@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/timerFragment"
+        android:icon="@drawable/ic_timer"
+        android:title="@string/title_timer"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/timelineFragment"
+        android:icon="@drawable/ic_timeline"
+        android:title="@string/title_timeline"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/aiFragment"
+        android:icon="@drawable/ic_ai"
+        android:title="@string/title_ai"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/statisticsFragment"
+        android:icon="@drawable/ic_statistics"
+        android:title="@string/title_statistics"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/title_settings"
+        app:showAsAction="ifRoom" />
+</menu>
