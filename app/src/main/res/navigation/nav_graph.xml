@@ -12,9 +12,9 @@
         tools:layout="@layout/fragment_timer" />
     <fragment
         android:id="@+id/timelineFragment"
-        android:name="com.projectapp.tempus.TimelineFragment"
+        android:name="com.projectapp.tempus.TimeLine.TimelineFragment"
         android:label="fragment_timeline"
-        tools:layout="@layout/fragment_timeline" />
+        tools:layout="@layout/timeline_fragment" />
     <fragment
         android:id="@+id/aiFragment"
         android:name="com.projectapp.tempus.AIFragment"
