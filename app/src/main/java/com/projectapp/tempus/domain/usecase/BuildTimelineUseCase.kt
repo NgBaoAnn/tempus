@@ -1,5 +1,6 @@
 package com.projectapp.tempus.domain.usecase
 
+import com.projectapp.tempus.R // <--- Nhớ Import R để lấy icon mặc định
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleItemRow
 import com.projectapp.tempus.data.schedule.dto.ScheduleRow
@@ -12,14 +13,11 @@ class BuildTimelineUseCase {
 
     private fun parseToZonedDateTime(s: String): ZonedDateTime {
         return try {
-            // works for "2025-12-18T08:00:00+07:00" or "...Z"
             OffsetDateTime.parse(s).toZonedDateTime()
         } catch (_: Exception) {
             try {
-                // works for "2025-12-18T08:00:00" (timestamp no tz)
                 LocalDateTime.parse(s).atZone(ZoneId.systemDefault())
             } catch (_: Exception) {
-                // fallback nếu lỡ chỉ có "2025-12-18"
                 LocalDate.parse(s).atStartOfDay(ZoneId.systemDefault())
             }
         }
@@ -57,8 +55,14 @@ class BuildTimelineUseCase {
                     taskId = s.id,
                     scheduleItemId = it?.id,
                     title = s.name,
-                    iconId = ev?.iconId ?: s.iconId,
-                    color = ev?.color ?: s.color,
+
+                    // --- SỬA Ở ĐÂY ---
+                    // Logic: Lấy icon bản sửa -> nếu null thì lấy bản gốc -> nếu vẫn null thì lấy icon mặc định
+                    iconId = (ev?.iconId ?: s.iconId) ?: R.drawable.ic_launcher_foreground,
+
+                    // Logic: Lấy màu bản sửa -> nếu null thì lấy bản gốc -> nếu vẫn null thì lấy màu xám
+                    color = (ev?.color ?: s.color) ?: "#808080",
+
                     startIso = ev?.startTimeDate ?: s.startTimeDate,
                     durationInterval = ev?.implementationTime ?: s.implementationTime,
                     status = status

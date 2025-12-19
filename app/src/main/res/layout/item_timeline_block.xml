@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="0dp"> <TextView
+    android:id="@+id/tvStartTime"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:text="00:00"
+    android:textColor="#757575"
+    android:textSize="14sp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="↓"
+        android:textColor="#BDBDBD"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@id/tvStartTime"
+        app:layout_constraintStart_toStartOf="@id/tvStartTime"
+        app:layout_constraintTop_toBottomOf="@id/tvStartTime" />
+
+    <TextView
+        android:id="@+id/tvEndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="07:00"
+        android:textColor="#757575"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/tvStartTime"
+        app:layout_constraintStart_toStartOf="@id/tvStartTime"
+        app:layout_constraintTop_toBottomOf="@id/tvArrow" />
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.25" />
+
+    <View
+        android:id="@+id/viewLine"
+        android:layout_width="4dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_line_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/cardIcon"
+        app:layout_constraintStart_toStartOf="@id/cardIcon"
+        app:layout_constraintTop_toBottomOf="@id/cardIcon" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#F5F5F5"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="@id/guidelineIcon"
+        app:layout_constraintStart_toStartOf="@id/guidelineIcon"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_launcher_foreground"
+            app:tint="#2196F3" />
+    </androidx.cardview.widget.CardView>
+
+
+    <TextView
+        android:id="@+id/tvTimeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="00:00"
+        android:textColor="#9E9E9E"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/tvTitle"
+        app:layout_constraintStart_toEndOf="@id/cardIcon"
+        app:layout_constraintTop_toTopOf="@id/cardIcon" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Ngủ"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/cardIcon"
+        app:layout_constraintStart_toStartOf="@id/tvTimeLabel"
+        app:layout_constraintTop_toBottomOf="@id/tvTimeLabel" />
+
+    <TextView
+        android:id="@+id/tvDuration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="7g thời gian rảnh!"
+        android:textColor="#757575"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@id/imgCheck"
+        app:layout_constraintStart_toStartOf="@id/tvTimeLabel"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+    <TextView
+        android:id="@+id/tvQuote"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"
+        android:text="Khung giờ đó đã qua..."
+        android:textColor="#9E9E9E"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/imgCheck"
+        app:layout_constraintStart_toStartOf="@id/tvTimeLabel"
+        app:layout_constraintTop_toBottomOf="@id/tvDuration" />
+
+
+    <ImageView
+        android:id="@+id/imgCheck"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/shape_circle_outline"
+        app:layout_constraintBottom_toBottomOf="@id/cardIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/cardIcon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
