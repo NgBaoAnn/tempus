@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F8FA"
@@ -11,26 +12,16 @@
         android:id="@+id/tvHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hẹn giờ"
+        android:fontFamily="@font/inter_bold"
+        android:text="@string/timer"
         android:textColor="#000000"
         android:textSize="32sp"
-        android:fontFamily="sans-serif-black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/btnFilter"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_filter_list"
-        app:tint="#8E8E93"
-        app:layout_constraintBottom_toBottomOf="@+id/tvHeader"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tvHeader" />
-
+    <!-- Setup Timer Card -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardMain"
+        android:id="@+id/cardSetup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -51,116 +42,142 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:selectionRequired="false"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:padding="4dp"
+                app:checkedButton="@id/btnCustom"
+                app:selectionRequired="true"
                 app:singleSelection="true">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn1min"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="1ph"
+                    android:text="1min"
                     android:padding="0dp"
                     android:textSize="12sp"
                     android:textAllCaps="false"
-                    app:cornerRadius="12dp" />
+                    android:textColor="@color/toggle_button_text"
+                    android:fontFamily="@font/inter_semibold"
+                    app:backgroundTint="@color/toggle_button_bg"
+                    app:strokeWidth="0dp"
+                    app:rippleColor="@android:color/transparent"
+                    app:cornerRadius="16dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn5min"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="5ph"
-                    android:padding="0dp"
-                    android:textSize="12sp"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn30min"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="30ph"
-                    android:padding="0dp"
-                    android:textSize="12sp"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn1hour"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="1g"
-                    android:padding="0dp"
-                    android:textSize="12sp"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCustom"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.8"
-                    android:text="tùy chỉnh"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="5min"
                     android:padding="0dp"
                     android:textSize="12sp"
                     android:textAllCaps="false"
-                    app:cornerRadius="12dp"/>
+                    android:textColor="@color/toggle_button_text"
+                    app:backgroundTint="@color/toggle_button_bg"
+                    app:strokeWidth="0dp"
+                    app:rippleColor="@android:color/transparent"
+                    app:cornerRadius="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn30min"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="30min"
+                    android:padding="0dp"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/toggle_button_text"
+                    app:backgroundTint="@color/toggle_button_bg"
+                    app:strokeWidth="0dp"
+                    app:rippleColor="@android:color/transparent"
+                    app:cornerRadius="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn1hour"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_semibold"
+                    android:layout_weight="1"
+                    android:text="1hour"
+                    android:padding="0dp"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/toggle_button_text"
+                    app:backgroundTint="@color/toggle_button_bg"
+                    app:strokeWidth="0dp"
+                    app:rippleColor="@android:color/transparent"
+                    app:cornerRadius="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCustom"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.8"
+                    android:text="@string/customize"
+                    android:fontFamily="@font/inter_bold"
+                    android:padding="0dp"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/toggle_button_text"
+                    app:backgroundTint="@color/toggle_button_bg"
+                    app:strokeWidth="0dp"
+                    app:rippleColor="@android:color/transparent"
+                    app:cornerRadius="16dp"/>
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <!-- Time Display -->
+            <!-- Number Picker Display -->
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="bottom"
+                android:layout_height="160dp"
+                android:gravity="center"
                 android:orientation="horizontal"
-                android:layout_marginTop="60dp">
+                android:layout_marginTop="40dp">
 
-                <TextView
-                    android:id="@+id/tvHour"
+                <NumberPicker
+                    android:id="@+id/npHour"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="00"
-                    android:textColor="@color/black"
-                    android:textSize="56sp" />
+                    android:layout_height="match_parent" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="12dp"
-                    android:text="giờ"
+                    android:fontFamily="@font/inter_medium"
+                    android:text="@string/hours"
                     android:textColor="#8E8E93"
                     android:textSize="16sp" />
 
-                <TextView
-                    android:id="@+id/tvMinute"
+                <NumberPicker
+                    android:id="@+id/npMinute"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="15"
-                    android:textColor="@color/black"
-                    android:textSize="56sp" />
+                    android:layout_height="match_parent" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="phút"
+                    android:text="@string/minutes"
+                    android:layout_marginStart="7dp"
+                    android:fontFamily="@font/inter_medium"
                     android:textColor="#8E8E93"
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <!-- Action Buttons -->
+            <!-- Setup Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="60dp"
+                android:layout_marginTop="40dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
@@ -197,6 +214,126 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Running Timer Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardRunning"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:visibility="gone"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHeader"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/timerProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:indicatorSize="260dp"
+                app:trackThickness="16dp"
+                app:trackColor="#EBEBF5"
+                app:trackCornerRadius="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:indicatorColor="@color/label_green"
+                android:progress="60" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@id/timerProgress"
+                app:layout_constraintEnd_toEndOf="@id/timerProgress"
+                app:layout_constraintStart_toStartOf="@id/timerProgress"
+                app:layout_constraintTop_toTopOf="@id/timerProgress">
+
+                <TextView
+                    android:id="@+id/tvTimeRemaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_bold"
+                    android:text="30:00"
+                    android:textColor="#000000"
+                    android:textSize="64sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/ivStatusIcon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_play"
+                        app:tint="@color/label_blue"/>
+                    <TextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/inter_semibold"
+                        android:text="Đang chạy"
+                        android:textColor="@color/label_blue"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvEndTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/inter_medium"
+                    android:text="Kết thúc lúc 21:48"
+                    android:textColor="#8E8E93"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelTimer"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="#F2F2F7"
+                app:cornerRadius="40dp"
+                app:icon="@drawable/ic_close"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="32dp"
+                app:iconTint="#000000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPauseResume"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/label_blue"
+                app:cornerRadius="40dp"
+                app:icon="@drawable/ic_pause"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="32dp"
+                app:iconTint="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
     <!-- Bottom Settings Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSettings"
@@ -205,7 +342,7 @@
         android:layout_marginTop="24dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="2dp"
-        app:layout_constraintTop_toBottomOf="@id/cardMain">
+        app:layout_constraintTop_toBottomOf="@id/cardSetup">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -219,15 +356,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nhãn"
+                    android:fontFamily="@font/inter_medium"
+                    android:text="@string/tag"
                     android:textColor="#8E8E93"
                     android:textSize="18sp" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:text="Hẹn giờ"
-                    android:textColor="@color/black"
+                    android:text="@string/timer"
+                    android:textColor="#8E8E93"
+                    android:fontFamily="@font/inter_medium"
                     android:textSize="18sp" />
             </RelativeLayout>
 
@@ -289,7 +428,7 @@
                     android:foreground="@drawable/ic_tick_selector" />
 
                 <FrameLayout
-                    android:id="@+id/colorPink"
+                    android:id="@+id/colorTeal"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_marginHorizontal="8dp"

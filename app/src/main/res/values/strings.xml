@@ -10,4 +10,9 @@
     <string name="month">Tháng</string>"
     <string name="chart_title">Thống kê hoàn thành</string>
     <string name="category_title">Danh mục tác vụ hàng đầu</string>"
+    <string name="tag">Nhãn</string>
+    <string name="timer">Hẹn giờ</string>
+    <string name="customize">Tùy chỉnh</string>
+    <string name="hours">Giờ</string>
+    <string name="minutes">Phút</string>
 </resources>
