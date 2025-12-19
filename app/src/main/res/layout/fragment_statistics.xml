@@ -28,13 +28,14 @@
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/inter_bold"
+            android:gravity="center"
             android:text="@string/statis_title"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="center"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Toggle -->
         <com.google.android.material.button.MaterialButtonToggleGroup
@@ -56,15 +57,16 @@
                 android:id="@+id/btnWeek"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
-                android:layout_marginRight="20dp"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
                 android:layout_weight="1"
+                android:fontFamily="@font/inter_medium"
+                android:stateListAnimator="@animator/button_elevation"
                 android:text="@string/week"
                 android:textAllCaps="false"
-                app:cornerRadius="10dp"
                 android:textColor="@color/selector_toggle_text"
-                android:stateListAnimator="@animator/button_elevation"
                 app:backgroundTint="@color/selector_toggle_background"
+                app:cornerRadius="10dp"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.LargeComponent.Rounded" />
 
             <com.google.android.material.button.MaterialButton
@@ -72,14 +74,15 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:cornerRadius="10dp"
-                android:text="@string/month"
                 android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                android:fontFamily="@font/inter_medium"
+                android:stateListAnimator="@animator/button_elevation"
+                android:text="@string/month"
                 android:textAllCaps="false"
                 android:textColor="@color/selector_toggle_text"
-                android:stateListAnimator="@animator/button_elevation"
                 app:backgroundTint="@color/selector_toggle_background"
+                app:cornerRadius="10dp"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.LargeComponent.Rounded" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -88,13 +91,14 @@
             android:id="@+id/tvStatisticTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/chart_title"
-            android:textStyle="bold"
-            android:textSize="20dp"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/toggleGroup"
+            android:fontFamily="@font/inter_semibold"
+            android:text="@string/chart_title"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/toggleGroup" />
 
 
 
@@ -167,8 +171,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:fontFamily="@font/inter_semibold"
             android:text="@string/category_title"
             android:textStyle="bold"
+            android:textSize="18dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
