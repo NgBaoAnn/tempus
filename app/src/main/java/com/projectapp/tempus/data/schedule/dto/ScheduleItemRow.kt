@@ -10,5 +10,6 @@ data class ScheduleItemRow(
     val date: String,                 // "YYYY-MM-DD"
     val status: StatusType? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
-    @SerialName("edited_version") val editedVersion: String? = null
+    @SerialName("edited_version") val editedVersion: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )

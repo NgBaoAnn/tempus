@@ -1,14 +1,18 @@
 package com.projectapp.tempus.domain.model
 
 import com.projectapp.tempus.data.schedule.dto.StatusType
+import java.time.Duration
+import java.time.LocalDateTime
 
 data class TimelineBlock(
     val taskId: String,
-    val scheduleItemId: String?,   // null nếu chưa có item (chưa done/skip/delete)
+    val scheduleItemId: String?,   // null nếu chưa có item
     val title: String,
-    val iconId: Int,
+    val label: String,
     val color: String,
-    val startIso: String,          // ISO datetime
-    val durationInterval: String,  // "HH:MM:SS"
-    val status: StatusType         // planned/done/skip/delete
+    val startTime: LocalDateTime,
+    val duration: Duration,
+    // ---------------------------
+
+    val status: StatusType
 )

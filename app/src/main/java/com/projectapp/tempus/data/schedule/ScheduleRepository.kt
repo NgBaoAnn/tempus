@@ -16,4 +16,6 @@ interface ScheduleRepository {
 
     suspend fun attachEditedVersionToDate(taskId: String, date: String, editedVersionId: String): ScheduleItemRow
 
+    suspend fun getScheduleById(id: String): ScheduleRow?
+    suspend fun deleteSchedule(id: String)
 }

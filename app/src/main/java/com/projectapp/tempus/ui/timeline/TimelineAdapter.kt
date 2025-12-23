@@ -1,6 +1,7 @@
 package com.projectapp.tempus.ui.timeline
 
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.LayoutInflater
@@ -12,30 +13,32 @@ import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.projectapp.tempus.R
+import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
-import java.time.LocalTime
+import com.projectapp.tempus.ui.timeline.getIconResId // Nhớ import hàm này
 import java.time.format.DateTimeFormatter
 
-class TimelineAdapter(private val items: List<TimelineBlock>) :
-    RecyclerView.Adapter<TimelineAdapter.TimelineViewHolder>() {
+class TimelineAdapter(
+    private var items: List<TimelineBlock>,
+    private val onBlockClick: (TimelineBlock) -> Unit,
+    private val onStatusClick: (TimelineBlock) -> Unit
+) : RecyclerView.Adapter<TimelineAdapter.TimelineViewHolder>() {
+
+    fun submitList(newItems: List<TimelineBlock>) {
+        items = newItems
+        notifyDataSetChanged()
+    }
 
     class TimelineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Cột 1: Thời gian
         val tvStartTime: TextView = itemView.findViewById(R.id.tvStartTime)
         val tvEndTime: TextView = itemView.findViewById(R.id.tvEndTime)
-
-        // Cột 2: Timeline (Icon & Line)
         val cardIcon: CardView = itemView.findViewById(R.id.cardIcon)
         val imgIcon: ImageView = itemView.findViewById(R.id.imgIcon)
         val viewLine: View = itemView.findViewById(R.id.viewLine)
-
-        // Cột 3: Nội dung
         val tvTimeLabel: TextView = itemView.findViewById(R.id.tvTimeLabel)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvDuration: TextView = itemView.findViewById(R.id.tvDuration)
-        val tvQuote: TextView = itemView.findViewById(R.id.tvQuote) // Dòng quote nhỏ
-
-        // Cột 4: Checkbox
+        val tvQuote: TextView = itemView.findViewById(R.id.tvQuote)
         val imgCheck: ImageView = itemView.findViewById(R.id.imgCheck)
     }
 
@@ -45,82 +48,93 @@ class TimelineAdapter(private val items: List<TimelineBlock>) :
         return TimelineViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O) // Yêu cầu Android 8.0 trở lên để xử lý giờ
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: TimelineViewHolder, position: Int) {
         val item = items[position]
 
-        // --- 1. XỬ LÝ DỮ LIỆU CHỮ (TEXT) ---
+        // --- 1. SET TEXT & CLICK ---
         holder.tvTitle.text = item.title
+        holder.itemView.setOnClickListener { onBlockClick(item) }
+        holder.imgCheck.setOnClickListener { onStatusClick(item) }
 
-        // Lấy giờ bắt đầu (Cắt chuỗi ISO: 2025-10-03T07:00:00 -> 07:00)
-        val startTimeStr = if (item.startIso.length >= 16) item.startIso.substring(11, 16) else "00:00"
-        holder.tvStartTime.text = startTimeStr
-        holder.tvTimeLabel.text = startTimeStr // Giờ nhỏ cạnh icon
+        // --- 2. XỬ LÝ THỜI GIAN ---
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-        // Tính giờ kết thúc (Start + Duration)
-        val endTimeStr = calculateEndTime(startTimeStr, item.durationInterval)
-        holder.tvEndTime.text = endTimeStr
+        // Start Time
+        val startStr = item.startTime.format(timeFormatter)
+        holder.tvStartTime.text = startStr
+        holder.tvTimeLabel.text = startStr
 
-        // Hiển thị thời lượng
-        val durationHour = item.durationInterval.substring(0, 2).toIntOrNull() ?: 0
-        val durationMin = item.durationInterval.substring(3, 5).toIntOrNull() ?: 0
-        val durationText = if(durationHour > 0) "${durationHour}g ${durationMin}p" else "${durationMin} phút"
-        holder.tvDuration.text = "$durationText thời gian rảnh!"
+        // End Time
+        val endTime = item.startTime.plus(item.duration)
+        holder.tvEndTime.text = endTime.format(timeFormatter)
+
+        // Duration Text (VD: 1g 30p eat)
+        val hours = item.duration.toHours()
+        val minutes = item.duration.toMinutes() % 60
+        val durationText = if (hours > 0) "${hours}g ${minutes}p" else "${minutes}p"
+        holder.tvDuration.text = "$durationText ${item.label}"
 
 
-        // --- 2. XỬ LÝ ICON ---
-        holder.imgIcon.setImageResource(item.iconId)
+        // --- 3. XỬ LÝ ICON (Dùng hàm extension) ---
+        val iconResId = holder.itemView.context.getIconResId(item.label)
+        holder.imgIcon.setImageResource(iconResId)
 
 
-        // --- 3. XỬ LÝ MÀU SẮC (THEO DESIGN CỦA BẠN) ---
+        // --- 4. XỬ LÝ MÀU SẮC & TRẠNG THÁI ---
         try {
             val colorInt = Color.parseColor(item.color)
 
-            // A. Icon: Màu gốc đậm
+            // A. XỬ LÝ CARD ICON (Theo yêu cầu mới)
+            // 1. Icon: Tô màu theo DB (Xanh, Đỏ, Tím...)
             holder.imgIcon.setColorFilter(colorInt)
 
-            // B. Nền tròn Icon: Màu gốc mờ (15%)
-            holder.cardIcon.setCardBackgroundColor(adjustAlpha(colorInt, 0.15f))
+            // 2. Nền Card: Màu xám nhạt cố định (#F5F5F5)
+            holder.cardIcon.setCardBackgroundColor(Color.parseColor("#F5F5F5"))
 
-            // C. Đường kẻ dọc: Màu gốc mờ (30%)
-            holder.viewLine.setBackgroundColor(adjustAlpha(colorInt, 0.3f))
+            // 3. Đường kẻ dọc: Vẫn nên giữ màu theo Task (nhưng mờ) để đẹp, hoặc bạn muốn xám luôn thì báo tôi
+            holder.viewLine.setBackgroundColor(adjustAlpha(colorInt, 0.5f))
 
-            // D. Viền Checkbox (Vòng tròn bên phải)
-            val checkDrawable = holder.imgCheck.background as GradientDrawable
-            checkDrawable.setStroke(4, colorInt) // Độ dày viền 4px, màu theo task
 
-            // E. Chữ Quote (mô phỏng theo màu)
-            holder.tvQuote.setTextColor(Color.GRAY)
+            // B. CHECKBOX LOGIC (Giữ nguyên logic cũ)
+            if (item.status == StatusType.done) {
+                // === DONE ===
+                holder.imgCheck.setBackgroundResource(R.drawable.shape_circle_solid)
+
+                // Tô màu vòng tròn đặc bằng màu của Task
+                holder.imgCheck.background.setColorFilter(colorInt, PorterDuff.Mode.SRC_IN)
+                holder.imgCheck.setImageDrawable(null)
+
+                holder.tvTitle.paint.isStrikeThruText = true
+                holder.tvTitle.alpha = 0.6f
+
+            } else {
+                // === PLANNED ===
+                holder.imgCheck.setBackgroundResource(R.drawable.shape_circle_outline)
+                holder.imgCheck.background.clearColorFilter()
+                holder.imgCheck.setImageDrawable(null)
+
+                // Viền vòng tròn theo màu của Task
+                val bgShape = holder.imgCheck.background as? GradientDrawable
+                bgShape?.mutate()
+                bgShape?.setStroke(4, colorInt)
+
+                holder.tvTitle.paint.isStrikeThruText = false
+                holder.tvTitle.alpha = 1.0f
+            }
 
         } catch (e: Exception) {
-            // Fallback nếu lỗi màu
-            holder.imgIcon.setColorFilter(Color.BLACK)
+            // Fallback
+            holder.imgIcon.setColorFilter(Color.GRAY)
+            holder.cardIcon.setCardBackgroundColor(Color.parseColor("#F5F5F5"))
         }
     }
 
     override fun getItemCount(): Int = items.size
 
-    // --- HÀM PHỤ TRỢ ---
-
-    // 1. Hàm làm mờ màu
+    // Hàm làm mờ màu nền
     private fun adjustAlpha(color: Int, factor: Float): Int {
         val alpha = (Color.alpha(color) * factor).toInt()
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
-    }
-
-    // 2. Hàm tính giờ kết thúc (Cần Android 8.0+)
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun calculateEndTime(start: String, duration: String): String {
-        return try {
-            val startTime = LocalTime.parse(start) // "07:00"
-            // Duration format "HH:MM:SS" -> lấy giờ và phút
-            val durHours = duration.substring(0, 2).toLong()
-            val durMinutes = duration.substring(3, 5).toLong()
-
-            val endTime = startTime.plusHours(durHours).plusMinutes(durMinutes)
-            endTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-        } catch (e: Exception) {
-            "00:00"
-        }
     }
 }

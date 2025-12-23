@@ -6,7 +6,7 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.JsonNull
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.schedule.dto.*
-
+import io.github.jan.supabase.postgrest.query.Returning
 class SupabaseScheduleRepository : ScheduleRepository {
     private val supabase = SupabaseClientProvider.client
 
@@ -67,7 +67,9 @@ class SupabaseScheduleRepository : ScheduleRepository {
                         put("status", status.name)
                         put("updated_at", "now()")
                     }
-                ) { filter { eq("id", id) } }
+                ) { filter { eq("id", id) }
+                    select()
+                }
                 .decodeSingle()
         } else {
             supabase.from("schedule_items")
@@ -137,6 +139,18 @@ class SupabaseScheduleRepository : ScheduleRepository {
                     put("edited_version", editedVersionId)
                 }) { select() }
                 .decodeSingle()
+        }
+    }
+
+    override suspend fun getScheduleById(id: String): ScheduleRow? {
+        return supabase.from("schedule")
+            .select { filter { eq("id", id) } }
+            .decodeSingleOrNull()
+    }
+
+    override suspend fun deleteSchedule(id: String) {
+        supabase.from("schedule").delete {
+            filter { eq("id", id) }
         }
     }
 
