@@ -59,5 +59,4 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-}git add app/build.gradle.kts
-        git add settings.gradle.kts
+}
