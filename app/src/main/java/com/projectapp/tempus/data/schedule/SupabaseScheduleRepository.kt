@@ -7,6 +7,8 @@ import kotlinx.serialization.json.JsonNull
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.schedule.dto.*
 import io.github.jan.supabase.postgrest.query.Returning
+import java.time.OffsetDateTime
+
 class SupabaseScheduleRepository : ScheduleRepository {
     private val supabase = SupabaseClientProvider.client
 
@@ -16,10 +18,26 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeList()
     }
 
-    override suspend fun getScheduleItemsByDate(date: String): List<ScheduleItemRow> {
+    override suspend fun getScheduleItemsByDate(date: String, taskIds: List<String>): List<ScheduleItemRow> {
+        if (taskIds.isEmpty()) return emptyList()
+
         return supabase.from("schedule_items")
-            .select { filter { eq("date", date) } }
+            .select {
+                filter {
+                    eq("date", date)
+                    isIn("task_id", taskIds)
+                }
+            }
             .decodeList()
+    }
+
+    override suspend fun getScheduleById(id: String): ScheduleRow? {
+        return supabase.from("schedule")
+            .select {
+                filter { eq("id", id) }
+            }
+            .decodeList<ScheduleRow>()
+            .firstOrNull()
     }
 
     override suspend fun getEditedVersions(ids: List<String>): List<EditedVersionRow> {
@@ -65,7 +83,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
                 .update(
                     buildJsonObject {
                         put("status", status.name)
-                        put("updated_at", "now()")
+                        put("updated_at", java.time.OffsetDateTime.now().toString())
                     }
                 ) { filter { eq("id", id) }
                     select()
@@ -98,7 +116,10 @@ class SupabaseScheduleRepository : ScheduleRepository {
         }
 
         return supabase.from("schedule")
-            .update(body) { filter { eq("id", taskId) } }
+            .update(body) {
+                select()
+                filter { eq("id", taskId) }
+            }
             .decodeSingle()
     }
 
@@ -120,38 +141,52 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeSingle()
     }
 
-    override suspend fun attachEditedVersionToDate(taskId: String, date: String, editedVersionId: String): ScheduleItemRow {
+    override suspend fun attachEditedVersionToDate(
+        taskId: String,
+        date: String,
+        editedVersionId: String
+    ): ScheduleItemRow {
+
         val existing = supabase.from("schedule_items")
-            .select { filter { eq("task_id", taskId); eq("date", date) } }
+            .select {
+                filter {
+                    eq("task_id", taskId)
+                    eq("date", date)
+                }
+            }
             .decodeList<ScheduleItemRow>()
 
         return if (existing.isNotEmpty()) {
             val id = existing.first().id
             supabase.from("schedule_items")
-                .update(buildJsonObject { put("edited_version", editedVersionId) }) { filter { eq("id", id) } }
+                .update(
+                    buildJsonObject { put("edited_version", editedVersionId) }
+                ) {
+                    select() // ✅ để decodeSingle() không fail
+                    filter { eq("id", id) }
+                }
                 .decodeSingle()
         } else {
             supabase.from("schedule_items")
-                .insert(buildJsonObject {
-                    put("task_id", taskId)
-                    put("date", date)
-                    put("status", "planned")
-                    put("edited_version", editedVersionId)
-                }) { select() }
+                .insert(
+                    buildJsonObject {
+                        put("task_id", taskId)
+                        put("date", date)
+                        put("status", com.projectapp.tempus.data.schedule.dto.StatusType.planned.name)
+                        put("edited_version", editedVersionId)
+                        put("updated_at", OffsetDateTime.now().toString())
+                    }
+                ) { select() }
                 .decodeSingle()
         }
     }
 
-    override suspend fun getScheduleById(id: String): ScheduleRow? {
-        return supabase.from("schedule")
-            .select { filter { eq("id", id) } }
-            .decodeSingleOrNull()
+    override suspend fun deleteSchedule(id: String) {
+        supabase.from("schedule")
+            .delete {
+                filter { eq("id", id) }
+            }
     }
 
-    override suspend fun deleteSchedule(id: String) {
-        supabase.from("schedule").delete {
-            filter { eq("id", id) }
-        }
-    }
 
 }

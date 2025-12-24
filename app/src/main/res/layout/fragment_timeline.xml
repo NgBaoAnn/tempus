@@ -42,46 +42,22 @@
         app:layout_constraintEnd_toStartOf="@id/btnAdd"
         app:layout_constraintTop_toTopOf="@id/btnAdd" />
 
-    <LinearLayout
-        android:id="@+id/layoutCalendar"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCalendar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        android:weightSum="7"
-        app:layout_constraintTop_toBottomOf="@id/tvMonth">
+        app:layout_constraintTop_toBottomOf="@id/tvMonth"
+        tools:listitem="@layout/item_calendar_day" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="T5" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_date_selected_red"
-                android:padding="8dp"
-                android:text="13"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTimeline"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutCalendar"
+        app:layout_constraintTop_toBottomOf="@id/rvCalendar"
         app:layout_constraintVertical_bias="0.0"
         tools:layout_editor_absoluteX="0dp"
         tools:listitem="@layout/item_timeline_block" />
