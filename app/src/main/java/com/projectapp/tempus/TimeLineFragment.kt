@@ -55,7 +55,7 @@ class TimelineFragment : Fragment() {
         val adapter = TimelineAdapter(
             items = emptyList(),
             onBlockClick = { block ->
-                // 👇 [SỬA] LOGIC CHUYỂN MÀN HÌNH ĐỂ EDIT
+                // [SỬA] LOGIC CHUYỂN MÀN HÌNH ĐỂ EDIT
                 // Gói ID vào Bundle để màn hình Edit biết cần load task nào
                 val bundle = Bundle().apply {
                     putString("taskId", block.taskId) // Đảm bảo block.taskId là ID của task
@@ -92,7 +92,7 @@ class TimelineFragment : Fragment() {
 
         // --- 4. XỬ LÝ NÚT ADD (DẤU CỘNG) ---
         binding.btnAdd.setOnClickListener {
-            // 👇 [SỬA] LOGIC CHUYỂN MÀN HÌNH ĐỂ THÊM MỚI
+            // [SỬA] LOGIC CHUYỂN MÀN HÌNH ĐỂ THÊM MỚI
             // Không truyền bundle -> Màn hình Edit sẽ hiểu là "Thêm mới"
             findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment)
         }

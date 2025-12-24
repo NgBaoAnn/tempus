@@ -24,6 +24,7 @@ data class EditState(
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726", // Cam mặc định
+    val iconLabel: String = "book",
     val loading: Boolean = false
 )
 
@@ -61,7 +62,8 @@ class EditScheduleViewModel(
                             // description = t.description, // Mở comment nếu DB có cột này
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
-                            color = t.color ?: "#FFA726"
+                            color = t.color ?: "#FFA726",
+                            iconLabel = t.label ?: "book"
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()

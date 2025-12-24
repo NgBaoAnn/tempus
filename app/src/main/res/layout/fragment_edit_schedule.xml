@@ -86,7 +86,7 @@
                             android:background="@null"
                             android:hint="Tên tác vụ"
                             android:inputType="textCapSentences"
-                            android:text="Thức dậy"
+                            android:text=""
                             android:textColor="#000000"
                             android:textSize="20sp"
                             android:textStyle="bold" />

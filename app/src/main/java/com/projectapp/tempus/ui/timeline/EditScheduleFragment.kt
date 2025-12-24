@@ -49,33 +49,33 @@ class EditScheduleFragment : Fragment() {
 
         setupEvents()
 
-        // 👇 [QUAN TRỌNG] PHẦN NÀY CHỊU TRÁCH NHIỆM TẮT MÀN HÌNH 👇
+        // 1. Lắng nghe sự kiện LƯU THÀNH CÔNG -> Tắt màn hình
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.saveSuccessEvent.collect {
-                // Khi code chạy vào đây nghĩa là ViewModel đã báo: "Lưu xong rồi!"
                 Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
-
-                // Lệnh này sẽ đóng màn hình và quay về Timeline
                 findNavController().popBackStack()
             }
         }
-        // 👆 HẾT PHẦN TẮT MÀN HÌNH 👆
 
-        // Quan sát dữ liệu để cập nhật giao diện
+        // 3. Quan sát dữ liệu để cập nhật giao diện
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collectLatest { state ->
                 binding.tvScreenTitle.text = if(state.isEditMode) "Sửa tác vụ" else "Tạo tác vụ"
                 binding.btnDelete.visibility = if(state.isEditMode) View.VISIBLE else View.GONE
 
+                // Điền Title (chỉ điền khi ô đang trống để tránh reset khi user đang gõ)
                 if (binding.edtTitle.text.isEmpty() && state.title.isNotEmpty()) {
                     binding.edtTitle.setText(state.title)
-                    binding.edtDescription.setText(state.description)
                 }
 
                 val dateFormatter = DateTimeFormatter.ofPattern("'ngày' dd 'thg' MM, yyyy", Locale("vi", "VN"))
                 binding.tvDateValue.text = state.date.format(dateFormatter)
                 binding.tvTimeValue.text = state.time.format(DateTimeFormatter.ofPattern("HH:mm"))
 
+                val iconResId = requireContext().getIconResId(state.iconLabel)
+                binding.imgIconPreview.setImageResource(iconResId)
+
+                // Cập nhật màu Icon
                 try {
                     binding.imgIconPreview.setColorFilter(Color.parseColor(state.color))
                 } catch (e: Exception) {}
@@ -84,24 +84,20 @@ class EditScheduleFragment : Fragment() {
     }
 
     private fun setupEvents() {
-        // Nút X (Đóng không lưu)
         binding.btnClose.setOnClickListener { findNavController().popBackStack() }
 
-        // Nút Save (Lưu)
         binding.btnSave.setOnClickListener {
             val title = binding.edtTitle.text.toString()
             if (title.isBlank()) {
                 Toast.makeText(context, "Chưa nhập tên", Toast.LENGTH_SHORT).show()
             } else {
-                // CHỈ GỌI LỆNH LƯU - KHÔNG ĐƯỢC GỌI popBackStack() Ở ĐÂY
+                // Gọi lệnh lưu
                 viewModel.saveTask(title, binding.edtDescription.text.toString())
             }
         }
 
         binding.btnDelete.setOnClickListener {
             viewModel.deleteTask()
-            // Riêng xóa thì có thể đợi event hoặc đóng luôn tùy logic,
-            // nhưng tốt nhất là đợi event giống như Save để đảm bảo xóa xong mới đóng.
         }
 
         binding.btnPickDate.setOnClickListener {
