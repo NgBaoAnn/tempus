@@ -154,7 +154,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="0"
                         android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_lock" />
+                        app:srcCompat="@drawable/ic_lock_img" />
 
                     <EditText
                         android:id="@+id/edit_password"
@@ -196,7 +196,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_weight="0"
                         android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_lock" />
+                        app:srcCompat="@drawable/ic_lock_img" />
 
                     <EditText
                         android:id="@+id/edt_confirm_password"
