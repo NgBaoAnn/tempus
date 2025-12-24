@@ -87,6 +87,7 @@
                             android:hint="Tên tác vụ"
                             android:inputType="textCapSentences"
                             android:text=""
+
                             android:textColor="#000000"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -105,7 +106,6 @@
                         android:layout_height="wrap_content"
                         android:background="@null"
                         android:hint="Thêm mô tả..."
-                        android:text="Bắt đầu ngày mới với năng lượng."
                         android:textColor="#757575"
                         android:textSize="15sp" />
 
@@ -157,6 +157,32 @@
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Ngày" android:textColor="#000" android:textSize="16sp"/>
                         <TextView android:id="@+id/tvDateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="#F2F2F7" android:paddingHorizontal="10dp" android:paddingVertical="6dp" android:text="ngày 3 thg 10, 2025" android:textColor="#000" android:textSize="14sp" />
                     </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/layoutTodayOnly"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Chỉ áp dụng cho ngày này"
+                            android:textColor="#000"
+                            android:textSize="16sp" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchTodayOnly"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F2F2F2" />
+
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F2F2F2"/>
 
                     <LinearLayout

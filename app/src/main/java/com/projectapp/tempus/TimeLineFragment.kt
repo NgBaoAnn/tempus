@@ -22,10 +22,15 @@ import com.projectapp.tempus.ui.timeline.TimelineViewModel
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.projectapp.tempus.ui.timeline.CalendarDayAdapter
+import java.time.DayOfWeek
+import java.time.LocalDate
 
 class TimelineFragment : Fragment() {
 
     private var _binding: FragmentTimelineBinding? = null
+    private lateinit var calAdapter: CalendarDayAdapter
+
     private val binding get() = _binding!!
 
     // --- 1. KHỞI TẠO VIEWMODEL ---
@@ -50,6 +55,13 @@ class TimelineFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // --- 1. SETUP CALENDAR (7 ngày trong tuần) ---
+        val calAdapter = CalendarDayAdapter { picked ->
+            viewModel.onSelectDate(picked)
+        }
+        binding.rvCalendar.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvCalendar.adapter = calAdapter
 
         // --- 2. SETUP ADAPTER ---
         val adapter = TimelineAdapter(
@@ -83,6 +95,8 @@ class TimelineFragment : Fragment() {
                 val formatter = DateTimeFormatter.ofPattern("'thg' MM yyyy", Locale("vi", "VN"))
                 binding.tvMonth.text = state.date.format(formatter)
 
+                calAdapter.submit(buildWeek(state.date), state.date)
+
                 // Hiển thị Lỗi
                 if (state.error != null) {
                     Toast.makeText(requireContext(), state.error, Toast.LENGTH_LONG).show()
@@ -99,6 +113,11 @@ class TimelineFragment : Fragment() {
 
         // Load dữ liệu khi vào màn hình
         viewModel.onRefresh()
+    }
+
+    private fun buildWeek(selected: LocalDate): List<LocalDate> {
+        val start = selected.with(DayOfWeek.MONDAY)
+        return (0..6).map { start.plusDays(it.toLong()) }
     }
 
     // Thêm hàm onResume để khi quay lại từ màn Edit thì reload lại danh sách

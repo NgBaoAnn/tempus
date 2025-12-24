@@ -20,6 +20,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.appcompat.app.AlertDialog
+import com.projectapp.tempus.data.schedule.dto.RepeatType
+
 
 class EditScheduleFragment : Fragment() {
 
@@ -62,6 +65,11 @@ class EditScheduleFragment : Fragment() {
             viewModel.state.collectLatest { state ->
                 binding.tvScreenTitle.text = if(state.isEditMode) "Sửa tác vụ" else "Tạo tác vụ"
                 binding.btnDelete.visibility = if(state.isEditMode) View.VISIBLE else View.GONE
+                binding.switchTodayOnly.isEnabled = state.isEditMode
+                binding.tvRepeatValue.text = repeatToVi(state.repeat)
+                if (binding.switchTodayOnly.isChecked != state.applyTodayOnly) {
+                    binding.switchTodayOnly.isChecked = state.applyTodayOnly
+                }
 
                 // Điền Title (chỉ điền khi ô đang trống để tránh reset khi user đang gõ)
                 if (binding.edtTitle.text.isEmpty() && state.title.isNotEmpty()) {
@@ -76,6 +84,8 @@ class EditScheduleFragment : Fragment() {
                 binding.imgIconPreview.setImageResource(iconResId)
 
                 // Cập nhật màu Icon
+                binding.btnPickRepeat.isEnabled = !state.applyTodayOnly
+                binding.tvRepeatValue.alpha = if (state.applyTodayOnly) 0.5f else 1.0f
                 try {
                     binding.imgIconPreview.setColorFilter(Color.parseColor(state.color))
                 } catch (e: Exception) {}
@@ -96,6 +106,10 @@ class EditScheduleFragment : Fragment() {
             }
         }
 
+        binding.switchTodayOnly.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.setApplyTodayOnly(isChecked)
+        }
+
         binding.btnDelete.setOnClickListener {
             viewModel.deleteTask()
         }
@@ -114,6 +128,29 @@ class EditScheduleFragment : Fragment() {
             }, t.hour, t.minute, true).show()
         }
 
+        binding.btnPickRepeat.setOnClickListener {
+            // Nếu đang bật only_today thì bạn có thể chặn luôn:
+            if (viewModel.state.value.applyTodayOnly) {
+                Toast.makeText(context, "Chế độ 'Chỉ hôm nay' không đổi lặp lại", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val options = arrayOf("Một lần", "Hàng ngày", "Hàng tuần", "Hàng tháng")
+            val values = arrayOf(RepeatType.once, RepeatType.daily, RepeatType.weekly, RepeatType.monthly)
+
+            val current = viewModel.state.value.repeat
+            val checkedIndex = values.indexOf(current).coerceAtLeast(0)
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Chọn lặp lại")
+                .setSingleChoiceItems(options, checkedIndex) { dialog, which ->
+                    viewModel.setRepeat(values[which])
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Hủy", null)
+                .show()
+        }
+
         setupColorClick(binding.colorRed, "#F44336")
         setupColorClick(binding.colorYellow, "#FFEB3B")
         setupColorClick(binding.colorGreen, "#4CAF50")
@@ -124,4 +161,14 @@ class EditScheduleFragment : Fragment() {
     private fun setupColorClick(view: View, colorCode: String) {
         view.setOnClickListener { viewModel.setColor(colorCode) }
     }
+
+    private fun repeatToVi(r: RepeatType): String {
+        return when (r) {
+            RepeatType.once -> "Một lần"
+            RepeatType.daily -> "Hàng ngày"
+            RepeatType.weekly -> "Hàng tuần"
+            RepeatType.monthly -> "Hàng tháng"
+        }
+    }
+
 }

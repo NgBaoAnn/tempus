@@ -3,6 +3,7 @@ package com.projectapp.tempus.ui.timeline
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.data.schedule.ScheduleRepository
+import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.SourceType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,8 +16,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-// Data class chứa toàn bộ thông tin màn hình
 data class EditState(
+    var applyTodayOnly: Boolean = false,
     val isEditMode: Boolean = false,
     val id: String? = null,
     val title: String = "",
@@ -25,6 +26,8 @@ data class EditState(
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726", // Cam mặc định
     val iconLabel: String = "book",
+    val repeat: RepeatType = RepeatType.daily,   // ✅ THÊM
+
     val loading: Boolean = false
 )
 
@@ -36,34 +39,32 @@ class EditScheduleViewModel(
     private val _state = MutableStateFlow(EditState())
     val state = _state.asStateFlow()
 
-    // 1. KÊNH THÔNG BÁO THÀNH CÔNG (QUAN TRỌNG)
     private val _saveSuccessEvent = Channel<Unit>()
     val saveSuccessEvent = _saveSuccessEvent.receiveAsFlow()
 
-    // 2. KHỞI TẠO: Load dữ liệu nếu là sửa
     fun initialize(taskId: String?) {
         if (taskId == null) {
-            // Mode THÊM: Mặc định
             _state.value = EditState(isEditMode = false)
         } else {
-            // Mode SỬA: Load từ DB
             viewModelScope.launch {
                 val task = repo.getScheduleById(taskId)
                 task?.let { t ->
                     try {
-                        // Parse ISO String (Xử lý múi giờ +00:00)
-                        val odt = java.time.OffsetDateTime.parse(t.startTimeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                        val odt = java.time.OffsetDateTime.parse(
+                            t.startTimeDate,
+                            DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                        )
                         val localZdt = odt.atZoneSameInstant(ZoneId.systemDefault())
 
                         _state.value = EditState(
                             isEditMode = true,
                             id = t.id,
                             title = t.name,
-                            // description = t.description, // Mở comment nếu DB có cột này
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
-                            iconLabel = t.label ?: "book"
+                            iconLabel = t.label ?: "book",
+                            repeat = t.repeat // ✅ LOAD repeat từ DB
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -73,13 +74,11 @@ class EditScheduleViewModel(
         }
     }
 
-    // 3. LƯU TASK (Đã gộp logic tạo dữ liệu + logic gửi tin nhắn)
     fun saveTask(title: String, desc: String) {
         viewModelScope.launch {
             try {
                 val s = _state.value
 
-                // A. Chuẩn bị dữ liệu (Format sang ISO-8601 chuẩn UTC)
                 val localDT = LocalDateTime.of(s.date, s.time)
                 val isoDate = localDT.atZone(ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneId.of("UTC"))
@@ -88,38 +87,46 @@ class EditScheduleViewModel(
                 val mapData = mapOf(
                     "user_id" to userId,
                     "name_schedule" to title,
-                    // "description" to desc,
                     "start_time_date" to isoDate,
                     "color" to s.color,
                     "source" to SourceType.manual.name,
                     "implementation_time" to "00:30:00",
-                    "repeat" to "daily"
+                    "repeat" to s.repeat.name // ✅ lấy từ state
                 )
 
-                // B. Gọi API Lưu
-                if (s.isEditMode && s.id != null) {
-                    repo.updateSchedule(s.id, mapData)
-                } else {
+                if (!s.isEditMode || s.id == null) {
                     repo.insertSchedule(mapData)
+                    _saveSuccessEvent.send(Unit)
+                    return@launch
                 }
 
-                // C. GỬI TÍN HIỆU THÀNH CÔNG -> Fragment sẽ đóng màn hình
-                _saveSuccessEvent.send(Unit)
+                val taskId = s.id
 
+                if (!s.applyTodayOnly) {
+                    repo.updateSchedule(taskId, mapData)
+                } else {
+                    // NOTE: edited_version của bạn hiện không có cột repeat -> không đưa repeat vào editedFields
+                    val editedFields = mapOf(
+                        "start_time_date" to isoDate,
+                        "color" to s.color,
+                        "implementation_time" to "00:30:00"
+                    )
+                    val ev = repo.insertEditedVersion(editedFields)
+                    repo.attachEditedVersionToDate(taskId, s.date.toString(), ev.id)
+                }
+
+                _saveSuccessEvent.send(Unit)
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Có thể thêm channel error để báo lỗi ra UI nếu muốn
             }
         }
     }
 
-    // 4. XÓA TASK
     fun deleteTask() {
         viewModelScope.launch {
             try {
                 _state.value.id?.let {
                     repo.deleteSchedule(it)
-                    // Xóa xong cũng gửi tín hiệu để đóng màn hình
                     _saveSuccessEvent.send(Unit)
                 }
             } catch (e: Exception) {
@@ -128,7 +135,14 @@ class EditScheduleViewModel(
         }
     }
 
-    // 5. CÁC HÀM UPDATE UI
+    fun setApplyTodayOnly(v: Boolean) {
+        _state.value = _state.value.copy(applyTodayOnly = v)
+    }
+
+    fun setRepeat(r: RepeatType) { // ✅ THÊM
+        _state.value = _state.value.copy(repeat = r)
+    }
+
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }
