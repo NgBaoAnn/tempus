@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -109,7 +110,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnForgotPassword.setOnClickListener {
-            // TODO: mở màn hình quên mật khẩu
+            showForgotPasswordDialog()
         }
 
         btnRegister.setOnClickListener {
@@ -224,4 +225,66 @@ class LoginActivity : AppCompatActivity() {
         // Giữ con trỏ ở cuối text
         edtPassword.setSelection(edtPassword.text.length)
     }
+
+    private fun showForgotPasswordDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_forgot_password, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(view)
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val btnSend = view.findViewById<MaterialButton>(R.id.btnSend)
+        val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancel)
+        val edtEmailReset = view.findViewById<EditText>(R.id.edt_email_reset)
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnSend.setOnClickListener {
+            val email = edtEmailReset.text.toString().trim()
+
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Gọi hàm xử lý và đóng dialog
+            handleResetPassword(email)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun handleResetPassword(email: String) {
+        // Sử dụng lifecycleScope.launch đồng bộ với cách làm handleLogin
+        lifecycleScope.launch {
+            try {
+                authService.resetPassword(email)
+
+                Log.d("LoginActivity", "Reset email sent to: $email")
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Vui lòng kiểm tra email để đặt lại mật khẩu",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "RESET PASSWORD ERROR", e)
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Lỗi: Không thể gửi email khôi phục",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
 }

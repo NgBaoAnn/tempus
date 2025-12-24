@@ -16,6 +16,10 @@ data class SignUpOptions(
     val data: UserMetadata
 )
 
+data class ResetPasswordRequest(
+    val email: String
+)
+
 data class UserMetadata(
     val full_name: String
 )
@@ -72,7 +76,7 @@ interface SupabaseAuthApi {
     @POST("auth/v1/signup")
     suspend fun signUp(
         @Body body: SignUpRequest
-    ): SignUpResponse   // ✅ KHÔNG PHẢI AuthResponse
+    ): SignUpResponse   // KHÔNG PHẢI AuthResponse
 
     @POST("auth/v1/token?grant_type=password")
     suspend fun login(
@@ -83,6 +87,12 @@ interface SupabaseAuthApi {
     suspend fun refreshToken(
         @Body body: RefreshTokenRequest
     ): AuthResponse
+
+    @POST("auth/v1/recover")
+    suspend fun recoverPassword(
+        @Body body: ResetPasswordRequest
+    ): retrofit2.Response<Unit>
+
 }
 
 
@@ -132,4 +142,14 @@ class AuthService(
             )
         )
     }
+
+    suspend fun resetPassword(email: String) {
+        val response = api.recoverPassword(ResetPasswordRequest(email))
+
+        if (!response.isSuccessful) {
+            // Nếu lỗi, ném ra ngoại lệ để LoginActivity bắt được trong khối try-catch
+            throw retrofit2.HttpException(response)
+        }
+    }
+
 }
