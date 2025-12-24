@@ -4,5 +4,10 @@
         <item>@font/inter_bold</item>
         <item>@font/inter_semibold</item>
         <item>@font/inter_thin</item>
+        <item>@font/nunito</item>
+        <item>@font/nunito_black</item>
+        <item>@font/nunito_bold</item>
+        <item>@font/nunito_extralight</item>
+        <item>@font/nunito_semibold</item>
     </array>
 </resources>

@@ -14,7 +14,8 @@
     <color name="label_green">#34C759</color>
     <color name="label_blue">#007AFF</color>
     <color name="label_purple">#AF52DE</color>
-    
+
     <color name="toggle_bg">#E0E0E0</color>
     <color name="text_secondary">#757575</color>
+    <color name="background_setting">#F1F0F5</color>
 </resources>
