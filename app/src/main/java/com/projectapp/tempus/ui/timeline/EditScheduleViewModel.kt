@@ -27,7 +27,7 @@ data class EditState(
     val color: String = "#FFA726", // Cam mặc định
     val iconLabel: String = "book",
     val repeat: RepeatType = RepeatType.daily,   // ✅ THÊM
-
+    val duration: String = "00:30:00",
     val loading: Boolean = false
 )
 
@@ -64,7 +64,8 @@ class EditScheduleViewModel(
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
                             iconLabel = t.label ?: "book",
-                            repeat = t.repeat // ✅ LOAD repeat từ DB
+                            repeat = t.repeat,
+                            duration = t.implementationTime ?: "00:30:00"   // ✅ THÊM DÒNG NÀY
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -90,7 +91,7 @@ class EditScheduleViewModel(
                     "start_time_date" to isoDate,
                     "color" to s.color,
                     "source" to SourceType.manual.name,
-                    "implementation_time" to "00:30:00",
+                    "implementation_time" to s.duration,
                     "repeat" to s.repeat.name // ✅ lấy từ state
                 )
 
@@ -109,7 +110,7 @@ class EditScheduleViewModel(
                     val editedFields = mapOf(
                         "start_time_date" to isoDate,
                         "color" to s.color,
-                        "implementation_time" to "00:30:00"
+                        "implementation_time" to s.duration
                     )
                     val ev = repo.insertEditedVersion(editedFields)
                     repo.attachEditedVersionToDate(taskId, s.date.toString(), ev.id)
@@ -142,7 +143,7 @@ class EditScheduleViewModel(
     fun setRepeat(r: RepeatType) { // ✅ THÊM
         _state.value = _state.value.copy(repeat = r)
     }
-
+    fun setDuration(d: String) { _state.value = _state.value.copy(duration = d) } // ✅ THÊM
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }

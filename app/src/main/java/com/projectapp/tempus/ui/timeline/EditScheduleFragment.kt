@@ -67,6 +67,7 @@ class EditScheduleFragment : Fragment() {
                 binding.btnDelete.visibility = if(state.isEditMode) View.VISIBLE else View.GONE
                 binding.switchTodayOnly.isEnabled = state.isEditMode
                 binding.tvRepeatValue.text = repeatToVi(state.repeat)
+                binding.tvDurationValue.text = durationToVi(state.duration)
                 if (binding.switchTodayOnly.isChecked != state.applyTodayOnly) {
                     binding.switchTodayOnly.isChecked = state.applyTodayOnly
                 }
@@ -151,6 +152,25 @@ class EditScheduleFragment : Fragment() {
                 .show()
         }
 
+        binding.btnPickDuration.setOnClickListener {
+            val mins = arrayOf(0, 15, 30, 45, 60, 90, 120, 180)
+            val labels = arrayOf("Không", "15 phút", "30 phút", "45 phút", "1 giờ", "1 giờ 30", "2 giờ", "3 giờ")
+
+            val current = viewModel.state.value.duration
+            val currentMin = hhmmssToMinutes(current)
+            val checked = mins.indexOf(currentMin).let { if (it >= 0) it else 2 } // default 30p
+
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Chọn thời lượng")
+                .setSingleChoiceItems(labels, checked) { dialog, which ->
+                    val dur = minutesToHHMMSS(mins[which])
+                    viewModel.setDuration(dur)
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Hủy", null)
+                .show()
+        }
+
         setupColorClick(binding.colorRed, "#F44336")
         setupColorClick(binding.colorYellow, "#FFEB3B")
         setupColorClick(binding.colorGreen, "#4CAF50")
@@ -169,6 +189,34 @@ class EditScheduleFragment : Fragment() {
             RepeatType.weekly -> "Hàng tuần"
             RepeatType.monthly -> "Hàng tháng"
         }
+    }
+    private fun durationToVi(hhmmss: String): String {
+        val parts = hhmmss.split(":")
+        val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+        val totalMin = h * 60 + m
+
+        return when (totalMin) {
+            0 -> "Không"
+            in 1..59 -> "${totalMin} phút"
+            else -> {
+                val hh = totalMin / 60
+                val mm = totalMin % 60
+                if (mm == 0) "${hh} giờ" else "${hh} giờ ${mm} phút"
+            }
+        }
+    }
+    private fun hhmmssToMinutes(s: String): Int {
+        val p = s.split(":")
+        val h = p.getOrNull(0)?.toIntOrNull() ?: 0
+        val m = p.getOrNull(1)?.toIntOrNull() ?: 0
+        return h * 60 + m
+    }
+
+    private fun minutesToHHMMSS(min: Int): String {
+        val h = min / 60
+        val m = min % 60
+        return String.format("%02d:%02d:00", h, m)
     }
 
 }
