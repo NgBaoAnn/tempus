@@ -2,9 +2,11 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -12,18 +14,6 @@
         android:padding="16dp">
 
         <!-- Title -->
-
-        <TextView
-            android:id="@+id/tvStatisticDesc2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:text="Tổng cộng 0 trong 0 tác vụ đã hoàn thành"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvStatisticTitle" />
-
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
@@ -32,7 +22,7 @@
             android:gravity="center"
             android:text="@string/statis_title"
             android:textSize="20sp"
-            android:textStyle="bold"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -58,138 +48,137 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/inter_medium"
-                android:stateListAnimator="@animator/button_elevation"
                 android:text="@string/week"
                 android:textAllCaps="false"
                 android:textColor="@color/selector_toggle_text"
                 app:backgroundTint="@color/selector_toggle_background"
-                app:cornerRadius="10dp"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.LargeComponent.Rounded" />
+                app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMonth"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/inter_medium"
-                android:stateListAnimator="@animator/button_elevation"
                 android:text="@string/month"
                 android:textAllCaps="false"
                 android:textColor="@color/selector_toggle_text"
                 app:backgroundTint="@color/selector_toggle_background"
-                app:cornerRadius="10dp"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.LargeComponent.Rounded" />
+                app:cornerRadius="10dp" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
+
         <!-- Statistic -->
         <TextView
             android:id="@+id/tvStatisticTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:fontFamily="@font/inter_semibold"
             android:text="@string/chart_title"
-            android:textSize="20dp"
-            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toggleGroup" />
-
-
-
-        <!-- Navigation -->
 
         <TextView
             android:id="@+id/tvStatisticDesc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:text="17/11 - 23/11"
-            android:textStyle="bold"
+            android:textColor="#8E8E93"
+            android:fontFamily="sans-serif"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvStatisticTitle" />
 
-        <!-- Chart -->
+        <TextView
+            android:id="@+id/tvStatisticDesc2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Tổng cộng 0 trong 0 tác vụ đã hoàn thành"
+            android:textColor="#3A3A3C"
+            android:fontFamily="@font/inter_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvStatisticDesc" />
 
+        <!-- Chart -->
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"
-            android:layout_width="375dp"
-            android:layout_height="339dp"
-            android:layout_marginTop="60dp"
-            android:background="#E7E7E7"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@+id/tvStatisticDesc2" />
 
-        <ImageButton
-            android:id="@+id/btnPrev"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="4dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/prev"
-            app:layout_constraintStart_toStartOf="parent"
-            android:scaleType="centerInside"
-            app:layout_constraintTop_toBottomOf="@id/barChart" />
-
-        <TextView
-            android:id="@+id/tvRange"
+        <LinearLayout
+            android:id="@+id/llChartNav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="17/11 - 23/11"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/btnNext"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toEndOf="@id/btnPrev"
-            app:layout_constraintTop_toBottomOf="@id/barChart" />
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barChart">
+
+            <ImageButton
+                android:id="@+id/btnPrev"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/prev"
+                android:scaleType="centerInside" />
+
+            <TextView
+                android:id="@+id/tvRange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:fontFamily="@font/inter_semibold"
+                android:text="17/11 - 23/11"
+                android:textColor="@color/black" />
+
+            <ImageButton
+                android:id="@+id/btnNext"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/next"
+                android:scaleType="centerInside" />
+        </LinearLayout>
 
         <!-- Category title -->
-
-        <!-- Category list -->
-
-        <ImageButton
-            android:id="@+id/btnNext"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="4dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/next"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:scaleType="centerInside"
-            app:layout_constraintTop_toBottomOf="@id/barChart" />
-
         <TextView
             android:id="@+id/tvCategoryTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/inter_semibold"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/inter_bold"
             android:text="@string/category_title"
-            android:textStyle="bold"
-            android:textSize="18dp"
+            android:textSize="18sp"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnPrev" />
+            app:layout_constraintTop_toBottomOf="@id/llChartNav" />
 
+        <!-- Category list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCategories"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="12dp"
             android:nestedScrollingEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCategoryTitle" />
+            app:layout_constraintTop_toBottomOf="@id/tvCategoryTitle"
+            tools:listitem="@layout/item_top_task" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
