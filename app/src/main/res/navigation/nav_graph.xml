@@ -14,7 +14,13 @@
         android:id="@+id/timelineFragment"
         android:name="com.projectapp.tempus.TimelineFragment"
         android:label="fragment_timeline"
-        tools:layout="@layout/fragment_timeline" />
+        tools:layout="@layout/fragment_timeline">
+
+        <action
+            android:id="@+id/action_timelineFragment_to_editScheduleFragment"
+            app:destination="@id/editScheduleFragment" />
+
+    </fragment>
     <fragment
         android:id="@+id/aiFragment"
         android:name="com.projectapp.tempus.AIFragment"
@@ -30,4 +36,17 @@
         android:name="com.projectapp.tempus.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/editScheduleFragment"
+        android:name="com.projectapp.tempus.ui.timeline.EditScheduleFragment"
+        android:label="Edit Schedule"
+        tools:layout="@layout/fragment_edit_schedule">
+
+        <argument
+            android:name="taskId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
 </navigation>
