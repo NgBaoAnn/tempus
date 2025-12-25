@@ -9,7 +9,7 @@ data class ScheduleRow(
     @SerialName("user_id") val userId: String,
     @SerialName("name_schedule") val name: String,
 
-    @SerialName("label") val label: String? = null,
+    val label: ScheduleLabel? = null,
     // ----------------------------------------------------
 
     @SerialName("start_time_date") val startTimeDate: String, // ISO string (VD: 2025-12-21 07:00:00+07)

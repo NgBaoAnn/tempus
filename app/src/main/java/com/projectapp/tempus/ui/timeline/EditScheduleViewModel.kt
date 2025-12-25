@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 
 data class EditState(
     var applyTodayOnly: Boolean = false,
@@ -25,7 +26,7 @@ data class EditState(
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726", // Cam mặc định
-    val iconLabel: String = "book",
+    val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,   // ✅ THÊM
     val duration: String = "00:30:00",
     val loading: Boolean = false
@@ -63,7 +64,7 @@ class EditScheduleViewModel(
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
-                            iconLabel = t.label ?: "book",
+                            iconLabel = t.label ?: ScheduleLabel.book,
                             repeat = t.repeat,
                             duration = t.implementationTime ?: "00:30:00"   // ✅ THÊM DÒNG NÀY
                         )
@@ -90,6 +91,7 @@ class EditScheduleViewModel(
                     "name_schedule" to title,
                     "start_time_date" to isoDate,
                     "color" to s.color,
+                    "label" to s.iconLabel.name,
                     "source" to SourceType.manual.name,
                     "implementation_time" to s.duration,
                     "repeat" to s.repeat.name // ✅ lấy từ state
@@ -110,6 +112,7 @@ class EditScheduleViewModel(
                     val editedFields = mapOf(
                         "start_time_date" to isoDate,
                         "color" to s.color,
+                        "label" to s.iconLabel.name,
                         "implementation_time" to s.duration
                     )
                     val ev = repo.insertEditedVersion(editedFields)
@@ -143,6 +146,11 @@ class EditScheduleViewModel(
     fun setRepeat(r: RepeatType) { // ✅ THÊM
         _state.value = _state.value.copy(repeat = r)
     }
+
+    fun setIcon(label: ScheduleLabel) {
+        _state.value = _state.value.copy(iconLabel = label)
+    }
+
     fun setDuration(d: String) { _state.value = _state.value.copy(duration = d) } // ✅ THÊM
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
