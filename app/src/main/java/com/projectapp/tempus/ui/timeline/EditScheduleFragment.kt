@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.appcompat.app.AlertDialog
 import com.projectapp.tempus.data.schedule.dto.RepeatType
+import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 
 
 class EditScheduleFragment : Fragment() {
@@ -81,8 +82,8 @@ class EditScheduleFragment : Fragment() {
                 binding.tvDateValue.text = state.date.format(dateFormatter)
                 binding.tvTimeValue.text = state.time.format(DateTimeFormatter.ofPattern("HH:mm"))
 
-                val iconResId = requireContext().getIconResId(state.iconLabel)
-                binding.imgIconPreview.setImageResource(iconResId)
+                val resId = requireContext().getIconResId(state.iconLabel.name)
+                binding.imgIconPreview.setImageResource(resId)
 
                 // Cập nhật màu Icon
                 binding.btnPickRepeat.isEnabled = !state.applyTodayOnly
@@ -113,6 +114,10 @@ class EditScheduleFragment : Fragment() {
 
         binding.btnDelete.setOnClickListener {
             viewModel.deleteTask()
+        }
+
+        binding.imgIconPreview.setOnClickListener {
+            showIconPicker()
         }
 
         binding.btnPickDate.setOnClickListener {
@@ -217,6 +222,45 @@ class EditScheduleFragment : Fragment() {
         val h = min / 60
         val m = min % 60
         return String.format("%02d:%02d:00", h, m)
+    }
+    private fun showIconPicker() {
+        val labels = listOf(
+            ScheduleLabel.wakeup,
+            ScheduleLabel.eat,
+            ScheduleLabel.exercise,
+            ScheduleLabel.rest,
+            ScheduleLabel.water,
+            ScheduleLabel.book,
+            ScheduleLabel.sleep
+        )
+
+        val namesVi = arrayOf(
+            "Thức dậy",
+            "Ăn uống",
+            "Tập luyện",
+            "Nghỉ ngơi",
+            "Uống nước",
+            "Học tập",
+            "Ngủ"
+        )
+
+        val current = viewModel.state.value.iconLabel
+        val checked = labels.indexOf(current).coerceAtLeast(0)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Chọn biểu tượng")
+            .setSingleChoiceItems(namesVi, checked) { dialog, which ->
+                val picked = labels[which]
+                viewModel.setIcon(picked)
+
+                // update preview ngay
+                val resId = requireContext().getIconResId(picked.name)
+                binding.imgIconPreview.setImageResource(resId)
+
+                dialog.dismiss()
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
     }
 
 }
