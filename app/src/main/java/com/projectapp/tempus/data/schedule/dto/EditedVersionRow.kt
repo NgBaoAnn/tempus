@@ -8,7 +8,8 @@ data class EditedVersionRow(
     val id: String,
 
     @SerialName("name_schedule") val name: String,
-    @SerialName("label") val label: String? = null,
+    val label: ScheduleLabel? = null,
+
     // ----------------------------------------------------
 
     val color: String? = null,

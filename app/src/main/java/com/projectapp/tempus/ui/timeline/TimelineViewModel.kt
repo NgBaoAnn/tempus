@@ -139,19 +139,17 @@ class TimelineViewModel(
                 _ui.value = _ui.value.copy(isLoading = true, error = null)
                 Log.d("Timeline", "load start date=$dateStr userId=$userId")
 
+                val dateStr = date.toString()
+
                 val schedules = repo.getAllSchedules(userId)
-                Log.d("Timeline", "load schedules=${schedules.size}")
+                val taskIds = schedules.map { it.id }
 
-                val items = repo.getScheduleItemsByDate(dateStr)
-                Log.d("Timeline", "load schedule_items=${items.size}")
+                val scheduleItems = repo.getScheduleItemsByDate(dateStr, taskIds)
 
-                /*val evIds = items.mapNotNull { it.editedVersion }.distinct()
-                val ev = repo.getEditedVersions(evIds).associateBy { it.id }
-                Log.d("Timeline", "load edited_version=${ev.size}")
+                val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
+                val editedMap = repo.getEditedVersions(editedIds).associateBy { it.id }
 
-                val blocks = builder.build(date, schedules, items, ev)
-                */
-                val blocks = builder.build(date, schedules, items, emptyMap())
+                val blocks = builder.build(date, schedules, scheduleItems, editedMap)
 
                 Log.d("Timeline", "build blocks=${blocks.size}")
 

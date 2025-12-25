@@ -110,7 +110,7 @@ class BuildTimelineUseCase {
                     title = s.name,
 
                     // Logic Label: Bản sửa -> Bản gốc -> Mặc định
-                    label = (ev?.label ?: s.label) ?: "activity",
+                    label = (ev?.label ?: s.label)?.name ?: "book",
 
                     // Logic Color: Bản sửa -> Bản gốc -> Mặc định xám
                     color = (ev?.color ?: s.color) ?: "#808080",
