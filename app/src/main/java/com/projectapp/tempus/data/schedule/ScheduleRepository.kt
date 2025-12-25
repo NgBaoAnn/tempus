@@ -5,6 +5,7 @@ import com.projectapp.tempus.data.schedule.dto.*
 interface ScheduleRepository {
     suspend fun getAllSchedules(userId: String): List<ScheduleRow>
     suspend fun getScheduleItemsByDate(date: String, taskIds: List<String>): List<ScheduleItemRow>
+    suspend fun getScheduleItemsByRange(startDate: String, endDate: String, taskIds: List<String>): List<ScheduleItemRow>
     suspend fun getEditedVersions(ids: List<String>): List<EditedVersionRow>
 
     suspend fun insertSchedule(row: Map<String, Any?>): ScheduleRow

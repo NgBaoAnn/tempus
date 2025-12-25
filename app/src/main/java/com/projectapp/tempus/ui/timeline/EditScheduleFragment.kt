@@ -231,7 +231,9 @@ class EditScheduleFragment : Fragment() {
             ScheduleLabel.rest,
             ScheduleLabel.water,
             ScheduleLabel.book,
-            ScheduleLabel.sleep
+            ScheduleLabel.sleep,
+            ScheduleLabel.clean,
+            ScheduleLabel.cook
         )
 
         val namesVi = arrayOf(
@@ -241,7 +243,9 @@ class EditScheduleFragment : Fragment() {
             "Nghỉ ngơi",
             "Uống nước",
             "Học tập",
-            "Ngủ"
+            "Ngủ",
+            "Dọn dẹp",
+            "Nấu ăn"
         )
 
         val current = viewModel.state.value.iconLabel

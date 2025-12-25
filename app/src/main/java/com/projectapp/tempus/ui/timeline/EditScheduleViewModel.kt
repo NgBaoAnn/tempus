@@ -1,5 +1,6 @@
 package com.projectapp.tempus.ui.timeline
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.data.schedule.ScheduleRepository
@@ -27,7 +28,7 @@ data class EditState(
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726", // Cam mặc định
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
-    val repeat: RepeatType = RepeatType.daily,   // ✅ THÊM
+    val repeat: RepeatType = RepeatType.daily,
     val duration: String = "00:30:00",
     val loading: Boolean = false
 )
@@ -43,14 +44,17 @@ class EditScheduleViewModel(
     private val _saveSuccessEvent = Channel<Unit>()
     val saveSuccessEvent = _saveSuccessEvent.receiveAsFlow()
 
+    private val _errorEvent = Channel<String>()
+    val errorEvent = _errorEvent.receiveAsFlow()
+
     fun initialize(taskId: String?) {
         if (taskId == null) {
             _state.value = EditState(isEditMode = false)
         } else {
             viewModelScope.launch {
-                val task = repo.getScheduleById(taskId)
-                task?.let { t ->
-                    try {
+                try {
+                    val task = repo.getScheduleById(taskId)
+                    task?.let { t ->
                         val odt = java.time.OffsetDateTime.parse(
                             t.startTimeDate,
                             DateTimeFormatter.ISO_OFFSET_DATE_TIME
@@ -66,11 +70,11 @@ class EditScheduleViewModel(
                             color = t.color ?: "#FFA726",
                             iconLabel = t.label ?: ScheduleLabel.book,
                             repeat = t.repeat,
-                            duration = t.implementationTime ?: "00:30:00"   // ✅ THÊM DÒNG NÀY
+                            duration = t.implementationTime ?: "00:30:00"
                         )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
+                } catch (e: Exception) {
+                    Log.e("EditViewModel", "Error initializing task", e)
                 }
             }
         }
@@ -86,7 +90,7 @@ class EditScheduleViewModel(
                     .withZoneSameInstant(ZoneId.of("UTC"))
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
-                val mapData = mapOf(
+                val mapData = mutableMapOf<String, Any?>(
                     "user_id" to userId,
                     "name_schedule" to title,
                     "start_time_date" to isoDate,
@@ -94,7 +98,7 @@ class EditScheduleViewModel(
                     "label" to s.iconLabel.name,
                     "source" to SourceType.manual.name,
                     "implementation_time" to s.duration,
-                    "repeat" to s.repeat.name // ✅ lấy từ state
+                    "repeat" to s.repeat.name
                 )
 
                 if (!s.isEditMode || s.id == null) {
@@ -108,7 +112,6 @@ class EditScheduleViewModel(
                 if (!s.applyTodayOnly) {
                     repo.updateSchedule(taskId, mapData)
                 } else {
-                    // NOTE: edited_version của bạn hiện không có cột repeat -> không đưa repeat vào editedFields
                     val editedFields = mapOf(
                         "start_time_date" to isoDate,
                         "color" to s.color,
@@ -121,7 +124,8 @@ class EditScheduleViewModel(
 
                 _saveSuccessEvent.send(Unit)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("EditViewModel", "Error saving task: ${e.message}", e)
+                _errorEvent.send("Lỗi lưu dữ liệu: ${e.message}. Vui lòng kiểm tra lại label trong Database.")
             }
         }
     }
@@ -134,7 +138,7 @@ class EditScheduleViewModel(
                     _saveSuccessEvent.send(Unit)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("EditViewModel", "Error deleting task", e)
             }
         }
     }
@@ -143,7 +147,7 @@ class EditScheduleViewModel(
         _state.value = _state.value.copy(applyTodayOnly = v)
     }
 
-    fun setRepeat(r: RepeatType) { // ✅ THÊM
+    fun setRepeat(r: RepeatType) {
         _state.value = _state.value.copy(repeat = r)
     }
 
@@ -151,7 +155,7 @@ class EditScheduleViewModel(
         _state.value = _state.value.copy(iconLabel = label)
     }
 
-    fun setDuration(d: String) { _state.value = _state.value.copy(duration = d) } // ✅ THÊM
+    fun setDuration(d: String) { _state.value = _state.value.copy(duration = d) }
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }

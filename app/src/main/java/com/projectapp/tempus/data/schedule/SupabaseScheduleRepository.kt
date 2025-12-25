@@ -31,6 +31,19 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeList()
     }
 
+    override suspend fun getScheduleItemsByRange(startDate: String, endDate: String, taskIds: List<String>): List<ScheduleItemRow> {
+        if (taskIds.isEmpty()) return emptyList()
+        return supabase.from("schedule_items")
+            .select {
+                filter {
+                    gte("date", startDate)
+                    lte("date", endDate)
+                    isIn("task_id", taskIds)
+                }
+            }
+            .decodeList()
+    }
+
     override suspend fun getScheduleById(id: String): ScheduleRow? {
         return supabase.from("schedule")
             .select {
@@ -48,7 +61,6 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun insertSchedule(row: Map<String, Any?>): ScheduleRow {
-        // supabase-kt insert nhận JsonObject dễ nhất
         val body = buildJsonObject {
             row.forEach { (k, v) ->
                 when (v) {
@@ -67,8 +79,6 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun upsertScheduleItem(taskId: String, date: String, status: StatusType): ScheduleItemRow {
-        // docs team: nếu chưa có dòng (task_id,date) -> insert; có rồi -> update
-        // Cách đơn giản: query trước, rồi update/insert
         val existing = supabase.from("schedule_items")
             .select {
                 filter {
@@ -162,7 +172,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
                 .update(
                     buildJsonObject { put("edited_version", editedVersionId) }
                 ) {
-                    select() // ✅ để decodeSingle() không fail
+                    select() 
                     filter { eq("id", id) }
                 }
                 .decodeSingle()
@@ -187,6 +197,4 @@ class SupabaseScheduleRepository : ScheduleRepository {
                 filter { eq("id", id) }
             }
     }
-
-
 }
