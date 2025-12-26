@@ -1,4 +1,4 @@
-package com.projectapp.tempus
+package com.projectapp.tempus.ui.auth
 
 import android.os.Bundle
 import android.util.Log
@@ -11,11 +11,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.projectapp.tempus.R
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.auth.AuthService
+import io.github.jan.supabase.exceptions.RestException
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 class RegisterActivity : AppCompatActivity() {
@@ -29,7 +29,6 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
 
     private lateinit var authService: AuthService
-    private lateinit var sessionStore: SecureSessionStore
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,34 +41,17 @@ class RegisterActivity : AppCompatActivity() {
             insets
         }
 
+        val supabaseClient = SupabaseClientProvider.client
+        authService = AuthService(supabaseClient)
+
         addControls()
         initAuthService()
         addEvents()
     }
 
     private fun initAuthService() {
-
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(
-                SupabaseAnonInterceptor(BuildConfig.SUPABASE_KEY)
-            )
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            )
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.SUPABASE_URL + "/")
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val authApi = retrofit.create(SupabaseAuthApi::class.java)
-
         authService = AuthService(
-            api = authApi
+            supabaseClient = SupabaseClientProvider.client,
         )
     }
 
@@ -95,74 +77,38 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun handleRegister() {
-
         val fullName = edtFullName.text.toString().trim()
         val email = edtEmail.text.toString().trim()
         val password = edtPassword.text.toString().trim()
         val confirmPassword = edtConfirmPassword.text.toString().trim()
 
-        Log.d("RegisterActivity", "FullName: $fullName | Email: $email")
-
-        if (!validateRegisterInput(fullName, email, password, confirmPassword)) {
-            return
-        }
+        if (!validateRegisterInput(fullName, email, password, confirmPassword)) return
 
         lifecycleScope.launch {
             try {
-                val res = authService.register(
-                    email = email,
-                    password = password,
-                    fullName = fullName
-                )
-
-                Log.d(
-                    "RegisterActivity",
-                    "REGISTER OK: id=${res.id}, email=${res.email}"
-                )
+                // Gọi hàm register với đầy đủ tham số
+                authService.register(email, password, fullName)
 
                 Toast.makeText(
-                    this@RegisterActivity,
-                    "Đăng ký thành công",
-                    Toast.LENGTH_SHORT
+                    applicationContext,
+                    "Đăng ký thành công! Vui lòng kiểm tra email.",
+                    Toast.LENGTH_LONG
                 ).show()
+                finish() // Quay lại màn hình Login
 
-            } catch (e: retrofit2.HttpException) {
-
-                val errorBody = e.response()?.errorBody()?.string()
-
-                Log.e(
-                    "RegisterActivity",
-                    "HTTP ${e.code()} | BODY: $errorBody",
-                    e
-                )
-
-                Toast.makeText(
-                    this@RegisterActivity,
-                    "Đăng ký thất bại: ${e.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            } catch (e: java.io.IOException) {
-
-                Log.e("RegisterActivity", "NETWORK ERROR", e)
-
-                Toast.makeText(
-                    this@RegisterActivity,
-                    "Lỗi mạng",
-                    Toast.LENGTH_SHORT
-                ).show()
+            } catch (e: RestException) {
+                // Lỗi từ phía Server Supabase (Email đã tồn tại, mật khẩu quá yếu...)
+                Log.e("RegisterActivity", "Supabase Error: ${e.message}")
+                val errorMsg = when {
+                    e.message?.contains("already registered") == true -> "Email này đã được sử dụng"
+                    else -> "Lỗi: ${e.message}"
+                }
+                Toast.makeText(this@RegisterActivity, errorMsg, Toast.LENGTH_SHORT).show()
 
             } catch (e: Exception) {
-
-                Log.e("RegisterActivity", "UNKNOWN ERROR TYPE = ${e::class.java.name}")
-                Log.e("RegisterActivity", "MESSAGE = ${e.message}")
-                Log.e("RegisterActivity", "STACKTRACE", e)
-
-                Toast.makeText(
-                    this@RegisterActivity,
-                    "Lỗi không xác định",
-                    Toast.LENGTH_SHORT
-                ).show()
+                // Lỗi mạng hoặc lỗi không xác định
+                Log.e("RegisterActivity", "General Error: ${e.message}")
+                Toast.makeText(this@RegisterActivity, "Lỗi kết nối mạng", Toast.LENGTH_SHORT).show()
             }
         }
     }
