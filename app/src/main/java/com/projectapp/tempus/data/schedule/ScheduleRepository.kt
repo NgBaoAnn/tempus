@@ -6,7 +6,6 @@ interface ScheduleRepository {
     suspend fun getAllSchedules(userId: String): List<ScheduleRow>
     suspend fun getScheduleItemsByDate(date: String, taskIds: List<String>): List<ScheduleItemRow>
     suspend fun getEditedVersions(ids: List<String>): List<EditedVersionRow>
-
     suspend fun insertSchedule(row: Map<String, Any?>): ScheduleRow
     suspend fun upsertScheduleItem(taskId: String, date: String, status: StatusType): ScheduleItemRow
 
@@ -18,4 +17,6 @@ interface ScheduleRepository {
 
     suspend fun getScheduleById(id: String): ScheduleRow?
     suspend fun deleteSchedule(id: String)
+
+    suspend fun getScheduleItemsByDates(dates: List<String>, taskIds: List<String>): List<ScheduleItemRow>
 }

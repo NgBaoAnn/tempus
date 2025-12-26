@@ -64,7 +64,7 @@ class EditScheduleViewModel(
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
-                            iconLabel = t.label ?: ScheduleLabel.book,
+                            iconLabel = ScheduleLabel.fromDb(t.label),
                             repeat = t.repeat,
                             duration = t.implementationTime ?: "00:30:00"   // ✅ THÊM DÒNG NÀY
                         )
