@@ -15,5 +15,15 @@ enum class ScheduleLabel {
     @SerialName("rest") rest,
     @SerialName("water") water,
     @SerialName("book") book,
-    @SerialName("sleep") sleep
+    @SerialName("sleep") sleep,
+    @SerialName("clean") clean,
+
+    @SerialName("unknown") UNKNOWN;
+
+    companion object {
+        fun fromDb(v: String?): ScheduleLabel {
+            if (v.isNullOrBlank()) return book
+            return values().firstOrNull { it.name == v } ?: UNKNOWN
+        }
+    }
 }

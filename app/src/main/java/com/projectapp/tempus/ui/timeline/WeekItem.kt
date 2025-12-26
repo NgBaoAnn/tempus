@@ -1,3 +1,7 @@
 package com.projectapp.tempus.ui.timeline
 
-data class WeekItem()
+import java.time.LocalDate
+
+data class WeekItem(
+    val days: List<LocalDate>
+)

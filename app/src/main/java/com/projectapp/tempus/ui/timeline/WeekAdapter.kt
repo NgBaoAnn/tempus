@@ -1,14 +1,14 @@
 package com.projectapp.tempus.ui.timeline
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.projectapp.tempus.R
 import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 class WeekAdapter(
     private val onDayClick: (LocalDate) -> Unit
@@ -29,9 +29,7 @@ class WeekAdapter(
         return VH(view)
     }
 
-    override fun onBindViewHolder(h: VH, pos: Int) {
-        h.bind(weeks[pos])
-    }
+    override fun onBindViewHolder(h: VH, pos: Int) = h.bind(weeks[pos])
 
     override fun getItemCount() = weeks.size
 
@@ -45,18 +43,25 @@ class WeekAdapter(
                 val v = LayoutInflater.from(container.context)
                     .inflate(R.layout.item_calendar_day, container, false)
 
-                v.findViewById<TextView>(R.id.tvDow).text =
-                    date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("vi"))
+                val tvDay = v.findViewById<TextView>(R.id.tvDay)
+                tvDay.text = date.dayOfMonth.toString()
 
-                v.findViewById<TextView>(R.id.tvDay).text =
-                    date.dayOfMonth.toString()
+                // ✅ chia đều 7 cột
+                val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                v.layoutParams = lp
 
-                v.isSelected = date == selectedDate
+                // ✅ highlight ngày đang chọn
+                if (date == selectedDate) {
+                    tvDay.setBackgroundResource(R.drawable.bg_date_selected_red)
+                    tvDay.setTextColor(Color.WHITE)
+                } else {
+                    tvDay.background = null
+                    tvDay.setTextColor(Color.BLACK)
+                }
+
                 v.setOnClickListener { onDayClick(date) }
-
                 container.addView(v)
             }
         }
     }
 }
-
