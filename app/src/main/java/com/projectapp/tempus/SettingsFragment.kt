@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.databinding.FragmentSettingsBinding
 import com.projectapp.tempus.ui.auth.LoginActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
+import io.github.jan.supabase.gotrue.auth
 
 
 class SettingsFragment : Fragment() {
@@ -27,7 +29,21 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        checkLogin()
         return binding.root
+    }
+
+    private fun checkLogin() {
+        // Sử dụng client từ Provider bạn đã tạo
+        val session = SupabaseClientProvider.client.auth.currentSessionOrNull()
+
+        if (session == null) {
+            // Nếu chưa đăng nhập, đẩy về LoginActivity
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
