@@ -1,8 +1,8 @@
 # 📋 Tiramisu - Developer Task Tracking
 
-> **Last Updated:** 2026-01-02  
+> **Last Updated:** 2026-01-07  
 > **Timeline:** 4 weeks  
-> **Team Size:** 4 developers
+> **Team Size:** 5 developers
 
 ---
 
@@ -294,9 +294,9 @@ interface OpenAIService {
 
 ---
 
-## 👤 Developer 4 - Gamification & UI/UX
+## 👤 Developer 4 - Gamification Core
 
-**Focus:** Plant Growing, Points, Animations  
+**Focus:** Points System, Tree Growth Logic, Animations  
 **Kỹ thuật showcase:** Custom Views, Lottie, State Machine, Room Relations
 
 ### Sprint Backlog
@@ -306,8 +306,6 @@ interface OpenAIService {
 | 4.1 | [Points System](#41-points-system) | 🔴 HIGH | 5 | [ ] TODO | Week 1 |
 | 4.2 | [Tree Growth Logic](#42-tree-growth) | 🔴 HIGH | 5 | [ ] TODO | Week 1 |
 | 4.3 | [Tree Animations](#43-animations) | 🔴 HIGH | 5 | [ ] TODO | Week 2 |
-| 4.4 | [Garden View](#44-garden) | 🟡 MED | 5 | [ ] TODO | Week 3 |
-| 4.5 | [Profile Page](#45-profile) | 🟢 LOW | 3 | [ ] TODO | Week 4 |
 
 ### Task Details
 
@@ -372,7 +370,21 @@ enum class TreeState {
 
 ---
 
-#### 4.4 Garden View
+## 👤 Developer 5 - UI/UX & Profile
+
+**Focus:** Garden View, Profile Page, User Experience  
+**Kỹ thuật showcase:** RecyclerView Grid, Navigation Component, DataBinding, Supabase Auth
+
+### Sprint Backlog
+
+| # | Task | Priority | Points | Status | Due |
+|---|------|----------|--------|--------|-----|
+| 5.1 | [Garden View](#51-garden-view) | 🟡 MED | 5 | [ ] TODO | Week 3 |
+| 5.2 | [Profile Page](#52-profile-page) | 🟢 LOW | 3 | [ ] TODO | Week 4 |
+
+### Task Details
+
+#### 5.1 Garden View
 ```kotlin
 // Grid of all user's trees
 // - ui/garden/GardenFragment.kt
@@ -387,7 +399,7 @@ enum class TreeState {
 
 ---
 
-#### 4.5 Profile Page
+#### 5.2 Profile Page
 ```kotlin
 // Update ProfileActivity:
 // - User info from Supabase
@@ -412,7 +424,8 @@ enum class TreeState {
 | Dev 1 | 0 | 0 | 5 | 5 |
 | Dev 2 | 0 | 0 | 5 | 5 |
 | Dev 3 | 0 | 0 | 5 | 5 |
-| Dev 4 | 0 | 0 | 5 | 5 |
+| Dev 4 | 0 | 0 | 3 | 3 |
+| Dev 5 | 0 | 0 | 2 | 2 |
 | **Total** | **0** | **0** | **20** | **20** |
 
 ### By Week
@@ -421,8 +434,8 @@ enum class TreeState {
 |------|-----------|-----------|
 | Week 1 | 1.1, 1.2, 2.1, 3.1, 4.1, 4.2 | 0 |
 | Week 2 | 1.3, 2.2, 3.2, 3.3, 4.3 | 0 |
-| Week 3 | 1.4, 2.3, 3.4, 4.4 | 0 |
-| Week 4 | 1.5, 2.4, 2.5, 3.5, 4.5 | 0 |
+| Week 3 | 1.4, 2.3, 3.4, 5.1 | 0 |
+| Week 4 | 1.5, 2.4, 2.5, 3.5, 5.2 | 0 |
 
 ---
 
@@ -435,6 +448,8 @@ enum class TreeState {
 | 3.2 Insights | 3.1 Statistics | - |
 | 4.1 Points | - | 4.2 Tree Growth |
 | 4.2 Tree Growth | 4.1 Points | 4.3 Animations |
+| 5.1 Garden View | 4.2 Tree Growth, 4.3 Animations | - |
+| 5.2 Profile | 4.1 Points | - |
 
 ---
 
