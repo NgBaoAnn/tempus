@@ -48,5 +48,17 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+            
+        <argument
+            android:name="selectedDate"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
+
+    <fragment
+        android:id="@+id/gardenFragment"
+        android:name="com.projectapp.tempus.ui.garden.GardenFragment"
+        android:label="Garden"
+        tools:layout="@layout/fragment_garden" />
 </navigation>
