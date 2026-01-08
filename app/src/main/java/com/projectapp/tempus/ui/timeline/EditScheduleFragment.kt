@@ -15,8 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
-import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import io.github.jan.supabase.gotrue.auth
 import com.projectapp.tempus.databinding.FragmentEditScheduleBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -25,7 +23,6 @@ import java.util.Locale
 import androidx.appcompat.app.AlertDialog
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
-import io.github.jan.supabase.gotrue.auth
 
 
 class EditScheduleFragment : Fragment() {
@@ -33,14 +30,10 @@ class EditScheduleFragment : Fragment() {
     private var _binding: FragmentEditScheduleBinding? = null
     private val binding get() = _binding!!
 
-    // Tạo ViewModel
     private val viewModel: EditScheduleViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
-                val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
-                val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
-
+                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
                 return EditScheduleViewModel(SupabaseScheduleRepository(), myUserId) as T
             }
         }
@@ -55,12 +48,10 @@ class EditScheduleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val taskIdArgs = arguments?.getString("taskId")
-        val selectedDateArgs = arguments?.getString("selectedDate")
-        viewModel.initialize(taskIdArgs, selectedDateArgs)
+        viewModel.initialize(taskIdArgs)
 
         setupEvents()
 
-        // 1. Lắng nghe sự kiện LƯU THÀNH CÔNG -> Tắt màn hình
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.saveSuccessEvent.collect {
                 Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
@@ -69,19 +60,7 @@ class EditScheduleFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.errorEvent.collect { msg ->
-                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-            }
-        }
-
-        // 3. Quan sát dữ liệu để cập nhật giao diện
-        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collectLatest { state ->
-                if (state.errorMessage != null) {
-                    Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
-                    viewModel.clearError() // Reset để không hiện lại khi rotate màn hình
-                }
-
                 binding.tvScreenTitle.text = if(state.isEditMode) "Sửa tác vụ" else "Tạo tác vụ"
                 binding.btnDelete.visibility = if(state.isEditMode) View.VISIBLE else View.GONE
                 binding.switchTodayOnly.isEnabled = state.isEditMode
@@ -91,7 +70,6 @@ class EditScheduleFragment : Fragment() {
                     binding.switchTodayOnly.isChecked = state.applyTodayOnly
                 }
 
-                // Điền Title (chỉ điền khi ô đang trống để tránh reset khi user đang gõ)
                 if (binding.edtTitle.text.isEmpty() && state.title.isNotEmpty()) {
                     binding.edtTitle.setText(state.title)
                 }
@@ -103,7 +81,6 @@ class EditScheduleFragment : Fragment() {
                 val resId = requireContext().getIconResId(state.iconLabel.name)
                 binding.imgIconPreview.setImageResource(resId)
 
-                // Cập nhật màu Icon
                 binding.btnPickRepeat.isEnabled = !state.applyTodayOnly
                 binding.tvRepeatValue.alpha = if (state.applyTodayOnly) 0.5f else 1.0f
                 try {
@@ -121,7 +98,6 @@ class EditScheduleFragment : Fragment() {
             if (title.isBlank()) {
                 Toast.makeText(context, "Chưa nhập tên", Toast.LENGTH_SHORT).show()
             } else {
-                // Gọi lệnh lưu
                 viewModel.saveTask(title, binding.edtDescription.text.toString())
             }
         }
@@ -153,7 +129,6 @@ class EditScheduleFragment : Fragment() {
         }
 
         binding.btnPickRepeat.setOnClickListener {
-            // Nếu đang bật only_today thì bạn có thể chặn luôn:
             if (viewModel.state.value.applyTodayOnly) {
                 Toast.makeText(context, "Chế độ 'Chỉ hôm nay' không đổi lặp lại", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -181,7 +156,7 @@ class EditScheduleFragment : Fragment() {
 
             val current = viewModel.state.value.duration
             val currentMin = hhmmssToMinutes(current)
-            val checked = mins.indexOf(currentMin).let { if (it >= 0) it else 2 } // default 30p
+            val checked = mins.indexOf(currentMin).let { if (it >= 0) it else 2 }
 
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("Chọn thời lượng")
@@ -251,7 +226,8 @@ class EditScheduleFragment : Fragment() {
             ScheduleLabel.book,
             ScheduleLabel.sleep,
             ScheduleLabel.clean,
-            ScheduleLabel.cook
+            ScheduleLabel.cook,
+            ScheduleLabel.garden
         )
 
         val namesVi = arrayOf(
@@ -263,7 +239,8 @@ class EditScheduleFragment : Fragment() {
             "Học tập",
             "Ngủ",
             "Dọn dẹp",
-            "Nấu ăn"
+            "Nấu ăn",
+            "Làm vườn"
         )
 
         val current = viewModel.state.value.iconLabel
@@ -275,7 +252,6 @@ class EditScheduleFragment : Fragment() {
                 val picked = labels[which]
                 viewModel.setIcon(picked)
 
-                // update preview ngay
                 val resId = requireContext().getIconResId(picked.name)
                 binding.imgIconPreview.setImageResource(resId)
 

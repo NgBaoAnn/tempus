@@ -35,6 +35,7 @@ enum class ScheduleLabel {
     @SerialName("sleep") sleep,
     @SerialName("clean") clean,
     @SerialName("cook") cook,
+    @SerialName("garden") garden,
     @SerialName("unknown") UNKNOWN;
 
     companion object {
