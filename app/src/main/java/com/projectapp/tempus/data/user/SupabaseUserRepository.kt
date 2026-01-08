@@ -8,6 +8,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 
+
 class SupabaseUserRepository(
     private val supabase: SupabaseClient = SupabaseClientProvider.client
 ) : UserRepository {

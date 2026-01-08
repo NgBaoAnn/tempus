@@ -10,8 +10,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.databinding.FragmentTimerBinding
+import com.projectapp.tempus.domain.model.PointAction
+import com.projectapp.tempus.domain.usecase.PointsManager
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
 
@@ -25,6 +30,9 @@ class TimerFragment : Fragment() {
     private var isTimerRunning = false
     private var totalTimeInMillis: Long = 0
     private var selectedColor: Int = Color.parseColor("#4CD964") // Mặc định xanh lá
+    
+    // Gamification
+    private lateinit var pointsManager: PointsManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +44,10 @@ class TimerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Initialize gamification
+        val repository = SupabaseGamificationRepository()
+        pointsManager = PointsManager(repository)
 
         setupNumberPickers()
         setupToggleGroup()
@@ -89,6 +101,18 @@ class TimerFragment : Fragment() {
             override fun onFinish() {
                 isTimerRunning = false
                 updateStatusUI()
+                
+                // 🎮 Award Pomodoro points when timer completes
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val earnedPoints = pointsManager.earnPoints(PointAction.POMODORO_COMPLETE)
+                    pointsManager.updateStreak()
+                    
+                    Toast.makeText(
+                        requireContext(),
+                        "🎉 Hoàn thành! +$earnedPoints điểm",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }.start()
 

@@ -25,6 +25,7 @@ import java.util.Locale
 import androidx.appcompat.app.AlertDialog
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
+import io.github.jan.supabase.gotrue.auth
 
 
 class EditScheduleFragment : Fragment() {
@@ -36,8 +37,10 @@ class EditScheduleFragment : Fragment() {
     private val viewModel: EditScheduleViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
-                    ?: throw IllegalStateException("User not logged in")
+
+                val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
+
                 return EditScheduleViewModel(SupabaseScheduleRepository(), myUserId) as T
             }
         }
@@ -52,7 +55,8 @@ class EditScheduleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val taskIdArgs = arguments?.getString("taskId")
-        viewModel.initialize(taskIdArgs)
+        val selectedDateArgs = arguments?.getString("selectedDate")
+        viewModel.initialize(taskIdArgs, selectedDateArgs)
 
         setupEvents()
 
@@ -64,9 +68,20 @@ class EditScheduleFragment : Fragment() {
             }
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.errorEvent.collect { msg ->
+                Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            }
+        }
+
         // 3. Quan sát dữ liệu để cập nhật giao diện
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collectLatest { state ->
+                if (state.errorMessage != null) {
+                    Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
+                    viewModel.clearError() // Reset để không hiện lại khi rotate màn hình
+                }
+
                 binding.tvScreenTitle.text = if(state.isEditMode) "Sửa tác vụ" else "Tạo tác vụ"
                 binding.btnDelete.visibility = if(state.isEditMode) View.VISIBLE else View.GONE
                 binding.switchTodayOnly.isEnabled = state.isEditMode
