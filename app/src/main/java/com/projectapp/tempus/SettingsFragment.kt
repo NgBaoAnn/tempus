@@ -20,6 +20,7 @@ class SettingsFragment : Fragment() {
 
     private var _binding: FragmentSettingsBinding? = null
     private val viewModel: SettingsViewModel by viewModels()
+    private var isLoggedIn = false
 
     private val binding get() = _binding!!
 
@@ -29,11 +30,11 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        checkLogin()
+        isLoggedIn = checkLogin()
         return binding.root
     }
 
-    private fun checkLogin() {
+    private fun checkLogin(): Boolean {
         // Sử dụng client từ Provider bạn đã tạo
         val session = SupabaseClientProvider.client.auth.currentSessionOrNull()
 
@@ -43,17 +44,22 @@ class SettingsFragment : Fragment() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             requireActivity().finish()
+            return false
         }
+        return true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Load và hiển thị dữ liệu User
-        viewModel.loadUser()
-        viewModel.user.observe(viewLifecycleOwner) { user ->
-            binding.tvUserName.text = user.username
-            binding.tvUserEmail.text = user.email
+        // Chỉ load user nếu đã đăng nhập
+        if (isLoggedIn) {
+            // 1. Load và hiển thị dữ liệu User
+            viewModel.loadUser()
+            viewModel.user.observe(viewLifecycleOwner) { user ->
+                binding.tvUserName.text = user.username
+                binding.tvUserEmail.text = user.email
+            }
         }
 
         // 2. Thiết lập các sự kiện Click

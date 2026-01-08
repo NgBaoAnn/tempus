@@ -1,6 +1,7 @@
 package com.projectapp.tempus
 
 import android.os.Build
+import io.github.jan.supabase.gotrue.auth
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,7 +47,8 @@ class TimelineFragment : Fragment() {
     private val viewModel: TimelineViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
+                val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
                 return TimelineViewModel(userId = myUserId, repo = repo) as T
             }
@@ -86,8 +88,6 @@ class TimelineFragment : Fragment() {
                     val pos = lm.findFirstCompletelyVisibleItemPosition()
                     if (pos != RecyclerView.NO_POSITION) {
                         val weekStart = buildWeeksAround(viewModel.ui.value.date)[pos].days.first()
-                        // ✅ chỉ đổi header tháng/năm, không chọn ngày
-                        // cách đơn giản: set date = giữa tuần để format tháng
                         viewModel.setCurrentWeekForHeader(weekStart.plusDays(3))
                     }
                 }
@@ -165,8 +165,12 @@ class TimelineFragment : Fragment() {
         // --- 4. XỬ LÝ NÚT ADD (DẤU CỘNG) ---
         binding.btnAdd.setOnClickListener {
             // [SỬA] LOGIC CHUYỂN MÀN HÌNH ĐỂ THÊM MỚI
-            // Không truyền bundle -> Màn hình Edit sẽ hiểu là "Thêm mới"
-            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment)
+            // Truyền ngày đang chọn để EditScheduleFragment biết
+            val currentDate = viewModel.ui.value.date
+            val bundle = Bundle().apply {
+                putString("selectedDate", currentDate.toString()) 
+            }
+            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
         }
 
         binding.btnMonthPicker.setOnClickListener {

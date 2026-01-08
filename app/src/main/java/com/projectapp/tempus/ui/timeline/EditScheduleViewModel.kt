@@ -30,7 +30,8 @@ data class EditState(
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,
     val duration: String = "00:30:00",
-    val loading: Boolean = false
+    val loading: Boolean = false,
+    val errorMessage: String? = null // ✅ Thêm field lỗi
 )
 
 class EditScheduleViewModel(
@@ -47,9 +48,19 @@ class EditScheduleViewModel(
     private val _errorEvent = Channel<String>()
     val errorEvent = _errorEvent.receiveAsFlow()
 
-    fun initialize(taskId: String?) {
+
+    fun initialize(taskId: String?, initialDateString: String? = null) {
         if (taskId == null) {
-            _state.value = EditState(isEditMode = false)
+            val dateToUse = if (initialDateString != null) {
+                try {
+                    LocalDate.parse(initialDateString)
+                } catch (e: Exception) {
+                    LocalDate.now()
+                }
+            } else {
+                LocalDate.now()
+            }
+            _state.value = EditState(isEditMode = false, date = dateToUse)
         } else {
             viewModelScope.launch {
                 try {
@@ -115,7 +126,7 @@ class EditScheduleViewModel(
                     val editedFields = mapOf(
                         "start_time_date" to isoDate,
                         "color" to s.color,
-                        "label" to s.iconLabel.name,
+                        // "label" -> Bỏ vì bảng edited_version dùng icon_id (cần update logic sau)
                         "implementation_time" to s.duration
                     )
                     val ev = repo.insertEditedVersion(editedFields)
@@ -159,4 +170,7 @@ class EditScheduleViewModel(
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }
+    fun clearError() {
+        _state.value = _state.value.copy(errorMessage = null)
+    }
 }
