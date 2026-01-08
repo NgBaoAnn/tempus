@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import io.github.jan.supabase.gotrue.auth
 import com.projectapp.tempus.databinding.FragmentEditScheduleBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -34,7 +36,8 @@ class EditScheduleFragment : Fragment() {
     private val viewModel: EditScheduleViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
+                val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("User not logged in")
                 return EditScheduleViewModel(SupabaseScheduleRepository(), myUserId) as T
             }
         }

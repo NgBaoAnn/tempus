@@ -154,19 +154,156 @@
                 android:scaleType="centerInside" />
         </LinearLayout>
 
+        <!-- ===== INSIGHTS CARD ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInsights"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#F8F9FA"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llChartNav">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Card Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/insights_title"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:fontFamily="@font/inter_semibold" />
+
+                <!-- Average Rate -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/avg_completion"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tvAvgRate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/inter_semibold" />
+                </LinearLayout>
+
+                <!-- Best Day -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📈 Ngày tốt nhất"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tvBestDay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="#4CAF50"
+                        android:fontFamily="@font/inter_semibold" />
+                </LinearLayout>
+
+                <!-- Worst Day -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📉 Ngày cần cải thiện"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tvWorstDay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="#FF5722"
+                        android:fontFamily="@font/inter_semibold" />
+                </LinearLayout>
+
+                <!-- Trend -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/trend_label"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tvTrend"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="@color/black"
+                        android:fontFamily="@font/inter_semibold" />
+                </LinearLayout>
+
+                <!-- Suggestion -->
+                <TextView
+                    android:id="@+id/tvSuggestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_suggestion"
+                    android:text="💡 Gợi ý sẽ hiện ở đây"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/inter_medium" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Category title -->
         <TextView
             android:id="@+id/tvCategoryTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:fontFamily="@font/inter_bold"
             android:text="@string/category_title"
             android:textSize="18sp"
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/llChartNav" />
+            app:layout_constraintTop_toBottomOf="@id/cardInsights" />
 
         <!-- Category list -->
         <androidx.recyclerview.widget.RecyclerView

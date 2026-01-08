@@ -18,6 +18,12 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
+        
+        // 1. Kết nối Navigation
         binding.bottomNavView.setupWithNavController(navController)
+        
+        // 2. ÉP BUỘC hiển thị màu gốc của PNG bằng cách tắt Tint trong code
+        // Việc này giúp icon không bị biến thành màu đen/xám mặc định
+        binding.bottomNavView.itemIconTintList = null
     }
 }

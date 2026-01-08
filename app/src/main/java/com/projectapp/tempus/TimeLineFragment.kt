@@ -15,6 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController // Nhớ Import dòng này
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import io.github.jan.supabase.gotrue.auth
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.databinding.FragmentTimelineBinding
 import com.projectapp.tempus.ui.timeline.TimelineAdapter
@@ -46,7 +48,8 @@ class TimelineFragment : Fragment() {
     private val viewModel: TimelineViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
+                val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("User not logged in")
                 val repo = SupabaseScheduleRepository()
                 return TimelineViewModel(userId = myUserId, repo = repo) as T
             }

@@ -15,7 +15,6 @@ class SupabaseUserRepository(
     override suspend fun getCurrentUser(): User {
         val userId = supabase.auth.currentUserOrNull()?.id
             ?: throw IllegalStateException("User not logged in")
-        //val userId = "cc3b9e4a-dce2-454c-905f-4324134de55f"
 
         val list = supabase.from("users")
             .select {

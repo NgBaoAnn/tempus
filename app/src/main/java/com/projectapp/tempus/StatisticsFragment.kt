@@ -19,6 +19,8 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import io.github.jan.supabase.gotrue.auth
 import com.projectapp.tempus.databinding.FragmentStatisticsBinding
 import com.projectapp.tempus.domain.usecase.GetStatisticsUseCase
 import kotlinx.coroutines.flow.collect
@@ -36,7 +38,8 @@ class StatisticsFragment : Fragment() {
     private val viewModel: StatisticsViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
+                val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("User not logged in")
                 val repo = SupabaseScheduleRepository()
                 val useCase = GetStatisticsUseCase()
                 return StatisticsViewModel(myUserId, repo, useCase) as T
@@ -157,6 +160,27 @@ class StatisticsFragment : Fragment() {
         binding.barChart.invalidate()
 
         topTaskAdapter.updateData(res.topCategories)
+
+        // ===== BIND INSIGHTS DATA =====
+        res.insights?.let { insights ->
+            binding.tvAvgRate.text = String.format("%.1f%%", insights.avgCompletionRate)
+            
+            binding.tvBestDay.text = insights.bestDay?.let { 
+                "${it.first} (${String.format("%.0f", it.second)}%)" 
+            } ?: "--"
+            
+            binding.tvWorstDay.text = insights.worstDay?.let { 
+                "${it.first} (${String.format("%.0f", it.second)}%)" 
+            } ?: "--"
+            
+            binding.tvTrend.text = when (insights.trend) {
+                com.projectapp.tempus.domain.usecase.TrendType.UP -> "📈 Đang tăng"
+                com.projectapp.tempus.domain.usecase.TrendType.DOWN -> "📉 Đang giảm"
+                com.projectapp.tempus.domain.usecase.TrendType.STABLE -> "➡️ Ổn định"
+            }
+            
+            binding.tvSuggestion.text = "💡 ${insights.suggestion}"
+        }
     }
 
     private fun setupBarChart() {
