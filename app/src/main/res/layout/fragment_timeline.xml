@@ -7,18 +7,34 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <TextView
-        android:id="@+id/tvMonth"
+    <LinearLayout
+        android:id="@+id/btnMonthPicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="thg 11 2025"
-        android:textColor="#2196F3"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:background="@drawable/bg_month_pill"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="thg 11 2025"
+            android:textColor="#2196F3"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="6dp"
+            android:src="@drawable/ic_unfold_more"
+            app:tint="#2196F3"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/btnAdd"
@@ -27,9 +43,9 @@
         android:layout_marginEnd="16dp"
         android:src="@drawable/add"
         app:tint="#2196F3"
-        app:layout_constraintBottom_toBottomOf="@id/tvMonth"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvMonth" />
+        app:layout_constraintTop_toTopOf="@id/btnMonthPicker"
+        app:layout_constraintBottom_toBottomOf="@id/btnMonthPicker" />
 
     <ImageView
         android:id="@+id/btnInbox"
@@ -38,9 +54,40 @@
         android:layout_marginEnd="16dp"
         android:src="@drawable/inbox"
         app:tint="#2196F3"
-        app:layout_constraintBottom_toBottomOf="@id/btnAdd"
         app:layout_constraintEnd_toStartOf="@id/btnAdd"
-        app:layout_constraintTop_toTopOf="@id/btnAdd" />
+        app:layout_constraintTop_toTopOf="@id/btnAdd"
+        app:layout_constraintBottom_toBottomOf="@id/btnAdd" />
+    <LinearLayout
+        android:id="@+id/layoutWeekHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/btnMonthPicker">
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T2" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T3" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T4" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T5" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T6" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="T7" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:gravity="center" android:text="CN" android:textColor="#9E9E9E" android:textSize="13sp"/>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCalendar"
@@ -48,18 +95,15 @@
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
         android:paddingBottom="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tvMonth"
+        app:layout_constraintTop_toBottomOf="@id/layoutWeekHeader"
         tools:listitem="@layout/item_calendar_day" />
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTimeline"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rvCalendar"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_timeline_block" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

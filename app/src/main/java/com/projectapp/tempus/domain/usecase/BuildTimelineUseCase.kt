@@ -1,5 +1,6 @@
 package com.projectapp.tempus.domain.usecase
 
+import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleItemRow
 import com.projectapp.tempus.data.schedule.dto.ScheduleRow
@@ -79,43 +80,35 @@ class BuildTimelineUseCase {
         return schedules.asSequence()
             .filter { occursOnDate(it) }
             .mapNotNull { s ->
-                val it = itemsByTask[s.id]
-                val status = it?.status ?: StatusType.planned
-
-                // Nếu status là 'delete' -> Bỏ qua, không hiển thị
+                val item = itemsByTask[s.id]
+                val status = item?.status ?: StatusType.planned
                 if (status == StatusType.delete) return@mapNotNull null
 
-                // Lấy bản sửa đổi (nếu có)
-                val ev = it?.editedVersion?.let { id -> editedVersions[id] }
+                val ev = item?.editedVersion?.let { editedVersions[it] }
 
-                // --- XỬ LÝ TIMEZONE ---
+                // ----- label safe (UNKNOWN fallback) -----
+                val lbEnum = ScheduleLabel.fromDb(ev?.label ?: s.label)
+                val labelStr = if (lbEnum == ScheduleLabel.UNKNOWN) "book" else lbEnum.name
+
+                // ----- color -----
+                val colorStr = (ev?.color ?: s.color) ?: "#808080"
+
+                // ----- start time -----
                 val sourceIso = ev?.startTimeDate ?: s.startTimeDate
-
-                // B1: Parse chuỗi UTC từ DB
                 val utcTime = parseToZonedDateTime(sourceIso)
-
-                // B2: Chuyển sang giờ điện thoại (VD: +00 -> +07)
                 val localZonedTime = utcTime.withZoneSameInstant(systemZone)
-
-                // B3: Ghép giờ đó vào ngày đang chọn (targetDate) để hiển thị trên Timeline
                 val uiStartTime = LocalDateTime.of(targetDate, localZonedTime.toLocalTime())
 
-                // --- XỬ LÝ DURATION ---
+                // ----- duration -----
                 val durationStr = ev?.implementationTime ?: s.implementationTime
                 val uiDuration = parseDuration(durationStr)
 
                 TimelineBlock(
                     taskId = s.id,
-                    scheduleItemId = it?.id,
+                    scheduleItemId = item?.id,
                     title = s.name,
-
-                    // Logic Label: Bản sửa -> Bản gốc -> Mặc định
-                    label = (ev?.label ?: s.label)?.name ?: "book",
-
-                    // Logic Color: Bản sửa -> Bản gốc -> Mặc định xám
-                    color = (ev?.color ?: s.color) ?: "#808080",
-
-                    // Dữ liệu đã chuẩn hóa cho UI
+                    label = labelStr,
+                    color = colorStr,
                     startTime = uiStartTime,
                     duration = uiDuration,
                     status = status

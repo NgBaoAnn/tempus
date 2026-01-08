@@ -1,10 +1,11 @@
-package com.projectapp.tempus
+package com.projectapp.tempus.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -16,11 +17,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.projectapp.tempus.MainActivity
+import com.projectapp.tempus.R
+import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.auth.AuthService
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.HttpException
 
 class LoginActivity : AppCompatActivity() {
 
@@ -35,7 +37,6 @@ class LoginActivity : AppCompatActivity() {
     private var isPasswordVisible = false
 
     private lateinit var authService: AuthService
-    private lateinit var sessionStore: SecureSessionStore
 
 
 
@@ -50,7 +51,6 @@ class LoginActivity : AppCompatActivity() {
         }
         addControls()
         initAuthService()
-        initSessionStore()
         addEvents()
     }
 
@@ -75,32 +75,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initAuthService() {
 
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(
-                SupabaseAnonInterceptor(BuildConfig.SUPABASE_KEY)
-            )
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            )
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.SUPABASE_URL + "/")
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val authApi = retrofit.create(SupabaseAuthApi::class.java)
-
         authService = AuthService(
-            api = authApi
+            supabaseClient = SupabaseClientProvider.client,
         )
-    }
-
-    private fun initSessionStore() {
-        sessionStore = SecureSessionStore(this)
     }
 
     private fun addEvents() {
@@ -140,16 +117,16 @@ class LoginActivity : AppCompatActivity() {
                     password = password
                 )
 
-                sessionStore.saveSession(
-                    accessToken = res.access_token,
-                    refreshToken = res.refresh_token,
-                    expiresIn = res.expires_in
-                )
+//                sessionStore.saveSession(
+//                    accessToken = res.access_token,
+//                    refreshToken = res.refresh_token,
+//                    expiresIn = res.expires_in
+//                )
 
-                Log.d(
-                    "LoginActivity",
-                    "LOGIN OK: userId=${res.user.id}, email=${res.user.email}"
-                )
+//                Log.d(
+//                    "LoginActivity",
+//                    "LOGIN OK: userId=${res.user.id}, email=${res.user.email}"
+//                )
 
                 Toast.makeText(
                     this@LoginActivity,
@@ -161,7 +138,7 @@ class LoginActivity : AppCompatActivity() {
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
 
-            } catch (e: retrofit2.HttpException) {
+            } catch (e: HttpException) {
 
                 val errorBody = e.response()?.errorBody()?.string()
                 Log.e("LoginActivity", "HTTP ${e.code()} | $errorBody", e)
@@ -195,7 +172,7 @@ class LoginActivity : AppCompatActivity() {
             return false
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -250,7 +227,7 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }

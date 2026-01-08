@@ -12,6 +12,9 @@ import com.projectapp.tempus.domain.model.TimelineBlock
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.YearMonth
+import java.time.DayOfWeek
+import java.time.ZoneId
 
 data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
@@ -21,6 +24,7 @@ data class TimelineUiState(
 )
 
 class TimelineViewModel(
+    private var cachedSchedules: List<com.projectapp.tempus.data.schedule.dto.ScheduleRow> = emptyList(),
     private val userId: String,
     private val repo: ScheduleRepository,
     private val builder: BuildTimelineUseCase = BuildTimelineUseCase()
@@ -167,5 +171,77 @@ class TimelineViewModel(
                 )
             }
         }
+    }
+
+    fun setCurrentWeekForHeader(anyDayInWeek: LocalDate) {
+        _ui.value = _ui.value.copy(date = anyDayInWeek)
+    }
+
+    suspend fun getMonthIcons(ym: YearMonth): Map<java.time.LocalDate, List<String>> {
+        if (cachedSchedules.isEmpty()) {
+            cachedSchedules = repo.getAllSchedules(userId)
+        }
+
+        val days = (1..ym.lengthOfMonth()).map { ym.atDay(it) }
+        val dateStrs = days.map { it.toString() }
+        val taskIds = cachedSchedules.map { it.id }
+
+        // 1) load schedule_items của cả tháng cho các task
+        val items = repo.getScheduleItemsByDates(dateStrs, taskIds)
+
+        // 2) map (date|taskId) -> item
+        val itemByKey = items.associateBy { it.date + "|" + it.taskId }
+
+        // 3) collect edited_version ids -> fetch edited_versions -> map id -> row
+        val editedIds = items.mapNotNull { it.editedVersion }.distinct()
+        val editedMap = if (editedIds.isNotEmpty()) {
+            repo.getEditedVersions(editedIds).associateBy { it.id }   // ✅ dùng hàm sẵn có của bạn
+        } else emptyMap()
+
+        fun occursOnDate(s: com.projectapp.tempus.data.schedule.dto.ScheduleRow, d: java.time.LocalDate): Boolean {
+            val startZdt = try {
+                OffsetDateTime.parse(s.startTimeDate.replace(" ", "T"))
+                    .atZoneSameInstant(ZoneId.systemDefault())
+            } catch (_: Exception) {
+                // fallback: nếu format lạ
+                java.time.LocalDate.parse(s.startTimeDate.split(" ")[0]).atStartOfDay(ZoneId.systemDefault())
+            }
+            val startDate = startZdt.toLocalDate()
+
+            return when (s.repeat) {
+                com.projectapp.tempus.data.schedule.dto.RepeatType.once -> d == startDate
+                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> !d.isBefore(startDate)
+                com.projectapp.tempus.data.schedule.dto.RepeatType.weekly ->
+                    !d.isBefore(startDate) && d.dayOfWeek == startDate.dayOfWeek
+                com.projectapp.tempus.data.schedule.dto.RepeatType.monthly ->
+                    !d.isBefore(startDate) && d.dayOfMonth == startDate.dayOfMonth
+            }
+        }
+
+        val res = HashMap<java.time.LocalDate, MutableList<String>>()
+
+        for (d in days) {
+            val list = ArrayList<String>()
+
+            for (s in cachedSchedules) {
+                if (!occursOnDate(s, d)) continue
+
+                val key = d.toString() + "|" + s.id
+                val item = itemByKey[key]
+
+                // delete => ẩn khỏi lịch
+                if (item?.status == StatusType.delete) continue
+
+                // ✅ icon label: edited_version (nếu có) > schedule gốc > book
+                val evLabel = item?.editedVersion?.let { editedMap[it]?.label }
+                val labelStr = (evLabel ?: s.label) ?: "book"
+
+                list.add(labelStr)
+            }
+
+            res[d] = list
+        }
+
+        return res
     }
 }

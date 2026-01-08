@@ -22,14 +22,23 @@ import com.projectapp.tempus.ui.timeline.TimelineViewModel
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import com.projectapp.tempus.ui.timeline.CalendarDayAdapter
+import com.projectapp.tempus.ui.timeline.WeekAdapter
 import java.time.DayOfWeek
 import java.time.LocalDate
+import android.app.DatePickerDialog
+import androidx.recyclerview.widget.RecyclerView
+import android.view.MotionEvent
+import androidx.recyclerview.widget.PagerSnapHelper
+import com.projectapp.tempus.ui.timeline.WeekItem
+import com.projectapp.tempus.ui.timeline.MonthCalendarDialogFragment
+import java.time.YearMonth
 
 class TimelineFragment : Fragment() {
 
     private var _binding: FragmentTimelineBinding? = null
-    private lateinit var calAdapter: CalendarDayAdapter
+    private lateinit var weekAdapter: WeekAdapter
+    private var lastWeekStart: LocalDate? = null
+    private var pendingJumpWeekStart: LocalDate? = null
 
     private val binding get() = _binding!!
 
@@ -56,12 +65,34 @@ class TimelineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // --- 1. SETUP CALENDAR (7 ngày trong tuần) ---
-        val calAdapter = CalendarDayAdapter { picked ->
-            viewModel.onSelectDate(picked)
+        weekAdapter = WeekAdapter { pickedDate ->
+            viewModel.onSelectDate(pickedDate)
         }
-        binding.rvCalendar.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvCalendar.adapter = calAdapter
+
+        binding.rvCalendar.apply {
+            adapter = weekAdapter
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
+        }
+
+        PagerSnapHelper().attachToRecyclerView(binding.rvCalendar)
+        binding.rvCalendar.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(rv: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val lm = rv.layoutManager as LinearLayoutManager
+                    val pos = lm.findFirstCompletelyVisibleItemPosition()
+                    if (pos != RecyclerView.NO_POSITION) {
+                        val weekStart = buildWeeksAround(viewModel.ui.value.date)[pos].days.first()
+                        // ✅ chỉ đổi header tháng/năm, không chọn ngày
+                        // cách đơn giản: set date = giữa tuần để format tháng
+                        viewModel.setCurrentWeekForHeader(weekStart.plusDays(3))
+                    }
+                }
+            }
+        })
 
         // --- 2. SETUP ADAPTER ---
         val adapter = TimelineAdapter(
@@ -88,21 +119,48 @@ class TimelineFragment : Fragment() {
         // --- 3. QUAN SÁT DỮ LIỆU TỪ VIEWMODEL ---
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.ui.collect { state ->
-                // Cập nhật list cho Adapter
+
                 adapter.submitList(state.blocks)
 
-                // Cập nhật ngày tháng trên Header
-                val formatter = DateTimeFormatter.ofPattern("'thg' MM yyyy", Locale("vi", "VN"))
+                val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
                 binding.tvMonth.text = state.date.format(formatter)
 
-                calAdapter.submit(buildWeek(state.date), state.date)
+                val weeks = buildWeeksAround(state.date)
+                weekAdapter.submit(weeks, state.date)
 
-                // Hiển thị Lỗi
+                val currentWeekStart = state.date.with(DayOfWeek.MONDAY)
+
+                // ✅ CHỈ scroll khi:
+                // - lần đầu vào
+                // - đổi tuần (vuốt qua tuần khác)
+                // - hoặc user vừa chọn tháng/năm (pendingJumpWeekStart != null)
+                val shouldScroll =
+                    (lastWeekStart == null) ||
+                            (currentWeekStart != lastWeekStart) ||
+                            (pendingJumpWeekStart != null)
+
+                if (shouldScroll) {
+                    val targetWeekStart = pendingJumpWeekStart ?: currentWeekStart
+
+                    val idx = weeks.indexOfFirst { w ->
+                        w.days.first().with(DayOfWeek.MONDAY) == targetWeekStart
+                    }
+
+                    if (idx != -1) {
+                        binding.rvCalendar.scrollToPosition(idx)
+                    }
+
+                    pendingJumpWeekStart = null
+                }
+
+                lastWeekStart = currentWeekStart
+
                 if (state.error != null) {
                     Toast.makeText(requireContext(), state.error, Toast.LENGTH_LONG).show()
                 }
             }
         }
+
 
         // --- 4. XỬ LÝ NÚT ADD (DẤU CỘNG) ---
         binding.btnAdd.setOnClickListener {
@@ -111,14 +169,43 @@ class TimelineFragment : Fragment() {
             findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment)
         }
 
+        binding.btnMonthPicker.setOnClickListener {
+            val init = viewModel.ui.value.date
+
+            lateinit var dialog: MonthCalendarDialogFragment
+
+            dialog = MonthCalendarDialogFragment(
+                initialDate = init,
+                onPick = { d: LocalDate ->
+                    viewModel.onSelectDate(d)
+                },
+                onMonthChange = { ym: YearMonth ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        val map = viewModel.getMonthIcons(ym)
+                        dialog.setMonthData(ym, map)
+                    }
+                }
+            )
+
+            dialog.show(parentFragmentManager, "month_calendar")
+        }
+
+
         // Load dữ liệu khi vào màn hình
         viewModel.onRefresh()
     }
 
-    private fun buildWeek(selected: LocalDate): List<LocalDate> {
-        val start = selected.with(DayOfWeek.MONDAY)
-        return (0..6).map { start.plusDays(it.toLong()) }
+    private fun buildWeeksAround(center: LocalDate): List<WeekItem> {
+        val start = center.with(DayOfWeek.MONDAY)
+
+        return (-4..4).map { offset ->
+            val weekStart = start.plusWeeks(offset.toLong())
+            WeekItem(
+                days = (0..6).map { weekStart.plusDays(it.toLong()) }
+            )
+        }
     }
+
 
     // Thêm hàm onResume để khi quay lại từ màn Edit thì reload lại danh sách
     override fun onResume() {

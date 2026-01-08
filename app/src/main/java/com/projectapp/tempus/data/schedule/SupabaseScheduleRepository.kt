@@ -197,4 +197,18 @@ class SupabaseScheduleRepository : ScheduleRepository {
                 filter { eq("id", id) }
             }
     }
+
+    override suspend fun getScheduleItemsByDates(dates: List<String>, taskIds: List<String>): List<ScheduleItemRow> {
+        if (dates.isEmpty() || taskIds.isEmpty()) return emptyList()
+
+        return supabase.from("schedule_items")
+            .select {
+                filter {
+                    isIn("date", dates)
+                    isIn("task_id", taskIds)
+                }
+            }
+            .decodeList()
+    }
+
 }
