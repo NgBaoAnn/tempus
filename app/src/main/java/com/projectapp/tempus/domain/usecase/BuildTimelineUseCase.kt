@@ -87,7 +87,7 @@ class BuildTimelineUseCase {
                 val ev = item?.editedVersion?.let { editedVersions[it] }
 
                 // ----- label safe (UNKNOWN fallback) -----
-                val lbEnum = ScheduleLabel.fromDb(ev?.label ?: s.label)
+                val lbEnum = ScheduleLabel.fromDb(ev?.label ?: s.label?.name)
                 val labelStr = if (lbEnum == ScheduleLabel.UNKNOWN) "book" else lbEnum.name
 
                 // ----- color -----

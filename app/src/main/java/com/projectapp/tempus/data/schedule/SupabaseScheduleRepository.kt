@@ -44,6 +44,18 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeList()
     }
 
+    override suspend fun getScheduleItemsByDates(dates: List<String>, taskIds: List<String>): List<ScheduleItemRow> {
+        if (taskIds.isEmpty() || dates.isEmpty()) return emptyList()
+        return supabase.from("schedule_items")
+            .select {
+                filter {
+                    isIn("date", dates)
+                    isIn("task_id", taskIds)
+                }
+            }
+            .decodeList()
+    }
+
     override suspend fun getScheduleById(id: String): ScheduleRow? {
         return supabase.from("schedule")
             .select {
@@ -197,18 +209,4 @@ class SupabaseScheduleRepository : ScheduleRepository {
                 filter { eq("id", id) }
             }
     }
-
-    override suspend fun getScheduleItemsByDates(dates: List<String>, taskIds: List<String>): List<ScheduleItemRow> {
-        if (dates.isEmpty() || taskIds.isEmpty()) return emptyList()
-
-        return supabase.from("schedule_items")
-            .select {
-                filter {
-                    isIn("date", dates)
-                    isIn("task_id", taskIds)
-                }
-            }
-            .decodeList()
-    }
-
 }

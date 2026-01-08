@@ -234,7 +234,7 @@ class TimelineViewModel(
 
                 // ✅ icon label: edited_version (nếu có) > schedule gốc > book
                 val evLabel = item?.editedVersion?.let { editedMap[it]?.label }
-                val labelStr = (evLabel ?: s.label) ?: "book"
+                val labelStr = (evLabel ?: s.label?.name) ?: "book"
 
                 list.add(labelStr)
             }
