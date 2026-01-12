@@ -12,6 +12,7 @@ import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.databinding.FragmentSettingsBinding
 import com.projectapp.tempus.ui.auth.LoginActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
+import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
 import io.github.jan.supabase.gotrue.auth
 
@@ -69,8 +70,8 @@ class SettingsFragment : Fragment() {
     private fun setupClickListeners() {
         // Thẻ thông tin cá nhân (Profile)
         binding.cardProfile.setOnClickListener {
-            // TODO: Mở màn hình chỉnh sửa Profile (ProfileActivity)
-            Toast.makeText(requireContext(), "Mở Profile", Toast.LENGTH_SHORT).show()
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
         }
 
         // THẺ CÁ NHÂN HÓA (Mở PersonalizationActivity)

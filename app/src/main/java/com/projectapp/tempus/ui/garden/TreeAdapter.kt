@@ -15,9 +15,11 @@ import com.projectapp.tempus.domain.model.TreeType
 
 /**
  * Adapter cho RecyclerView hiển thị danh sách cây
+ * Hỗ trợ click và long-click events
  */
 class TreeAdapter(
-    private val onTreeClick: (TreeEntity) -> Unit
+    private val onClick: (TreeEntity) -> Unit,
+    private val onLongClick: ((TreeEntity) -> Unit)? = null
 ) : ListAdapter<TreeEntity, TreeAdapter.TreeViewHolder>(TreeDiffCallback()) {
 
     private val treeCalculator = TreeGrowthCalculator()
@@ -71,14 +73,22 @@ class TreeAdapter(
             }
 
             // Click listener
-            itemView.setOnClickListener { onTreeClick(tree) }
+            itemView.setOnClickListener { onClick(tree) }
+            
+            // Long click listener for delete
+            onLongClick?.let { callback ->
+                itemView.setOnLongClickListener { 
+                    callback(tree)
+                    true 
+                }
+            }
 
             // Animation on bind
             itemView.alpha = 0f
             itemView.animate()
                 .alpha(1f)
                 .setDuration(300)
-                .setStartDelay((adapterPosition * 50).toLong())
+                .setStartDelay((bindingAdapterPosition * 50).toLong())
                 .start()
         }
 

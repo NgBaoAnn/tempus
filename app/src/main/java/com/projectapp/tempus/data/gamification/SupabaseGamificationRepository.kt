@@ -196,6 +196,29 @@ class SupabaseGamificationRepository(
         }
     }
     
+    /**
+     * Get alive trees once (no polling) - for immediate refresh
+     */
+    suspend fun getAliveTreesOnce(): List<TreeEntity> {
+        val userId = getCurrentUserId() ?: return emptyList()
+        
+        return try {
+            supabase.from("trees")
+                .select {
+                    filter {
+                        eq("user_id", userId)
+                        eq("is_alive", true)
+                    }
+                    order("created_at", Order.DESCENDING)
+                }
+                .decodeList<TreeDto>()
+                .map { it.toEntity() }
+        } catch (e: Exception) {
+            android.util.Log.e("GamificationRepo", "Error getting alive trees once: ${e.message}")
+            emptyList()
+        }
+    }
+    
     override fun getAllTrees(): Flow<List<TreeEntity>> = flow {
         while (true) {
             val userId = getCurrentUserId()

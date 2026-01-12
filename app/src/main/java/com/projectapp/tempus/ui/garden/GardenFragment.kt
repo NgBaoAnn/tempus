@@ -12,6 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.databinding.FragmentGardenBinding
+import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
 import com.projectapp.tempus.domain.usecase.PointsManager
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +20,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Fragment hiển thị vườn cây của người dùng
+ * Enhanced với Stats Summary, Pull-to-Refresh, và Delete Tree
  */
 class GardenFragment : Fragment() {
 
@@ -27,6 +29,11 @@ class GardenFragment : Fragment() {
     
     private lateinit var pointsManager: PointsManager
     private lateinit var treeAdapter: TreeAdapter
+    
+    // Stats tracking
+    private var totalTrees = 0
+    private var matureTrees = 0
+    private var totalInvested = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +52,7 @@ class GardenFragment : Fragment() {
         pointsManager = PointsManager(repository)
         
         setupRecyclerView()
+        setupSwipeRefresh()
         setupFab()
         observeData()
         
@@ -55,13 +63,34 @@ class GardenFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        treeAdapter = TreeAdapter { tree ->
-            showTreeDetails(tree)
-        }
+        treeAdapter = TreeAdapter(
+            onClick = { tree -> showTreeDetails(tree) },
+            onLongClick = { tree -> showDeleteDialog(tree) }
+        )
         
         binding.rvTrees.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = treeAdapter
+        }
+    }
+    
+    private fun setupSwipeRefresh() {
+        binding.swipeRefresh.setColorSchemeColors(
+            resources.getColor(android.R.color.holo_green_dark, null)
+        )
+        binding.swipeRefresh.setOnRefreshListener {
+            refreshData()
+        }
+    }
+    
+    private fun refreshData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                pointsManager.checkAndUpdateDeadTrees()
+                // Data will auto-update via Flow observers
+            } finally {
+                binding.swipeRefresh.isRefreshing = false
+            }
         }
     }
     
@@ -82,10 +111,11 @@ class GardenFragment : Fragment() {
             }
         }
         
-        // Observe trees
+        // Observe trees and update stats
         viewLifecycleOwner.lifecycleScope.launch {
             pointsManager.getAliveTrees().collectLatest { trees ->
                 treeAdapter.submitList(trees)
+                updateStats(trees)
                 
                 // Show/hide empty state
                 if (trees.isEmpty()) {
@@ -97,6 +127,18 @@ class GardenFragment : Fragment() {
                 }
             }
         }
+    }
+    
+    private fun updateStats(trees: List<TreeEntity>) {
+        totalTrees = trees.size
+        matureTrees = trees.count { 
+            TreeState.fromString(it.state) == TreeState.TREE 
+        }
+        totalInvested = trees.sumOf { it.investedPoints }
+        
+        binding.tvTotalTrees.text = totalTrees.toString()
+        binding.tvMatureTrees.text = matureTrees.toString()
+        binding.tvInvestedPoints.text = totalInvested.toString()
     }
     
     private fun showPlantTreeDialog() {
@@ -166,10 +208,10 @@ class GardenFragment : Fragment() {
                     append("📈 Tiến độ: ${info.progressPercent.toInt()}%\n")
                     
                     info.pointsToNextLevel?.let { points ->
-                        append("⬆️ Cần ${points} điểm để lên level\n")
+                        append("⬆️ Cần $points điểm để lên level\n")
                     }
                     
-                    if (info.entity.isAlive && info.state != com.projectapp.tempus.domain.model.TreeState.TREE) {
+                    if (info.entity.isAlive && info.state != TreeState.TREE) {
                         append("⏰ Còn ${info.daysUntilDeath} ngày trước khi héo")
                     }
                 }
@@ -180,8 +222,43 @@ class GardenFragment : Fragment() {
                     .setPositiveButton("Tưới cây (10 điểm)") { _, _ ->
                         waterTree(tree.id)
                     }
+                    .setNeutralButton("Xóa cây") { _, _ ->
+                        showDeleteDialog(tree)
+                    }
                     .setNegativeButton("Đóng", null)
                     .show()
+            }
+        }
+    }
+    
+    private fun showDeleteDialog(tree: TreeEntity) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("🗑️ Xóa cây?")
+            .setMessage("Bạn có chắc muốn xóa \"${tree.name}\"?\n\nHành động này không thể hoàn tác và bạn sẽ mất ${tree.investedPoints} điểm đã đầu tư.")
+            .setPositiveButton("Xóa") { _, _ ->
+                deleteTree(tree)
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }
+    
+    private fun deleteTree(tree: TreeEntity) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val repository = SupabaseGamificationRepository()
+                repository.killTree(tree.id)
+                
+                Toast.makeText(
+                    requireContext(),
+                    "Đã xóa ${tree.name}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Lỗi xóa cây: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -197,12 +274,36 @@ class GardenFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
                 binding.pointsDisplay.showEarnedPoints(-10)
+                
+                // Force refresh to update progress bar immediately
+                forceRefreshTrees()
             } else {
                 Toast.makeText(
                     requireContext(),
                     "Không đủ điểm để tưới cây!",
                     Toast.LENGTH_SHORT
                 ).show()
+            }
+        }
+    }
+    
+    /**
+     * Force refresh tree list from database
+     */
+    private fun forceRefreshTrees() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val repository = SupabaseGamificationRepository()
+                val freshTrees = repository.getAliveTreesOnce()
+                
+                // Force adapter to update by clearing and resubmitting
+                // Need to create a new list to trigger DiffUtil
+                treeAdapter.submitList(null)
+                treeAdapter.submitList(freshTrees.toList())
+                
+                updateStats(freshTrees)
+            } catch (e: Exception) {
+                android.util.Log.e("GardenFragment", "Error refreshing: ${e.message}")
             }
         }
     }
