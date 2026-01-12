@@ -1,21 +1,37 @@
 package com.projectapp.tempus.ui.setting
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.projectapp.tempus.R
+import com.projectapp.tempus.MainActivity
+import com.projectapp.tempus.ui.setting.profile.ProfileScreen
+import com.projectapp.tempus.ui.theme.TempusTheme
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_profile)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        
+        setContent {
+            TempusTheme {
+                ProfileScreen(
+                    onNavigateToGarden = {
+                        // Navigate to MainActivity with Garden tab selected
+                        val intent = Intent(this, MainActivity::class.java).apply {
+                            putExtra("navigate_to", "garden")
+                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        }
+                        startActivity(intent)
+                        finish()
+                    },
+                    onBack = {
+                        finish()
+                    }
+                )
+            }
         }
     }
 }
