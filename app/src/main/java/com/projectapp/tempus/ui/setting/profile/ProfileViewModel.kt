@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
+import com.projectapp.tempus.data.user.SupabaseUserRepository
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ data class ProfileUiState(
     val currentStreak: Int = 0,
     val treeCount: Int = 0,
     val memberSince: String = "",
+    val avatarUrl: String? = null,
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val error: String? = null,
@@ -31,6 +33,7 @@ class ProfileViewModel : ViewModel() {
     
     private val supabase = SupabaseClientProvider.client
     private val gamificationRepo = SupabaseGamificationRepository()
+    private val userRepository = SupabaseUserRepository()
     
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -44,18 +47,20 @@ class ProfileViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             try {
-                // Get current user from Supabase Auth
-                val user = supabase.auth.currentUserOrNull()
+                // Get current user from Supabase Auth for auth check
+                val authUser = supabase.auth.currentUserOrNull()
                 
-                if (user == null) {
+                if (authUser == null) {
                     _uiState.update { it.copy(isLoading = false, error = "Chưa đăng nhập") }
                     return@launch
                 }
                 
-                // Extract email and full_name from user metadata
-                val email = user.email ?: ""
-                val fullName = user.userMetadata?.get("full_name")?.jsonPrimitive?.content ?: ""
-                val createdAt = user.createdAt?.toString()?.take(10) ?: ""
+                val email = authUser.email ?: ""
+                
+                // Fetch full user details from Repository (public.users table)
+                val dbUser = userRepository.getCurrentUser()
+                
+                val createdAt = authUser.createdAt?.toString()?.take(10) ?: ""
                 
                 // Get gamification data
                 val userPoints = gamificationRepo.getUserPointsOnce()
@@ -65,11 +70,12 @@ class ProfileViewModel : ViewModel() {
                     it.copy(
                         isLoading = false,
                         email = email,
-                        fullName = fullName,
+                        fullName = dbUser.username, // Load from DB
                         totalPoints = userPoints?.totalPoints ?: 0,
                         currentStreak = userPoints?.currentStreak ?: 0,
                         treeCount = treeCount,
-                        memberSince = formatDate(createdAt)
+                        memberSince = formatDate(createdAt),
+                        avatarUrl = dbUser.avatar
                     )
                 }
             } catch (e: Exception) {
@@ -85,10 +91,11 @@ class ProfileViewModel : ViewModel() {
             _uiState.update { it.copy(isSaving = true, saveSuccess = false, error = null) }
             
             try {
-                // Update user metadata in Supabase using modifyUser
-                supabase.auth.modifyUser {
-                    data = JsonObject(mapOf("full_name" to JsonPrimitive(newName)))
-                }
+                // Get current DB user first
+                val currentUser = userRepository.getCurrentUser()
+                // Update username in DB
+                val updatedUser = currentUser.copy(username = newName)
+                userRepository.updateUser(updatedUser)
                 
                 _uiState.update { 
                     it.copy(
@@ -118,6 +125,30 @@ class ProfileViewModel : ViewModel() {
             } else isoDate
         } catch (e: Exception) {
             isoDate
+        }
+    }
+    fun uploadAvatar(byteArray: ByteArray) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, saveSuccess = false, error = null) }
+            
+            try {
+                // Upload avatar and update user profile
+                userRepository.uploadAvatar(byteArray)
+                
+                // Refresh profile to show new avatar
+                loadProfile()
+                
+                _uiState.update { 
+                    it.copy(
+                        isSaving = false, 
+                        saveSuccess = true
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { 
+                    it.copy(isSaving = false, error = "Lỗi upload ảnh: ${e.message}") 
+                }
+            }
         }
     }
 }

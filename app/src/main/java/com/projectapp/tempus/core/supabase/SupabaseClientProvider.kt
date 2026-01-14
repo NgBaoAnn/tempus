@@ -4,6 +4,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.SettingsSessionManager
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
 import io.ktor.websocket.WebSocketDeflateExtension.Companion.install
 
 object SupabaseClientProvider {
@@ -20,5 +21,6 @@ object SupabaseClientProvider {
             sessionManager = SettingsSessionManager()
         }
         install(Postgrest)
+        install(Storage)
     }
 }

@@ -15,6 +15,7 @@ import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
 import io.github.jan.supabase.gotrue.auth
+import coil.load
 
 
 class SettingsFragment : Fragment() {
@@ -60,11 +61,26 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 binding.tvUserName.text = user.username
                 binding.tvUserEmail.text = user.email
+                
+                // Load Avatar
+                binding.imgAvatar.load(user.avatar) {
+                    crossfade(true)
+                    placeholder(R.drawable.ic_personal) // Make sure this drawable exists or use a default
+                    error(R.drawable.ic_personal)
+                    fallback(R.drawable.ic_personal)
+                }
             }
         }
 
         // 2. Thiết lập các sự kiện Click
         setupClickListeners()
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        if (isLoggedIn) {
+            viewModel.loadUser()
+        }
     }
 
     private fun setupClickListeners() {

@@ -18,7 +18,13 @@ class SettingsViewModel : ViewModel() {
 
     fun loadUser() {
         viewModelScope.launch {
-            _user.value = getUser()
+            try {
+                _user.value = getUser()
+            } catch (e: Exception) {
+                // Log error or set error state
+                // For now, prevent crash
+                e.printStackTrace()
+            }
         }
     }
 

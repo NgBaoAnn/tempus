@@ -7,7 +7,7 @@ import com.projectapp.tempus.domain.user.model.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
-
+import io.github.jan.supabase.storage.storage
 
 class SupabaseUserRepository(
     private val supabase: SupabaseClient = SupabaseClientProvider.client
@@ -25,7 +25,8 @@ class SupabaseUserRepository(
             }
             .decodeList<UserDto>()
 
-        return list.first().toDomain()
+        val userDto = list.firstOrNull() ?: throw IllegalStateException("User data not found in database")
+        return userDto.toDomain()
     }
 
     override suspend fun updateUser(user: User) {
@@ -42,5 +43,27 @@ class SupabaseUserRepository(
                     eq("id", user.id)
                 }
             }
+    }
+
+    override suspend fun uploadAvatar(byteArray: ByteArray): String {
+        val userId = supabase.auth.currentUserOrNull()?.id
+            ?: throw IllegalStateException("User not logged in")
+
+        // Use a unique name to avoid caching issues or collisions
+        val fileName = "$userId/${System.currentTimeMillis()}.jpg"
+        val bucket = supabase.storage.from("avatars")
+
+        // Upload file
+        bucket.upload(fileName, byteArray)
+
+        // Get public URL
+        val publicUrl = bucket.publicUrl(fileName)
+
+        // Update user profile with new avatar URL
+        val user = getCurrentUser()
+        val updatedUser = user.copy(avatar = publicUrl)
+        updateUser(updatedUser)
+
+        return publicUrl
     }
 }
