@@ -30,6 +30,7 @@ object ChatColors {
     // Accent (Sky)
     val Accent = Color(0xFF0369A1)         // Sky 700
     val AccentLight = Color(0xFF0EA5E9)    // Sky 500
+    val OnAccent = Color(0xFFFFFFFF)       // White (for text on accent)
     
     // Background & Surface
     val Background = Color(0xFFF8FAFC)     // Slate 50
