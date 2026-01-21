@@ -95,4 +95,7 @@ dependencies {
 
     // Lottie Animations for Tree Growth
     implementation("com.airbnb.android:lottie:6.3.0")
+
+    // Biometric for secure delete
+    implementation("androidx.biometric:biometric:1.1.0")
 }

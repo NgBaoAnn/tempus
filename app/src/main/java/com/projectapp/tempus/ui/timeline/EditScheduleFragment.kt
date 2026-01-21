@@ -23,6 +23,7 @@ import java.util.Locale
 import androidx.appcompat.app.AlertDialog
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
+import io.github.jan.supabase.gotrue.auth
 
 
 class EditScheduleFragment : Fragment() {
@@ -33,8 +34,9 @@ class EditScheduleFragment : Fragment() {
     private val viewModel: EditScheduleViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
-                return EditScheduleViewModel(SupabaseScheduleRepository(), myUserId) as T
+                val currentUserId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                    .auth.currentSessionOrNull()?.user?.id ?: ""
+                return EditScheduleViewModel(SupabaseScheduleRepository(), currentUserId) as T
             }
         }
     }
