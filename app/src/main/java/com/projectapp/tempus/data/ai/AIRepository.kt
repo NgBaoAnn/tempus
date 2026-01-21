@@ -6,6 +6,7 @@ import com.projectapp.tempus.data.ai.dto.Content
 import com.projectapp.tempus.data.ai.dto.GeminiRequest
 import com.projectapp.tempus.data.ai.dto.GenerationConfig
 import com.projectapp.tempus.data.ai.dto.Part
+import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.domain.model.ActionType
 import com.projectapp.tempus.domain.model.AgentProposal
 import com.projectapp.tempus.domain.model.ExecutionResult
@@ -14,6 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Repository for AI operations using Gemini API
@@ -22,7 +25,10 @@ import org.json.JSONObject
  * - ASK MODE: Q&A only, no database writes
  * - AGENT MODE: Proposals with Accept/Cancel flow
  */
-class AIRepository {
+class AIRepository(
+    private val scheduleRepository: ScheduleRepository? = null,
+    private val userId: String? = null
+) {
     
     private val geminiService = GeminiClientProvider.service
     private val apiKey = BuildConfig.GEMINI_API_KEY
@@ -242,12 +248,17 @@ class AIRepository {
     /**
      * Execute a proposal (Step 2 of Agent Mode flow)
      * This is where database writes happen
-     * 
-     * TODO: Integrate with ScheduleRepository for actual DB writes
      */
     suspend fun executeProposal(proposal: AgentProposal): Result<ExecutionResult> = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
         val appliedChanges = mutableListOf<String>()
+        
+        // Validate that we have the required dependencies
+        if (scheduleRepository == null || userId == null) {
+            return@withContext Result.failure(
+                IllegalStateException("ScheduleRepository or userId not configured for Agent Mode")
+            )
+        }
         
         try {
             for (action in proposal.actions) {
@@ -255,18 +266,53 @@ class AIRepository {
                     ActionType.CREATE_SCHEDULE -> {
                         val scheduleData = action.getScheduleData()
                         if (scheduleData != null) {
-                            // TODO: Call scheduleRepository.insertSchedule(...)
-                            appliedChanges.add("Tạo: ${scheduleData.name} (${scheduleData.startTime})")
+                            // Parse date or use today
+                            val dateStr = scheduleData.date ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                            
+                            // Build schedule row
+                            val row = mapOf(
+                                "user_id" to userId,
+                                "name" to scheduleData.name,
+                                "start_time" to scheduleData.startTime,
+                                "end_time" to (scheduleData.endTime ?: ""),
+                                "duration" to scheduleData.durationMinutes,
+                                "date" to dateStr,
+                                "is_active" to true
+                            )
+                            
+                            // Actually insert to database
+                            val inserted = scheduleRepository.insertSchedule(row)
+                            appliedChanges.add("✅ Tạo: ${scheduleData.name} (${scheduleData.startTime}) - ID: ${inserted.id}")
                         }
                     }
                     ActionType.UPDATE_SCHEDULE -> {
-                        appliedChanges.add("Cập nhật: ${action.description}")
+                        val taskId = action.data["id"] as? String ?: action.data["taskId"] as? String
+                        if (taskId != null) {
+                            val fields = mutableMapOf<String, Any?>()
+                            action.data.forEach { (key, value) ->
+                                if (key != "id" && key != "taskId") {
+                                    fields[key] = value
+                                }
+                            }
+                            if (fields.isNotEmpty()) {
+                                scheduleRepository.updateSchedule(taskId, fields)
+                                appliedChanges.add("✅ Cập nhật: ${action.description}")
+                            }
+                        } else {
+                            appliedChanges.add("⚠️ Bỏ qua cập nhật (thiếu ID): ${action.description}")
+                        }
                     }
                     ActionType.DELETE_SCHEDULE -> {
-                        appliedChanges.add("Xóa: ${action.description}")
+                        val taskId = action.data["id"] as? String ?: action.data["taskId"] as? String
+                        if (taskId != null) {
+                            scheduleRepository.deleteSchedule(taskId)
+                            appliedChanges.add("✅ Xóa: ${action.description}")
+                        } else {
+                            appliedChanges.add("⚠️ Bỏ qua xóa (thiếu ID): ${action.description}")
+                        }
                     }
                     else -> {
-                        appliedChanges.add(action.description)
+                        appliedChanges.add("ℹ️ ${action.description}")
                     }
                 }
             }

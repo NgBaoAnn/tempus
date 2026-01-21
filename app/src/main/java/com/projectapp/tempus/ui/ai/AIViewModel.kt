@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.data.ai.AIRepository
 import com.projectapp.tempus.data.ai.ChatMessage
+import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.domain.model.AgentProposal
 import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.ChatMode
@@ -20,9 +21,12 @@ import java.time.format.DateTimeFormatter
  * ViewModel for AI Chat with Ask/Agent modes
  * Implements state machine for Agent Mode flow
  */
-class AIViewModel : ViewModel() {
+class AIViewModel(
+    scheduleRepository: ScheduleRepository? = null,
+    userId: String? = null
+) : ViewModel() {
     
-    private val aiRepository = AIRepository()
+    private val aiRepository = AIRepository(scheduleRepository, userId)
     private val parseScheduleUseCase = ParseScheduleSuggestionUseCase()
     
     // ============================================
