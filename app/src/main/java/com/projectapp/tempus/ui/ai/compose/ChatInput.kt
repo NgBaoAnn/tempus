@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ripple.rememberRipple
+// Note: Using simple clickable without explicit indication for compatibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -45,6 +45,7 @@ fun ChatInput(
     onValueChange: (String) -> Unit,
     onSend: () -> Unit,
     enabled: Boolean = true,
+    placeholder: String = "Nhập tin nhắn...",
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
@@ -71,6 +72,7 @@ fun ChatInput(
                     }
                 },
                 enabled = enabled,
+                placeholder = placeholder,
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
@@ -100,6 +102,7 @@ private fun ChatTextField(
     onValueChange: (String) -> Unit,
     onSend: () -> Unit,
     enabled: Boolean,
+    placeholder: String = "Nhập tin nhắn...",
     modifier: Modifier = Modifier
 ) {
     BasicTextField(
@@ -129,7 +132,7 @@ private fun ChatTextField(
             ) {
                 if (value.isEmpty()) {
                     Text(
-                        text = "Nhập tin nhắn...",
+                        text = placeholder,
                         style = MaterialTheme.typography.bodyLarge,
                         color = ChatColors.TextMuted
                     )
@@ -160,7 +163,7 @@ private fun SendButton(
             .background(backgroundColor)
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(bounded = true, color = ChatColors.Surface),
+                indication = null,
                 enabled = enabled,
                 onClick = onClick
             ),

@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ripple.rememberRipple
+// Note: Using simple clickable without explicit indication for compatibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,10 +47,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.ai.ChatMessage
+import com.projectapp.tempus.domain.model.AgentState
+import com.projectapp.tempus.domain.model.ChatMode
 import com.projectapp.tempus.ui.ai.AIViewModel
 
 /**
- * Main Chat Screen composable
+ * Main Chat Screen composable with Ask/Agent modes
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +62,10 @@ fun ChatScreen(
 ) {
     val messages by viewModel.messages.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
+    val chatMode by viewModel.chatMode.observeAsState(ChatMode.ASK)
+    val agentState by viewModel.agentState.observeAsState(AgentState.Idle)
+    
+    // Legacy support
     val suggestions by viewModel.suggestions.observeAsState(emptyList())
     val showSuggestionSheet by viewModel.showSuggestionSheet.observeAsState(false)
     
@@ -67,7 +73,7 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     
     // Auto-scroll to bottom when new message arrives
-    LaunchedEffect(messages.size, isLoading) {
+    LaunchedEffect(messages.size, isLoading, agentState) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
@@ -78,20 +84,46 @@ fun ChatScreen(
             topBar = {
                 ChatTopBar(
                     isLoading = isLoading,
+                    chatMode = chatMode,
                     onClearChat = { viewModel.clearChat() }
                 )
             },
             bottomBar = {
-                ChatInput(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    onSend = {
-                        viewModel.sendMessage(inputText)
-                        inputText = ""
-                    },
-                    enabled = !isLoading,
-                    modifier = Modifier.imePadding()
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ChatColors.Surface)
+                ) {
+                    // Mode Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        ModeToggle(
+                            currentMode = chatMode,
+                            onModeChange = { viewModel.setMode(it) },
+                            enabled = agentState is AgentState.Idle && !isLoading
+                        )
+                    }
+                    
+                    // Chat Input
+                    ChatInput(
+                        value = inputText,
+                        onValueChange = { inputText = it },
+                        onSend = {
+                            viewModel.sendMessage(inputText)
+                            inputText = ""
+                        },
+                        enabled = !isLoading && agentState !is AgentState.AwaitingAccept,
+                        placeholder = when (chatMode) {
+                            ChatMode.ASK -> "Hỏi điều gì đó..."
+                            ChatMode.AGENT -> "Yêu cầu một hành động..."
+                        },
+                        modifier = Modifier.imePadding()
+                    )
+                }
             },
             containerColor = ChatColors.Background,
             modifier = modifier.fillMaxSize()
@@ -109,11 +141,12 @@ fun ChatScreen(
                     exit = fadeOut()
                 ) {
                     EmptyState(
+                        chatMode = chatMode,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
                 
-                // Messages list
+                // Messages list with Proposal Card
                 AnimatedVisibility(
                     visible = messages.isNotEmpty(),
                     enter = fadeIn(),
@@ -132,9 +165,44 @@ fun ChatScreen(
                         }
                         
                         // Typing indicator
-                        if (isLoading) {
+                        if (isLoading && agentState !is AgentState.Proposing) {
                             item(key = "typing") {
                                 TypingIndicator(visible = true)
+                            }
+                        }
+                        
+                        // Proposing indicator
+                        if (agentState is AgentState.Proposing) {
+                            item(key = "proposing") {
+                                ProposingIndicator()
+                            }
+                        }
+                        
+                        // Proposal Card (AwaitingAccept state)
+                        if (agentState is AgentState.AwaitingAccept) {
+                            item(key = "proposal") {
+                                val proposal = (agentState as AgentState.AwaitingAccept).proposal
+                                ProposalCard(
+                                    proposal = proposal,
+                                    onAccept = { viewModel.acceptProposal() },
+                                    onCancel = { viewModel.cancelProposal() },
+                                    isExecuting = false
+                                )
+                            }
+                        }
+                        
+                        // Executing state
+                        if (agentState is AgentState.Executing) {
+                            item(key = "executing") {
+                                ExecutingIndicator()
+                            }
+                        }
+                        
+                        // Execution result (Done state)
+                        if (agentState is AgentState.Done) {
+                            item(key = "result") {
+                                val result = (agentState as AgentState.Done).result
+                                ExecutionFeedback(result = result)
                             }
                         }
                     }
@@ -142,7 +210,7 @@ fun ChatScreen(
             }
         }
         
-        // Schedule Suggestion Sheet
+        // Legacy Schedule Suggestion Sheet
         if (showSuggestionSheet && suggestions.isNotEmpty()) {
             ScheduleSuggestionSheet(
                 suggestions = suggestions,
@@ -154,12 +222,59 @@ fun ChatScreen(
 }
 
 /**
+ * Proposing indicator for Agent Mode
+ */
+@Composable
+private fun ProposingIndicator(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "🤖", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Đang phân tích và tạo đề xuất...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ChatColors.Accent
+        )
+    }
+}
+
+/**
+ * Executing indicator for Agent Mode
+ */
+@Composable
+private fun ExecutingIndicator(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "⚡", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Đang thực hiện các thay đổi...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ChatColors.Online
+        )
+    }
+}
+
+/**
  * Chat top app bar with avatar and status
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ChatTopBar(
     isLoading: Boolean,
+    chatMode: ChatMode,
     onClearChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -187,11 +302,20 @@ private fun ChatTopBar(
                     Spacer(modifier = Modifier.width(12.dp))
                     
                     Column {
-                        Text(
-                            text = "Tiramisu AI",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = ChatColors.TextPrimary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Tiramisu AI",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = ChatColors.TextPrimary
+                            )
+                            
+                            Spacer(modifier = Modifier.width(8.dp))
+                            
+                            // Mode badge
+                            ModeIndicator(mode = chatMode)
+                        }
                         
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -210,7 +334,7 @@ private fun ChatTopBar(
                             Spacer(modifier = Modifier.width(6.dp))
                             
                             Text(
-                                text = if (isLoading) "Đang suy nghĩ..." else "Sẵn sàng giúp bạn",
+                                text = if (isLoading) "Đang xử lý..." else "Sẵn sàng",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (isLoading) ChatColors.Typing else ChatColors.Online
                             )
@@ -226,7 +350,7 @@ private fun ChatTopBar(
                         .clip(CircleShape)
                         .clickable(
                             interactionSource = interactionSource,
-                            indication = rememberRipple(bounded = true),
+                            indication = null,
                             onClick = onClearChat
                         ),
                     contentAlignment = Alignment.Center
@@ -251,6 +375,7 @@ private fun ChatTopBar(
  */
 @Composable
 private fun EmptyState(
+    chatMode: ChatMode,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -270,7 +395,10 @@ private fun EmptyState(
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = "Xin chào! Tôi là Tiramisu AI",
+            text = when (chatMode) {
+                ChatMode.ASK -> "Chế độ Ask 💬"
+                ChatMode.AGENT -> "Chế độ Agent 🤖"
+            },
             style = MaterialTheme.typography.titleLarge,
             color = ChatColors.TextPrimary,
             textAlign = TextAlign.Center
@@ -279,7 +407,10 @@ private fun EmptyState(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Tôi có thể giúp bạn lên lịch, quản lý công việc\nvà đưa ra lời khuyên về quản lý thời gian.",
+            text = when (chatMode) {
+                ChatMode.ASK -> "Hỏi đáp, tư vấn về quản lý thời gian.\nKhông thực hiện hành động."
+                ChatMode.AGENT -> "Yêu cầu tạo, sửa, xóa lịch.\nXem trước và xác nhận trước khi thực hiện."
+            },
             style = MaterialTheme.typography.bodyMedium,
             color = ChatColors.TextSecondary,
             textAlign = TextAlign.Center,
@@ -288,7 +419,7 @@ private fun EmptyState(
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Quick suggestions
+        // Quick suggestions based on mode
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -299,9 +430,16 @@ private fun EmptyState(
                 color = ChatColors.TextMuted
             )
             
-            SuggestionChip(text = "Lên lịch học bài cho tôi")
-            SuggestionChip(text = "Gợi ý thời gian nghỉ ngơi")
-            SuggestionChip(text = "Tôi cần làm gì hôm nay?")
+            when (chatMode) {
+                ChatMode.ASK -> {
+                    SuggestionChip(text = "Làm sao để quản lý thời gian tốt hơn?")
+                    SuggestionChip(text = "Kỹ thuật Pomodoro là gì?")
+                }
+                ChatMode.AGENT -> {
+                    SuggestionChip(text = "Lên lịch học bài cho tôi")
+                    SuggestionChip(text = "Tạo lịch làm việc từ 8h-17h")
+                }
+            }
         }
     }
 }
