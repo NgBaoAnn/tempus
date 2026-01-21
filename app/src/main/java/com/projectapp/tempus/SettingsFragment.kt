@@ -21,6 +21,7 @@ import com.projectapp.tempus.data.export.DataExportRepository
 import com.projectapp.tempus.databinding.FragmentSettingsBinding
 import com.projectapp.tempus.ui.auth.LoginActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
+import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
@@ -77,7 +78,8 @@ class SettingsFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.cardProfile.setOnClickListener {
-            Toast.makeText(requireContext(), "Mở Profile", Toast.LENGTH_SHORT).show()
+            val intent = Intent(requireContext(), ProfileActivity::class.java)
+            startActivity(intent)
         }
 
         binding.cardPersonalization.setOnClickListener {

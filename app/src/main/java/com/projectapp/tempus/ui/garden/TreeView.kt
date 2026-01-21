@@ -11,6 +11,9 @@ import com.projectapp.tempus.domain.model.TreeType
 
 /**
  * Custom View hiển thị cây với hình ảnh drawable
+ * 
+ * NOTE: Lottie animations disabled do JSON file issues.
+ * Using static drawables with scale animations instead.
  */
 class TreeView @JvmOverloads constructor(
     context: Context,
@@ -51,7 +54,7 @@ class TreeView @JvmOverloads constructor(
         imageView.setImageResource(drawableRes)
         
         if (animate && isLevelUp) {
-            // Simple scale animation for level up
+            // Scale animation for level up
             imageView.scaleX = 0.5f
             imageView.scaleY = 0.5f
             imageView.animate()
@@ -69,8 +72,6 @@ class TreeView @JvmOverloads constructor(
      * Lấy drawable resource theo type và state
      */
     private fun getDrawableRes(type: TreeType, state: TreeState): Int {
-        // Sử dụng hình chung cho seed, sprout, sapling
-        // Và hình riêng cho mỗi loại cây khi trưởng thành
         return when (state) {
             TreeState.SEED -> R.drawable.ic_seed
             TreeState.SPROUT -> when (type) {
