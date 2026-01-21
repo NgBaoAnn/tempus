@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.ScheduleSuggestion
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 
 /**
  * Bottom sheet for previewing and accepting/rejecting schedule suggestions
@@ -168,11 +170,17 @@ private fun SuggestionItem(
         label = "bgColor"
     )
     
+    val interactionSource = remember { MutableInteractionSource() }
+    
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onToggle),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onToggle
+            ),
         color = backgroundColor
     ) {
         Row(
