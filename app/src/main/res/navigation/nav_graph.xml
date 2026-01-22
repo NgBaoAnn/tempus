@@ -23,7 +23,7 @@
     </fragment>
     <fragment
         android:id="@+id/aiFragment"
-        android:name="com.projectapp.tempus.AIFragment"
+        android:name="com.projectapp.tempus.ui.ai.AIFragment"
         android:label="fragment_ai"
         tools:layout="@layout/fragment_ai" />
     <fragment

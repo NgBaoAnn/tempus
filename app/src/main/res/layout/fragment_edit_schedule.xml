@@ -216,6 +216,26 @@
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Lặp lại" android:textColor="#000" android:textSize="16sp"/>
                         <TextView android:id="@+id/tvRepeatValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hàng ngày" android:textColor="#757575" android:textSize="16sp" />
                         <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:src="@drawable/ic_lock" app:tint="#BDBDBD"/> </LinearLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F2F2F2"/>
+
+                    <!-- Priority Picker -->
+                    <LinearLayout
+                        android:id="@+id/btnPickPriority"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Độ ưu tiên" android:textColor="#000" android:textSize="16sp"/>
+                        <View
+                            android:id="@+id/priorityIndicator"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/shape_circle_solid"
+                            android:backgroundTint="#FF9800"/>
+                        <TextView android:id="@+id/tvPriorityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Trung bình" android:textColor="#757575" android:textSize="16sp" />
+                        <ImageView android:layout_width="16dp" android:layout_height="16dp" android:layout_marginStart="4dp" android:src="@drawable/ic_unfold_more" app:tint="#BDBDBD"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

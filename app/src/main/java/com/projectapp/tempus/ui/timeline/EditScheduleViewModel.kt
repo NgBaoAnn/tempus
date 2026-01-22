@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.data.schedule.ScheduleRepository
+import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.SourceType
 import kotlinx.coroutines.channels.Channel
@@ -30,6 +31,7 @@ data class EditState(
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,
     val duration: String = "00:30:00",
+    val priority: PriorityType = PriorityType.medium,
     val loading: Boolean = false,
     val errorMessage: String? = null // ✅ Thêm field lỗi
 )
@@ -79,9 +81,10 @@ class EditScheduleViewModel(
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
-                            iconLabel = t.label ?: ScheduleLabel.book,
-                            repeat = t.repeat,
-                            duration = t.implementationTime ?: "00:30:00"
+                        iconLabel = t.label ?: ScheduleLabel.book,
+                        repeat = t.repeat,
+                        duration = t.implementationTime ?: "00:30:00",
+                        priority = t.priority ?: PriorityType.medium
                         )
                     }
                 } catch (e: Exception) {
@@ -109,7 +112,8 @@ class EditScheduleViewModel(
                     "label" to s.iconLabel.name,
                     "source" to SourceType.manual.name,
                     "implementation_time" to s.duration,
-                    "repeat" to s.repeat.name
+                    "repeat" to s.repeat.name,
+                    "priority" to s.priority.name
                 )
 
                 if (!s.isEditMode || s.id == null) {
@@ -170,6 +174,7 @@ class EditScheduleViewModel(
     fun setDate(d: LocalDate) { _state.value = _state.value.copy(date = d) }
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }
+    fun setPriority(p: PriorityType) { _state.value = _state.value.copy(priority = p) }
     fun clearError() {
         _state.value = _state.value.copy(errorMessage = null)
     }

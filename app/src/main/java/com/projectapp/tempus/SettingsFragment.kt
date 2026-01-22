@@ -11,6 +11,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -18,11 +21,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.export.DataExportRepository
-import com.projectapp.tempus.databinding.FragmentSettingsBinding
 import com.projectapp.tempus.ui.auth.LoginActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
+import com.projectapp.tempus.ui.setting.compose.SettingsScreen
+import com.projectapp.tempus.ui.setting.compose.UserInfo
+import com.projectapp.tempus.ui.theme.TempusTheme
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 import java.io.File
@@ -30,23 +35,41 @@ import java.io.File
 
 class SettingsFragment : Fragment() {
 
-    private var _binding: FragmentSettingsBinding? = null
     private val viewModel: SettingsViewModel by viewModels()
     private var isLoggedIn = false
     
     private lateinit var exportRepository: DataExportRepository
-
-    private val binding get() = _binding!!
+    
+    // Compose state - using mutableStateOf properly
+    private val userInfoState = mutableStateOf(UserInfo())
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         isLoggedIn = checkLogin()
         exportRepository = DataExportRepository(requireContext())
-        return binding.root
+        
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                TempusTheme {
+                    SettingsScreen(
+                        userInfo = userInfoState.value,
+                        onProfileClick = ::navigateToProfile,
+                        onNotificationsClick = ::onNotificationsClick,
+                        onPersonalizationClick = ::navigateToPersonalization,
+                        onThemeClick = ::onThemeClick,
+                        onPrivacyClick = ::onPrivacyClick,
+                        onExportJsonClick = ::exportToJson,
+                        onExportCsvClick = ::exportToCsv,
+                        onDeleteDataClick = ::showDeleteConfirmationStep1,
+                        onLogoutClick = ::logout
+                    )
+                }
+            }
+        }
     }
 
     private fun checkLogin(): Boolean {
@@ -68,55 +91,36 @@ class SettingsFragment : Fragment() {
         if (isLoggedIn) {
             viewModel.loadUser()
             viewModel.user.observe(viewLifecycleOwner) { user ->
-                binding.tvUserName.text = user.username
-                binding.tvUserEmail.text = user.email
+                userInfoState.value = UserInfo(
+                    name = user.username,
+                    email = user.email
+                )
             }
         }
-
-        setupClickListeners()
     }
-
-    private fun setupClickListeners() {
-        binding.cardProfile.setOnClickListener {
-            val intent = Intent(requireContext(), ProfileActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.cardPersonalization.setOnClickListener {
-            val intent = Intent(requireContext(), PersonalizationActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.cardNotifications.setOnClickListener {
-            Toast.makeText(requireContext(), "Cài đặt thông báo", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.cardTheme.setOnClickListener {
-            Toast.makeText(requireContext(), "Cài đặt giao diện", Toast.LENGTH_SHORT).show()
-        }
-
-        binding.cardPrivacy.setOnClickListener {
-            Toast.makeText(requireContext(), "Xem chính sách bảo mật", Toast.LENGTH_SHORT).show()
-        }
-
-        // ===== EXPORT JSON =====
-        binding.cardExportJson.setOnClickListener {
-            exportToJson()
-        }
-
-        // ===== EXPORT CSV =====
-        binding.cardExportCsv.setOnClickListener {
-            exportToCsv()
-        }
-
-        // ===== DELETE ALL DATA =====
-        binding.cardDeleteData.setOnClickListener {
-            showDeleteConfirmationStep1()
-        }
-
-        binding.btnLogout.setOnClickListener {
-            logout()
-        }
+    
+    // ===== NAVIGATION =====
+    
+    private fun navigateToProfile() {
+        val intent = Intent(requireContext(), ProfileActivity::class.java)
+        startActivity(intent)
+    }
+    
+    private fun navigateToPersonalization() {
+        val intent = Intent(requireContext(), PersonalizationActivity::class.java)
+        startActivity(intent)
+    }
+    
+    private fun onNotificationsClick() {
+        Toast.makeText(requireContext(), "Cài đặt thông báo", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun onThemeClick() {
+        Toast.makeText(requireContext(), "Cài đặt giao diện", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun onPrivacyClick() {
+        Toast.makeText(requireContext(), "Xem chính sách bảo mật", Toast.LENGTH_SHORT).show()
     }
 
     // ===== EXPORT FUNCTIONS =====
@@ -259,11 +263,6 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(requireContext(), "❌ Lỗi khi xóa dữ liệu", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun logout() {
