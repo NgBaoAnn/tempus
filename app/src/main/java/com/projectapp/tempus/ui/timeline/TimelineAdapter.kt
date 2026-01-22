@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.projectapp.tempus.R
+import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
 import com.projectapp.tempus.ui.timeline.getIconResId // Nhớ import hàm này
@@ -40,6 +41,7 @@ class TimelineAdapter(
         val tvDuration: TextView = itemView.findViewById(R.id.tvDuration)
         val tvQuote: TextView = itemView.findViewById(R.id.tvQuote)
         val imgCheck: ImageView = itemView.findViewById(R.id.imgCheck)
+        val priorityBadge: View = itemView.findViewById(R.id.priorityBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TimelineViewHolder {
@@ -74,6 +76,21 @@ class TimelineAdapter(
         val minutes = item.duration.toMinutes() % 60
         val durationText = if (hours > 0) "${hours}g ${minutes}p" else "${minutes}p"
         holder.tvDuration.text = "$durationText ${item.label}"
+        
+        // --- Priority Badge ---
+        when (item.priority) {
+            PriorityType.high -> {
+                holder.priorityBadge.visibility = View.VISIBLE
+                holder.priorityBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#F44336"))
+            }
+            PriorityType.medium -> {
+                holder.priorityBadge.visibility = View.GONE
+            }
+            PriorityType.low -> {
+                holder.priorityBadge.visibility = View.VISIBLE
+                holder.priorityBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#4CAF50"))
+            }
+        }
 
 
         // --- 3. XỬ LÝ ICON (Dùng hàm extension) ---

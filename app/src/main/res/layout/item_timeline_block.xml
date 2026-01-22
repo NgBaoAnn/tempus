@@ -102,7 +102,22 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/cardIcon"
         app:layout_constraintStart_toStartOf="@id/tvTimeLabel"
+        app:layout_constraintEnd_toStartOf="@id/priorityBadge"
         app:layout_constraintTop_toBottomOf="@id/tvTimeLabel" />
+
+    <!-- Priority Badge -->
+    <View
+        android:id="@+id/priorityBadge"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/shape_circle_solid"
+        android:backgroundTint="#FF9800"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle"
+        app:layout_constraintEnd_toStartOf="@id/imgCheck"
+        app:layout_constraintStart_toEndOf="@id/tvTitle"
+        app:layout_constraintTop_toTopOf="@id/tvTitle" />
 
     <TextView
         android:id="@+id/tvDuration"
