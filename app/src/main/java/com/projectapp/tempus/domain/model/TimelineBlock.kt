@@ -15,5 +15,12 @@ data class TimelineBlock(
     val duration: Duration,
     // ---------------------------
     val priority: PriorityType = PriorityType.medium,
-    val status: StatusType
+    val status: StatusType,
+    val subtasks: List<SubtaskInfo> = emptyList()
+)
+
+data class SubtaskInfo(
+    val id: String,
+    val title: String,
+    val isDone: Boolean
 )

@@ -7,7 +7,9 @@ import com.projectapp.tempus.data.schedule.dto.ScheduleRow
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.EditedVersionRow
+import com.projectapp.tempus.data.schedule.dto.SubTaskRow
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.domain.model.SubtaskInfo
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -56,7 +58,8 @@ class BuildTimelineUseCase {
         targetDate: LocalDate,
         schedules: List<ScheduleRow>,
         items: List<ScheduleItemRow>,
-        editedVersions: Map<String, EditedVersionRow>
+        editedVersions: Map<String, EditedVersionRow>,
+        subtasksMap: Map<String, List<SubTaskRow>> = emptyMap()
     ): List<TimelineBlock> {
 
         val itemsByTask = items.associateBy { it.taskId }
@@ -104,6 +107,15 @@ class BuildTimelineUseCase {
                 val durationStr = ev?.implementationTime ?: s.implementationTime
                 val uiDuration = parseDuration(durationStr)
 
+                // ----- subtasks -----
+                val subtaskInfos = subtasksMap[s.id]?.map { st ->
+                    SubtaskInfo(
+                        id = st.id ?: "",
+                        title = st.title,
+                        isDone = st.isDone
+                    )
+                } ?: emptyList()
+
                 TimelineBlock(
                     taskId = s.id,
                     scheduleItemId = item?.id,
@@ -113,7 +125,8 @@ class BuildTimelineUseCase {
                     startTime = uiStartTime,
                     duration = uiDuration,
                     priority = s.priority ?: PriorityType.medium,
-                    status = status
+                    status = status,
+                    subtasks = subtaskInfos
                 )
             }
             .sortedBy { it.startTime }
