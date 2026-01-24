@@ -31,6 +31,13 @@ android {
             "SUPABASE_KEY",
             "\"${project.findProperty("SUPABASE_KEY")}\""
         )
+
+        // Gemini AI service
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"${project.findProperty("GEMINI_API_KEY")}\""
+        )
     }
 
     buildFeatures {
@@ -117,6 +124,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.compose.runtime.livedata)
     implementation(libs.lottie.compose)
     
     // Compose Debug
