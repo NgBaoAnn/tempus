@@ -15,20 +15,29 @@
 > Task :app:mapDebugSourceSetPaths UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
 > Task :app:extractDeepLinksDebug UP-TO-DATE
-> Task :app:processDebugMainManifest UP-TO-DATE
-> Task :app:processDebugManifest UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
-> Task :app:processDebugResources UP-TO-DATE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
 > Task :app:kspDebugKotlin
 
 > Task :app:compileDebugKotlin
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:57:74 Unchecked cast of 'com.projectapp.tempus.ui.timeline.TimelineViewModel' to 'T'.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:129:74 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/StatisticsFragment.kt:44:69 Unchecked cast of 'com.projectapp.tempus.StatisticsViewModel' to 'T'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/StatisticsFragment.kt:129:84 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:42:74 Unchecked cast of 'com.projectapp.tempus.ui.timeline.TimelineViewModel' to 'T'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:63:74 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/GetStatisticsUseCase.kt:185:76 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/GetStatisticsUseCase.kt:187:80 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:39:91 Unchecked cast of 'com.projectapp.tempus.ui.timeline.EditScheduleViewModel' to 'T'.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:79:93 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/TimelineAdapter.kt:105:44 'fun setColorFilter(p0: Int, p1: PorterDuff.Mode): Unit' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:150:25 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:152:23 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:178:20 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/setting/compose/SettingsScreen.kt:179:46 'val Icons.Outlined.ExitToApp: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.ExitToApp.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/theme/Theme.kt:77:20 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:46:23 Unchecked cast of 'com.projectapp.tempus.ui.timeline.EditScheduleViewModel' to 'T'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:87:93 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/MonthCalendarDialogFragment.kt:73:66 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/FilterSortBar.kt:195:49 'val Icons.Filled.List: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.List.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/TimelineScreen.kt:308:33 Condition is always 'true'.
 
-BUILD SUCCESSFUL in 19s
-20 actionable tasks: 2 executed, 18 up-to-date
+BUILD SUCCESSFUL in 33s
+20 actionable tasks: 6 executed, 14 up-to-date

@@ -104,16 +104,24 @@ class BuildTimelineUseCase {
                 val durationStr = ev?.implementationTime ?: s.implementationTime
                 val uiDuration = parseDuration(durationStr)
 
+                // ----- createdAt parsing -----
+                val createdAtLdt = s.createdAt?.let { 
+                    try { parseToZonedDateTime(it).withZoneSameInstant(systemZone).toLocalDateTime() } 
+                    catch (_: Exception) { null }
+                }
+
                 TimelineBlock(
                     taskId = s.id,
                     scheduleItemId = item?.id,
                     title = s.name,
                     label = labelStr,
+                    labelEnum = lbEnum,
                     color = colorStr,
                     startTime = uiStartTime,
                     duration = uiDuration,
                     priority = s.priority ?: PriorityType.medium,
-                    status = status
+                    status = status,
+                    createdAt = createdAtLdt
                 )
             }
             .sortedBy { it.startTime }
