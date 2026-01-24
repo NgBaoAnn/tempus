@@ -83,6 +83,9 @@ class TimelineFragment : Fragment() {
                     onStatusToggle = { block ->
                         val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
                         viewModel.onToggleStatus(block.taskId, newStatus)
+                    },
+                    onSubtaskToggle = { subtaskId, isDone ->
+                        viewModel.onSubtaskToggle(subtaskId, isDone)
                     }
                 )
             }
