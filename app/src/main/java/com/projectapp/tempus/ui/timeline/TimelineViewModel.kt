@@ -94,9 +94,23 @@ class TimelineViewModel(
         }
     }
 
+    fun onSubtaskToggle(subtaskId: String, isDone: Boolean) {
+        Log.d("Timeline", "onSubtaskToggle subtaskId=$subtaskId isDone=$isDone")
+        viewModelScope.launch {
+            try {
+                repo.updateSubTaskStatus(subtaskId, isDone)
+                Log.d("Timeline", "updateSubTaskStatus ok")
+                load(_ui.value.date)
+            } catch (e: Exception) {
+                Log.e("Timeline", "updateSubTaskStatus FAILED: ${e.message}", e)
+            }
+        }
+    }
+
     fun onClickBlock(taskId: String) {
         Log.d("Timeline", "onClickBlock taskId=$taskId")
     }
+
 
     fun onEditName(taskId: String, newName: String) {
         viewModelScope.launch {
@@ -153,7 +167,13 @@ class TimelineViewModel(
                 val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
                 val editedMap = repo.getEditedVersions(editedIds).associateBy { it.id }
 
-                val blocks = builder.build(date, schedules, scheduleItems, editedMap)
+                // Load subtasks for all schedules
+                val subtasksMap = mutableMapOf<String, List<com.projectapp.tempus.data.schedule.dto.SubTaskRow>>()
+                for (taskId in taskIds) {
+                    subtasksMap[taskId] = repo.getSubTasks(taskId)
+                }
+
+                val blocks = builder.build(date, schedules, scheduleItems, editedMap, subtasksMap)
 
                 Log.d("Timeline", "build blocks=${blocks.size}")
 
