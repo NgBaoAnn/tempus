@@ -204,6 +204,13 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun deleteSchedule(id: String) {
+        // First delete related schedule_items (FK constraint)
+        supabase.from("schedule_items")
+            .delete {
+                filter { eq("task_id", id) }
+            }
+        
+        // Then delete the schedule
         supabase.from("schedule")
             .delete {
                 filter { eq("id", id) }
