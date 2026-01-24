@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
+import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
@@ -73,6 +74,7 @@ fun TimelineScreen(
     selectedDate: LocalDate,
     monthYear: String,
     weeks: List<List<LocalDate>>,
+    dailyQuote: QuoteDto? = null,
     onDateSelected: (LocalDate) -> Unit,
     onMonthPickerClick: () -> Unit,
     onAddClick: () -> Unit,
@@ -104,6 +106,9 @@ fun TimelineScreen(
                 monthYear = monthYear,
                 onMonthPickerClick = onMonthPickerClick
             )
+            
+            // Daily Quote Card
+            DailyQuoteCard(quote = dailyQuote)
             
             // Week Calendar Strip
             WeekCalendarStrip(

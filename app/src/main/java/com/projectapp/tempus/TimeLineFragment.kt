@@ -37,7 +37,11 @@ class TimelineFragment : Fragment() {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
-                return TimelineViewModel(userId = myUserId, repo = repo) as T
+                return TimelineViewModel(
+                    application = requireActivity().application,
+                    userId = myUserId,
+                    repo = repo
+                ) as T
             }
         }
     }
@@ -60,6 +64,7 @@ class TimelineFragment : Fragment() {
                     selectedDate = uiState.date,
                     monthYear = uiState.date.format(formatter),
                     weeks = weeks.map { it.days },
+                    dailyQuote = uiState.dailyQuote,
                     onDateSelected = { date ->
                         viewModel.onSelectDate(date)
                     },

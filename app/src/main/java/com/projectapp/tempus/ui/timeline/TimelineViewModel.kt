@@ -1,11 +1,14 @@
 package com.projectapp.tempus.ui.timeline
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.projectapp.tempus.data.quote.QuoteRepository
+import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
@@ -20,18 +23,31 @@ data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val blocks: List<TimelineBlock> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val dailyQuote: QuoteDto? = null
 )
 
 class TimelineViewModel(
+    application: Application,
     private var cachedSchedules: List<com.projectapp.tempus.data.schedule.dto.ScheduleRow> = emptyList(),
     private val userId: String,
     private val repo: ScheduleRepository,
     private val builder: BuildTimelineUseCase = BuildTimelineUseCase()
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
+    private val quoteRepository = QuoteRepository(application)
+    
     private val _ui = MutableStateFlow(TimelineUiState())
     val ui: StateFlow<TimelineUiState> = _ui
+    
+    init {
+        loadDailyQuote()
+    }
+    
+    private fun loadDailyQuote() {
+        val quote = quoteRepository.getTodayQuote()
+        _ui.value = _ui.value.copy(dailyQuote = quote)
+    }
 
     fun onSelectDate(date: LocalDate) {
         Log.d("Timeline", "onSelectDate: $date")
