@@ -16,10 +16,17 @@ interface ScheduleRepository {
     suspend fun getScheduleById(id: String): ScheduleRow?
     suspend fun deleteSchedule(id: String)
     
+    /**
+     * Delete all schedules for a user that start from a specific date onwards
+     * @param userId The user ID
+     * @param fromDate The date from which to delete (ISO format)
+     * @return Number of deleted schedules
+     */
+    suspend fun deleteSchedulesFromDate(userId: String, fromDate: String): Int
+    
     // Subtask methods
     suspend fun getSubTasks(scheduleId: String): List<SubTaskRow>
     suspend fun insertSubTasks(scheduleId: String, titles: List<String>)
     suspend fun deleteSubTasksByScheduleId(scheduleId: String)
     suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean)
 }
-
