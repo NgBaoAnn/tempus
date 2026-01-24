@@ -32,6 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.clickable
 import com.projectapp.tempus.R
 import java.util.Calendar
 import java.util.Locale
@@ -66,6 +69,7 @@ fun TimerScreen(
     onResume: () -> Unit,
     onCancel: () -> Unit,
     onReset: () -> Unit,
+    onNotesClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -102,7 +106,8 @@ fun TimerScreen(
                     onQuickSelect = onQuickSelect,
                     onColorSelect = onColorSelect,
                     onStart = onStart,
-                    onReset = onReset
+                    onReset = onReset,
+                    onNotesClick = onNotesClick
                 )
                 TimerState.RUNNING, TimerState.PAUSED -> RunningContent(
                     isRunning = state == TimerState.RUNNING,
@@ -128,7 +133,8 @@ private fun SetupContent(
     onQuickSelect: (Int) -> Unit,
     onColorSelect: (Color) -> Unit,
     onStart: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onNotesClick: () -> Unit
 ) {
     Column {
         // Setup Card
@@ -183,6 +189,57 @@ private fun SetupContent(
                         modifier = Modifier.weight(1f)
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                
+                HorizontalDivider(
+                    color = TimerColors.SurfaceVariant,
+                    thickness = 1.dp
+                )
+                
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                
+                // Quick Notes button - prominent position
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNotesClick() },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFF0F9FF) // Light blue background
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "📝",
+                                fontSize = 22.sp
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Ghi chú nhanh",
+                                    style = TimerTypography.BodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "Ghi lại ý tưởng khi tập trung",
+                                    fontSize = 12.sp,
+                                    color = TimerColors.TextMuted
+                                )
+                            }
+                        }
+                        Text(
+                            text = "→",
+                            fontSize = 20.sp,
+                            color = Color(0xFF3B82F6)
+                        )
+                    }
+                }
             }
         }
         
@@ -227,6 +284,42 @@ private fun SetupContent(
                     selectedColor = selectedColor,
                     onColorSelect = onColorSelect
                 )
+                
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                
+                HorizontalDivider(
+                    color = TimerColors.SurfaceVariant,
+                    thickness = 1.dp
+                )
+                
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                
+                // Quick Notes button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNotesClick() }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "📝",
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Ghi chú nhanh",
+                            style = TimerTypography.BodyMedium
+                        )
+                    }
+                    Text(
+                        text = "→",
+                        fontSize = 18.sp,
+                        color = TimerColors.TextMuted
+                    )
+                }
             }
         }
     }
