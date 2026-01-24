@@ -1,6 +1,6 @@
 package com.projectapp.tempus.data.user
 
-import com.projectapp.tempus.domain.user.model.User
+import com.projectapp.tempus.domain.model.User
 
 interface UserRepository {
     suspend fun getCurrentUser(): User

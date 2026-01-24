@@ -3,7 +3,7 @@ package com.projectapp.tempus.data.user
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.user.dto.UserDto
 import com.projectapp.tempus.data.user.dto.toDomain
-import com.projectapp.tempus.domain.user.model.User
+import com.projectapp.tempus.domain.model.User
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from

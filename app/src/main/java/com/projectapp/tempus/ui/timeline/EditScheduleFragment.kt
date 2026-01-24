@@ -37,7 +37,7 @@ class EditScheduleFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val currentUserId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
                     .auth.currentSessionOrNull()?.user?.id ?: ""
-                return EditScheduleViewModel(SupabaseScheduleRepository(), currentUserId) as T
+                return EditScheduleViewModel(SupabaseScheduleRepository(requireContext()), currentUserId) as T
             }
         }
     }

@@ -134,4 +134,7 @@ dependencies {
     // Image Loading (Coil)
     implementation("io.coil-kt:coil:2.7.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    
+    // Media Notification
+    implementation("androidx.media:media:1.7.0")
 }

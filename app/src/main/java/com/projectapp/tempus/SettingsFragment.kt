@@ -29,7 +29,6 @@ import com.projectapp.tempus.ui.setting.compose.SettingsScreen
 import com.projectapp.tempus.ui.setting.compose.UserInfo
 import com.projectapp.tempus.ui.theme.TempusTheme
 import io.github.jan.supabase.gotrue.auth
-import coil.load
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -94,9 +93,17 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 userInfoState.value = UserInfo(
                     name = user.username,
-                    email = user.email
+                    email = user.email,
+                    avatar = user.avatar
                 )
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isLoggedIn) {
+            viewModel.loadUser()
         }
     }
 
@@ -165,9 +172,17 @@ class SettingsFragment : Fragment() {
             }
 
             startActivity(Intent.createChooser(shareIntent, "Chia sẻ dữ liệu"))
-            Toast.makeText(requireContext(), "Đã lưu vào ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                requireContext(),
+                "Đã lưu vào ${file.absolutePath}",
+                Toast.LENGTH_LONG
+            ).show()
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Lỗi chia sẻ file: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Lỗi chia sẻ file: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -191,6 +206,7 @@ class SettingsFragment : Fragment() {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 showBiometricPrompt()
             }
+
             else -> {
                 // Nếu không có biometric, skip đến step 2
                 showDeleteConfirmationStep2()
@@ -201,7 +217,8 @@ class SettingsFragment : Fragment() {
     private fun showBiometricPrompt() {
         val executor = ContextCompat.getMainExecutor(requireContext())
 
-        val biometricPrompt = BiometricPrompt(this, executor,
+        val biometricPrompt = BiometricPrompt(
+            this, executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
@@ -211,14 +228,20 @@ class SettingsFragment : Fragment() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
                     if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
-                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                        Toast.makeText(requireContext(), "Lỗi xác thực: $errString", Toast.LENGTH_SHORT).show()
+                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                    ) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Lỗi xác thực: $errString",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    Toast.makeText(requireContext(), "Xác thực thất bại", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Xác thực thất bại", Toast.LENGTH_SHORT)
+                        .show()
                 }
             })
 
@@ -244,10 +267,18 @@ class SettingsFragment : Fragment() {
             .setView(editText)
             .setPositiveButton("Xóa vĩnh viễn") { _, _ ->
                 val input = editText.text.toString().trim()
-                if (input.equals("XÓA", ignoreCase = true) || input.equals("XOA", ignoreCase = true)) {
+                if (input.equals("XÓA", ignoreCase = true) || input.equals(
+                        "XOA",
+                        ignoreCase = true
+                    )
+                ) {
                     performDelete()
                 } else {
-                    Toast.makeText(requireContext(), "Nhập không đúng. Hủy xóa.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Nhập không đúng. Hủy xóa.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .setNegativeButton("Hủy", null)
@@ -259,9 +290,11 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Đang xóa dữ liệu...", Toast.LENGTH_SHORT).show()
             val success = exportRepository.deleteAllData()
             if (success) {
-                Toast.makeText(requireContext(), "✅ Đã xóa tất cả dữ liệu", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "✅ Đã xóa tất cả dữ liệu", Toast.LENGTH_LONG)
+                    .show()
             } else {
-                Toast.makeText(requireContext(), "❌ Lỗi khi xóa dữ liệu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "❌ Lỗi khi xóa dữ liệu", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }

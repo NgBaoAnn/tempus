@@ -9,8 +9,12 @@ import com.projectapp.tempus.data.schedule.dto.*
 import io.github.jan.supabase.postgrest.query.Returning
 import java.time.OffsetDateTime
 
-class SupabaseScheduleRepository : ScheduleRepository {
+import android.content.Context
+import com.projectapp.tempus.service.ReminderScheduler
+
+class SupabaseScheduleRepository(private val context: Context) : ScheduleRepository {
     private val supabase = SupabaseClientProvider.client
+    private val reminderScheduler = ReminderScheduler(context)
 
     override suspend fun getAllSchedules(userId: String): List<ScheduleRow> {
         return supabase.from("schedule")
@@ -85,9 +89,14 @@ class SupabaseScheduleRepository : ScheduleRepository {
             }
         }
 
-        return supabase.from("schedule")
+        val result = supabase.from("schedule")
             .insert(body) { select() }
-            .decodeSingle()
+            .decodeSingle<ScheduleRow>()
+            
+        // Schedule alarm
+        reminderScheduler.scheduleReminder(result.id, result.name, result.startTimeDate)
+        
+        return result
     }
 
     override suspend fun upsertScheduleItem(taskId: String, date: String, status: StatusType): ScheduleItemRow {
@@ -137,12 +146,18 @@ class SupabaseScheduleRepository : ScheduleRepository {
             }
         }
 
-        return supabase.from("schedule")
+        val result = supabase.from("schedule")
             .update(body) {
                 select()
                 filter { eq("id", taskId) }
             }
-            .decodeSingle()
+            .decodeSingle<ScheduleRow>()
+            
+        // Cancel old alarm and schedule new one
+        reminderScheduler.cancelReminder(taskId)
+        reminderScheduler.scheduleReminder(result.id, result.name, result.startTimeDate)
+        
+        return result
     }
 
     override suspend fun insertEditedVersion(fields: Map<String, Any?>): EditedVersionRow {
@@ -204,6 +219,8 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun deleteSchedule(id: String) {
+        reminderScheduler.cancelReminder(id)
+        
         supabase.from("schedule")
             .delete {
                 filter { eq("id", id) }

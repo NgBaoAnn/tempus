@@ -1,4 +1,4 @@
-package com.projectapp.tempus.domain.user.model
+package com.projectapp.tempus.domain.model
 
 data class User(
     val id: String,

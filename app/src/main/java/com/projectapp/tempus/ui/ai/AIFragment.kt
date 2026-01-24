@@ -28,7 +28,7 @@ class AIFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Initialize ViewModel with dependencies
-        val scheduleRepository = SupabaseScheduleRepository()
+        val scheduleRepository = SupabaseScheduleRepository(requireContext())
         val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
         
         val factory = object : ViewModelProvider.Factory {

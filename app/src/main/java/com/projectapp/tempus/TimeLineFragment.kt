@@ -36,7 +36,7 @@ class TimelineFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository()
+                val repo = SupabaseScheduleRepository(requireContext())
                 return TimelineViewModel(userId = myUserId, repo = repo) as T
             }
         }

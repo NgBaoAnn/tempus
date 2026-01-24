@@ -38,6 +38,33 @@ class MainActivity : AppCompatActivity() {
 
         // Setup Compose Bottom Nav
         updateBottomNav()
+        
+        handleNavigationIntent(intent)
+    }
+    
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        handleNavigationIntent(intent)
+    }
+    
+    private fun handleNavigationIntent(intent: android.content.Intent?) {
+        intent?.getStringExtra("NAVIGATE_TO")?.let { destination ->
+            if (destination == "timer") {
+                val timerItem = navItems.find { it.route == NavItem.Timer.route }
+                if (timerItem != null && currentRoute != NavItem.Timer.route) {
+                    currentRoute = NavItem.Timer.route
+                    
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(R.id.timerFragment, false, true)
+                        .setLaunchSingleTop(true)
+                        .setRestoreState(true)
+                        .build()
+                        
+                    navController.navigate(timerItem.fragmentId, null, navOptions)
+                    updateBottomNav()
+                }
+            }
+        }
     }
     
     private fun updateBottomNav() {

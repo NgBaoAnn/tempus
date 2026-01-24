@@ -31,10 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+
 
 data class UserInfo(
     val name: String = "",
-    val email: String = ""
+    val email: String = "",
+    val avatar: String? = null
 )
 
 @Composable
@@ -74,6 +81,7 @@ fun SettingsScreen(
         ProfileCard(
             userName = userInfo.name.ifEmpty { "Tên người dùng" },
             userEmail = userInfo.email.ifEmpty { "user@email.com" },
+            avatarUrl = userInfo.avatar,
             onClick = onProfileClick
         )
         
@@ -197,6 +205,7 @@ fun SettingsScreen(
 private fun ProfileCard(
     userName: String,
     userEmail: String,
+    avatarUrl: String?,
     onClick: () -> Unit
 ) {
     Card(
@@ -220,11 +229,17 @@ private fun ProfileCard(
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(avatarUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = "Avatar",
-                    modifier = Modifier.size(32.dp),
-                    tint = Color.Gray
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    error = rememberVectorPainter(Icons.Default.Person),
+                    fallback = rememberVectorPainter(Icons.Default.Person),
+                    placeholder = rememberVectorPainter(Icons.Default.Person)
                 )
             }
             
