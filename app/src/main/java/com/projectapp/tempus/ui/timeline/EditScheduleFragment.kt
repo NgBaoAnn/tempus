@@ -21,8 +21,10 @@ import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.appcompat.app.AlertDialog
+import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
+import io.github.jan.supabase.gotrue.auth
 
 
 class EditScheduleFragment : Fragment() {
@@ -33,8 +35,9 @@ class EditScheduleFragment : Fragment() {
     private val viewModel: EditScheduleViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val myUserId = "8c7c9fb1-5122-41c1-972f-6dfdcde89109"
-                return EditScheduleViewModel(SupabaseScheduleRepository(), myUserId) as T
+                val currentUserId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                    .auth.currentSessionOrNull()?.user?.id ?: ""
+                return EditScheduleViewModel(SupabaseScheduleRepository(), currentUserId) as T
             }
         }
     }
@@ -85,6 +88,17 @@ class EditScheduleFragment : Fragment() {
                 binding.tvRepeatValue.alpha = if (state.applyTodayOnly) 0.5f else 1.0f
                 try {
                     binding.imgIconPreview.setColorFilter(Color.parseColor(state.color))
+                } catch (e: Exception) {}
+                
+                // Priority display
+                binding.tvPriorityValue.text = priorityToVi(state.priority)
+                val priorityColor = when (state.priority) {
+                    PriorityType.high -> "#F44336"
+                    PriorityType.medium -> "#FF9800"
+                    PriorityType.low -> "#4CAF50"
+                }
+                try {
+                    binding.priorityIndicator.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor(priorityColor))
                 } catch (e: Exception) {}
             }
         }
@@ -174,10 +188,36 @@ class EditScheduleFragment : Fragment() {
         setupColorClick(binding.colorGreen, "#4CAF50")
         setupColorClick(binding.colorBlue, "#2196F3")
         setupColorClick(binding.colorPurple, "#9C27B0")
+        
+        // Priority Picker
+        binding.btnPickPriority.setOnClickListener {
+            val options = arrayOf("Cao", "Trung bình", "Thấp")
+            val values = arrayOf(PriorityType.high, PriorityType.medium, PriorityType.low)
+            
+            val current = viewModel.state.value.priority
+            val checkedIndex = values.indexOf(current).coerceAtLeast(0)
+            
+            AlertDialog.Builder(requireContext())
+                .setTitle("Chọn độ ưu tiên")
+                .setSingleChoiceItems(options, checkedIndex) { dialog, which ->
+                    viewModel.setPriority(values[which])
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Hủy", null)
+                .show()
+        }
     }
 
     private fun setupColorClick(view: View, colorCode: String) {
         view.setOnClickListener { viewModel.setColor(colorCode) }
+    }
+    
+    private fun priorityToVi(p: PriorityType): String {
+        return when (p) {
+            PriorityType.high -> "Cao"
+            PriorityType.medium -> "Trung bình"
+            PriorityType.low -> "Thấp"
+        }
     }
 
     private fun repeatToVi(r: RepeatType): String {

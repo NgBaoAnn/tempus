@@ -5,6 +5,7 @@ import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleItemRow
 import com.projectapp.tempus.data.schedule.dto.ScheduleRow
 import com.projectapp.tempus.data.schedule.dto.StatusType
+import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.EditedVersionRow
 import com.projectapp.tempus.domain.model.TimelineBlock
 import java.time.*
@@ -87,7 +88,7 @@ class BuildTimelineUseCase {
                 val ev = item?.editedVersion?.let { editedVersions[it] }
 
                 // ----- label safe (UNKNOWN fallback) -----
-                val lbEnum = ScheduleLabel.fromDb(ev?.label ?: s.label?.name)
+                val lbEnum = ev?.label ?: s.label ?: ScheduleLabel.book
                 val labelStr = if (lbEnum == ScheduleLabel.UNKNOWN) "book" else lbEnum.name
 
                 // ----- color -----
@@ -111,6 +112,7 @@ class BuildTimelineUseCase {
                     color = colorStr,
                     startTime = uiStartTime,
                     duration = uiDuration,
+                    priority = s.priority ?: PriorityType.medium,
                     status = status
                 )
             }

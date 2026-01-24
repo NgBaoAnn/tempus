@@ -31,6 +31,13 @@ android {
             "SUPABASE_KEY",
             "\"${project.findProperty("SUPABASE_KEY")}\""
         )
+
+        // Gemini AI service
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"${project.findProperty("GEMINI_API_KEY")}\""
+        )
     }
 
     buildFeatures {
@@ -105,6 +112,9 @@ dependencies {
     // Lottie Animations
     implementation("com.airbnb.android:lottie:6.3.0")
 
+    // Biometric for secure delete
+    implementation("androidx.biometric:biometric:1.1.0")
+
     // ============ JETPACK COMPOSE ============
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
@@ -114,6 +124,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.compose.runtime.livedata)
     implementation(libs.lottie.compose)
     
     // Compose Debug

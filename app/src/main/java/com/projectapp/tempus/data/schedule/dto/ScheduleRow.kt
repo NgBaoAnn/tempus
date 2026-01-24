@@ -10,6 +10,9 @@ data class ScheduleRow(
     @SerialName("name_schedule") val name: String,
 
     val label: ScheduleLabel? = null,
+    val priority: PriorityType? = PriorityType.medium,
+    @SerialName("category_id") val categoryId: String? = null,
+    val description: String? = null,
     // ----------------------------------------------------
 
     @SerialName("start_time_date") val startTimeDate: String, // ISO string (VD: 2025-12-21 07:00:00+07)
@@ -19,3 +22,4 @@ data class ScheduleRow(
     val source: SourceType? = null,
     @SerialName("created_at") val createdAt: String? = null
 )
+

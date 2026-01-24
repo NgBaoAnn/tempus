@@ -16,6 +16,12 @@
     <color name="label_purple">#AF52DE</color>
 
     <color name="toggle_bg">#E0E0E0</color>
-    <color name="text_secondary">#757575</color>
     <color name="background_setting">#F1F0F5</color>
+    
+    <!-- Bottom Navigation Colors -->
+    <color name="nav_primary">#3B82F6</color>
+    <color name="nav_primary_light">#EFF6FF</color>
+    <color name="nav_inactive">#94A3B8</color>
+    <color name="nav_background">#FFFFFF</color>
+    <color name="nav_surface">#F8FAFC</color>
 </resources>
