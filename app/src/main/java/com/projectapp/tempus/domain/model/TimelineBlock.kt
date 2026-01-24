@@ -18,5 +18,12 @@ data class TimelineBlock(
     // ---------------------------
     val priority: PriorityType = PriorityType.medium,
     val status: StatusType,
-    val createdAt: LocalDateTime? = null // For sorting by created date
+    val createdAt: LocalDateTime? = null, // For sorting by created date
+    val subtasks: List<SubtaskInfo> = emptyList()
+)
+
+data class SubtaskInfo(
+    val id: String,
+    val title: String,
+    val isDone: Boolean
 )

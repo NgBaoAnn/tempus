@@ -37,7 +37,11 @@ class TimelineFragment : Fragment() {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
-                return TimelineViewModel(userId = myUserId, repo = repo) as T
+                return TimelineViewModel(
+                    application = requireActivity().application,
+                    userId = myUserId,
+                    repo = repo
+                ) as T
             }
         }
     }
@@ -68,6 +72,7 @@ class TimelineFragment : Fragment() {
                     filterPriorities = uiState.filterPriorities,
                     filterStatus = uiState.filterStatus,
                     isFilterActive = uiState.isFilterActive,
+                    dailyQuote = uiState.dailyQuote,
                     // Callbacks
                     onDateSelected = { date ->
                         viewModel.onSelectDate(date)
@@ -99,7 +104,10 @@ class TimelineFragment : Fragment() {
                     onFilterLabelToggle = { label -> viewModel.onFilterLabelToggle(label) },
                     onFilterPriorityToggle = { priority -> viewModel.onFilterPriorityToggle(priority) },
                     onFilterStatusChanged = { status -> viewModel.onFilterStatusChanged(status) },
-                    onClearAllFilters = { viewModel.clearAllFilters() }
+                    onClearAllFilters = { viewModel.clearAllFilters() },
+                    onSubtaskToggle = { subtaskId, isDone ->
+                        viewModel.onSubtaskToggle(subtaskId, isDone)
+                    }
                 )
             }
         }

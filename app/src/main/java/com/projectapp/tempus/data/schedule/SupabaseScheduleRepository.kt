@@ -204,9 +204,64 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun deleteSchedule(id: String) {
+        // First delete related sub_task (FK constraint)
+        supabase.from("sub_task")
+            .delete {
+                filter { eq("schedule_id", id) }
+            }
+        
+        // Delete related schedule_items (FK constraint)
+        supabase.from("schedule_items")
+            .delete {
+                filter { eq("task_id", id) }
+            }
+        
+        // Then delete the schedule
         supabase.from("schedule")
             .delete {
                 filter { eq("id", id) }
+            }
+    }
+    
+    // ============================================
+    // SUBTASK METHODS
+    // ============================================
+    
+    override suspend fun getSubTasks(scheduleId: String): List<SubTaskRow> {
+        return supabase.from("sub_task")
+            .select {
+                filter { eq("schedule_id", scheduleId) }
+            }
+            .decodeList()
+    }
+    
+    override suspend fun insertSubTasks(scheduleId: String, titles: List<String>) {
+        if (titles.isEmpty()) return
+        
+        titles.forEachIndexed { index, title ->
+            val body = buildJsonObject {
+                put("schedule_id", scheduleId)
+                put("title", title)
+                put("is_done", false)
+                put("order_no", index)
+            }
+            supabase.from("sub_task").insert(body)
+        }
+    }
+    
+    override suspend fun deleteSubTasksByScheduleId(scheduleId: String) {
+        supabase.from("sub_task")
+            .delete {
+                filter { eq("schedule_id", scheduleId) }
+            }
+    }
+    
+    override suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean) {
+        supabase.from("sub_task")
+            .update(
+                buildJsonObject { put("is_done", isDone) }
+            ) {
+                filter { eq("id", subTaskId) }
             }
     }
 }

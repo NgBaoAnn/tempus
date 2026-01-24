@@ -7,7 +7,9 @@ import com.projectapp.tempus.data.schedule.dto.ScheduleRow
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.EditedVersionRow
+import com.projectapp.tempus.data.schedule.dto.SubTaskRow
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.domain.model.SubtaskInfo
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -56,7 +58,8 @@ class BuildTimelineUseCase {
         targetDate: LocalDate,
         schedules: List<ScheduleRow>,
         items: List<ScheduleItemRow>,
-        editedVersions: Map<String, EditedVersionRow>
+        editedVersions: Map<String, EditedVersionRow>,
+        subtasksMap: Map<String, List<SubTaskRow>> = emptyMap()
     ): List<TimelineBlock> {
 
         val itemsByTask = items.associateBy { it.taskId }
@@ -104,11 +107,20 @@ class BuildTimelineUseCase {
                 val durationStr = ev?.implementationTime ?: s.implementationTime
                 val uiDuration = parseDuration(durationStr)
 
-                // ----- createdAt parsing -----
+                // ----- createdAt parsing (for sorting) -----
                 val createdAtLdt = s.createdAt?.let { 
                     try { parseToZonedDateTime(it).withZoneSameInstant(systemZone).toLocalDateTime() } 
                     catch (_: Exception) { null }
                 }
+
+                // ----- subtasks -----
+                val subtaskInfos = subtasksMap[s.id]?.map { st ->
+                    SubtaskInfo(
+                        id = st.id ?: "",
+                        title = st.title,
+                        isDone = st.isDone
+                    )
+                } ?: emptyList()
 
                 TimelineBlock(
                     taskId = s.id,
@@ -121,7 +133,8 @@ class BuildTimelineUseCase {
                     duration = uiDuration,
                     priority = s.priority ?: PriorityType.medium,
                     status = status,
-                    createdAt = createdAtLdt
+                    createdAt = createdAtLdt,
+                    subtasks = subtaskInfos
                 )
             }
             .sortedBy { it.startTime }

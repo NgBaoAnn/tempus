@@ -84,6 +84,17 @@ class AIRepository(
                 |- Đây chỉ là ĐỀ XUẤT, chưa thực hiện
                 |- CHỈ trả về JSON, không thêm text giải thích
                 |- Nếu không phải yêu cầu hành động, trả lời bình thường (không JSON)
+                |
+                |ĐỐI VỚI DELETE_SCHEDULE VÀ UPDATE_SCHEDULE:
+                |- PHẢI bao gồm trường "id" lấy từ [CONTEXT] được cung cấp
+                |- Nếu người dùng yêu cầu xóa/sửa nhưng KHÔNG có lịch trình phù hợp trong CONTEXT, trả lời văn bản thông thường (không JSON)
+                |- Format cho DELETE: {"type": "DELETE_SCHEDULE", "id": "uuid-from-context", "name": "Tên công việc bị xóa"}
+                |- Format cho UPDATE: {"type": "UPDATE_SCHEDULE", "id": "uuid-from-context", "name": "Tên mới", "start": "HH:MM", ...}
+                |
+                |VÍ DỤ XÓA:
+                |Nếu CONTEXT có: "ID: abc-123, Tên: Học bài, Ngày: 2026-01-24"
+                |Và người dùng yêu cầu "xóa Học bài"
+                |Trả về: {"intent": "Xóa lịch Học bài", "actions": [{"type": "DELETE_SCHEDULE", "id": "abc-123", "name": "Học bài"}], "impact": "Xóa 1 công việc"}
                 """.trimMargin()
             )
         )
@@ -153,10 +164,34 @@ class AIRepository(
      */
     suspend fun requestProposal(message: String): Result<AgentResponse> = withContext(Dispatchers.IO) {
         try {
+            // Build context with user's current schedules for today
+            val scheduleContext = buildScheduleContext()
+            
+            // DEBUG: Log the context being sent
+            android.util.Log.d("AIRepository", "Schedule context: $scheduleContext")
+            android.util.Log.d("AIRepository", "userId: $userId, repo: ${scheduleRepository != null}")
+            
+            val contextMessage = if (scheduleContext.isNotBlank()) {
+                """$message
+
+[CONTEXT - Lịch trình hiện tại của người dùng]
+$scheduleContext
+[END CONTEXT]"""
+            } else {
+                // If no context, still inform AI
+                """$message
+
+[CONTEXT - Lịch trình hiện tại của người dùng]
+Không thể tải lịch trình. Vui lòng thử lại.
+[END CONTEXT]"""
+            }
+            
+            android.util.Log.d("AIRepository", "Final message to AI: $contextMessage")
+            
             val contents = listOf(
                 Content(
                     role = "user",
-                    parts = listOf(Part(text = message))
+                    parts = listOf(Part(text = contextMessage))
                 )
             )
             
@@ -175,6 +210,8 @@ class AIRepository(
                 ?.content?.parts?.firstOrNull()?.text
                 ?: return@withContext Result.failure(Exception("Empty response from AI"))
             
+            android.util.Log.d("AIRepository", "AI response: $responseText")
+            
             // Try to parse JSON response into AgentProposal
             val proposal = parseProposal(responseText)
             
@@ -186,7 +223,69 @@ class AIRepository(
                 Result.success(AgentResponse.TextOnly(responseText))
             }
         } catch (e: Exception) {
+            android.util.Log.e("AIRepository", "Error in requestProposal", e)
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Build context string with user's current schedules
+     * This allows AI to reference actual schedule IDs for delete/update
+     */
+    private suspend fun buildScheduleContext(): String {
+        if (scheduleRepository == null || userId == null) return ""
+        
+        return try {
+            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val allSchedules = scheduleRepository.getAllSchedules(userId)
+            
+            if (allSchedules.isEmpty()) return "Không có lịch trình nào."
+            
+            val scheduleLines = allSchedules.map { schedule ->
+                // Parse date/time from startTimeDate
+                // Format can be: "2025-12-21T07:00:00+07:00" or "2025-12-21 07:00:00+07"
+                val dateTimeStr = schedule.startTimeDate
+                val originalDate = try {
+                    if (dateTimeStr.contains("T")) {
+                        dateTimeStr.substringBefore("T")
+                    } else {
+                        dateTimeStr.split(" ").firstOrNull() ?: "không xác định"
+                    }
+                } catch (e: Exception) {
+                    "không xác định"
+                }
+                
+                val timeInfo = try {
+                    if (dateTimeStr.contains("T")) {
+                        dateTimeStr.substringAfter("T").take(5)
+                    } else {
+                        dateTimeStr.split(" ").getOrNull(1)?.take(5) ?: "?"
+                    }
+                } catch (e: Exception) {
+                    "?"
+                }
+                
+                // Check repeat type to determine if applies to today
+                val repeatType = schedule.repeat.name
+                val appliesToday = when (repeatType) {
+                    "daily" -> true
+                    "weekly" -> true  // Simplified - could check day of week
+                    "once" -> originalDate == today
+                    else -> true
+                }
+                
+                val todayMarker = if (appliesToday) "[HÔM NAY] " else ""
+                val repeatInfo = if (repeatType != "once") "(lặp: $repeatType)" else ""
+                
+                "$todayMarker- ID: ${schedule.id}, Tên: ${schedule.name}, Giờ: $timeInfo, $repeatInfo"
+            }
+            
+            """Hôm nay: $today
+LƯU Ý: Schedule có lặp (daily/weekly) SẼ xuất hiện hôm nay dù ngày tạo gốc khác.
+Danh sách lịch trình:
+${scheduleLines.joinToString("\n")}"""
+        } catch (e: Exception) {
+            ""
         }
     }
     
@@ -269,15 +368,22 @@ class AIRepository(
                             // Parse date or use today
                             val dateStr = scheduleData.date ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                             
-                            // Build schedule row
+                            // Build start_time_date as ISO timestamp
+                            // Format: "2025-12-21T07:00:00+07:00"
+                            val startTimeDate = "${dateStr}T${scheduleData.startTime}:00+07:00"
+                            
+                            // Convert duration to interval format (HH:MM:SS)
+                            val hours = scheduleData.durationMinutes / 60
+                            val minutes = scheduleData.durationMinutes % 60
+                            val implementationTime = String.format("%02d:%02d:00", hours, minutes)
+                            
+                            // Build schedule row matching database schema
                             val row = mapOf(
                                 "user_id" to userId,
-                                "name" to scheduleData.name,
-                                "start_time" to scheduleData.startTime,
-                                "end_time" to (scheduleData.endTime ?: ""),
-                                "duration" to scheduleData.durationMinutes,
-                                "date" to dateStr,
-                                "is_active" to true
+                                "name_schedule" to scheduleData.name,
+                                "start_time_date" to startTimeDate,
+                                "implementation_time" to implementationTime,
+                                "repeat" to "once"  // Default repeat type
                             )
                             
                             // Actually insert to database

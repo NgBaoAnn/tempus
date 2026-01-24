@@ -1,11 +1,14 @@
 package com.projectapp.tempus.ui.timeline
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.projectapp.tempus.data.quote.QuoteRepository
+import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
@@ -31,6 +34,7 @@ data class TimelineUiState(
     val blocks: List<TimelineBlock> = emptyList(),
     val filteredBlocks: List<TimelineBlock> = emptyList(), // After applying filters
     val error: String? = null,
+    val dailyQuote: QuoteDto? = null,
     // Search/Sort/Filter state
     val searchQuery: String = "",
     val sortBy: SortOption = SortOption.START_TIME,
@@ -41,14 +45,26 @@ data class TimelineUiState(
 )
 
 class TimelineViewModel(
+    application: Application,
     private var cachedSchedules: List<com.projectapp.tempus.data.schedule.dto.ScheduleRow> = emptyList(),
     private val userId: String,
     private val repo: ScheduleRepository,
     private val builder: BuildTimelineUseCase = BuildTimelineUseCase()
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
+    private val quoteRepository = QuoteRepository(application)
+    
     private val _ui = MutableStateFlow(TimelineUiState())
     val ui: StateFlow<TimelineUiState> = _ui
+    
+    init {
+        loadDailyQuote()
+    }
+    
+    private fun loadDailyQuote() {
+        val quote = quoteRepository.getTodayQuote()
+        _ui.value = _ui.value.copy(dailyQuote = quote)
+    }
 
     fun onSelectDate(date: LocalDate) {
         Log.d("Timeline", "onSelectDate: $date")
@@ -111,9 +127,23 @@ class TimelineViewModel(
         }
     }
 
+    fun onSubtaskToggle(subtaskId: String, isDone: Boolean) {
+        Log.d("Timeline", "onSubtaskToggle subtaskId=$subtaskId isDone=$isDone")
+        viewModelScope.launch {
+            try {
+                repo.updateSubTaskStatus(subtaskId, isDone)
+                Log.d("Timeline", "updateSubTaskStatus ok")
+                load(_ui.value.date)
+            } catch (e: Exception) {
+                Log.e("Timeline", "updateSubTaskStatus FAILED: ${e.message}", e)
+            }
+        }
+    }
+
     fun onClickBlock(taskId: String) {
         Log.d("Timeline", "onClickBlock taskId=$taskId")
     }
+
 
     fun onEditName(taskId: String, newName: String) {
         viewModelScope.launch {
@@ -170,7 +200,13 @@ class TimelineViewModel(
                 val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
                 val editedMap = repo.getEditedVersions(editedIds).associateBy { it.id }
 
-                val blocks = builder.build(date, schedules, scheduleItems, editedMap)
+                // Load subtasks for all schedules
+                val subtasksMap = mutableMapOf<String, List<com.projectapp.tempus.data.schedule.dto.SubTaskRow>>()
+                for (taskId in taskIds) {
+                    subtasksMap[taskId] = repo.getSubTasks(taskId)
+                }
+
+                val blocks = builder.build(date, schedules, scheduleItems, editedMap, subtasksMap)
 
                 Log.d("Timeline", "build blocks=${blocks.size}")
 
