@@ -1,6 +1,7 @@
 package com.projectapp.tempus.ui.timeline.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import com.projectapp.tempus.R
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.domain.model.SubtaskInfo
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -48,6 +50,23 @@ object TimelineColors {
     val TimelineGray = Color(0xFFE2E8F0)
 }
 
+/**
+ * Get drawable resource ID for schedule label - matches existing drawable files
+ */
+fun getLabelIconResId(label: String): Int = when (label.lowercase()) {
+    "wakeup" -> R.drawable.wakeup
+    "eat" -> R.drawable.eat
+    "cook" -> R.drawable.cook
+    "exercise" -> R.drawable.exercise
+    "rest" -> R.drawable.rest
+    "water" -> R.drawable.water
+    "book" -> R.drawable.book
+    "sleep" -> R.drawable.sleep
+    "clean" -> R.drawable.clean
+    "garden" -> R.drawable.ic_garden
+    else -> R.drawable.book  // Default
+}
+
 @Composable
 fun TimelineScreen(
     blocks: List<TimelineBlock>,
@@ -59,6 +78,7 @@ fun TimelineScreen(
     onAddClick: () -> Unit,
     onTaskClick: (TimelineBlock) -> Unit,
     onStatusToggle: (TimelineBlock) -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -101,7 +121,8 @@ fun TimelineScreen(
                 TimelineList(
                     blocks = blocks,
                     onTaskClick = onTaskClick,
-                    onStatusToggle = onStatusToggle
+                    onStatusToggle = onStatusToggle,
+                    onSubtaskToggle = onSubtaskToggle
                 )
             }
         }
@@ -239,7 +260,8 @@ fun WeekCalendarStrip(
 fun TimelineList(
     blocks: List<TimelineBlock>,
     onTaskClick: (TimelineBlock) -> Unit,
-    onStatusToggle: (TimelineBlock) -> Unit
+    onStatusToggle: (TimelineBlock) -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -257,7 +279,8 @@ fun TimelineList(
                 block = block,
                 isLast = index == blocks.lastIndex,
                 onTaskClick = { onTaskClick(block) },
-                onStatusToggle = { onStatusToggle(block) }
+                onStatusToggle = { onStatusToggle(block) },
+                onSubtaskToggle = onSubtaskToggle
             )
             
             if (showFreeTime && nextBlock != null) {
@@ -280,7 +303,8 @@ fun TimelineItem(
     block: TimelineBlock,
     isLast: Boolean,
     onTaskClick: () -> Unit,
-    onStatusToggle: () -> Unit
+    onStatusToggle: () -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val startTime = block.startTime.format(timeFormatter)
@@ -365,7 +389,7 @@ fun TimelineItem(
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Icon
+                // Icon based on label
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -374,10 +398,10 @@ fun TimelineItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = painterResource(id = getLabelIconResId(block.label)),
                         contentDescription = null,
                         tint = taskColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 
@@ -430,9 +454,62 @@ fun TimelineItem(
                         fontSize = 13.sp,
                         color = TimelineColors.TextMuted
                     )
+                    
+                    // Subtasks display
+                    if (block.subtasks.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Column {
+                            block.subtasks.take(3).forEach { subtask ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .clip(CircleShape)
+                                            .background(if (subtask.isDone) taskColor.copy(alpha = 0.7f) else Color.Transparent)
+                                            .border(
+                                                width = 1.dp,
+                                                color = if (subtask.isDone) Color.Transparent else TimelineColors.TextMuted,
+                                                shape = CircleShape
+                                            )
+                                            .clickable { onSubtaskToggle(subtask.id, !subtask.isDone) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (subtask.isDone) {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(10.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = subtask.title,
+                                        fontSize = 12.sp,
+                                        color = if (subtask.isDone) TimelineColors.TextMuted else TimelineColors.TextSecondary,
+                                        textDecoration = if (subtask.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            if (block.subtasks.size > 3) {
+                                Text(
+                                    text = "+${block.subtasks.size - 3} more",
+                                    fontSize = 11.sp,
+                                    color = TimelineColors.TextMuted,
+                                    modifier = Modifier.padding(start = 20.dp, top = 2.dp)
+                                )
+                            }
+                        }
+                    }
                 }
                 
-                // Checkbox
+                // Checkbox - visible border when not done
                 Box(
                     modifier = Modifier
                         .size(28.dp)
@@ -440,9 +517,11 @@ fun TimelineItem(
                         .background(if (isDone) taskColor else Color.Transparent)
                         .then(
                             if (!isDone) {
-                                Modifier
-                                    .background(Color.Transparent)
-                                    .clip(CircleShape)
+                                Modifier.border(
+                                    width = 2.dp,
+                                    color = TimelineColors.TextMuted,
+                                    shape = CircleShape
+                                )
                             } else Modifier
                         )
                         .clickable { onStatusToggle() },
@@ -455,21 +534,6 @@ fun TimelineItem(
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color.Transparent)
-                                .padding(2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(Color.Transparent)
-                            )
-                        }
                     }
                 }
             }
