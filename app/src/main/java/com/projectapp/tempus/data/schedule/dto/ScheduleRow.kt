@@ -13,7 +13,7 @@ data class ScheduleRow(
     val priority: PriorityType? = PriorityType.medium,
     @SerialName("category_id") val categoryId: String? = null,
     val description: String? = null,
-    @SerialName("end_date") val endDate: String? = null,
+
     // ----------------------------------------------------
 
     @SerialName("start_time_date") val startTimeDate: String, // ISO string (VD: 2025-12-21 07:00:00+07)
