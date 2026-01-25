@@ -86,6 +86,7 @@ class TreeView @JvmOverloads constructor(
                 TreeType.SAKURA -> R.drawable.ic_sakura_sapling
                 TreeType.BAMBOO -> R.drawable.ic_bamboo_sapling
                 TreeType.PALM -> R.drawable.ic_palm_sapling
+                TreeType.COCONUT -> R.drawable.ic_palm_sapling  // Reuse palm
                 TreeType.APPLE -> R.drawable.ic_apple_sapling
             }
             TreeState.TREE -> when (type) {
@@ -94,6 +95,7 @@ class TreeView @JvmOverloads constructor(
                 TreeType.SAKURA -> R.drawable.ic_sakura_tree
                 TreeType.BAMBOO -> R.drawable.ic_bamboo_tree
                 TreeType.PALM -> R.drawable.ic_palm_tree
+                TreeType.COCONUT -> R.drawable.ic_palm_tree  // Reuse palm
                 TreeType.APPLE -> R.drawable.ic_apple_tree
             }
             TreeState.DEAD -> R.drawable.ic_tree_dead

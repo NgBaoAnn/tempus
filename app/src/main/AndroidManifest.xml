@@ -28,6 +28,10 @@
             android:name=".ui.setting.ProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.garden.TreeDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tempus" />
+        <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
         <activity
