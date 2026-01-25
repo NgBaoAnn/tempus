@@ -6,8 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+<<<<<<< HEAD
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -17,7 +16,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+=======
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+>>>>>>> master
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -29,7 +34,11 @@ import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
+<<<<<<< HEAD
 import com.projectapp.tempus.data.voice.SpeechRecognitionManager
+import com.projectapp.tempus.data.voice.TaskParserService
+=======
+>>>>>>> master
 import com.projectapp.tempus.domain.usecase.PointsManager
 import com.projectapp.tempus.ui.components.PointsNotification
 import com.projectapp.tempus.ui.timeline.MonthCalendarDialogFragment
@@ -42,6 +51,7 @@ import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -55,8 +65,12 @@ class TimelineFragment : Fragment() {
                 val repo = SupabaseScheduleRepository()
                 val pointsManager = PointsManager(SupabaseGamificationRepository())
                 return TimelineViewModel(
+<<<<<<< HEAD
                     application = requireActivity().application,
                     userId = myUserId,
+=======
+                    userId = myUserId, 
+>>>>>>> master
                     repo = repo,
                     pointsManager = pointsManager
                 ) as T
@@ -83,12 +97,13 @@ class TimelineFragment : Fragment() {
                 val weeks = buildWeeksAround(uiState.date)
                 val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
                 
+<<<<<<< HEAD
                 // Voice sheet state
                 var showVoiceSheet by remember { mutableStateOf(false) }
                 val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
                 val scope = rememberCoroutineScope()
                 
-                // Voice ViewModel
+                // Voice ViewModel - use correct constructor
                 val supabaseForVoice = SupabaseClientProvider.client
                 val voiceUserId = supabaseForVoice.auth.currentUserOrNull()?.id ?: ""
                 val voiceRepo = SupabaseScheduleRepository()
@@ -102,69 +117,71 @@ class TimelineFragment : Fragment() {
                 }
                 val voiceState by voiceViewModel.state.collectAsState()
                 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    TimelineScreen(
-                        blocks = if (uiState.isFilterActive) uiState.filteredBlocks else uiState.blocks,
-                        selectedDate = uiState.date,
-                        monthYear = uiState.date.format(formatter),
-                        weeks = weeks.map { it.days },
-                        searchQuery = uiState.searchQuery,
-                        sortBy = uiState.sortBy,
-                        filterLabels = uiState.filterLabels,
-                        filterPriorities = uiState.filterPriorities,
-                        filterStatus = uiState.filterStatus,
-                        isFilterActive = uiState.isFilterActive,
-                        dailyQuote = uiState.dailyQuote,
-                        onDateSelected = { date ->
-                            viewModel.onSelectDate(date)
-                        },
-                        onMonthPickerClick = {
-                            showMonthPicker()
-                        },
-                        onAddClick = {
-                            val currentDate = viewModel.ui.value.date
-                            val bundle = Bundle().apply {
-                                putString("selectedDate", currentDate.toString())
-                            }
-                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
-                        },
-                        onVoiceClick = {
-                            showVoiceSheet = true
-                        },
-                        onTaskClick = { block ->
-                            val bundle = Bundle().apply {
-                                putString("taskId", block.taskId)
-                                putString("selectedDate", viewModel.ui.value.date.toString())
-                            }
-                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
-                        },
-                        onStatusToggle = { block ->
-                            val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
-                            viewModel.onToggleStatus(block.taskId, newStatus)
-                        },
-                        onSearchQueryChanged = { query -> viewModel.onSearchQueryChanged(query) },
-                        onSortChanged = { sortOption -> viewModel.onSortChanged(sortOption) },
-                        onFilterLabelToggle = { label -> viewModel.onFilterLabelToggle(label) },
-                        onFilterPriorityToggle = { priority -> viewModel.onFilterPriorityToggle(priority) },
-                        onFilterStatusChanged = { status -> viewModel.onFilterStatusChanged(status) },
-                        onClearAllFilters = { viewModel.clearAllFilters() },
-                        onSubtaskToggle = { subtaskId, isDone ->
-                            viewModel.onSubtaskToggle(subtaskId, isDone)
+                TimelineScreen(
+                    // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
+                    blocks = if (uiState.isFilterActive) uiState.filteredBlocks else uiState.blocks,
+                    selectedDate = uiState.date,
+                    monthYear = uiState.date.format(formatter),
+                    weeks = weeks.map { it.days },
+                    // Search/Sort/Filter state
+                    searchQuery = uiState.searchQuery,
+                    sortBy = uiState.sortBy,
+                    filterLabels = uiState.filterLabels,
+                    filterPriorities = uiState.filterPriorities,
+                    filterStatus = uiState.filterStatus,
+                    isFilterActive = uiState.isFilterActive,
+                    dailyQuote = uiState.dailyQuote,
+                    // Callbacks
+                    onDateSelected = { date ->
+                        viewModel.onSelectDate(date)
+                    },
+                    onMonthPickerClick = {
+                        showMonthPicker()
+                    },
+                    onAddClick = {
+                        val currentDate = viewModel.ui.value.date
+                        val bundle = Bundle().apply {
+                            putString("selectedDate", currentDate.toString())
+                        }
+                        findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                    },
+                    onVoiceClick = {
+                        showVoiceSheet = true
+                    },
+                    onTaskClick = { block ->
+                        val bundle = Bundle().apply {
+                            putString("taskId", block.taskId)
+                            putString("selectedDate", viewModel.ui.value.date.toString())
+                        }
+                        findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                    },
+                    onStatusToggle = { block ->
+                        val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
+                        viewModel.onToggleStatus(block.taskId, newStatus)
+                    },
+                    // Search/Sort/Filter callbacks
+                    onSearchQueryChanged = { query -> viewModel.onSearchQueryChanged(query) },
+                    onSortChanged = { sortOption -> viewModel.onSortChanged(sortOption) },
+                    onFilterLabelToggle = { label -> viewModel.onFilterLabelToggle(label) },
+                    onFilterPriorityToggle = { priority -> viewModel.onFilterPriorityToggle(priority) },
+                    onFilterStatusChanged = { status -> viewModel.onFilterStatusChanged(status) },
+                    onClearAllFilters = { viewModel.clearAllFilters() },
+                    onSubtaskToggle = { subtaskId, isDone ->
+                        viewModel.onSubtaskToggle(subtaskId, isDone)
+                    }
+                )
+                
+                // Points earned notification overlay
+                val earnedPoints = uiState.earnedPoints
+                val earnedReason = uiState.earnedReason
+                if (earnedPoints != null && earnedReason != null) {
+                    PointsNotification(
+                        points = earnedPoints,
+                        reason = earnedReason,
+                        onDismiss = {
+                            viewModel.clearEarnedPoints()
                         }
                     )
-                    
-                    // Points earned notification overlay
-                    val earnedPoints = uiState.earnedPoints
-                    val earnedReason = uiState.earnedReason
-                    if (earnedPoints != null && earnedReason != null) {
-                        PointsNotification(
-                            points = earnedPoints,
-                            reason = earnedReason,
-                            onDismiss = {
-                                viewModel.clearEarnedPoints()
-                            }
-                        )
-                    }
                 }
                 
                 // Voice Input Bottom Sheet
@@ -187,6 +204,7 @@ class TimelineFragment : Fragment() {
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
                             onConfirmTask = { task ->
+                                // Navigate to EditSchedule with parsed task data
                                 val bundle = Bundle().apply {
                                     putString("selectedDate", viewModel.ui.value.date.toString())
                                     putString("taskName", task.taskName ?: "")
@@ -209,6 +227,52 @@ class TimelineFragment : Fragment() {
                             }
                         )
                     }
+=======
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TimelineScreen(
+                        blocks = uiState.blocks,
+                        selectedDate = uiState.date,
+                        monthYear = uiState.date.format(formatter),
+                        weeks = weeks.map { it.days },
+                        onDateSelected = { date ->
+                            viewModel.onSelectDate(date)
+                        },
+                        onMonthPickerClick = {
+                            showMonthPicker()
+                        },
+                        onAddClick = {
+                            val currentDate = viewModel.ui.value.date
+                            val bundle = Bundle().apply {
+                                putString("selectedDate", currentDate.toString())
+                            }
+                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                        },
+                        onTaskClick = { block ->
+                            val bundle = Bundle().apply {
+                                putString("taskId", block.taskId)
+                                putString("selectedDate", viewModel.ui.value.date.toString())
+                            }
+                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                        },
+                        onStatusToggle = { block ->
+                            val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
+                            viewModel.onToggleStatus(block.taskId, newStatus)
+                        }
+                    )
+                    
+                    // Points earned notification overlay
+                    val earnedPoints = uiState.earnedPoints
+                    val earnedReason = uiState.earnedReason
+                    if (earnedPoints != null && earnedReason != null) {
+                        PointsNotification(
+                            points = earnedPoints,
+                            reason = earnedReason,
+                            onDismiss = {
+                                viewModel.clearEarnedPoints()
+                            }
+                        )
+                    }
+>>>>>>> master
                 }
             }
         }
@@ -220,6 +284,7 @@ class TimelineFragment : Fragment() {
         viewModel.onRefresh()
         
         // Sync all timeline alarms when timeline loads
+        // At this point, user auth is guaranteed to be ready
         com.projectapp.tempus.service.TimelineAlarmManager.syncAllAlarms(requireContext())
     }
 
