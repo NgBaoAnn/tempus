@@ -235,6 +235,15 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeList()
     }
     
+    override suspend fun getSubTasksBatch(scheduleIds: List<String>): List<SubTaskRow> {
+        if (scheduleIds.isEmpty()) return emptyList()
+        return supabase.from("sub_task")
+            .select {
+                filter { isIn("schedule_id", scheduleIds) }
+            }
+            .decodeList()
+    }
+    
     override suspend fun insertSubTasks(scheduleId: String, titles: List<String>) {
         if (titles.isEmpty()) return
         

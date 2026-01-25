@@ -88,33 +88,56 @@ class AIRepository(
                 |
                 |Các type hợp lệ: CREATE_SCHEDULE, UPDATE_SCHEDULE, DELETE_SCHEDULE, SKIP_INSTANCE
                 |
-                |QUAN TRỌNG VỀ XÓA LỊCH RECURRING (daily/weekly):
+                |=== CREATE_SCHEDULE ===
+                |Format: {"type": "CREATE_SCHEDULE", "name": "Tên", "startTime": "HH:MM", "duration": 60, "date": "YYYY-MM-DD", "label": "...", "color": "..."}
+                |
+                |LABEL (icon) - CHỌN ĐÚNG loại phù hợp với hoạt động:
+                |  - wakeup: Thức dậy, alarm, báo thức
+                |  - eat: Ăn uống, bữa sáng/trưa/tối, meal
+                |  - exercise: Tập luyện, gym, thể dục, chạy bộ, yoga
+                |  - rest: Nghỉ ngơi, thư giãn, break, meditation
+                |  - water: Uống nước, trà, cà phê
+                |  - book: Học tập, đọc sách, làm việc, meeting, coding
+                |  - sleep: Đi ngủ, ngủ
+                |  - clean: Dọn dẹp, vệ sinh, giặt giũ
+                |  - cook: Nấu ăn, làm bếp
+                |  - garden: Làm vườn, trồng cây
+                |
+                |COLOR (hex) - CHỌN màu phù hợp với loại hoạt động:
+                |  - #FF3B30 (đỏ): exercise, thể thao
+                |  - #FF9500 (cam): wakeup, báo thức
+                |  - #FFCC00 (vàng): eat, ăn uống
+                |  - #34C759 (xanh lá): clean, garden
+                |  - #00C7BE (teal): water, uống nước
+                |  - #007AFF (xanh dương): book, học tập, làm việc
+                |  - #5856D6 (tím đậm): sleep
+                |  - #AF52DE (tím): rest, nghỉ ngơi
+                |  - #FF2D55 (hồng): cook, nấu ăn
+                |  - #A2845E (nâu): garden
+                |
+                |VÍ DỤ CREATE_SCHEDULE:
+                |Request: "thêm lịch học IELTS lúc 9h sáng mai, 2 tiếng"
+                |→ {"actions": [{"type": "CREATE_SCHEDULE", "name": "Học IELTS", "startTime": "09:00", "duration": 120, "date": "2026-01-26", "label": "book", "color": "#007AFF"}]}
+                |
+                |Request: "tạo lịch tập gym 7h sáng"
+                |→ {"actions": [{"type": "CREATE_SCHEDULE", "name": "Tập gym", "startTime": "07:00", "duration": 60, "label": "exercise", "color": "#FF3B30"}]}
+                |
+                |=== XÓA LỊCH RECURRING (daily/weekly) ===
                 |
                 |1. SKIP_INSTANCE: Dùng khi XÓA/BỎ QUA cho MỘT NGÀY CỤ THỂ
                 |   - Khi lịch có (lặp: daily) hoặc (lặp: weekly)
                 |   - Và người dùng muốn xóa "hôm nay" hoặc ngày cụ thể
                 |   - Format: {"type": "SKIP_INSTANCE", "id": "uuid", "name": "Tên", "date": "YYYY-MM-DD"}
-                |   - Ví dụ: "xóa hđ hôm nay" với lịch daily → SKIP_INSTANCE với date của hôm nay
                 |
                 |2. DELETE_SCHEDULE: Dùng khi XÓA HOÀN TOÀN chuỗi lịch
                 |   - Khi lịch KHÔNG lặp (repeat: once)
-                |   - HOẶC khi người dùng nói rõ "xóa hoàn toàn", "xóa vĩnh viễn", "xóa luôn"
+                |   - HOẶC khi người dùng nói rõ "xóa hoàn toàn", "xóa vĩnh viễn"
                 |   - Format: {"type": "DELETE_SCHEDULE", "id": "uuid", "name": "Tên"}
-                |
-                |VÍ DỤ:
-                |CONTEXT: "[HÔM NAY] - ID: abc-123, Tên: Học bài, (lặp: daily)"
-                |Hôm nay: 2026-01-25
-                |
-                |Request: "xóa hoạt động học bài hôm nay"
-                |→ {"actions": [{"type": "SKIP_INSTANCE", "id": "abc-123", "name": "Học bài", "date": "2026-01-25"}]}
-                |
-                |Request: "xóa hoàn toàn lịch học bài"
-                |→ {"actions": [{"type": "DELETE_SCHEDULE", "id": "abc-123", "name": "Học bài"}]}
                 |
                 |QUAN TRỌNG:
                 |- CHỈ trả về JSON, không thêm text giải thích
-                |- LUÔN bao gồm "id" lấy từ CONTEXT
-                |- Với recurring activities + xóa ngày cụ thể → LUÔN dùng SKIP_INSTANCE + date
+                |- LUÔN bao gồm "id" từ CONTEXT khi UPDATE/DELETE
+                |- LUÔN gán label và color phù hợp khi CREATE_SCHEDULE
                 """.trimMargin()
             )
         )
@@ -191,6 +214,50 @@ class AIRepository(
             )
         )
     )
+    
+    // ============================================
+    // VOICE COMMAND PARSING (STATELESS)
+    // ============================================
+    
+    /**
+     * Parse voice command to JSON - stateless, no conversation history
+     * Lower temperature for more consistent JSON output
+     */
+    suspend fun parseVoiceCommand(prompt: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val request = GeminiRequest(
+                contents = listOf(
+                    Content(
+                        role = "user",
+                        parts = listOf(Part(text = prompt))
+                    )
+                ),
+                systemInstruction = Content(
+                    role = "user",
+                    parts = listOf(
+                        Part(text = """
+                            |Bạn là JSON parser. CHỈ trả về JSON, KHÔNG có text khác.
+                            |Output phải là valid JSON object bắt đầu bằng { và kết thúc bằng }
+                        """.trimMargin())
+                    )
+                ),
+                generationConfig = GenerationConfig(
+                    temperature = 0.3f,  // Lower temperature for consistent output
+                    maxOutputTokens = 512
+                )
+            )
+            
+            val response = geminiService.generateContent(apiKey, request)
+            
+            val responseText = response.candidates?.firstOrNull()
+                ?.content?.parts?.firstOrNull()?.text
+                ?: return@withContext Result.failure(Exception("Empty response from AI"))
+            
+            Result.success(responseText)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     
     // ============================================
     // ASK MODE METHODS
@@ -485,13 +552,25 @@ ${scheduleLines.joinToString("\n")}"""
                             val minutes = scheduleData.durationMinutes % 60
                             val implementationTime = String.format("%02d:%02d:00", hours, minutes)
                             
+                            // Ưu tiên label/color từ AI JSON, fallback về ActivityClassifier
+                            val aiLabel = action.data["label"] as? String
+                            val aiColor = action.data["color"] as? String
+                            
+                            val (fallbackLabel, fallbackColor) = ActivityClassifier.classifyWithColor(scheduleData.name)
+                            
+                            val finalLabel = if (!aiLabel.isNullOrBlank()) aiLabel else fallbackLabel.name
+                            val finalColor = if (!aiColor.isNullOrBlank() && aiColor.startsWith("#")) aiColor else fallbackColor
+                            
                             // Build schedule row matching database schema
                             val row = mapOf(
                                 "user_id" to userId,
                                 "name_schedule" to scheduleData.name,
                                 "start_time_date" to startTimeDate,
                                 "implementation_time" to implementationTime,
-                                "repeat" to "once"  // Default repeat type
+                                "repeat" to "once",  // Default repeat type
+                                "label" to finalLabel,  // AI-assigned or auto-classified icon
+                                "color" to finalColor,  // AI-assigned or auto-classified color
+                                "source" to "ai"        // Mark as AI-generated
                             )
                             
                             // Actually insert to database
