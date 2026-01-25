@@ -316,7 +316,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                     date = today,
                     label = ScheduleLabel.wakeup,
                     color = "#FF9500", // Orange
-                    duration = "00:30:00"
+                    duration = "00:30:00",
+                    activeDays = state.activeDays
                 )
 
                 // Step 3: Create Sleep task
@@ -327,7 +328,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                     date = today,
                     label = ScheduleLabel.sleep,
                     color = "#5856D6", // Purple
-                    duration = "00:30:00"
+                    duration = "00:30:00",
+                    activeDays = state.activeDays
                 )
 
                 // Step 4: Create Work Start task
@@ -338,7 +340,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                     date = today,
                     label = ScheduleLabel.book,
                     color = "#34C759", // Green
-                    duration = calculateDuration(state.workStartTime, state.workEndTime)
+                    duration = calculateDuration(state.workStartTime, state.workEndTime),
+                    activeDays = state.activeDays
                 )
 
                 // Step 5: Create custom time period tasks
@@ -356,7 +359,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                         date = today,
                         label = periodLabel,
                         color = period.color,
-                        duration = calculateDuration(period.startTime, period.endTime)
+                        duration = calculateDuration(period.startTime, period.endTime),
+                        activeDays = state.activeDays
                     )
                 }
 
@@ -380,7 +384,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         date: LocalDate,
         label: ScheduleLabel,
         color: String,
-        duration: String
+        duration: String,
+        activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7) // Mặc định tất cả các ngày
     ) {
         try {
             val timeParts = timeStr.split(":")
@@ -393,6 +398,11 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 .withZoneSameInstant(ZoneId.of("UTC"))
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
+            // Nếu chọn tất cả 7 ngày -> daily, ngược lại -> custom với repeat_days
+            val isAllDays = activeDays.sorted() == listOf(1, 2, 3, 4, 5, 6, 7)
+            val repeatType = if (isAllDays) RepeatType.daily else RepeatType.custom
+            val repeatDays = if (isAllDays) null else activeDays.sorted().joinToString(",")
+
             val mapData = mapOf<String, Any?>(
                 "user_id" to userId,
                 "name_schedule" to name,
@@ -401,12 +411,13 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 "label" to label.name,
                 "source" to SourceType.manual.name,
                 "implementation_time" to duration,
-                "repeat" to RepeatType.daily.name,
+                "repeat" to repeatType.name,
+                "repeat_days" to repeatDays,
                 "priority" to "medium"
             )
 
             scheduleRepo.insertSchedule(mapData)
-            Log.d("PersonalizationVM", "Created task: $name at $timeStr")
+            Log.d("PersonalizationVM", "Created task: $name at $timeStr, repeat=$repeatType, days=$repeatDays")
 
         } catch (e: Exception) {
             Log.e("PersonalizationVM", "Error creating task $name", e)

@@ -31,6 +31,7 @@ data class EditState(
     val color: String = "#FFA726",
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,
+    val repeatDays: List<Int> = listOf(1, 2, 3, 4, 5), // Các thứ lặp lại (1=Mon, 7=Sun), mặc định Thứ 2-6
     val duration: String = "00:30:00",
     val priority: PriorityType = PriorityType.medium,
     val loading: Boolean = false,
@@ -88,6 +89,7 @@ class EditScheduleViewModel(
                             color = t.color ?: "#FFA726",
                             iconLabel = t.label ?: ScheduleLabel.book,
                             repeat = t.repeat,
+                            repeatDays = t.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: listOf(1, 2, 3, 4, 5),
                             duration = t.implementationTime ?: "00:30:00",
                             priority = t.priority ?: PriorityType.medium,
                             subtasks = subtaskTitles
@@ -119,6 +121,7 @@ class EditScheduleViewModel(
                     "source" to SourceType.manual.name,
                     "implementation_time" to s.duration,
                     "repeat" to s.repeat.name,
+                    "repeat_days" to if (s.repeat == RepeatType.custom) s.repeatDays.joinToString(",") else null,
                     "priority" to s.priority.name
                 )
 
@@ -236,6 +239,23 @@ class EditScheduleViewModel(
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }
     fun setPriority(p: PriorityType) { _state.value = _state.value.copy(priority = p) }
     fun setSubtasks(list: List<String>) { _state.value = _state.value.copy(subtasks = list) }
+    
+    fun setRepeatDays(days: List<Int>) { 
+        _state.value = _state.value.copy(repeatDays = days.sorted()) 
+    }
+    
+    fun toggleRepeatDay(day: Int) {
+        val currentDays = _state.value.repeatDays.toMutableList()
+        if (currentDays.contains(day)) {
+            if (currentDays.size > 1) { // Giữ ít nhất 1 ngày
+                currentDays.remove(day)
+            }
+        } else {
+            currentDays.add(day)
+        }
+        _state.value = _state.value.copy(repeatDays = currentDays.sorted())
+    }
+    
     fun clearError() {
         _state.value = _state.value.copy(errorMessage = null)
     }

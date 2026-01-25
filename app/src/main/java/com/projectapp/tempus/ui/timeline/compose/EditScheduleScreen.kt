@@ -442,7 +442,9 @@ fun EditScheduleScreen(
     if (showRepeatSheet) {
         RepeatPickerSheet(
             currentRepeat = state.repeat,
-            onRepeatSelected = { viewModel.setRepeat(it); showRepeatSheet = false },
+            currentRepeatDays = state.repeatDays,
+            onRepeatSelected = { viewModel.setRepeat(it) },
+            onRepeatDayToggle = { viewModel.toggleRepeatDay(it) },
             onDismiss = { showRepeatSheet = false }
         )
     }
@@ -795,14 +797,21 @@ private fun DurationPickerSheet(
 @Composable
 private fun RepeatPickerSheet(
     currentRepeat: RepeatType,
+    currentRepeatDays: List<Int> = listOf(1, 2, 3, 4, 5),
     onRepeatSelected: (RepeatType) -> Unit,
+    onRepeatDayToggle: (Int) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val repeats = listOf(
         RepeatType.once to "Một lần",
         RepeatType.daily to "Hàng ngày",
         RepeatType.weekly to "Hàng tuần",
-        RepeatType.monthly to "Hàng tháng"
+        RepeatType.monthly to "Hàng tháng",
+        RepeatType.custom to "Tùy chỉnh theo thứ"
+    )
+    
+    val weekDays = listOf(
+        1 to "T2", 2 to "T3", 3 to "T4", 4 to "T5", 5 to "T6", 6 to "T7", 7 to "CN"
     )
     
     ModalBottomSheet(
@@ -825,6 +834,52 @@ private fun RepeatPickerSheet(
                     isSelected = isSelected,
                     onClick = { onRepeatSelected(repeat) }
                 )
+            }
+            
+            // Hiển thị weekday selector nếu chọn "Tùy chỉnh"
+            if (currentRepeat == RepeatType.custom) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Chọn các thứ lặp lại:",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = EditColors.TextSecondary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    weekDays.forEach { (dayValue, dayLabel) ->
+                        val isActive = currentRepeatDays.contains(dayValue)
+                        Surface(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .clickable { onRepeatDayToggle(dayValue) },
+                            color = if (isActive) EditColors.Primary else Color.Transparent,
+                            shape = CircleShape
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isActive) EditColors.Primary else EditColors.Divider,
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Text(
+                                    text = dayLabel,
+                                    fontSize = 12.sp,
+                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isActive) Color.White else EditColors.TextSecondary
+                                )
+                            }
+                        }
+                    }
+                }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -1026,6 +1081,7 @@ private fun repeatToLabel(r: RepeatType): String = when (r) {
     RepeatType.daily -> "Hàng ngày"
     RepeatType.weekly -> "Hàng tuần"
     RepeatType.monthly -> "Hàng tháng"
+    RepeatType.custom -> "Tùy chỉnh"
 }
 
 private fun priorityToInfo(p: PriorityType): Pair<String, Color> = when (p) {

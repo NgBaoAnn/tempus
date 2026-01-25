@@ -82,11 +82,21 @@ class BuildTimelineUseCase {
                 return false // Schedule has ended
             }
 
+            // Phải sau ngày bắt đầu
+            if (targetDate.isBefore(startDate)) return false
+
             return when (s.repeat) {
                 RepeatType.once -> targetDate == startDate
-                RepeatType.daily -> !targetDate.isBefore(startDate)
-                RepeatType.weekly -> !targetDate.isBefore(startDate) && targetDate.dayOfWeek == startDate.dayOfWeek
-                RepeatType.monthly -> !targetDate.isBefore(startDate) && targetDate.dayOfMonth == startDate.dayOfMonth
+                RepeatType.daily -> true // Đã check isBefore ở trên
+                RepeatType.weekly -> targetDate.dayOfWeek == startDate.dayOfWeek
+                RepeatType.monthly -> targetDate.dayOfMonth == startDate.dayOfMonth
+                RepeatType.custom -> {
+                    // Parse repeat_days: "1,3,5" = Thứ 2, 4, 6 (1=Monday, 7=Sunday)
+                    val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                    if (repeatDays.isEmpty()) return false
+                    // DayOfWeek.MONDAY.value = 1, SUNDAY.value = 7
+                    repeatDays.contains(targetDate.dayOfWeek.value)
+                }
             }
         }
 

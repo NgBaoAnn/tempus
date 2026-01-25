@@ -454,13 +454,22 @@ class TimelineViewModel(
                 return false // Schedule has ended
             }
 
+            // Phải sau ngày bắt đầu
+            if (d.isBefore(startDate)) return false
+
             return when (s.repeat) {
                 com.projectapp.tempus.data.schedule.dto.RepeatType.once -> d == startDate
-                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> !d.isBefore(startDate)
+                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> true // Đã check isBefore ở trên
                 com.projectapp.tempus.data.schedule.dto.RepeatType.weekly ->
-                    !d.isBefore(startDate) && d.dayOfWeek == startDate.dayOfWeek
+                    d.dayOfWeek == startDate.dayOfWeek
                 com.projectapp.tempus.data.schedule.dto.RepeatType.monthly ->
-                    !d.isBefore(startDate) && d.dayOfMonth == startDate.dayOfMonth
+                    d.dayOfMonth == startDate.dayOfMonth
+                com.projectapp.tempus.data.schedule.dto.RepeatType.custom -> {
+                    // Parse repeat_days: "1,3,5" = Thứ 2, 4, 6 (1=Monday, 7=Sunday)
+                    val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                    if (repeatDays.isEmpty()) return false
+                    repeatDays.contains(d.dayOfWeek.value)
+                }
             }
         }
 
