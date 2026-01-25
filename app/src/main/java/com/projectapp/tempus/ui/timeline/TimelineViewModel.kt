@@ -15,18 +15,14 @@ import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.model.TimelineBlock
-import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
 import com.projectapp.tempus.domain.usecase.PointsManager
-<<<<<<< HEAD
-=======
-import io.github.jan.supabase.gotrue.auth
->>>>>>> master
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
 import java.time.DayOfWeek
 import java.time.ZoneId
+import io.github.jan.supabase.gotrue.auth
 
 // Sort options for timeline
 enum class SortOption {
@@ -39,7 +35,6 @@ data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val blocks: List<TimelineBlock> = emptyList(),
-<<<<<<< HEAD
     val filteredBlocks: List<TimelineBlock> = emptyList(), // After applying filters
     val error: String? = null,
     val dailyQuote: QuoteDto? = null,
@@ -50,9 +45,6 @@ data class TimelineUiState(
     val filterPriorities: Set<PriorityType> = emptySet(),
     val filterStatus: StatusType? = null, // null = show all
     val isFilterActive: Boolean = false,
-=======
-    val error: String? = null,
->>>>>>> master
     // Points earned event (set to null after consuming)
     val earnedPoints: Int? = null,
     val earnedReason: String? = null
@@ -74,6 +66,8 @@ class TimelineViewModel(
     
     init {
         loadDailyQuote()
+        // Load tasks for today when ViewModel initializes
+        load(LocalDate.now())
     }
     
     private fun loadDailyQuote() {
@@ -173,7 +167,6 @@ class TimelineViewModel(
         }
     }
     
-<<<<<<< HEAD
     fun clearEarnedPoints() {
         _ui.value = _ui.value.copy(earnedPoints = null, earnedReason = null)
     }
@@ -190,14 +183,6 @@ class TimelineViewModel(
             }
         }
     }
-=======
-    /**
-     * Clear earned points event after UI has consumed it
-     */
-    fun clearEarnedPoints() {
-        _ui.value = _ui.value.copy(earnedPoints = null, earnedReason = null)
-    }
->>>>>>> master
 
     fun onClickBlock(taskId: String) {
         Log.d("Timeline", "onClickBlock taskId=$taskId")
@@ -296,8 +281,6 @@ class TimelineViewModel(
                     return@launch
                 }
                 
-                val dateStr = date.toString()
-
                 val schedules = repo.getAllSchedules(currentUserId)
                 val taskIds = schedules.map { it.id }
 

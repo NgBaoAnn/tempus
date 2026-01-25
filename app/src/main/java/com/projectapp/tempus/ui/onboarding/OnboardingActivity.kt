@@ -3,6 +3,7 @@ package com.projectapp.tempus.ui.onboarding
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,10 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.projectapp.tempus.MainActivity
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.ui.auth.LoginActivity
 import io.github.jan.supabase.gotrue.auth
+import kotlinx.coroutines.launch
 
 /**
  * Onboarding Activity - Entry point của app
@@ -32,6 +35,7 @@ class OnboardingActivity : ComponentActivity() {
     companion object {
         private const val PREFS_NAME = "tempus_prefs"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val TAG = "OnboardingActivity"
         
         fun isOnboardingCompleted(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -47,21 +51,36 @@ class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // 1. Check login status
-        val isLoggedIn = SupabaseClientProvider.client.auth.currentUserOrNull() != null
-        
-        if (isLoggedIn) {
-            navigateToMain()
-            return
+        // Load session from storage and check login status
+        lifecycleScope.launch {
+            try {
+                // Load session from storage first
+                SupabaseClientProvider.client.auth.loadFromStorage()
+                Log.d(TAG, "Session loaded from storage")
+                
+                val currentUser = SupabaseClientProvider.client.auth.currentUserOrNull()
+                Log.d(TAG, "Current user: ${currentUser?.id}")
+                
+                if (currentUser != null) {
+                    navigateToMain()
+                    return@launch
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading session: ${e.message}", e)
+            }
+            
+            // Check onboarding status if not logged in
+            if (isOnboardingCompleted(this@OnboardingActivity)) {
+                navigateToLogin()
+                return@launch
+            }
+            
+            // Show onboarding
+            showOnboarding()
         }
-        
-        // 2. Check onboarding status
-        if (isOnboardingCompleted(this)) {
-            navigateToLogin()
-            return
-        }
-        
-        // 3. Show onboarding
+    }
+    
+    private fun showOnboarding() {
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         

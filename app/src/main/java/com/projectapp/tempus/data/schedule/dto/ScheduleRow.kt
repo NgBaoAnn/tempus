@@ -19,6 +19,7 @@ data class ScheduleRow(
     @SerialName("implementation_time") val implementationTime: String, // "HH:MM:SS"
     val repeat: RepeatType,
     @SerialName("end_date") val endDate: String? = null, // ISO date string (VD: 2026-01-26) - schedule won't show after this date
+    @SerialName("repeat_days") val repeatDays: List<Int>? = null, // Specific days for weekly repeat (0=Sunday, 6=Saturday)
     val color: String? = null,
     val source: SourceType? = null,
     @SerialName("created_at") val createdAt: String? = null
