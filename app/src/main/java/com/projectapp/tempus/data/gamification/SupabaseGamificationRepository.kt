@@ -336,4 +336,25 @@ class SupabaseGamificationRepository(
             android.util.Log.e("GamificationRepo", "Error killing tree: ${e.message}")
         }
     }
+    
+    /**
+     * Xóa cây hoàn toàn khỏi database
+     */
+    suspend fun deleteTree(treeId: Long) {
+        val userId = getCurrentUserId() ?: return
+        
+        try {
+            supabase.from("trees")
+                .delete {
+                    filter {
+                        eq("id", treeId)
+                        eq("user_id", userId)
+                    }
+                }
+            android.util.Log.d("GamificationRepo", "Tree $treeId deleted successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("GamificationRepo", "Error deleting tree: ${e.message}")
+            throw e
+        }
+    }
 }
