@@ -21,6 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -32,13 +40,39 @@ fun ProfileScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
     
     // Show success message
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
-            // Snackbar or Toast will be shown
+            Toast.makeText(context, "Cập nhật thành công!", Toast.LENGTH_SHORT).show()
             viewModel.clearSaveSuccess()
+        }
+    }
+
+    // Show error message
+    LaunchedEffect(uiState.error) {
+        if (uiState.error != null) {
+            Toast.makeText(context, uiState.error, Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    val avatarPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+                
+                if (bytes != null) {
+                    viewModel.uploadAvatar(bytes)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Lỗi đọc ảnh", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     
@@ -76,7 +110,12 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Avatar
-                ProfileAvatar()
+                ProfileAvatar(
+                    avatarUrl = uiState.avatarUrl,
+                    onAvatarClick = { 
+                        avatarPicker.launch("image/*")
+                    }
+                )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -146,20 +185,48 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileAvatar() {
+private fun ProfileAvatar(
+    avatarUrl: String?,
+    onAvatarClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .size(100.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer),
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onAvatarClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Person,
+        // Use AsyncImage for everything to maintain stable node structure
+        // If avatarUrl is null, it acts as if loading model=null, triggering fallback/error
+        AsyncImage(
+            model = coil.request.ImageRequest.Builder(LocalContext.current)
+                .data(avatarUrl)
+                .crossfade(true)
+                .build(),
             contentDescription = "Avatar",
-            modifier = Modifier.size(50.dp),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            // Use fallback/error painter to show the icon if no image
+            error = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
+            fallback = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
+            placeholder = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person)
         )
+        
+        // Edit icon overlay
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                .padding(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Change Avatar",
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 
@@ -170,13 +237,20 @@ private fun ProfileName(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
+        // Invisible spacer to balance the IconButton on the right, ensuring Text is centered
+        Spacer(modifier = Modifier.width(48.dp))
+        
         Text(
             text = name.ifEmpty { "Chưa đặt tên" },
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f, fill = false)
         )
+        
         IconButton(onClick = onEditClick) {
             Icon(
                 imageVector = Icons.Default.Edit,

@@ -35,6 +35,7 @@ interface ScheduleRepository {
     
     // Subtask methods
     suspend fun getSubTasks(scheduleId: String): List<SubTaskRow>
+    suspend fun getSubTasksBatch(scheduleIds: List<String>): List<SubTaskRow>
     suspend fun insertSubTasks(scheduleId: String, titles: List<String>)
     suspend fun deleteSubTasksByScheduleId(scheduleId: String)
     suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean)

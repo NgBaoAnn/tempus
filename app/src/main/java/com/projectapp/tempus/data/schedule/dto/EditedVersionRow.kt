@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
 data class EditedVersionRow(
     val id: String,
 
-    @SerialName("name_schedule") val name: String? = null,
-    @SerialName("icon_id") val iconId: String? = null,
+    @SerialName("name_schedule") val name: String,
+    @SerialName("icon_id") val iconId: String,
     val label: ScheduleLabel? = null,
     // ----------------------------------------------------
 
