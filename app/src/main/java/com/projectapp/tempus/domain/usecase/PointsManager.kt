@@ -57,6 +57,38 @@ class PointsManager(
     }
     
     /**
+     * Kiếm điểm Pomodoro dựa trên thời gian tập trung
+     * @param focusMinutes Số phút đã tập trung
+     * @return Số điểm thực tế được cộng (1 điểm/phút, có streak bonus)
+     * 
+     * Công thức: 1 điểm/phút + bonus nếu streak >= 3
+     * Ví dụ: 25 phút = 25 điểm, với streak x1.5 = 37 điểm
+     */
+    suspend fun earnPomodoroPoints(focusMinutes: Int): Int {
+        val current = repository.getOrCreateUserPoints()
+        
+        // Base: 1 điểm/phút
+        val basePoints = focusMinutes.coerceAtLeast(1)
+        
+        // Áp dụng streak multiplier
+        val hasStreak = current.currentStreak >= 3
+        val multiplier = if (hasStreak) STREAK_MULTIPLIER else 1f
+        val finalPoints = (basePoints * multiplier).toInt()
+        
+        // Update total points
+        val newTotal = (current.totalPoints + finalPoints).coerceAtLeast(0)
+        repository.updateUserPoints(current.copy(totalPoints = newTotal))
+        
+        // Log history với số phút
+        repository.addPointHistory(PointHistoryEntity(
+            points = finalPoints,
+            reason = "POMODORO_${focusMinutes}m"
+        ))
+        
+        return finalPoints
+    }
+    
+    /**
      * Dùng điểm (trừ điểm)
      * @return true nếu thành công, false nếu không đủ điểm
      */
