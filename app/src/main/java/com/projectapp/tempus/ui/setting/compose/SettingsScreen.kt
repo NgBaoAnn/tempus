@@ -93,7 +93,6 @@ fun SettingsScreen(
             
             SettingsGroup {
                 SettingsItem(
-                SettingsItem(
                     icon = Icons.Default.Settings,
                     iconBgColor = SettingsColors.IconBgBlue,
                     iconTint = SettingsColors.IconBlue,
@@ -421,6 +420,7 @@ private fun SettingsDivider() {
 private fun ProfileCard(
     userName: String,
     userEmail: String,
+    avatarUrl: String? = null,
     onClick: () -> Unit
 ) {
     Card(
