@@ -51,14 +51,14 @@ fun DailyQuoteCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .shadow(
-                elevation = 8.dp,
-                shape = RoundedCornerShape(20.dp),
-                ambientColor = Color(0xFF667EEA).copy(alpha = 0.15f),
-                spotColor = Color(0xFF667EEA).copy(alpha = 0.1f)
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0xFF3B82F6).copy(alpha = 0.15f),
+                spotColor = Color(0xFF3B82F6).copy(alpha = 0.1f)
             ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -68,46 +68,37 @@ fun DailyQuoteCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF667EEA),
-                            Color(0xFF764BA2),
-                            Color(0xFF8B5CF6)
+                            Color(0xFF1E3A8A),
+                            Color(0xFF3B82F6),
+                            Color(0xFF60A5FA)
                         )
                     )
                 )
         ) {
-            // Decorative circles
+            // Decorative circles (smaller)
             Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .offset(x = (-20).dp, y = (-20).dp)
+                    .size(50.dp)
+                    .offset(x = (-15).dp, y = (-15).dp)
                     .alpha(shimmerAlpha)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.1f))
             )
             Box(
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(35.dp)
                     .align(Alignment.TopEnd)
-                    .offset(x = 20.dp, y = 10.dp)
+                    .offset(x = 15.dp, y = 8.dp)
                     .alpha(shimmerAlpha * 0.8f)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.08f))
-            )
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .align(Alignment.BottomStart)
-                    .offset(x = 30.dp, y = 10.dp)
-                    .alpha(shimmerAlpha * 0.6f)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.06f))
             )
             
             // Content
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Sparkle icon row
@@ -119,60 +110,60 @@ fun DailyQuoteCard(
                         painter = painterResource(id = R.drawable.ic_points_star),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Câu nói hôm nay",
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White.copy(alpha = 0.8f),
-                        letterSpacing = 1.sp
+                        letterSpacing = 0.5.sp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Icon(
                         painter = painterResource(id = R.drawable.ic_points_star),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 // Quote text with elegant typography
                 Text(
                     text = "\"${quote.text}\"",
-                    fontSize = 15.sp,
+                    fontSize = 13.sp,
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Medium,
                     color = Color.White,
                     textAlign = TextAlign.Center,
-                    lineHeight = 24.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    lineHeight = 18.sp,
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
                 
                 // Author attribution
                 if (!quote.author.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(Color.White.copy(alpha = 0.15f))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(4.dp)
+                                .size(3.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.6f))
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = quote.author,
-                            fontSize = 13.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.95f)
                         )
