@@ -47,8 +47,8 @@ sealed class NavItem(
     data object Timer : NavItem("timer", "Hẹn giờ", R.drawable.ic_timer, R.id.timerFragment)
     data object Timeline : NavItem("timeline", "Lịch", R.drawable.ic_timeline, R.id.timelineFragment)
     data object AI : NavItem("ai", "AI", R.drawable.ic_ai, R.id.aiFragment)
+    data object Social : NavItem("social", "Bạn bè", R.drawable.ic_social, R.id.socialFragment)
     data object Statistics : NavItem("statistics", "Thống kê", R.drawable.ic_statistics, R.id.statisticsFragment)
-    data object Garden : NavItem("garden", "Garden", R.drawable.ic_garden, R.id.gardenFragment)
     data object Settings : NavItem("settings", "Cài đặt", R.drawable.ic_settings, R.id.settingsFragment)
 }
 
@@ -56,8 +56,8 @@ val navItems = listOf(
     NavItem.Timer,
     NavItem.Timeline,
     NavItem.AI,
+    NavItem.Social,
     NavItem.Statistics,
-    NavItem.Garden,
     NavItem.Settings
 )
 
