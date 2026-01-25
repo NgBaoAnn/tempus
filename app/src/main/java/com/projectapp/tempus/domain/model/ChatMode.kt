@@ -14,7 +14,13 @@ enum class ChatMode {
      * Agent Mode - AI proposes actions, user must accept
      * Database writes only happen after user confirmation
      */
-    AGENT
+    AGENT,
+    
+    /**
+     * Life Planner Mode - Long-term goal planning
+     * AI creates multi-week plans with milestones
+     */
+    LIFE_PLANNER
 }
 
 /**
