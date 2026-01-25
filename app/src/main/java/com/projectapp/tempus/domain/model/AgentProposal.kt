@@ -56,7 +56,10 @@ data class ProposedAction(
         return try {
             ScheduleActionData(
                 name = data["name"] as? String ?: "",
-                startTime = data["start"] as? String ?: data["startTime"] as? String ?: "",
+                startTime = data["start"] as? String 
+                    ?: data["startTime"] as? String 
+                    ?: data["time"] as? String  // AI sometimes returns "time" instead of "start"
+                    ?: "",
                 endTime = data["end"] as? String ?: data["endTime"] as? String,
                 durationMinutes = (data["duration"] as? Number)?.toInt() ?: 60,
                 date = data["date"] as? String
@@ -85,6 +88,7 @@ enum class ActionType {
     CREATE_SCHEDULE,
     UPDATE_SCHEDULE,
     DELETE_SCHEDULE,
+    SKIP_INSTANCE,     // Skip one occurrence of recurring activity
     CREATE_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,

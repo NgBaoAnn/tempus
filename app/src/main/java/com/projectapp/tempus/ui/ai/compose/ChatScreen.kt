@@ -49,6 +49,7 @@ import com.projectapp.tempus.R
 import com.projectapp.tempus.data.ai.ChatMessage
 import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.ChatMode
+import com.projectapp.tempus.domain.model.LifePlanState
 import com.projectapp.tempus.ui.ai.AIViewModel
 
 /**
@@ -64,6 +65,7 @@ fun ChatScreen(
     val isLoading by viewModel.isLoading.observeAsState(false)
     val chatMode by viewModel.chatMode.observeAsState(ChatMode.ASK)
     val agentState by viewModel.agentState.observeAsState(AgentState.Idle)
+    val lifePlanState by viewModel.lifePlanState.observeAsState(LifePlanState.Idle)
     
     // Legacy support
     val suggestions by viewModel.suggestions.observeAsState(emptyList())
@@ -73,7 +75,7 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     
     // Auto-scroll to bottom when new message arrives
-    LaunchedEffect(messages.size, isLoading, agentState) {
+    LaunchedEffect(messages.size, isLoading, agentState, lifePlanState) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
@@ -116,10 +118,11 @@ fun ChatScreen(
                             viewModel.sendMessage(inputText)
                             inputText = ""
                         },
-                        enabled = !isLoading && agentState !is AgentState.AwaitingAccept,
+                        enabled = !isLoading && agentState !is AgentState.AwaitingAccept && lifePlanState !is LifePlanState.AwaitingApproval,
                         placeholder = when (chatMode) {
                             ChatMode.ASK -> "Hỏi điều gì đó..."
                             ChatMode.AGENT -> "Yêu cầu một hành động..."
+                            ChatMode.LIFE_PLANNER -> "Chia sẻ mục tiêu của bạn..."
                         },
                         modifier = Modifier.imePadding()
                     )
@@ -203,6 +206,34 @@ fun ChatScreen(
                             item(key = "result") {
                                 val result = (agentState as AgentState.Done).result
                                 ExecutionFeedback(result = result)
+                            }
+                        }
+                        
+                        // Life Planner: Analyzing indicator
+                        if (lifePlanState is LifePlanState.Analyzing) {
+                            item(key = "lifePlanAnalyzing") {
+                                LifePlanAnalyzingIndicator()
+                            }
+                        }
+                        
+                        // Life Planner: Preview Card
+                        if (lifePlanState is LifePlanState.AwaitingApproval) {
+                            item(key = "lifePlanPreview") {
+                                val proposal = (lifePlanState as LifePlanState.AwaitingApproval).proposal
+                                LifePlanPreviewCard(
+                                    proposal = proposal,
+                                    onAccept = { viewModel.acceptLifePlan() },
+                                    onReject = { viewModel.rejectLifePlan() },
+                                    isLoading = false,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                        
+                        // Life Planner: Creating indicator
+                        if (lifePlanState is LifePlanState.Creating) {
+                            item(key = "lifePlanCreating") {
+                                LifePlanCreatingIndicator()
                             }
                         }
                     }
@@ -398,6 +429,7 @@ private fun EmptyState(
             text = when (chatMode) {
                 ChatMode.ASK -> "Chế độ Ask 💬"
                 ChatMode.AGENT -> "Chế độ Agent 🤖"
+                ChatMode.LIFE_PLANNER -> "Life Planner 🎯"
             },
             style = MaterialTheme.typography.titleLarge,
             color = ChatColors.TextPrimary,
@@ -410,6 +442,7 @@ private fun EmptyState(
             text = when (chatMode) {
                 ChatMode.ASK -> "Hỏi đáp, tư vấn về quản lý thời gian.\nKhông thực hiện hành động."
                 ChatMode.AGENT -> "Yêu cầu tạo, sửa, xóa lịch.\nXem trước và xác nhận trước khi thực hiện."
+                ChatMode.LIFE_PLANNER -> "Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc."
             },
             style = MaterialTheme.typography.bodyMedium,
             color = ChatColors.TextSecondary,
@@ -439,6 +472,10 @@ private fun EmptyState(
                     SuggestionChip(text = "Lên lịch học bài cho tôi")
                     SuggestionChip(text = "Tạo lịch làm việc từ 8h-17h")
                 }
+                ChatMode.LIFE_PLANNER -> {
+                    SuggestionChip(text = "Tôi muốn học IELTS 7.0 trong 3 tháng")
+                    SuggestionChip(text = "Chuẩn bị thi cuối kỳ 5 môn trong 2 tuần")
+                }
             }
         }
     }
@@ -462,6 +499,52 @@ private fun SuggestionChip(
             style = MaterialTheme.typography.bodySmall,
             color = ChatColors.Accent,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+/**
+ * Analyzing indicator for Life Planner Mode
+ */
+@Composable
+private fun LifePlanAnalyzingIndicator(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "🎯", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Đang phân tích mục tiêu và tạo kế hoạch...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ChatColors.Accent
+        )
+    }
+}
+
+/**
+ * Creating indicator for Life Planner Mode
+ */
+@Composable
+private fun LifePlanCreatingIndicator(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "📅", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Đang tạo lịch từ kế hoạch...",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ChatColors.Online
         )
     }
 }

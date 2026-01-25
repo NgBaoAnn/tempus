@@ -87,6 +87,7 @@ fun TimelineScreen(
     onDateSelected: (LocalDate) -> Unit,
     onMonthPickerClick: () -> Unit,
     onAddClick: () -> Unit,
+    onVoiceClick: () -> Unit = {},
     onTaskClick: (TimelineBlock) -> Unit,
     onStatusToggle: (TimelineBlock) -> Unit,
     // Search/Sort/Filter callbacks
@@ -102,12 +103,32 @@ fun TimelineScreen(
     Scaffold(
         modifier = modifier.background(TimelineColors.Background),
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddClick,
-                containerColor = TimelineColors.Primary,
-                contentColor = Color.White
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Task")
+                // Voice Command FAB
+                FloatingActionButton(
+                    onClick = onVoiceClick,
+                    containerColor = Color(0xFF10B981), // Green color for mic
+                    contentColor = Color.White,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_mic),
+                        contentDescription = "Voice Command",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
+                // Add Task FAB
+                FloatingActionButton(
+                    onClick = onAddClick,
+                    containerColor = TimelineColors.Primary,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                }
             }
         },
         containerColor = TimelineColors.Background
