@@ -23,8 +23,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,42 +40,60 @@ import com.projectapp.tempus.ui.social.friends.FriendsUiState
 import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 
 /**
- * Modern Color scheme cho Social module - Vibrant & Block-based style
+ * Premium Blue Liquid Glass Design System
+ * Style: Flowing glass, smooth transitions, translucent, modern premium
  */
 object SocialColors {
-    // Primary colors
-    val Primary = Color(0xFF6366F1)        // Indigo 500
-    val PrimaryDark = Color(0xFF4F46E5)    // Indigo 600
-    val PrimaryLight = Color(0xFFEEF2FF)   // Indigo 50
+    // === PRIMARY BLUE PALETTE ===
+    val Primary = Color(0xFF2563EB)        // Blue 600 - Main brand
+    val PrimaryDark = Color(0xFF1D4ED8)    // Blue 700
+    val PrimaryLight = Color(0xFFDBEAFE)   // Blue 100
+    val PrimaryLighter = Color(0xFFEFF6FF) // Blue 50
     
-    // Accent colors
-    val Secondary = Color(0xFF10B981)      // Emerald 500
-    val Accent = Color(0xFFF43F5E)         // Rose 500 - CTA
-    val AccentLight = Color(0xFFFFF1F2)    // Rose 50
+    // === SECONDARY & ACCENT ===
+    val Secondary = Color(0xFF60A5FA)      // Blue 400 - Lighter blue
+    val Accent = Color(0xFF3B82F6)         // Blue 500
+    val CTA = Color(0xFFF43F5E)            // Rose 500 - Action buttons
+    val CTALight = Color(0xFFFFF1F2)       // Rose 50
     
-    // Background & Surface
-    val Background = Color(0xFFF8FAFC)     // Slate 50
-    val CardBackground = Color.White
-    val SurfaceVariant = Color(0xFFF1F5F9) // Slate 100
+    // === BACKGROUND & SURFACE (Liquid Glass) ===
+    val Background = Color(0xFFF0F9FF)     // Sky 50 - Soft blue tint
+    val BackgroundGradientStart = Color(0xFFF0F9FF) // Sky 50
+    val BackgroundGradientEnd = Color(0xFFE0F2FE)   // Sky 100
+    val CardBackground = Color(0xFFFFFFFF)
+    val CardBackgroundGlass = Color(0xF2FFFFFF)     // White 95% for glass effect
+    val SurfaceVariant = Color(0xFFE0F2FE) // Sky 100
+    val SurfaceElevated = Color(0xFFFAFAFF)
     
-    // Text colors
-    val TextPrimary = Color(0xFF0F172A)    // Slate 900
-    val TextSecondary = Color(0xFF64748B)  // Slate 500
+    // === TEXT COLORS ===
+    val TextPrimary = Color(0xFF1E293B)    // Slate 800
+    val TextSecondary = Color(0xFF475569)  // Slate 600
     val TextMuted = Color(0xFF94A3B8)      // Slate 400
+    val TextOnPrimary = Color.White
     
-    // Status colors
-    val Danger = Color(0xFFEF4444)         // Red 500
-    val Warning = Color(0xFFF59E0B)        // Amber 500
+    // === STATUS COLORS ===
     val Success = Color(0xFF22C55E)        // Green 500
+    val Warning = Color(0xFFF59E0B)        // Amber 500
+    val Danger = Color(0xFFEF4444)         // Red 500
+    val Info = Color(0xFF0EA5E9)           // Sky 500
     
-    // Gradient colors
-    val GradientStart = Color(0xFF6366F1)  // Indigo
-    val GradientMid = Color(0xFF8B5CF6)    // Violet
-    val GradientEnd = Color(0xFFA855F7)    // Purple
+    // === GRADIENT COLORS (Blue Spectrum) ===
+    val GradientStart = Color(0xFF2563EB)  // Blue 600
+    val GradientMid = Color(0xFF3B82F6)    // Blue 500
+    val GradientEnd = Color(0xFF60A5FA)    // Blue 400
+    val GradientLight = Color(0xFF93C5FD)  // Blue 300
     
-    // Shadow & Overlay
-    val CardShadow = Color(0x1A6366F1)     // Primary with alpha
+    // === GLASS & SHADOW EFFECTS ===
+    val GlassBorder = Color(0x40FFFFFF)    // White 25%
+    val GlassOverlay = Color(0x0AFFFFFF)   // White 4%
+    val CardShadow = Color(0x1A2563EB)     // Blue shadow
+    val SoftShadow = Color(0x0D000000)     // Very soft black shadow
     val Overlay = Color(0x80000000)        // Black 50%
+    
+    // === ONLINE/STATUS INDICATORS ===
+    val Online = Color(0xFF22C55E)         // Green
+    val Away = Color(0xFFF59E0B)           // Amber
+    val Offline = Color(0xFF94A3B8)        // Slate 400
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -206,46 +226,76 @@ private fun FriendsHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(SocialColors.GradientStart, SocialColors.GradientEnd)
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        SocialColors.GradientStart,
+                        SocialColors.GradientMid,
+                        SocialColors.GradientEnd
+                    ),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 )
             )
-            .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // Glass overlay pattern
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SocialColors.GlassOverlay)
+                .padding(horizontal = 24.dp, vertical = 28.dp)
         ) {
-            Column {
-                Text(
-                    text = "Bạn bè",
-                    color = Color.White,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                if (pendingCount > 0) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$pendingCount lời mời đang chờ",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 14.sp
-                    )
-                }
-            }
-            
-            // Messages button
-            FilledIconButton(
-                onClick = onMessagesClick,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color.White.copy(alpha = 0.2f),
-                    contentColor = Color.White
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Filled.MailOutline,
-                    contentDescription = "Tin nhắn"
-                )
+                Column {
+                    Text(
+                        text = "Kết nối",
+                        color = Color.White,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(SocialColors.Online, CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (pendingCount > 0) "$pendingCount lời mời mới" else "Đang trực tuyến",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+                
+                // Messages button with glass effect
+                Surface(
+                    onClick = onMessagesClick,
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.15f),
+                    border = BorderStroke(1.dp, SocialColors.GlassBorder)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            Icons.Filled.MailOutline,
+                            contentDescription = "Tin nhắn",
+                            tint = Color.White,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
             }
         }
     }
