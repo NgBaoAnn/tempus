@@ -10,6 +10,7 @@ import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
+import io.github.jan.supabase.gotrue.auth
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -53,8 +54,11 @@ class TimelineViewModel(
                 val now = OffsetDateTime.now()
                     .withHour(8).withMinute(0).withSecond(0).withNano(0)
 
+                val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                val currentUserId = if (userId.isNotEmpty()) userId else supabase.auth.currentUserOrNull()?.id ?: ""
+
                 val body = mapOf(
-                    "user_id" to userId,
+                    "user_id" to currentUserId,
                     "name_schedule" to "Dummy Task",
                     "icon_id" to 1,
                     "start_time_date" to now.toString(),
@@ -141,11 +145,35 @@ class TimelineViewModel(
         viewModelScope.launch {
             try {
                 _ui.value = _ui.value.copy(isLoading = true, error = null)
-                Log.d("Timeline", "load start date=$dateStr userId=$userId")
-
+                
+                // Get dynamic User ID to handle cold starts where session might not be ready in constructor
+                var currentUserId = userId
+                if (currentUserId.isEmpty()) {
+                    val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                    currentUserId = supabase.auth.currentUserOrNull()?.id ?: ""
+                    
+                    // If still empty, try to load from storage
+                    if (currentUserId.isEmpty()) {
+                        try {
+                            supabase.auth.loadFromStorage()
+                            currentUserId = supabase.auth.currentUserOrNull()?.id ?: ""
+                        } catch (e: Exception) {
+                            Log.e("Timeline", "Failed to restore session", e)
+                        }
+                    }
+                }
+                
+                Log.d("Timeline", "load start date=$dateStr userId=$currentUserId")
+                
+                if (currentUserId.isEmpty()) {
+                    Log.w("Timeline", "No user logged in")
+                    _ui.value = _ui.value.copy(isLoading = false, blocks = emptyList(), error = "Please login first")
+                    return@launch
+                }
+                
                 val dateStr = date.toString()
 
-                val schedules = repo.getAllSchedules(userId)
+                val schedules = repo.getAllSchedules(currentUserId)
                 val taskIds = schedules.map { it.id }
 
                 val scheduleItems = repo.getScheduleItemsByDate(dateStr, taskIds)
