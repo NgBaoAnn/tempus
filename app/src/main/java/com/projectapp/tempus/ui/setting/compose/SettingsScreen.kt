@@ -93,21 +93,13 @@ fun SettingsScreen(
             
             SettingsGroup {
                 SettingsItem(
-<<<<<<< HEAD
-                icon = Icons.Default.Settings,
-                iconBgColor = SettingsColors.IconBgBlue,
-                iconTint = SettingsColors.IconBlue,
-                title = "Giao diện",
-                onClick = onThemeClick
-            )
-=======
+                SettingsItem(
                     icon = Icons.Default.Settings,
                     iconBgColor = SettingsColors.IconBgBlue,
                     iconTint = SettingsColors.IconBlue,
                     title = "Giao diện",
                     onClick = onThemeClick
                 )
->>>>>>> garden/vinh_nho
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Outlined.Notifications,
