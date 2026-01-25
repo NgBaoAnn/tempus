@@ -1,5 +1,6 @@
 package com.projectapp.tempus
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -18,16 +20,19 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.projectapp.tempus.data.focus.FocusModePreferences
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.PointsManager
-import com.projectapp.tempus.receiver.TimerActionReceiver
+import com.projectapp.tempus.service.focus.FocusModeService
+import com.projectapp.tempus.ui.focus.FocusLockActivity
+import com.projectapp.tempus.ui.focus.FocusSettingsActivity
 import com.projectapp.tempus.ui.timer.compose.TimerColors
 import com.projectapp.tempus.ui.timer.compose.TimerScreen
 import com.projectapp.tempus.ui.timer.compose.TimerState
 import com.projectapp.tempus.util.TimerEventBus
 import com.projectapp.tempus.util.TimerNotificationHelper
-import com.projectapp.tempus.data.timer.TimerPreferences
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class TimerFragment : Fragment() {
@@ -45,9 +50,15 @@ class TimerFragment : Fragment() {
     
     // Gamification
     private lateinit var pointsManager: PointsManager
+    
+    // Focus Mode
+    private lateinit var focusModePreferences: FocusModePreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize Focus Mode preferences
+        focusModePreferences = FocusModePreferences(requireContext())
         
         // Request notification permission for Android 13+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -97,6 +108,8 @@ class TimerFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             
             setContent {
+                val focusModeEnabled by focusModePreferences.focusModeEnabled.collectAsState(initial = false)
+                
                 TimerScreen(
                     timerState = timerState,
                     hours = hours,
@@ -105,6 +118,7 @@ class TimerFragment : Fragment() {
                     totalSeconds = totalSeconds,
                     selectedQuickIndex = selectedQuickIndex,
                     selectedColor = selectedColor,
+                    focusModeEnabled = focusModeEnabled,
                     onHoursChange = { hours = it },
                     onMinutesChange = { minutes = it },
                     onQuickSelect = { index ->
@@ -129,6 +143,9 @@ class TimerFragment : Fragment() {
                     },
                     onNotesClick = {
                         findNavController().navigate(R.id.action_timerFragment_to_notesFragment)
+                    },
+                    onFocusSettingsClick = {
+                        startActivity(Intent(requireContext(), FocusSettingsActivity::class.java))
                     }
                 )
             }
@@ -152,6 +169,22 @@ class TimerFragment : Fragment() {
             false
         )
         
+        // Start Focus Lock Screen if enabled
+        lifecycleScope.launch {
+            val focusModeEnabled = focusModePreferences.focusModeEnabled.first()
+            val autoStart = focusModePreferences.autoStartWithTimer.first()
+            
+            if (focusModeEnabled && autoStart) {
+                // Launch the focus lock screen
+                FocusLockActivity.start(
+                    requireContext(),
+                    totalSeconds,
+                    selectedColor.hashCode()
+                )
+                Log.d("TimerFragment", "Focus Lock Screen started with timer")
+            }
+        }
+        
         startCountDown()
     }
     
@@ -166,6 +199,9 @@ class TimerFragment : Fragment() {
                     TimerNotificationHelper.formatTime(secondsRemaining),
                     false
                 )
+                
+                // Update Focus Lock Screen
+                FocusLockActivity.sendTimerUpdate(requireContext(), secondsRemaining)
             }
 
             override fun onFinish() {
@@ -174,6 +210,9 @@ class TimerFragment : Fragment() {
                 
                 // Cancel notification
                 TimerNotificationHelper.cancelNotification(requireContext())
+                
+                // Close Focus Lock Screen
+                FocusLockActivity.sendTimerFinish(requireContext())
                 
                 // 🎮 Award Pomodoro points when timer completes
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -222,6 +261,9 @@ class TimerFragment : Fragment() {
         
         // Cancel notification
         TimerNotificationHelper.cancelNotification(requireContext())
+        
+        // Stop Focus Mode
+        FocusModeService.stopFocusMode(requireContext())
     }
 
     override fun onDestroy() {
@@ -231,4 +273,3 @@ class TimerFragment : Fragment() {
         TimerNotificationHelper.cancelNotification(requireContext())
     }
 }
-

@@ -63,6 +63,7 @@ fun TimerScreen(
     totalSeconds: Long,
     selectedQuickIndex: Int,
     selectedColor: Color,
+    focusModeEnabled: Boolean = false,
     onHoursChange: (Int) -> Unit,
     onMinutesChange: (Int) -> Unit,
     onQuickSelect: (Int) -> Unit,
@@ -73,6 +74,7 @@ fun TimerScreen(
     onCancel: () -> Unit,
     onReset: () -> Unit,
     onNotesClick: () -> Unit = {},
+    onFocusSettingsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -104,13 +106,15 @@ fun TimerScreen(
                     minutes = minutes,
                     selectedQuickIndex = selectedQuickIndex,
                     selectedColor = selectedColor,
+                    focusModeEnabled = focusModeEnabled,
                     onHoursChange = onHoursChange,
                     onMinutesChange = onMinutesChange,
                     onQuickSelect = onQuickSelect,
                     onColorSelect = onColorSelect,
                     onStart = onStart,
                     onReset = onReset,
-                    onNotesClick = onNotesClick
+                    onNotesClick = onNotesClick,
+                    onFocusSettingsClick = onFocusSettingsClick
                 )
                 TimerState.RUNNING, TimerState.PAUSED -> RunningContent(
                     isRunning = state == TimerState.RUNNING,
@@ -131,13 +135,15 @@ private fun SetupContent(
     minutes: Int,
     selectedQuickIndex: Int,
     selectedColor: Color,
+    focusModeEnabled: Boolean,
     onHoursChange: (Int) -> Unit,
     onMinutesChange: (Int) -> Unit,
     onQuickSelect: (Int) -> Unit,
     onColorSelect: (Color) -> Unit,
     onStart: () -> Unit,
     onReset: () -> Unit,
-    onNotesClick: () -> Unit
+    onNotesClick: () -> Unit,
+    onFocusSettingsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
@@ -243,6 +249,60 @@ private fun SetupContent(
                             fontSize = 20.sp,
                             color = Color(0xFF3B82F6)
                         )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingSmall))
+                
+                // Focus Mode button
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onFocusSettingsClick() },
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (focusModeEnabled) Color(0xFFE8F5E9) else Color(0xFFFFF3E0)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "🎯",
+                                fontSize = 22.sp
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Focus Mode",
+                                    style = TimerTypography.BodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = if (focusModeEnabled) "Đang bật - Chặn app phân tâm" else "Chặn app phân tâm khi tập trung",
+                                    fontSize = 12.sp,
+                                    color = TimerColors.TextMuted
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = if (focusModeEnabled) Color(0xFF4CAF50) else Color(0xFFFF9800),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = if (focusModeEnabled) "ON" else "OFF",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }

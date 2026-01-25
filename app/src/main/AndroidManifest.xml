@@ -11,6 +11,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- Focus Mode permissions -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +33,17 @@
         <activity
             android:name=".ui.setting.PersonalizationActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.focus.FocusSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.focus.FocusLockActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Tempus.Fullscreen"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.setting.LegalDocumentActivity"
             android:exported="false" />
@@ -84,6 +104,16 @@
             android:name=".widget.TasksWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported="false" />
+
+        <!-- Focus Mode Service -->
+        <service
+            android:name=".service.focus.FocusModeService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Focus Mode - monitors app usage to block distracting apps" />
+        </service>
 
         <!-- FileProvider for sharing exported files -->
         <provider
