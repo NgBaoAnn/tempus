@@ -1,5 +1,4 @@
 package com.projectapp.tempus.ui.notes.compose
-
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
