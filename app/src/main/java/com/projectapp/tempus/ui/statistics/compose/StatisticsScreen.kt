@@ -6,19 +6,25 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,22 +34,45 @@ import com.projectapp.tempus.domain.usecase.DayStats
 import com.projectapp.tempus.domain.usecase.InsightsData
 import com.projectapp.tempus.domain.usecase.TrendType
 
-// ======================== COLORS ========================
+// ======================== MODERN DESIGN SYSTEM ========================
 
-private object StatsColors {
-    val Background = Color(0xFFFFFFFF)
-    val Surface = Color(0xFFF8F9FA)
-    val CardBg = Color(0xFFF5F5F5)
-    val Primary = Color(0xFF3CDAEF)
-    val PrimaryDark = Color(0xFF00B4D8)
-    val TextPrimary = Color(0xFF1A1A1A)
-    val TextSecondary = Color(0xFF6B7280)
-    val Green = Color(0xFF4CAF50)
-    val Red = Color(0xFFFF5722)
-    val Orange = Color(0xFFFF9800)
-    val Purple = Color(0xFF9C27B0)
-    val GridLine = Color(0xFFE0E0E0)
-    val ChartBar = Color(0xFF3CDAEF)
+private object StatsDesign {
+    // Primary Palette
+    val Primary = Color(0xFF3B82F6)        // Blue 500
+    val PrimaryLight = Color(0xFF60A5FA)    // Blue 400
+    val PrimaryDark = Color(0xFF1D4ED8)     // Blue 700
+    
+    // Accent Colors
+    val Accent = Color(0xFF8B5CF6)          // Violet 500
+    val Success = Color(0xFF10B981)         // Emerald 500
+    val Warning = Color(0xFFF59E0B)         // Amber 500
+    val Error = Color(0xFFEF4444)           // Red 500
+    
+    // Backgrounds
+    val Background = Color(0xFFF8FAFC)      // Slate 50
+    val Surface = Color(0xFFFFFFFF)
+    val SurfaceElevated = Color(0xFFF1F5F9) // Slate 100
+    
+    // Text Colors
+    val TextPrimary = Color(0xFF0F172A)     // Slate 900
+    val TextSecondary = Color(0xFF475569)   // Slate 600
+    val TextMuted = Color(0xFF94A3B8)       // Slate 400
+    
+    // Chart Colors
+    val ChartBar = Color(0xFF3B82F6)
+    val ChartBarLight = Color(0xFF60A5FA)
+    val GridLine = Color(0xFFE2E8F0)        // Slate 200
+    
+    // Gradients
+    val PrimaryGradient = Brush.linearGradient(
+        colors = listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))
+    )
+    val SuccessGradient = Brush.linearGradient(
+        colors = listOf(Color(0xFF10B981), Color(0xFF34D399))
+    )
+    val PomodoroGradient = Brush.linearGradient(
+        colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
+    )
 }
 
 // ======================== DATA CLASSES ========================
@@ -66,7 +95,7 @@ data class StatisticsUiData(
 fun StatisticsScreen(
     uiData: StatisticsUiData,
     isLoading: Boolean,
-    onModeChange: (Boolean) -> Unit, // true = Week, false = Month
+    onModeChange: (Boolean) -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier
@@ -74,23 +103,16 @@ fun StatisticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(StatsColors.Background)
+            .background(StatsDesign.Background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(20.dp)
     ) {
-        // Title
-        Text(
-            text = "Thống kê",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = StatsColors.TextPrimary,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
+        // Header
+        HeaderSection()
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         
-        // Toggle Week/Month
+        // Mode Toggle
         ModeToggle(
             isWeekMode = uiData.isWeekMode,
             onModeChange = onModeChange
@@ -98,25 +120,27 @@ fun StatisticsScreen(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Pomodoro Stats Card
-        PomodoroStatsCard(
+        // Stats Overview Cards
+        StatsOverviewRow(
             pomodoroCount = uiData.pomodoroCount,
-            pomodoroMinutes = uiData.pomodoroMinutes
+            pomodoroMinutes = uiData.pomodoroMinutes,
+            completedTasks = uiData.completedTasks,
+            totalTasks = uiData.totalTasks
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
-        // Summary Card
-        SummaryCard(
+        // Progress Card
+        ProgressCard(
             rangeLabel = uiData.rangeLabel,
             totalTasks = uiData.totalTasks,
             completedTasks = uiData.completedTasks
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Chart Section
-        ChartSection(
+        ChartCard(
             dailyStats = uiData.dailyStats,
             isWeekMode = uiData.isWeekMode,
             rangeLabel = uiData.rangeLabel,
@@ -124,20 +148,44 @@ fun StatisticsScreen(
             onNext = onNext
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Insights Card
         uiData.insights?.let { insights ->
             InsightsCard(insights = insights)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
         }
         
         // Categories Section
         if (uiData.topCategories.isNotEmpty()) {
-            CategoriesSection(categories = uiData.topCategories)
+            CategoriesCard(categories = uiData.topCategories)
         }
         
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+// ======================== HEADER ========================
+
+@Composable
+private fun HeaderSection() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Analytics,
+            contentDescription = null,
+            tint = StatsDesign.Primary,
+            modifier = Modifier.size(32.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = "Thống kê",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = StatsDesign.TextPrimary
+        )
     }
 }
 
@@ -148,11 +196,10 @@ private fun ModeToggle(
     isWeekMode: Boolean,
     onModeChange: (Boolean) -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = StatsColors.CardBg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = RoundedCornerShape(16.dp),
+        color = StatsDesign.SurfaceElevated
     ) {
         Row(
             modifier = Modifier
@@ -160,14 +207,16 @@ private fun ModeToggle(
                 .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            ToggleButton(
+            ToggleChip(
                 text = "Tuần",
+                icon = Icons.Outlined.DateRange,
                 selected = isWeekMode,
                 onClick = { onModeChange(true) },
                 modifier = Modifier.weight(1f)
             )
-            ToggleButton(
+            ToggleChip(
                 text = "Tháng",
+                icon = Icons.Outlined.CalendarMonth,
                 selected = !isWeekMode,
                 onClick = { onModeChange(false) },
                 modifier = Modifier.weight(1f)
@@ -177,41 +226,96 @@ private fun ModeToggle(
 }
 
 @Composable
-private fun ToggleButton(
+private fun ToggleChip(
     text: String,
+    icon: ImageVector,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(40.dp),
-        shape = RoundedCornerShape(10.dp),
+        modifier = modifier.height(44.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) StatsColors.Primary else Color.Transparent,
-            contentColor = if (selected) Color.White else StatsColors.TextSecondary
+            containerColor = if (selected) StatsDesign.Primary else Color.Transparent,
+            contentColor = if (selected) Color.White else StatsDesign.TextSecondary
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = if (selected) 4.dp else 0.dp
+        )
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = text,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            fontSize = 14.sp
         )
     }
 }
 
-// ======================== POMODORO STATS CARD ========================
+// ======================== STATS OVERVIEW ROW ========================
 
 @Composable
-private fun PomodoroStatsCard(
+private fun StatsOverviewRow(
     pomodoroCount: Int,
-    pomodoroMinutes: Int
+    pomodoroMinutes: Int,
+    completedTasks: Int,
+    totalTasks: Int
 ) {
-    Card(
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFECB3)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Pomodoro Card
+        StatCard(
+            title = "Pomodoro",
+            value = "$pomodoroCount",
+            subtitle = "$pomodoroMinutes phút",
+            icon = Icons.Filled.Timer,
+            iconTint = Color(0xFFFF6B6B),
+            gradient = StatsDesign.PomodoroGradient,
+            modifier = Modifier.weight(1f)
+        )
+        
+        // Tasks Card
+        StatCard(
+            title = "Hoàn thành",
+            value = "$completedTasks",
+            subtitle = "/ $totalTasks tác vụ",
+            icon = Icons.Filled.CheckCircle,
+            iconTint = StatsDesign.Success,
+            gradient = StatsDesign.SuccessGradient,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatCard(
+    title: String,
+    value: String,
+    subtitle: String,
+    icon: ImageVector,
+    iconTint: Color,
+    gradient: Brush,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = iconTint.copy(alpha = 0.15f),
+                spotColor = iconTint.copy(alpha = 0.15f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = StatsDesign.Surface
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -219,170 +323,246 @@ private fun PomodoroStatsCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(iconTint.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "🍅",
-                    fontSize = 24.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Pomodoro",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = StatsColors.TextPrimary
+                    text = title,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = StatsDesign.TextSecondary
                 )
             }
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatItem(
-                    value = "$pomodoroCount",
-                    label = "Phiên",
-                    emoji = "✅"
-                )
-                StatItem(
-                    value = "$pomodoroMinutes",
-                    label = "Phút tập trung",
-                    emoji = "⏱️"
-                )
-                StatItem(
-                    value = if (pomodoroCount > 0) "${pomodoroMinutes / pomodoroCount}" else "0",
-                    label = "Phút/phiên",
-                    emoji = "📊"
-                )
-            }
+            Text(
+                text = value,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = StatsDesign.TextPrimary
+            )
+            
+            Text(
+                text = subtitle,
+                fontSize = 13.sp,
+                color = StatsDesign.TextMuted
+            )
         }
     }
 }
 
-@Composable
-private fun StatItem(
-    value: String,
-    label: String,
-    emoji: String
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = emoji,
-            fontSize = 20.sp
-        )
-        Text(
-            text = value,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = StatsColors.TextPrimary
-        )
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = StatsColors.TextSecondary
-        )
-    }
-}
-
-// ======================== SUMMARY CARD ========================
+// ======================== PROGRESS CARD ========================
 
 @Composable
-private fun SummaryCard(
+private fun ProgressCard(
     rangeLabel: String,
     totalTasks: Int,
     completedTasks: Int
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = StatsColors.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    val progress = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 800),
+        label = "progress"
+    )
+    
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = StatsDesign.Primary.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = StatsDesign.Surface
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text(
-                text = "Tiến độ hoàn thành",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = StatsColors.TextPrimary
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = rangeLabel,
-                fontSize = 14.sp,
-                color = StatsColors.TextSecondary
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Progress bar
-            val progress = if (totalTasks > 0) completedTasks.toFloat() / totalTasks else 0f
-            val animatedProgress by animateFloatAsState(
-                targetValue = progress,
-                animationSpec = tween(durationMillis = 800),
-                label = "progress"
-            )
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(StatsColors.GridLine)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(animatedProgress)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(StatsColors.Primary)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.TrendingUp,
+                        contentDescription = null,
+                        tint = StatsDesign.Primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Tiến độ",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = StatsDesign.TextPrimary
+                    )
+                }
+                
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = StatsDesign.SurfaceElevated
+                ) {
+                    Text(
+                        text = rangeLabel,
+                        fontSize = 12.sp,
+                        color = StatsDesign.TextSecondary,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
-            Text(
-                text = "$completedTasks / $totalTasks tác vụ đã hoàn thành (${(progress * 100).toInt()}%)",
-                fontSize = 14.sp,
-                color = StatsColors.TextSecondary
-            )
+            // Circular Progress Indicator
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(120.dp)
+                ) {
+                    CircularProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.fillMaxSize(),
+                        strokeWidth = 10.dp,
+                        color = StatsDesign.Primary,
+                        trackColor = StatsDesign.GridLine
+                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "${(animatedProgress * 100).toInt()}%",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = StatsDesign.TextPrimary
+                        )
+                        Text(
+                            text = "Hoàn thành",
+                            fontSize = 11.sp,
+                            color = StatsDesign.TextMuted
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(32.dp))
+                
+                Column {
+                    ProgressStatRow(
+                        icon = Icons.Filled.Task,
+                        label = "Tổng cộng",
+                        value = "$totalTasks",
+                        color = StatsDesign.TextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ProgressStatRow(
+                        icon = Icons.Filled.CheckCircle,
+                        label = "Đã hoàn thành",
+                        value = "$completedTasks",
+                        color = StatsDesign.Success
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ProgressStatRow(
+                        icon = Icons.Outlined.RadioButtonUnchecked,
+                        label = "Còn lại",
+                        value = "${totalTasks - completedTasks}",
+                        color = StatsDesign.Warning
+                    )
+                }
+            }
         }
     }
 }
 
-// ======================== CHART SECTION ========================
+@Composable
+private fun ProgressStatRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    color: Color
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            color = StatsDesign.TextSecondary
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = StatsDesign.TextPrimary
+        )
+    }
+}
+
+// ======================== CHART CARD ========================
 
 @Composable
-private fun ChartSection(
+private fun ChartCard(
     dailyStats: List<DayStats>,
     isWeekMode: Boolean,
     rangeLabel: String,
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = StatsColors.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = StatsDesign.Primary.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = StatsDesign.Surface
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text(
-                text = "Biểu đồ hoàn thành",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = StatsColors.TextPrimary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.BarChart,
+                    contentDescription = null,
+                    tint = StatsDesign.Primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Biểu đồ",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = StatsDesign.TextPrimary
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Bar Chart using Canvas
+            // Bar Chart
             BarChart(
                 dailyStats = dailyStats,
                 isWeekMode = isWeekMode,
@@ -391,7 +571,7 @@ private fun ChartSection(
                     .height(200.dp)
             )
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Navigation
             Row(
@@ -399,20 +579,33 @@ private fun ChartSection(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onPrevious) {
-                    Text("◀", fontSize = 18.sp)
+                IconButton(onClick = onPrevious) {
+                    Icon(
+                        imageVector = Icons.Filled.ChevronLeft,
+                        contentDescription = "Trước",
+                        tint = StatsDesign.Primary
+                    )
                 }
                 
-                Text(
-                    text = rangeLabel,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = StatsColors.TextPrimary,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = StatsDesign.SurfaceElevated
+                ) {
+                    Text(
+                        text = rangeLabel,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = StatsDesign.TextPrimary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
                 
-                TextButton(onClick = onNext) {
-                    Text("▶", fontSize = 18.sp)
+                IconButton(onClick = onNext) {
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = "Sau",
+                        tint = StatsDesign.Primary
+                    )
                 }
             }
         }
@@ -430,17 +623,25 @@ private fun BarChart(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Chưa có dữ liệu",
-                color = StatsColors.TextSecondary,
-                fontSize = 14.sp
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = Icons.Outlined.InsertChart,
+                    contentDescription = null,
+                    tint = StatsDesign.TextMuted,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Chưa có dữ liệu",
+                    color = StatsDesign.TextMuted,
+                    fontSize = 14.sp
+                )
+            }
         }
         return
     }
     
     Column(modifier = modifier) {
-        // Chart area with Y-axis labels
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -449,7 +650,7 @@ private fun BarChart(
             // Y-axis labels
             Column(
                 modifier = Modifier
-                    .width(36.dp)
+                    .width(40.dp)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -457,7 +658,7 @@ private fun BarChart(
                     Text(
                         text = label,
                         fontSize = 10.sp,
-                        color = StatsColors.TextSecondary,
+                        color = StatsDesign.TextMuted,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }
@@ -477,7 +678,7 @@ private fun BarChart(
                 for (i in 0..gridLines) {
                     val y = (chartHeight / gridLines) * i
                     drawLine(
-                        color = StatsColors.GridLine,
+                        color = StatsDesign.GridLine,
                         start = Offset(0f, y),
                         end = Offset(chartWidth, y),
                         strokeWidth = 1.dp.toPx(),
@@ -495,28 +696,26 @@ private fun BarChart(
                     val x = (barSpacing * index) + (barSpacing - barWidth) / 2
                     val y = chartHeight - barHeight
                     
-                    // Draw bar with rounded corners
                     if (barHeight > 0) {
                         drawRoundRect(
-                            color = StatsColors.ChartBar,
+                            color = StatsDesign.ChartBar,
                             topLeft = Offset(x, y),
                             size = Size(barWidth, barHeight),
-                            cornerRadius = CornerRadius(3.dp.toPx(), 3.dp.toPx())
+                            cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
                         )
                     }
                 }
             }
         }
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
         // X-axis labels
         if (isWeekMode) {
-            // Week mode: show all 7 day labels
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 36.dp)
+                    .padding(start = 40.dp)
             ) {
                 dailyStats.forEach { stats ->
                     val label = when (stats.date.dayOfWeek.value) {
@@ -532,29 +731,27 @@ private fun BarChart(
                     Text(
                         text = label,
                         fontSize = 12.sp,
-                        color = StatsColors.TextSecondary,
+                        color = StatsDesign.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
         } else {
-            // Month mode: show only milestone days (1, 5, 10, 15, 20, 25, last day)
             val totalDays = dailyStats.size
             val milestoneDays = listOf(1, 5, 10, 15, 20, 25, totalDays)
             
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 36.dp),
+                    .padding(start = 40.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 milestoneDays.filter { it <= totalDays }.forEach { day ->
                     Text(
                         text = day.toString(),
                         fontSize = 11.sp,
-                        color = StatsColors.TextSecondary,
-                        textAlign = TextAlign.Center
+                        color = StatsDesign.TextSecondary
                     )
                 }
             }
@@ -566,135 +763,215 @@ private fun BarChart(
 
 @Composable
 private fun InsightsCard(insights: InsightsData) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = StatsColors.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = StatsDesign.Accent.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = StatsDesign.Surface
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text(
-                text = "💡 Phân tích",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = StatsColors.TextPrimary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Lightbulb,
+                    contentDescription = null,
+                    tint = StatsDesign.Warning,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Phân tích",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = StatsDesign.TextPrimary
+                )
+            }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Average Rate
-            InsightRow(
+            InsightItem(
+                icon = Icons.Outlined.Speed,
                 label = "Tỷ lệ hoàn thành TB",
                 value = String.format("%.1f%%", insights.avgCompletionRate),
-                valueColor = StatsColors.Primary
+                iconTint = StatsDesign.Primary
             )
             
             // Best Day
             insights.bestDay?.let { (day, rate) ->
-                InsightRow(
-                    label = "📈 Ngày tốt nhất",
+                InsightItem(
+                    icon = Icons.Filled.TrendingUp,
+                    label = "Ngày tốt nhất",
                     value = "$day (${rate.toInt()}%)",
-                    valueColor = StatsColors.Green
+                    iconTint = StatsDesign.Success
                 )
             }
             
             // Worst Day
             insights.worstDay?.let { (day, rate) ->
-                InsightRow(
-                    label = "📉 Cần cải thiện",
+                InsightItem(
+                    icon = Icons.Filled.TrendingDown,
+                    label = "Cần cải thiện",
                     value = "$day (${rate.toInt()}%)",
-                    valueColor = StatsColors.Red
+                    iconTint = StatsDesign.Error
                 )
             }
             
             // Trend
-            InsightRow(
-                label = "📊 Xu hướng",
-                value = when (insights.trend) {
-                    TrendType.UP -> "📈 Đang tăng"
-                    TrendType.DOWN -> "📉 Đang giảm"
-                    TrendType.STABLE -> "➡️ Ổn định"
-                },
-                valueColor = when (insights.trend) {
-                    TrendType.UP -> StatsColors.Green
-                    TrendType.DOWN -> StatsColors.Red
-                    TrendType.STABLE -> StatsColors.TextSecondary
-                }
+            val (trendIcon, trendText, trendColor) = when (insights.trend) {
+                TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", StatsDesign.Success)
+                TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", StatsDesign.Error)
+                TrendType.STABLE -> Triple(Icons.Filled.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
+            }
+            InsightItem(
+                icon = trendIcon,
+                label = "Xu hướng",
+                value = trendText,
+                iconTint = trendColor
             )
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
-            // Suggestion
-            Card(
+            // Suggestion Card
+            Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                shape = RoundedCornerShape(12.dp),
+                color = StatsDesign.Primary.copy(alpha = 0.08f)
             ) {
-                Text(
-                    text = "💡 ${insights.suggestion}",
-                    fontSize = 14.sp,
-                    color = StatsColors.TextPrimary,
-                    modifier = Modifier.padding(12.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.TipsAndUpdates,
+                        contentDescription = null,
+                        tint = StatsDesign.Primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = insights.suggestion,
+                        fontSize = 14.sp,
+                        color = StatsDesign.TextPrimary,
+                        lineHeight = 20.sp
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun InsightRow(
+private fun InsightItem(
+    icon: ImageVector,
     label: String,
     value: String,
-    valueColor: Color
+    iconTint: Color
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = StatsColors.TextSecondary
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                color = StatsDesign.TextSecondary
+            )
+        }
         Text(
             text = value,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = valueColor
+            color = StatsDesign.TextPrimary
         )
     }
 }
 
-// ======================== CATEGORIES SECTION ========================
+// ======================== CATEGORIES CARD ========================
+
+// Category icon mapping
+private fun getCategoryIcon(label: String): ImageVector = when (label) {
+    "wakeup" -> Icons.Outlined.WbSunny
+    "eat" -> Icons.Outlined.Restaurant
+    "exercise" -> Icons.Outlined.FitnessCenter
+    "rest" -> Icons.Outlined.Weekend
+    "water" -> Icons.Outlined.WaterDrop
+    "book" -> Icons.Outlined.MenuBook
+    "sleep" -> Icons.Outlined.Bedtime
+    "clean" -> Icons.Outlined.CleaningServices
+    "cook" -> Icons.Outlined.SoupKitchen
+    "garden" -> Icons.Outlined.Yard
+    else -> Icons.Outlined.Label
+}
+
+private fun getCategoryName(label: String): String = when (label) {
+    "wakeup" -> "Thức dậy"
+    "eat" -> "Ăn uống"
+    "exercise" -> "Tập luyện"
+    "rest" -> "Nghỉ ngơi"
+    "water" -> "Uống nước"
+    "book" -> "Học tập"
+    "sleep" -> "Ngủ"
+    "clean" -> "Dọn dẹp"
+    "cook" -> "Nấu ăn"
+    "garden" -> "Làm vườn"
+    else -> label.replaceFirstChar { it.uppercase() }
+}
 
 @Composable
-private fun CategoriesSection(categories: List<CategoryStats>) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = StatsColors.Surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+private fun CategoriesCard(categories: List<CategoryStats>) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = StatsDesign.Accent.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = StatsDesign.Surface
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
-            Text(
-                text = "🏷️ Theo danh mục",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = StatsColors.TextPrimary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Category,
+                    contentDescription = null,
+                    tint = StatsDesign.Accent,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Theo danh mục",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = StatsDesign.TextPrimary
+                )
+            }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             categories.take(5).forEach { category ->
                 CategoryItem(category = category)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
@@ -702,54 +979,61 @@ private fun CategoriesSection(categories: List<CategoryStats>) {
 
 @Composable
 private fun CategoryItem(category: CategoryStats) {
-    val labelDisplayName = when (category.label) {
-        "wakeup" -> "🌅 Thức dậy"
-        "eat" -> "🍽️ Ăn uống"
-        "exercise" -> "💪 Tập luyện"
-        "rest" -> "😴 Nghỉ ngơi"
-        "water" -> "💧 Uống nước"
-        "book" -> "📚 Học tập"
-        "sleep" -> "🌙 Ngủ"
-        "clean" -> "🧹 Dọn dẹp"
-        "cook" -> "🍳 Nấu ăn"
-        "garden" -> "🌱 Làm vườn"
-        else -> "📋 ${category.label}"
-    }
+    val progress = category.percentage / 100f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(600),
+        label = "category_progress"
+    )
     
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = labelDisplayName,
-                fontSize = 14.sp,
-                color = StatsColors.TextPrimary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = getCategoryIcon(category.label),
+                    contentDescription = null,
+                    tint = StatsDesign.Primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = getCategoryName(category.label),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = StatsDesign.TextPrimary
+                )
+            }
             Text(
                 text = "${category.completedCount}/${category.totalCount} (${category.percentage}%)",
-                fontSize = 14.sp,
-                color = StatsColors.TextSecondary
+                fontSize = 13.sp,
+                color = StatsDesign.TextSecondary
             )
         }
         
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
         // Progress bar
-        val progress = category.percentage / 100f
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(StatsColors.GridLine)
+                .background(StatsDesign.GridLine)
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(progress)
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(4.dp))
-                    .background(StatsColors.Primary)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(StatsDesign.Primary, StatsDesign.Accent)
+                        )
+                    )
             )
         }
     }
