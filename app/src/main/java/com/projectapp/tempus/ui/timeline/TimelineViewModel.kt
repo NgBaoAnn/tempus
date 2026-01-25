@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
+import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.model.TimelineBlock
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
+import com.projectapp.tempus.domain.usecase.PointsManager
 import io.github.jan.supabase.gotrue.auth
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -21,13 +23,17 @@ data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val blocks: List<TimelineBlock> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    // Points earned event (set to null after consuming)
+    val earnedPoints: Int? = null,
+    val earnedReason: String? = null
 )
 
 class TimelineViewModel(
     private var cachedSchedules: List<com.projectapp.tempus.data.schedule.dto.ScheduleRow> = emptyList(),
     private val userId: String,
     private val repo: ScheduleRepository,
+    private val pointsManager: PointsManager? = null,
     private val builder: BuildTimelineUseCase = BuildTimelineUseCase()
 ) : ViewModel() {
 
@@ -89,13 +95,33 @@ class TimelineViewModel(
                 _ui.value = _ui.value.copy(isLoading = true, error = null)
                 val item = repo.upsertScheduleItem(taskId, dateStr, status)
                 Log.d("Timeline", "upsertScheduleItem ok itemId=${item.id} status=${item.status}")
-                _ui.value = _ui.value.copy(isLoading = false)
+                
+                // Award points when task is completed
+                var earnedPoints: Int? = null
+                if (status == StatusType.completed && pointsManager != null) {
+                    earnedPoints = pointsManager.earnPoints(PointAction.TASK_COMPLETE)
+                    pointsManager.updateStreak()
+                    Log.d("Timeline", "Awarded $earnedPoints points for task completion")
+                }
+                
+                _ui.value = _ui.value.copy(
+                    isLoading = false,
+                    earnedPoints = earnedPoints,
+                    earnedReason = if (earnedPoints != null) "Hoàn thành Task" else null
+                )
                 load(_ui.value.date)
             } catch (e: Exception) {
                 Log.e("Timeline", "upsertScheduleItem FAILED: ${e.message}", e)
                 _ui.value = _ui.value.copy(isLoading = false, error = "Upsert failed: ${e.message}")
             }
         }
+    }
+    
+    /**
+     * Clear earned points event after UI has consumed it
+     */
+    fun clearEarnedPoints() {
+        _ui.value = _ui.value.copy(earnedPoints = null, earnedReason = null)
     }
 
     fun onClickBlock(taskId: String) {

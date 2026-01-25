@@ -6,8 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -16,8 +19,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
+import com.projectapp.tempus.domain.usecase.PointsManager
+import com.projectapp.tempus.ui.components.PointsNotification
 import com.projectapp.tempus.ui.timeline.MonthCalendarDialogFragment
 import com.projectapp.tempus.ui.timeline.TimelineViewModel
 import com.projectapp.tempus.ui.timeline.WeekItem
@@ -37,7 +43,12 @@ class TimelineFragment : Fragment() {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
-                return TimelineViewModel(userId = myUserId, repo = repo) as T
+                val pointsManager = PointsManager(SupabaseGamificationRepository())
+                return TimelineViewModel(
+                    userId = myUserId, 
+                    repo = repo,
+                    pointsManager = pointsManager
+                ) as T
             }
         }
     }
@@ -55,36 +66,51 @@ class TimelineFragment : Fragment() {
                 val weeks = buildWeeksAround(uiState.date)
                 val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
                 
-                TimelineScreen(
-                    blocks = uiState.blocks,
-                    selectedDate = uiState.date,
-                    monthYear = uiState.date.format(formatter),
-                    weeks = weeks.map { it.days },
-                    onDateSelected = { date ->
-                        viewModel.onSelectDate(date)
-                    },
-                    onMonthPickerClick = {
-                        showMonthPicker()
-                    },
-                    onAddClick = {
-                        val currentDate = viewModel.ui.value.date
-                        val bundle = Bundle().apply {
-                            putString("selectedDate", currentDate.toString())
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TimelineScreen(
+                        blocks = uiState.blocks,
+                        selectedDate = uiState.date,
+                        monthYear = uiState.date.format(formatter),
+                        weeks = weeks.map { it.days },
+                        onDateSelected = { date ->
+                            viewModel.onSelectDate(date)
+                        },
+                        onMonthPickerClick = {
+                            showMonthPicker()
+                        },
+                        onAddClick = {
+                            val currentDate = viewModel.ui.value.date
+                            val bundle = Bundle().apply {
+                                putString("selectedDate", currentDate.toString())
+                            }
+                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                        },
+                        onTaskClick = { block ->
+                            val bundle = Bundle().apply {
+                                putString("taskId", block.taskId)
+                                putString("selectedDate", viewModel.ui.value.date.toString())
+                            }
+                            findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
+                        },
+                        onStatusToggle = { block ->
+                            val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
+                            viewModel.onToggleStatus(block.taskId, newStatus)
                         }
-                        findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
-                    },
-                    onTaskClick = { block ->
-                        val bundle = Bundle().apply {
-                            putString("taskId", block.taskId)
-                            putString("selectedDate", viewModel.ui.value.date.toString())
-                        }
-                        findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
-                    },
-                    onStatusToggle = { block ->
-                        val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
-                        viewModel.onToggleStatus(block.taskId, newStatus)
+                    )
+                    
+                    // Points earned notification overlay
+                    val earnedPoints = uiState.earnedPoints
+                    val earnedReason = uiState.earnedReason
+                    if (earnedPoints != null && earnedReason != null) {
+                        PointsNotification(
+                            points = earnedPoints,
+                            reason = earnedReason,
+                            onDismiss = {
+                                viewModel.clearEarnedPoints()
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
