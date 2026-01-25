@@ -165,7 +165,7 @@ private fun SetupContent(
                     onSelect = onQuickSelect
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingXLarge))
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
                 
                 // Time picker
                 TimePickerDisplay(
@@ -175,7 +175,7 @@ private fun SetupContent(
                     onMinutesChange = onMinutesChange
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingXLarge))
+                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
                 
                 // Action buttons
                 Row(
@@ -308,7 +308,7 @@ private fun SetupContent(
             }
         }
         
-        Spacer(modifier = Modifier.height(TimerDimens.SpacingLarge))
+        Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
         
         // Settings Card
         Surface(

@@ -7,10 +7,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -25,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +41,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import java.util.Locale
 
@@ -195,7 +201,7 @@ fun QuickSelectButtons(
 }
 
 /**
- * Simple time display for setup mode
+ * Scrollable wheel-style time picker
  */
 @Composable
 fun TimePickerDisplay(
@@ -206,95 +212,124 @@ fun TimePickerDisplay(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier,
+        modifier = modifier.height(120.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Hours display
-        TimeUnitPicker(
+        // Hours wheel
+        WheelPicker(
             value = hours,
+            range = 0..23,
             label = "giờ",
-            onIncrease = { onHoursChange((hours + 1).coerceAtMost(23)) },
-            onDecrease = { onHoursChange((hours - 1).coerceAtLeast(0)) }
+            onValueChange = onHoursChange
         )
         
-        Spacer(modifier = Modifier.width(24.dp))
+        // Colon separator
+        Text(
+            text = ":",
+            style = TimerTypography.TimeDisplay.copy(fontSize = 40.sp),
+            color = TimerColors.TextPrimary,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         
-        // Minutes display  
-        TimeUnitPicker(
+        // Minutes wheel
+        WheelPicker(
             value = minutes,
+            range = 0..59,
             label = "phút",
-            onIncrease = { onMinutesChange((minutes + 1) % 60) },
-            onDecrease = { onMinutesChange((minutes - 1 + 60) % 60) }
+            onValueChange = onValueChange@{ onMinutesChange(it) }
         )
     }
 }
 
 @Composable
-private fun TimeUnitPicker(
+private fun WheelPicker(
     value: Int,
+    range: IntRange,
     label: String,
-    onIncrease: () -> Unit,
-    onDecrease: () -> Unit,
+    onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val items = range.toList()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = value.coerceIn(range))
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+    
+    // Sync scroll position to value changes from outside
+    LaunchedEffect(value) {
+        if (listState.firstVisibleItemIndex != value) {
+            listState.animateScrollToItem(value.coerceIn(range))
+        }
+    }
+    
+    // Update value when scroll settles
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (!listState.isScrollInProgress) {
+            val centerIndex = listState.firstVisibleItemIndex
+            if (centerIndex in range && centerIndex != value) {
+                onValueChange(centerIndex)
+            }
+        }
+    }
     
     Column(
-        modifier = modifier,
+        modifier = modifier.width(80.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Up arrow
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onIncrease
-                ),
+                .height(100.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(TimerColors.SurfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_up),
-                contentDescription = "Increase",
-                tint = TimerColors.TextSecondary,
-                modifier = Modifier.size(24.dp)
+            // Selection indicator
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
+                    .background(TimerColors.SurfaceVariant)
             )
+            
+            LazyColumn(
+                state = listState,
+                flingBehavior = flingBehavior,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(vertical = 32.dp)
+            ) {
+                items(items.size) { index ->
+                    val itemValue = items[index]
+                    val isSelected = itemValue == value
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(36.dp)
+                            .clickable { onValueChange(itemValue) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = String.format(Locale.getDefault(), "%02d", itemValue),
+                            style = TimerTypography.TimeDisplay.copy(
+                                fontSize = if (isSelected) 32.sp else 20.sp
+                            ),
+                            color = if (isSelected) 
+                                TimerColors.TextPrimary 
+                            else 
+                                TimerColors.TextMuted.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+            }
         }
         
-        // Value
-        Text(
-            text = String.format(Locale.getDefault(), "%02d", value),
-            style = TimerTypography.TimeDisplay.copy(fontSize = TimerDimens.TimeTextSizeSmall)
-        )
+        Spacer(modifier = Modifier.height(4.dp))
         
-        // Label
         Text(
             text = label,
-            style = TimerTypography.LabelSmall
+            style = TimerTypography.LabelSmall,
+            color = TimerColors.TextMuted
         )
-        
-        // Down arrow
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onDecrease
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_down),
-                contentDescription = "Decrease",
-                tint = TimerColors.TextSecondary,
-                modifier = Modifier.size(24.dp)
-            )
-        }
     }
 }
 
