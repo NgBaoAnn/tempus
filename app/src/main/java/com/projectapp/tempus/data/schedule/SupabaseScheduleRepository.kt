@@ -144,6 +144,22 @@ class SupabaseScheduleRepository : ScheduleRepository {
             }
             .decodeSingle()
     }
+    
+    private fun calculateEndTime(startIso: String, durationStr: String): String {
+        return try {
+            val start = java.time.LocalDateTime.parse(startIso, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+            // durationStr format "HH:mm:ss"
+            val parts = durationStr.split(":")
+            val h = parts.getOrNull(0)?.toLongOrNull() ?: 0
+            val m = parts.getOrNull(1)?.toLongOrNull() ?: 0
+            val s = parts.getOrNull(2)?.toLongOrNull() ?: 0
+            
+            val end = start.plusHours(h).plusMinutes(m).plusSeconds(s)
+            end.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+        } catch (e: Exception) {
+            startIso // Fallback
+        }
+    }
 
     override suspend fun insertEditedVersion(fields: Map<String, Any?>): EditedVersionRow {
         val body = buildJsonObject {

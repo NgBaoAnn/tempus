@@ -1,6 +1,6 @@
 package com.projectapp.tempus.data.user.dto
 
-import com.projectapp.tempus.domain.user.model.User
+import com.projectapp.tempus.domain.model.User
 import kotlinx.serialization.Serializable
 
 @Serializable

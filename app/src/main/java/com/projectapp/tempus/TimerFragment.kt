@@ -2,6 +2,7 @@ package com.projectapp.tempus
 
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,9 @@ import com.projectapp.tempus.ui.components.PointsNotificationState
 import com.projectapp.tempus.ui.timer.compose.TimerColors
 import com.projectapp.tempus.ui.timer.compose.TimerScreen
 import com.projectapp.tempus.ui.timer.compose.TimerState
+import com.projectapp.tempus.util.TimerEventBus
+import com.projectapp.tempus.util.TimerNotificationHelper
+import com.projectapp.tempus.data.timer.TimerPreferences
 import kotlinx.coroutines.launch
 
 class TimerFragment : Fragment() {
@@ -47,6 +51,45 @@ class TimerFragment : Fragment() {
     
     // Points notification state
     private var pointsNotification by mutableStateOf(PointsNotificationState())
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Request notification permission for Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissions(
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1001
+                )
+            }
+        }
+        
+        // Listen to TimerEventBus
+        lifecycleScope.launch {
+            TimerEventBus.events.collect { event ->
+                Log.d("TimerFragment", "Received event: $event")
+                when (event) {
+                    TimerEventBus.TimerEvent.PAUSE -> {
+                        Log.d("TimerFragment", "Calling pauseTimer()")
+                        pauseTimer()
+                    }
+                    TimerEventBus.TimerEvent.RESUME -> {
+                        Log.d("TimerFragment", "Calling resumeTimer()")
+                        resumeTimer()
+                    }
+                    TimerEventBus.TimerEvent.STOP -> {
+                        Log.d("TimerFragment", "Calling cancelTimer()")
+                        cancelTimer()
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -121,6 +164,13 @@ class TimerFragment : Fragment() {
         secondsRemaining = totalSeconds
         timerState = TimerState.RUNNING
         
+        // Show notification
+        TimerNotificationHelper.showTimerNotification(
+            requireContext(),
+            TimerNotificationHelper.formatTime(secondsRemaining),
+            false
+        )
+        
         startCountDown()
     }
     
@@ -128,11 +178,21 @@ class TimerFragment : Fragment() {
         countDownTimer = object : CountDownTimer(secondsRemaining * 1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 secondsRemaining = millisUntilFinished / 1000
+                
+                // Update notification
+                TimerNotificationHelper.showTimerNotification(
+                    requireContext(),
+                    TimerNotificationHelper.formatTime(secondsRemaining),
+                    false
+                )
             }
 
             override fun onFinish() {
                 secondsRemaining = 0
                 timerState = TimerState.SETUP
+                
+                // Cancel notification
+                TimerNotificationHelper.cancelNotification(requireContext())
                 
                 // 🎮 Award Pomodoro points based on focus duration
                 viewLifecycleOwner.lifecycleScope.launch {
@@ -157,10 +217,25 @@ class TimerFragment : Fragment() {
     private fun pauseTimer() {
         countDownTimer?.cancel()
         timerState = TimerState.PAUSED
+        
+        // Update notification to show Resume button
+        TimerNotificationHelper.showTimerNotification(
+            requireContext(),
+            TimerNotificationHelper.formatTime(secondsRemaining),
+            true
+        )
     }
     
     private fun resumeTimer() {
         timerState = TimerState.RUNNING
+        
+        // Update notification to show Pause button
+        TimerNotificationHelper.showTimerNotification(
+            requireContext(),
+            TimerNotificationHelper.formatTime(secondsRemaining),
+            false
+        )
+        
         startCountDown()
     }
 
@@ -168,10 +243,15 @@ class TimerFragment : Fragment() {
         countDownTimer?.cancel()
         timerState = TimerState.SETUP
         secondsRemaining = 0
+        
+        // Cancel notification
+        TimerNotificationHelper.cancelNotification(requireContext())
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("TimerFragment", "onDestroy()")
         countDownTimer?.cancel()
+        TimerNotificationHelper.cancelNotification(requireContext())
     }
 }

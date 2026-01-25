@@ -4,6 +4,8 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.SettingsSessionManager
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
+import io.ktor.websocket.WebSocketDeflateExtension.Companion.install
 import kotlinx.serialization.json.Json
 
 object SupabaseClientProvider {
@@ -19,6 +21,8 @@ object SupabaseClientProvider {
             // Tự động lưu session vào máy, không cần viết code lưu id hay token nữa
             sessionManager = SettingsSessionManager()
         }
+        install(Postgrest)
+        install(Storage)
         install(Postgrest) {
             // Cấu hình JSON để bỏ qua các trường không xác định và xử lý lỗi linh hoạt
             defaultSchema = "public"
