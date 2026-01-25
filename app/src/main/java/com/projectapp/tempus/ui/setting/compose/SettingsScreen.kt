@@ -47,6 +47,7 @@ fun SettingsScreen(
     onPersonalizationClick: () -> Unit,
     onThemeClick: () -> Unit,
     onPrivacyClick: () -> Unit,
+    onTermsClick: () -> Unit,
     onExportJsonClick: () -> Unit,
     onExportCsvClick: () -> Unit,
     onDeleteDataClick: () -> Unit,
@@ -195,7 +196,7 @@ fun SettingsScreen(
                 iconBgColor = SettingsColors.IconBgGreen,
                 iconTint = SettingsColors.IconGreen,
                 title = "Điều khoản dịch vụ",
-                onClick = {}
+                onClick = onTermsClick
             )
             }
             

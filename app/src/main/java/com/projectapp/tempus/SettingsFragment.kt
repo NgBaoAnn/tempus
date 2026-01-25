@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.export.DataExportRepository
 import com.projectapp.tempus.ui.auth.LoginActivity
+import com.projectapp.tempus.ui.setting.LegalDocumentActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
@@ -61,7 +62,8 @@ class SettingsFragment : Fragment() {
                         onNotificationsClick = ::onNotificationsClick,
                         onPersonalizationClick = ::navigateToPersonalization,
                         onThemeClick = ::onThemeClick,
-                        onPrivacyClick = ::onPrivacyClick,
+                        onPrivacyClick = ::navigateToPrivacyPolicy,
+                        onTermsClick = ::navigateToTermsOfService,
                         onExportJsonClick = ::exportToJson,
                         onExportCsvClick = ::exportToCsv,
                         onDeleteDataClick = ::showDeleteConfirmationStep1,
@@ -93,8 +95,7 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 userInfoState.value = UserInfo(
                     name = user.username,
-                    email = user.email,
-                    avatar = user.avatar
+                    email = user.email
                 )
             }
         }
@@ -125,6 +126,18 @@ class SettingsFragment : Fragment() {
 
     private fun onThemeClick() {
         Toast.makeText(requireContext(), "Cài đặt giao diện", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun navigateToPrivacyPolicy() {
+        val intent = Intent(requireContext(), LegalDocumentActivity::class.java)
+        intent.putExtra(LegalDocumentActivity.EXTRA_DOCUMENT_TYPE, LegalDocumentActivity.TYPE_PRIVACY_POLICY)
+        startActivity(intent)
+    }
+    
+    private fun navigateToTermsOfService() {
+        val intent = Intent(requireContext(), LegalDocumentActivity::class.java)
+        intent.putExtra(LegalDocumentActivity.EXTRA_DOCUMENT_TYPE, LegalDocumentActivity.TYPE_TERMS_OF_SERVICE)
+        startActivity(intent)
     }
 
     private fun onPrivacyClick() {

@@ -138,11 +138,20 @@ class TimelineFragment : Fragment() {
                 val voiceState by voiceViewModel.state.collectAsState()
                 
                 TimelineScreen(
-                    blocks = uiState.blocks,
+                    // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
+                    blocks = if (uiState.isFilterActive) uiState.filteredBlocks else uiState.blocks,
                     selectedDate = uiState.date,
                     monthYear = uiState.date.format(formatter),
                     weeks = weeks.map { it.days },
+                    // Search/Sort/Filter state
+                    searchQuery = uiState.searchQuery,
+                    sortBy = uiState.sortBy,
+                    filterLabels = uiState.filterLabels,
+                    filterPriorities = uiState.filterPriorities,
+                    filterStatus = uiState.filterStatus,
+                    isFilterActive = uiState.isFilterActive,
                     dailyQuote = uiState.dailyQuote,
+                    // Callbacks
                     isLoading = uiState.isLoading,
                     onDateSelected = { date ->
                         viewModel.onSelectDate(date)
@@ -174,6 +183,13 @@ class TimelineFragment : Fragment() {
                         val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
                         viewModel.onToggleStatus(block.taskId, newStatus)
                     },
+                    // Search/Sort/Filter callbacks
+                    onSearchQueryChanged = { query -> viewModel.onSearchQueryChanged(query) },
+                    onSortChanged = { sortOption -> viewModel.onSortChanged(sortOption) },
+                    onFilterLabelToggle = { label -> viewModel.onFilterLabelToggle(label) },
+                    onFilterPriorityToggle = { priority -> viewModel.onFilterPriorityToggle(priority) },
+                    onFilterStatusChanged = { status -> viewModel.onFilterStatusChanged(status) },
+                    onClearAllFilters = { viewModel.clearAllFilters() },
                     onSubtaskToggle = { subtaskId, isDone ->
                         viewModel.onSubtaskToggle(subtaskId, isDone)
                     }

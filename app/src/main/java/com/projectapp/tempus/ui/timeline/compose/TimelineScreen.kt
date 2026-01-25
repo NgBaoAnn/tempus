@@ -35,8 +35,10 @@ import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.dto.PriorityType
+import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.ui.timeline.SortOption
 import com.projectapp.tempus.domain.model.SubtaskInfo
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -81,6 +83,13 @@ fun TimelineScreen(
     selectedDate: LocalDate,
     monthYear: String,
     weeks: List<List<LocalDate>>,
+    // Search/Sort/Filter state
+    searchQuery: String = "",
+    sortBy: SortOption = SortOption.START_TIME,
+    filterLabels: Set<ScheduleLabel> = emptySet(),
+    filterPriorities: Set<PriorityType> = emptySet(),
+    filterStatus: StatusType? = null,
+    isFilterActive: Boolean = false,
     dailyQuote: QuoteDto? = null,
     isLoading: Boolean = false,
     onDateSelected: (LocalDate) -> Unit,
@@ -89,6 +98,13 @@ fun TimelineScreen(
     onVoiceClick: () -> Unit = {},
     onTaskClick: (TimelineBlock) -> Unit,
     onStatusToggle: (TimelineBlock) -> Unit,
+    // Search/Sort/Filter callbacks
+    onSearchQueryChanged: (String) -> Unit = {},
+    onSortChanged: (SortOption) -> Unit = {},
+    onFilterLabelToggle: (ScheduleLabel) -> Unit = {},
+    onFilterPriorityToggle: (PriorityType) -> Unit = {},
+    onFilterStatusChanged: (StatusType?) -> Unit = {},
+    onClearAllFilters: () -> Unit = {},
     onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
@@ -144,6 +160,22 @@ fun TimelineScreen(
                 weeks = weeks,
                 selectedDate = selectedDate,
                 onDateSelected = onDateSelected
+            )
+            
+            // Filter/Sort Bar
+            FilterSortBar(
+                searchQuery = searchQuery,
+                sortBy = sortBy,
+                filterLabels = filterLabels,
+                filterPriorities = filterPriorities,
+                filterStatus = filterStatus,
+                isFilterActive = isFilterActive,
+                onSearchQueryChanged = onSearchQueryChanged,
+                onSortChanged = onSortChanged,
+                onFilterLabelToggle = onFilterLabelToggle,
+                onFilterPriorityToggle = onFilterPriorityToggle,
+                onFilterStatusChanged = onFilterStatusChanged,
+                onClearAllFilters = onClearAllFilters
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -371,6 +403,7 @@ fun SwipeableWeekCalendarStrip(
         }
     }
 }
+
 
 @Composable
 private fun TimelineTopBar(

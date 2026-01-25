@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import com.projectapp.tempus.data.quote.QuoteRepository
 import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.ScheduleRepository
+import com.projectapp.tempus.data.schedule.dto.PriorityType
+import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
@@ -20,12 +22,27 @@ import java.time.YearMonth
 import java.time.DayOfWeek
 import java.time.ZoneId
 
+// Sort options for timeline
+enum class SortOption {
+    START_TIME,   // Default - by start time
+    PRIORITY,     // By priority level (high -> medium -> low)
+    CREATED_AT    // By creation date (newest first)
+}
+
 data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val blocks: List<TimelineBlock> = emptyList(),
+    val filteredBlocks: List<TimelineBlock> = emptyList(), // After applying filters
     val error: String? = null,
-    val dailyQuote: QuoteDto? = null
+    val dailyQuote: QuoteDto? = null,
+    // Search/Sort/Filter state
+    val searchQuery: String = "",
+    val sortBy: SortOption = SortOption.START_TIME,
+    val filterLabels: Set<ScheduleLabel> = emptySet(),
+    val filterPriorities: Set<PriorityType> = emptySet(),
+    val filterStatus: StatusType? = null, // null = show all
+    val isFilterActive: Boolean = false
 )
 
 class TimelineViewModel(
@@ -168,6 +185,29 @@ class TimelineViewModel(
         }
     }
 
+    /**
+     * Kết thúc schedule từ một ngày cụ thể trở đi.
+     * Schedule sẽ không hiển thị từ ngày endDate trở về sau.
+     * @param taskId ID của task cần kết thúc
+     * @param endDate Ngày bắt đầu kết thúc (format: YYYY-MM-DD)
+     */
+    fun onEndScheduleFromDate(taskId: String, endDate: String) {
+        viewModelScope.launch {
+            try {
+                _ui.value = _ui.value.copy(isLoading = true, error = null)
+                repo.updateSchedule(taskId, mapOf("end_date" to endDate))
+                Log.d("Timeline", "set end_date ok taskId=$taskId endDate=$endDate")
+                _ui.value = _ui.value.copy(isLoading = false)
+                // Clear cached schedules to force reload
+                cachedSchedules = emptyList()
+                load(_ui.value.date)
+            } catch (e: Exception) {
+                Log.e("Timeline", "set end_date FAILED: ${e.message}", e)
+                _ui.value = _ui.value.copy(isLoading = false, error = "Set end date failed: ${e.message}")
+            }
+        }
+    }
+
 
 
     private fun load(date: LocalDate) {
@@ -219,9 +259,13 @@ class TimelineViewModel(
 
                 Log.d("Timeline", "build blocks=${blocks.size}")
 
+                // Apply current filters and sort
+                val filtered = applyFiltersAndSort(blocks)
+
                 _ui.value = _ui.value.copy(
                     isLoading = false,
                     blocks = blocks,
+                    filteredBlocks = filtered,
                     error = null
                 )
             } catch (e: Exception) {
@@ -229,10 +273,139 @@ class TimelineViewModel(
                 _ui.value = _ui.value.copy(
                     isLoading = false,
                     blocks = emptyList(),
+                    filteredBlocks = emptyList(),
                     error = "Load failed: ${e.message}"
                 )
             }
         }
+    }
+
+    // ==================== SEARCH / SORT / FILTER ====================
+
+    /**
+     * Handle search query change - filters in real-time
+     */
+    fun onSearchQueryChanged(query: String) {
+        _ui.value = _ui.value.copy(searchQuery = query)
+        reapplyFilters()
+    }
+
+    /**
+     * Handle sort option change
+     */
+    fun onSortChanged(sortOption: SortOption) {
+        _ui.value = _ui.value.copy(sortBy = sortOption)
+        reapplyFilters()
+    }
+
+    /**
+     * Toggle label filter (OR logic - any matching label shows)
+     */
+    fun onFilterLabelToggle(label: ScheduleLabel) {
+        val current = _ui.value.filterLabels.toMutableSet()
+        if (label in current) {
+            current.remove(label)
+        } else {
+            current.add(label)
+        }
+        _ui.value = _ui.value.copy(filterLabels = current)
+        reapplyFilters()
+    }
+
+    /**
+     * Toggle priority filter (OR logic - any matching priority shows)
+     */
+    fun onFilterPriorityToggle(priority: PriorityType) {
+        val current = _ui.value.filterPriorities.toMutableSet()
+        if (priority in current) {
+            current.remove(priority)
+        } else {
+            current.add(priority)
+        }
+        _ui.value = _ui.value.copy(filterPriorities = current)
+        reapplyFilters()
+    }
+
+    /**
+     * Change status filter (null = show all)
+     */
+    fun onFilterStatusChanged(status: StatusType?) {
+        _ui.value = _ui.value.copy(filterStatus = status)
+        reapplyFilters()
+    }
+
+    /**
+     * Clear all filters and search
+     */
+    fun clearAllFilters() {
+        _ui.value = _ui.value.copy(
+            searchQuery = "",
+            sortBy = SortOption.START_TIME,
+            filterLabels = emptySet(),
+            filterPriorities = emptySet(),
+            filterStatus = null,
+            isFilterActive = false
+        )
+        reapplyFilters()
+    }
+
+    /**
+     * Re-apply current filters to the loaded blocks
+     */
+    private fun reapplyFilters() {
+        val filtered = applyFiltersAndSort(_ui.value.blocks)
+        val hasActiveFilter = _ui.value.searchQuery.isNotEmpty() ||
+                _ui.value.filterLabels.isNotEmpty() ||
+                _ui.value.filterPriorities.isNotEmpty() ||
+                _ui.value.filterStatus != null ||
+                _ui.value.sortBy != SortOption.START_TIME
+        
+        _ui.value = _ui.value.copy(
+            filteredBlocks = filtered,
+            isFilterActive = hasActiveFilter
+        )
+    }
+
+    /**
+     * Apply search, filters, and sort to a list of blocks
+     */
+    private fun applyFiltersAndSort(blocks: List<TimelineBlock>): List<TimelineBlock> {
+        val state = _ui.value
+        
+        return blocks
+            .filter { block ->
+                // Search filter - case insensitive contains on title
+                val matchesSearch = state.searchQuery.isEmpty() || 
+                    block.title.contains(state.searchQuery, ignoreCase = true)
+                
+                // Label filter - OR logic (show if matches ANY selected label)
+                val matchesLabel = state.filterLabels.isEmpty() || 
+                    block.labelEnum in state.filterLabels
+                
+                // Priority filter - OR logic
+                val matchesPriority = state.filterPriorities.isEmpty() || 
+                    block.priority in state.filterPriorities
+                
+                // Status filter - exact match
+                val matchesStatus = state.filterStatus == null || 
+                    block.status == state.filterStatus
+
+                // All filters are AND-ed together
+                matchesSearch && matchesLabel && matchesPriority && matchesStatus
+            }
+            .let { filtered ->
+                when (state.sortBy) {
+                    SortOption.START_TIME -> filtered.sortedBy { it.startTime }
+                    SortOption.PRIORITY -> filtered.sortedBy { 
+                        when (it.priority) {
+                            PriorityType.high -> 0
+                            PriorityType.medium -> 1
+                            PriorityType.low -> 2
+                        }
+                    }
+                    SortOption.CREATED_AT -> filtered.sortedByDescending { it.createdAt }
+                }
+            }
     }
 
     fun setCurrentWeekForHeader(anyDayInWeek: LocalDate) {
@@ -270,13 +443,31 @@ class TimelineViewModel(
             }
             val startDate = startZdt.toLocalDate()
 
+            // Check end_date - if set, schedule doesn't appear after this date
+            val endDate = s.endDate?.let { 
+                try { java.time.LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
+                catch (_: Exception) { null } 
+            }
+            if (endDate != null && !d.isBefore(endDate)) {
+                return false // Schedule has ended
+            }
+
+            // Phải sau ngày bắt đầu
+            if (d.isBefore(startDate)) return false
+
             return when (s.repeat) {
                 com.projectapp.tempus.data.schedule.dto.RepeatType.once -> d == startDate
-                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> !d.isBefore(startDate)
+                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> true // Đã check isBefore ở trên
                 com.projectapp.tempus.data.schedule.dto.RepeatType.weekly ->
-                    !d.isBefore(startDate) && d.dayOfWeek == startDate.dayOfWeek
+                    d.dayOfWeek == startDate.dayOfWeek
                 com.projectapp.tempus.data.schedule.dto.RepeatType.monthly ->
-                    !d.isBefore(startDate) && d.dayOfMonth == startDate.dayOfMonth
+                    d.dayOfMonth == startDate.dayOfMonth
+                com.projectapp.tempus.data.schedule.dto.RepeatType.custom -> {
+                    // Parse repeat_days: "1,3,5" = Thứ 2, 4, 6 (1=Monday, 7=Sunday)
+                    val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                    if (repeatDays.isEmpty()) return false
+                    repeatDays.contains(d.dayOfWeek.value)
+                }
             }
         }
 

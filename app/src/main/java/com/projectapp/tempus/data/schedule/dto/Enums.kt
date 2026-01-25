@@ -31,7 +31,8 @@ enum class RepeatType {
     @SerialName("once") once,
     @SerialName("daily") daily,
     @SerialName("weekly") weekly,
-    @SerialName("monthly") monthly
+    @SerialName("monthly") monthly,
+    @SerialName("custom") custom // Lặp theo các thứ tùy chọn (dùng với repeat_days)
 }
 
 // ===================== StatusType =====================

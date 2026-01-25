@@ -239,6 +239,57 @@ class SupabaseScheduleRepository : ScheduleRepository {
             }
     }
     
+    /**
+     * Delete all schedules for a user that start from a specific date onwards
+     * This will also delete related sub_tasks and schedule_items
+     */
+    override suspend fun deleteSchedulesFromDate(userId: String, fromDate: String): Int {
+        // Get all schedules for this user that start from the given date
+        val schedulesToDelete = supabase.from("schedule")
+            .select {
+                filter {
+                    eq("user_id", userId)
+                    gte("start_time_date", fromDate)
+                }
+            }
+            .decodeList<ScheduleRow>()
+        
+        // Delete each schedule with its related data
+        schedulesToDelete.forEach { schedule ->
+            deleteSchedule(schedule.id)
+        }
+        
+        return schedulesToDelete.size
+    }
+    
+    /**
+     * Set end_date for all schedules of a user to stop them from appearing from today onwards.
+     * This keeps historical data - schedules still appear for past dates.
+     */
+    override suspend fun setEndDateForAllSchedules(userId: String, endDate: String): Int {
+        // Get all schedules for this user that don't have an end_date or have end_date > today
+        val schedulesToUpdate = supabase.from("schedule")
+            .select {
+                filter {
+                    eq("user_id", userId)
+                }
+            }
+            .decodeList<ScheduleRow>()
+            .filter { it.endDate == null || it.endDate > endDate }
+        
+        // Update each schedule with end_date
+        schedulesToUpdate.forEach { schedule ->
+            supabase.from("schedule")
+                .update(
+                    buildJsonObject { put("end_date", endDate) }
+                ) {
+                    filter { eq("id", schedule.id) }
+                }
+        }
+        
+        return schedulesToUpdate.size
+    }
+    
     // ============================================
     // SUBTASK METHODS
     // ============================================

@@ -20,15 +20,30 @@
 > Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:processDebugResources UP-TO-DATE
 > Task :app:kspDebugKotlin
-
 > Task :app:compileDebugKotlin
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:57:74 Unchecked cast of 'com.projectapp.tempus.ui.timeline.TimelineViewModel' to 'T'.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:129:74 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:61:19 Unchecked cast of 'com.projectapp.tempus.ui.timeline.TimelineViewModel' to 'T'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimeLineFragment.kt:116:74 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/TimerFragment.kt:59:17 'fun requestPermissions(p0: (Array<String!>..Array<out String!>), p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/data/voice/TaskParserService.kt:105:55 Java type mismatch: inferred type is 'kotlin.Nothing?', but 'kotlin.String' was expected.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/data/voice/TaskParserService.kt:106:50 Java type mismatch: inferred type is 'kotlin.Nothing?', but 'kotlin.String' was expected.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/data/voice/TaskParserService.kt:107:50 Java type mismatch: inferred type is 'kotlin.Nothing?', but 'kotlin.String' was expected.
 w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/GetStatisticsUseCase.kt:185:76 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
 w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/GetStatisticsUseCase.kt:187:80 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:39:91 Unchecked cast of 'com.projectapp.tempus.ui.timeline.EditScheduleViewModel' to 'T'.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:79:93 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/TimelineAdapter.kt:105:44 'fun setColorFilter(p0: Int, p1: PorterDuff.Mode): Unit' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:150:25 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:152:23 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/domain/usecase/ParseScheduleSuggestionUseCase.kt:178:20 Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type 'kotlin.String?'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/notes/compose/NotesScreen.kt:334:63 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/setting/compose/SettingsScreen.kt:163:38 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/theme/Theme.kt:77:20 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/EditScheduleFragment.kt:28:91 Unchecked cast of 'com.projectapp.tempus.ui.timeline.EditScheduleViewModel' to 'T'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/MonthCalendarDialogFragment.kt:73:66 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/EditScheduleScreen.kt:252:99 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/EditScheduleScreen.kt:1102:17 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/EditScheduleScreen.kt:1138:17 'fun Divider(modifier: Modifier = ..., thickness: Dp = ..., color: Color = ...): Unit' is deprecated. Renamed to HorizontalDivider.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/FilterSortBar.kt:195:49 'val Icons.Filled.List: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.List.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/ui/timeline/compose/TimelineScreen.kt:562:33 Condition is always 'true'.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/widget/TasksWidgetProvider.kt:68:23 'fun setRemoteAdapter(p0: Int, p1: Intent!): Unit' is deprecated. Deprecated in Java.
+w: file:///D:/Bai%20Tap%20Android/final%20project/tempus/app/src/main/java/com/projectapp/tempus/widget/TasksWidgetProvider.kt:104:34 'fun notifyAppWidgetViewDataChanged(p0: Int, p1: Int): Unit' is deprecated. Deprecated in Java.
 
-BUILD SUCCESSFUL in 19s
+BUILD SUCCESSFUL in 50s
 20 actionable tasks: 2 executed, 18 up-to-date

@@ -87,6 +87,13 @@ class GetStatisticsUseCase {
                     RepeatType.daily -> !currentDate.isBefore(startLocalDate)
                     RepeatType.weekly -> !currentDate.isBefore(startLocalDate) && currentDate.dayOfWeek == startLocalDate.dayOfWeek
                     RepeatType.monthly -> !currentDate.isBefore(startLocalDate) && currentDate.dayOfMonth == startLocalDate.dayOfMonth
+                    RepeatType.custom -> {
+                        if (currentDate.isBefore(startLocalDate)) false
+                        else {
+                            val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                            repeatDays.contains(currentDate.dayOfWeek.value)
+                        }
+                    }
                 }
 
                 if (occurs) {
