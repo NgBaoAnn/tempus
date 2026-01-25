@@ -1,10 +1,12 @@
 package com.projectapp.tempus.ui.ai.compose
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,7 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-// Note: Using simple clickable without explicit indication for compatibility
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,10 +44,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.ai.ChatMessage
 import com.projectapp.tempus.domain.model.AgentState
@@ -84,7 +91,7 @@ fun ChatScreen(
     ChatTheme {
         Scaffold(
             topBar = {
-                ChatTopBar(
+                PremiumChatHeader(
                     isLoading = isLoading,
                     chatMode = chatMode,
                     onClearChat = { viewModel.clearChat() }
@@ -143,7 +150,7 @@ fun ChatScreen(
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
-                    EmptyState(
+                    PremiumEmptyState(
                         chatMode = chatMode,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -299,11 +306,11 @@ private fun ExecutingIndicator(
 }
 
 /**
- * Chat top app bar with avatar and status
+ * Premium Chat Header with gradient and glow effects
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatTopBar(
+private fun PremiumChatHeader(
     isLoading: Boolean,
     chatMode: ChatMode,
     onClearChat: () -> Unit,
@@ -311,101 +318,194 @@ private fun ChatTopBar(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     
-    Surface(
-        shadowElevation = 2.dp,
-        color = ChatColors.Surface,
+    // Animated status glow
+    val infiniteTransition = rememberInfiniteTransition(label = "statusGlow")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+    
+    Box(
         modifier = modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        ChatColors.Surface,
+                        ChatColors.Surface.copy(alpha = 0.95f)
+                    )
+                )
+            )
     ) {
-        TopAppBar(
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // AI Avatar with glow
+            Box {
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .offset(x = (-2).dp, y = (-2).dp)
+                            .blur(10.dp)
+                            .clip(CircleShape)
+                            .background(ChatColors.Typing.copy(alpha = glowAlpha * 0.5f))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .offset(x = (-2).dp, y = (-2).dp)
+                            .blur(8.dp)
+                            .clip(CircleShape)
+                            .background(ChatColors.GlowCyan.copy(alpha = 0.3f))
+                    )
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            brush = Brush.linearGradient(
+                                colors = if (isLoading) listOf(
+                                    ChatColors.Typing,
+                                    ChatColors.TypingGlow
+                                ) else listOf(
+                                    ChatColors.Accent,
+                                    ChatColors.AccentLight
+                                )
+                            ),
+                            shape = CircleShape
+                        )
                 ) {
-                    // Avatar
                     Image(
                         painter = painterResource(id = R.drawable.ic_ai),
                         contentDescription = "AI Avatar",
                         modifier = Modifier
-                            .size(40.dp)
+                            .fillMaxSize()
+                            .padding(2.dp)
                             .clip(CircleShape)
                     )
-                    
-                    Spacer(modifier = Modifier.width(12.dp))
-                    
-                    Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Tiramisu AI",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = ChatColors.TextPrimary
-                            )
-                            
-                            Spacer(modifier = Modifier.width(8.dp))
-                            
-                            // Mode badge
-                            ModeIndicator(mode = chatMode)
-                        }
-                        
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Status dot
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isLoading) ChatColors.Typing 
-                                        else ChatColors.Online
-                                    )
-                            )
-                            
-                            Spacer(modifier = Modifier.width(6.dp))
-                            
-                            Text(
-                                text = if (isLoading) "Đang xử lý..." else "Sẵn sàng",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isLoading) ChatColors.Typing else ChatColors.Online
-                            )
-                        }
-                    }
                 }
-            },
-            actions = {
-                // Clear chat button
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = onClearChat
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = "Xóa cuộc trò chuyện",
-                        tint = ChatColors.TextSecondary,
-                        modifier = Modifier.size(24.dp)
+            }
+            
+            Spacer(modifier = Modifier.width(14.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Tiramisu AI",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ChatColors.TextPrimary
+                    )
+                    
+                    Spacer(modifier = Modifier.width(10.dp))
+                    
+                    // Premium Mode badge
+                    PremiumModeIndicator(mode = chatMode)
+                }
+                
+                Spacer(modifier = Modifier.height(2.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Animated status dot
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isLoading) ChatColors.Typing.copy(alpha = glowAlpha)
+                                else ChatColors.Online
+                            )
+                    )
+                    
+                    Spacer(modifier = Modifier.width(6.dp))
+                    
+                    Text(
+                        text = if (isLoading) "Đang xử lý..." else "Sẵn sàng hỗ trợ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isLoading) ChatColors.Typing else ChatColors.Online
                     )
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = ChatColors.Surface
+            }
+            
+            // Clear button with glass effect
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(ChatColors.SurfaceGlass)
+                    .border(
+                        width = 1.dp,
+                        color = ChatColors.BorderGlass,
+                        shape = CircleShape
+                    )
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClearChat
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_delete),
+                    contentDescription = "Xóa cuộc trò chuyện",
+                    tint = ChatColors.TextMuted,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Premium mode indicator badge
+ */
+@Composable
+private fun PremiumModeIndicator(
+    mode: ChatMode,
+    modifier: Modifier = Modifier
+) {
+    val (text, color) = when (mode) {
+        ChatMode.ASK -> "Ask" to ChatColors.Accent
+        ChatMode.AGENT -> "Agent" to ChatColors.Primary
+        ChatMode.LIFE_PLANNER -> "Planner" to ChatColors.Online
+    }
+    
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.2f))
+            .border(
+                width = 1.dp,
+                color = color.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp)
             )
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = color
         )
     }
 }
 
 /**
- * Empty state when no messages
+ * Premium Empty state with gradient and suggestions
  */
 @Composable
-private fun EmptyState(
+private fun PremiumEmptyState(
     chatMode: ChatMode,
     modifier: Modifier = Modifier
 ) {
@@ -414,27 +514,72 @@ private fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_ai),
-            contentDescription = null,
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape),
-            alpha = 0.6f
-        )
+        // Glowing AI avatar
+        Box {
+            // Glow
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .blur(24.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                ChatColors.Primary.copy(alpha = 0.4f),
+                                ChatColors.Accent.copy(alpha = 0.2f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+            
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 3.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                ChatColors.Primary,
+                                ChatColors.Accent
+                            )
+                        ),
+                        shape = CircleShape
+                    )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_ai),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                )
+            }
+        }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
         
-        Text(
-            text = when (chatMode) {
-                ChatMode.ASK -> "Chế độ Ask 💬"
-                ChatMode.AGENT -> "Chế độ Agent 🤖"
-                ChatMode.LIFE_PLANNER -> "Life Planner 🎯"
-            },
-            style = MaterialTheme.typography.titleLarge,
-            color = ChatColors.TextPrimary,
-            textAlign = TextAlign.Center
-        )
+        // Mode title
+        val (title, icon) = when (chatMode) {
+            ChatMode.ASK -> "Chế độ Ask" to "💬"
+            ChatMode.AGENT -> "Chế độ Agent" to "🤖"
+            ChatMode.LIFE_PLANNER -> "Life Planner" to "🎯"
+        }
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = ChatColors.TextPrimary
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = icon,
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
         
         Spacer(modifier = Modifier.height(8.dp))
         
@@ -445,36 +590,37 @@ private fun EmptyState(
                 ChatMode.LIFE_PLANNER -> "Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.TextSecondary,
+            color = ChatColors.TextMuted,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
         )
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Quick suggestions based on mode
+        // Quick suggestions
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Thử hỏi:",
+                text = "THỬ HỎI",
                 style = MaterialTheme.typography.labelSmall,
-                color = ChatColors.TextMuted
+                color = ChatColors.TextDim,
+                letterSpacing = 1.5.sp
             )
             
             when (chatMode) {
                 ChatMode.ASK -> {
-                    SuggestionChip(text = "Làm sao để quản lý thời gian tốt hơn?")
-                    SuggestionChip(text = "Kỹ thuật Pomodoro là gì?")
+                    PremiumSuggestionChip(text = "Làm sao để quản lý thời gian tốt hơn?")
+                    PremiumSuggestionChip(text = "Kỹ thuật Pomodoro là gì?")
                 }
                 ChatMode.AGENT -> {
-                    SuggestionChip(text = "Lên lịch học bài cho tôi")
-                    SuggestionChip(text = "Tạo lịch làm việc từ 8h-17h")
+                    PremiumSuggestionChip(text = "Lên lịch học bài cho tôi")
+                    PremiumSuggestionChip(text = "Tạo lịch làm việc từ 8h-17h")
                 }
                 ChatMode.LIFE_PLANNER -> {
-                    SuggestionChip(text = "Tôi muốn học IELTS 7.0 trong 3 tháng")
-                    SuggestionChip(text = "Chuẩn bị thi cuối kỳ 5 môn trong 2 tuần")
+                    PremiumSuggestionChip(text = "Tôi muốn học IELTS 7.0 trong 3 tháng")
+                    PremiumSuggestionChip(text = "Chuẩn bị thi cuối kỳ 5 môn trong 2 tuần")
                 }
             }
         }
@@ -482,26 +628,33 @@ private fun EmptyState(
 }
 
 /**
- * Suggestion chip for empty state
+ * Premium suggestion chip with glass effect
  */
 @Composable
-private fun SuggestionChip(
+private fun PremiumSuggestionChip(
     text: String,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = ChatColors.SurfaceVariant,
+    Box(
         modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(ChatColors.SurfaceVariant)
+            .border(
+                width = 1.dp,
+                color = ChatColors.BorderGlass,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Text(
             text = "\"$text\"",
             style = MaterialTheme.typography.bodySmall,
-            color = ChatColors.Accent,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            color = ChatColors.Accent
         )
     }
 }
+
+
 
 /**
  * Analyzing indicator for Life Planner Mode

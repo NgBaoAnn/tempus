@@ -1,6 +1,9 @@
 package com.projectapp.tempus.ui.ai.compose
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -13,21 +16,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-// Note: Using simple clickable without explicit indication for compatibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -37,7 +38,14 @@ import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.R
 
 /**
- * Chat input composable with text field and send button
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * PREMIUM CHAT INPUT - AI-Native Design
+ * Features: Glass morphism, gradient send button, focus glow effect
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * Premium chat input with glass morphism design
  */
 @Composable
 fun ChatInput(
@@ -51,18 +59,17 @@ fun ChatInput(
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = ChatColors.Surface,
-        shadowElevation = 4.dp
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(ChatColors.Surface)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Text input field
+            // Text input field with glass morphism
             ChatTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -78,8 +85,8 @@ fun ChatInput(
                     .focusRequester(focusRequester)
             )
             
-            // Send button
-            SendButton(
+            // Premium send button
+            PremiumSendButton(
                 onClick = {
                     if (value.isNotBlank() && enabled) {
                         onSend()
@@ -87,14 +94,14 @@ fun ChatInput(
                     }
                 },
                 enabled = value.isNotBlank() && enabled,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 12.dp)
             )
         }
     }
 }
 
 /**
- * Custom text field for chat input
+ * Glass morphism text field
  */
 @Composable
 private fun ChatTextField(
@@ -105,6 +112,15 @@ private fun ChatTextField(
     placeholder: String = "Nhập tin nhắn...",
     modifier: Modifier = Modifier
 ) {
+    val borderColor by animateColorAsState(
+        targetValue = if (value.isNotEmpty()) 
+            ChatColors.Primary.copy(alpha = 0.5f) 
+        else 
+            ChatColors.InputBorder,
+        animationSpec = tween(200),
+        label = "borderColor"
+    )
+    
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -112,7 +128,7 @@ private fun ChatTextField(
         textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = ChatColors.TextPrimary
         ),
-        cursorBrush = SolidColor(ChatColors.Accent),
+        cursorBrush = SolidColor(ChatColors.Primary),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Send
@@ -124,17 +140,20 @@ private fun ChatTextField(
         decorationBox = { innerTextField ->
             Box(
                 modifier = Modifier
-                    .background(
-                        color = ChatColors.SurfaceVariant,
-                        shape = RoundedCornerShape(24.dp)
+                    .clip(RoundedCornerShape(ChatDimens.InputCornerRadius))
+                    .border(
+                        width = 1.dp,
+                        color = borderColor,
+                        shape = RoundedCornerShape(ChatDimens.InputCornerRadius)
                     )
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .background(ChatColors.InputBackground)
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
             ) {
                 if (value.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = ChatColors.TextMuted
+                        color = ChatColors.InputPlaceholder
                     )
                 }
                 innerTextField()
@@ -145,35 +164,64 @@ private fun ChatTextField(
 }
 
 /**
- * Circular send button with icon
+ * Premium gradient send button with glow effect
  */
 @Composable
-private fun SendButton(
+private fun PremiumSendButton(
     onClick: () -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor = if (enabled) ChatColors.Accent else ChatColors.TextMuted
     val interactionSource = remember { MutableInteractionSource() }
     
-    Box(
-        modifier = modifier
-            .size(ChatDimens.SendButtonSize)
-            .clip(CircleShape)
-            .background(backgroundColor)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_send_message),
-            contentDescription = "Gửi tin nhắn",
-            tint = ChatColors.Surface,
-            modifier = Modifier.size(24.dp)
+    val backgroundBrush = if (enabled) {
+        Brush.linearGradient(
+            colors = listOf(
+                ChatColors.Primary,
+                ChatColors.PrimaryLight
+            )
         )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                ChatColors.TextDim,
+                ChatColors.TextMuted
+            )
+        )
+    }
+    
+    Box(contentAlignment = Alignment.Center) {
+        // Glow effect when enabled
+        if (enabled) {
+            Box(
+                modifier = Modifier
+                    .size(ChatDimens.SendButtonSize + 8.dp)
+                    .blur(12.dp)
+                    .clip(CircleShape)
+                    .background(ChatColors.GlowPurple)
+            )
+        }
+        
+        // Button
+        Box(
+            modifier = modifier
+                .size(ChatDimens.SendButtonSize)
+                .clip(CircleShape)
+                .background(backgroundBrush)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    enabled = enabled,
+                    onClick = onClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_send_message),
+                contentDescription = "Gửi tin nhắn",
+                tint = ChatColors.OnAccent,
+                modifier = Modifier.size(22.dp)
+            )
+        }
     }
 }

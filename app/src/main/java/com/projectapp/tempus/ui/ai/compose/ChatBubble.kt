@@ -1,26 +1,14 @@
 package com.projectapp.tempus.ui.ai.compose
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -31,11 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.ai.ChatMessage
@@ -44,7 +33,14 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * User message bubble - aligned right with accent color
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * PREMIUM AI CHAT BUBBLES - AI-Native Design
+ * Features: Gradient bubbles, glow effects, glass morphism, smooth animations
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * User message bubble - Right aligned with gradient background
  */
 @Composable
 fun UserMessageBubble(
@@ -52,45 +48,74 @@ fun UserMessageBubble(
     modifier: Modifier = Modifier
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val maxBubbleWidth = screenWidth * 0.75f
+    val maxBubbleWidth = screenWidth * 0.78f
     
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.End
     ) {
-        Surface(
-            shape = RoundedCornerShape(
-                topStart = ChatDimens.BubbleCornerRadius,
-                topEnd = ChatDimens.BubbleCornerRadius,
-                bottomStart = ChatDimens.BubbleCornerRadius,
-                bottomEnd = ChatDimens.BubbleSmallCorner
-            ),
-            color = ChatColors.UserBubble,
-            shadowElevation = 1.dp,
-            modifier = Modifier.widthIn(max = maxBubbleWidth)
-        ) {
-            Text(
-                text = message.text,
-                style = MaterialTheme.typography.bodyLarge,
-                color = ChatColors.UserBubbleText,
-                modifier = Modifier.padding(ChatDimens.BubblePadding)
+        // Glow effect behind bubble
+        Box {
+            // Subtle glow
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .offset(x = 2.dp, y = 4.dp)
+                    .blur(16.dp)
+                    .clip(RoundedCornerShape(
+                        topStart = ChatDimens.BubbleCornerRadius,
+                        topEnd = ChatDimens.BubbleCornerRadius,
+                        bottomStart = ChatDimens.BubbleCornerRadius,
+                        bottomEnd = ChatDimens.BubbleSmallCorner
+                    ))
+                    .background(ChatColors.GlowPurple)
             )
+            
+            // Gradient bubble
+            Box(
+                modifier = Modifier
+                    .widthIn(max = maxBubbleWidth)
+                    .clip(RoundedCornerShape(
+                        topStart = ChatDimens.BubbleCornerRadius,
+                        topEnd = ChatDimens.BubbleCornerRadius,
+                        bottomStart = ChatDimens.BubbleCornerRadius,
+                        bottomEnd = ChatDimens.BubbleSmallCorner
+                    ))
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                ChatColors.UserBubble,
+                                ChatColors.UserBubbleEnd
+                            )
+                        )
+                    )
+                    .padding(
+                        horizontal = ChatDimens.BubblePaddingHorizontal,
+                        vertical = ChatDimens.BubblePadding
+                    )
+            ) {
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = ChatColors.UserBubbleText
+                )
+            }
         }
         
         // Timestamp
         Text(
             text = formatTimestamp(message.timestamp),
             style = MaterialTheme.typography.labelSmall,
-            color = ChatColors.TextMuted,
+            color = ChatColors.TextDim,
             modifier = Modifier.padding(top = 4.dp, end = 4.dp)
         )
     }
 }
 
 /**
- * AI message bubble - aligned left with avatar
+ * AI message bubble - Left aligned with avatar and glass morphism
  */
 @Composable
 fun AIMessageBubble(
@@ -98,43 +123,95 @@ fun AIMessageBubble(
     modifier: Modifier = Modifier
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val maxBubbleWidth = screenWidth * 0.75f
+    val maxBubbleWidth = screenWidth * 0.78f
     
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Top
     ) {
-        // AI Avatar
-        Image(
-            painter = painterResource(id = R.drawable.ic_ai),
-            contentDescription = "AI Avatar",
-            modifier = Modifier
-                .size(ChatDimens.AvatarSize)
-                .clip(CircleShape)
-        )
+        // AI Avatar with glow
+        Box {
+            // Avatar glow
+            Box(
+                modifier = Modifier
+                    .size(ChatDimens.AvatarSize + 4.dp)
+                    .offset(x = (-2).dp, y = (-2).dp)
+                    .blur(8.dp)
+                    .clip(CircleShape)
+                    .background(ChatColors.GlowCyan.copy(alpha = 0.4f))
+            )
+            
+            // Avatar
+            Box(
+                modifier = Modifier
+                    .size(ChatDimens.AvatarSize)
+                    .clip(CircleShape)
+                    .border(
+                        width = 2.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                ChatColors.Accent,
+                                ChatColors.AccentLight
+                            )
+                        ),
+                        shape = CircleShape
+                    )
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_ai),
+                    contentDescription = "AI Avatar",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                )
+            }
+        }
         
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         
         Column {
-            Surface(
-                shape = RoundedCornerShape(
-                    topStart = ChatDimens.BubbleSmallCorner,
-                    topEnd = ChatDimens.BubbleCornerRadius,
-                    bottomStart = ChatDimens.BubbleCornerRadius,
-                    bottomEnd = ChatDimens.BubbleCornerRadius
-                ),
-                color = ChatColors.AIBubble,
-                shadowElevation = 1.dp,
-                modifier = Modifier.widthIn(max = maxBubbleWidth)
+            // Glass morphism bubble
+            Box(
+                modifier = Modifier
+                    .widthIn(max = maxBubbleWidth)
+                    .clip(RoundedCornerShape(
+                        topStart = ChatDimens.BubbleSmallCorner,
+                        topEnd = ChatDimens.BubbleCornerRadius,
+                        bottomStart = ChatDimens.BubbleCornerRadius,
+                        bottomEnd = ChatDimens.BubbleCornerRadius
+                    ))
+                    .border(
+                        width = 1.dp,
+                        color = ChatColors.AIBubbleBorder,
+                        shape = RoundedCornerShape(
+                            topStart = ChatDimens.BubbleSmallCorner,
+                            topEnd = ChatDimens.BubbleCornerRadius,
+                            bottomStart = ChatDimens.BubbleCornerRadius,
+                            bottomEnd = ChatDimens.BubbleCornerRadius
+                        )
+                    )
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                ChatColors.AIBubbleLight,
+                                ChatColors.AIBubble
+                            )
+                        )
+                    )
+                    .padding(
+                        horizontal = ChatDimens.BubblePaddingHorizontal,
+                        vertical = ChatDimens.BubblePadding
+                    )
             ) {
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyLarge,
                     color = ChatColors.AIBubbleText,
-                    modifier = Modifier.padding(ChatDimens.BubblePadding)
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
                 )
             }
             
@@ -142,7 +219,7 @@ fun AIMessageBubble(
             Text(
                 text = formatTimestamp(message.timestamp),
                 style = MaterialTheme.typography.labelSmall,
-                color = ChatColors.TextMuted,
+                color = ChatColors.TextDim,
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp)
             )
         }
@@ -150,7 +227,7 @@ fun AIMessageBubble(
 }
 
 /**
- * Typing indicator with animated dots
+ * Premium Typing indicator with pulsing dots and cyan glow
  */
 @Composable
 fun TypingIndicator(
@@ -166,30 +243,81 @@ fun TypingIndicator(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.Top
         ) {
-            // AI Avatar
-            Image(
-                painter = painterResource(id = R.drawable.ic_ai),
-                contentDescription = "AI Avatar",
+            // AI Avatar with thinking glow
+            Box {
+                // Animated glow
+                val infiniteTransition = rememberInfiniteTransition(label = "avatarGlow")
+                val glowAlpha by infiniteTransition.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 0.7f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1000, easing = EaseInOutSine),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow"
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .size(ChatDimens.AvatarSize + 8.dp)
+                        .offset(x = (-4).dp, y = (-4).dp)
+                        .blur(12.dp)
+                        .clip(CircleShape)
+                        .background(ChatColors.Typing.copy(alpha = glowAlpha))
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .size(ChatDimens.AvatarSize)
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    ChatColors.Typing,
+                                    ChatColors.TypingGlow
+                                )
+                            ),
+                            shape = CircleShape
+                        )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_ai),
+                        contentDescription = "AI Avatar",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(2.dp)
+                            .clip(CircleShape)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(10.dp))
+            
+            // Glass bubble with animated dots
+            Box(
                 modifier = Modifier
-                    .size(ChatDimens.AvatarSize)
-                    .clip(CircleShape)
-            )
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Surface(
-                shape = RoundedCornerShape(
-                    topStart = ChatDimens.BubbleSmallCorner,
-                    topEnd = ChatDimens.BubbleCornerRadius,
-                    bottomStart = ChatDimens.BubbleCornerRadius,
-                    bottomEnd = ChatDimens.BubbleCornerRadius
-                ),
-                color = ChatColors.AIBubble,
-                shadowElevation = 1.dp
+                    .clip(RoundedCornerShape(
+                        topStart = ChatDimens.BubbleSmallCorner,
+                        topEnd = ChatDimens.BubbleCornerRadius,
+                        bottomStart = ChatDimens.BubbleCornerRadius,
+                        bottomEnd = ChatDimens.BubbleCornerRadius
+                    ))
+                    .border(
+                        width = 1.dp,
+                        color = ChatColors.Typing.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(
+                            topStart = ChatDimens.BubbleSmallCorner,
+                            topEnd = ChatDimens.BubbleCornerRadius,
+                            bottomStart = ChatDimens.BubbleCornerRadius,
+                            bottomEnd = ChatDimens.BubbleCornerRadius
+                        )
+                    )
+                    .background(ChatColors.AIBubble)
             ) {
                 Row(
                     modifier = Modifier.padding(
@@ -200,8 +328,8 @@ fun TypingIndicator(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TypingDot(delayMillis = 0)
-                    TypingDot(delayMillis = 150)
-                    TypingDot(delayMillis = 300)
+                    TypingDot(delayMillis = 200)
+                    TypingDot(delayMillis = 400)
                 }
             }
         }
@@ -209,7 +337,7 @@ fun TypingIndicator(
 }
 
 /**
- * Single animated dot for typing indicator
+ * Animated typing dot with scale and alpha animation
  */
 @Composable
 private fun TypingDot(
@@ -217,22 +345,40 @@ private fun TypingDot(
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "typing")
+    
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(600, delayMillis = delayMillis),
+            animation = tween(600, delayMillis = delayMillis, easing = EaseInOutSine),
             repeatMode = RepeatMode.Reverse
         ),
         label = "dotAlpha"
     )
     
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, delayMillis = delayMillis, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dotScale"
+    )
+    
     Box(
         modifier = modifier
-            .size(8.dp)
+            .size((8 * scale).dp)
             .alpha(alpha)
             .clip(CircleShape)
-            .background(ChatColors.TextMuted)
+            .background(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        ChatColors.Typing,
+                        ChatColors.TypingGlow
+                    )
+                )
+            )
     )
 }
 
