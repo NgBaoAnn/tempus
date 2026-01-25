@@ -23,10 +23,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.voice.SpeechRecognitionManager
 import com.projectapp.tempus.data.voice.TaskParserService
+import com.projectapp.tempus.domain.usecase.PointsManager
+import com.projectapp.tempus.ui.components.PointsNotification
 import com.projectapp.tempus.ui.timeline.MonthCalendarDialogFragment
 import com.projectapp.tempus.ui.timeline.TimelineViewModel
 import com.projectapp.tempus.ui.timeline.WeekItem
@@ -49,10 +52,12 @@ class TimelineFragment : Fragment() {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
+                val pointsManager = PointsManager(SupabaseGamificationRepository())
                 return TimelineViewModel(
                     application = requireActivity().application,
                     userId = myUserId,
-                    repo = repo
+                    repo = repo,
+                    pointsManager = pointsManager
                 ) as T
             }
         }
@@ -149,6 +154,19 @@ class TimelineFragment : Fragment() {
                         viewModel.onSubtaskToggle(subtaskId, isDone)
                     }
                 )
+                
+                // Points earned notification overlay
+                val earnedPoints = uiState.earnedPoints
+                val earnedReason = uiState.earnedReason
+                if (earnedPoints != null && earnedReason != null) {
+                    PointsNotification(
+                        points = earnedPoints,
+                        reason = earnedReason,
+                        onDismiss = {
+                            viewModel.clearEarnedPoints()
+                        }
+                    )
+                }
                 
                 // Voice Input Bottom Sheet
                 if (showVoiceSheet) {

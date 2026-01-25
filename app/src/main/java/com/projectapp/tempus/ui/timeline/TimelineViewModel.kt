@@ -14,7 +14,9 @@ import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.BuildTimelineUseCase
+import com.projectapp.tempus.domain.usecase.PointsManager
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.YearMonth
@@ -41,7 +43,10 @@ data class TimelineUiState(
     val filterLabels: Set<ScheduleLabel> = emptySet(),
     val filterPriorities: Set<PriorityType> = emptySet(),
     val filterStatus: StatusType? = null, // null = show all
-    val isFilterActive: Boolean = false
+    val isFilterActive: Boolean = false,
+    // Points earned event (set to null after consuming)
+    val earnedPoints: Int? = null,
+    val earnedReason: String? = null
 )
 
 class TimelineViewModel(
@@ -49,6 +54,7 @@ class TimelineViewModel(
     private var cachedSchedules: List<com.projectapp.tempus.data.schedule.dto.ScheduleRow> = emptyList(),
     private val userId: String,
     private val repo: ScheduleRepository,
+    private val pointsManager: PointsManager? = null,
     private val builder: BuildTimelineUseCase = BuildTimelineUseCase()
 ) : AndroidViewModel(application) {
 
@@ -118,13 +124,45 @@ class TimelineViewModel(
                 _ui.value = _ui.value.copy(isLoading = true, error = null)
                 val item = repo.upsertScheduleItem(taskId, dateStr, status)
                 Log.d("Timeline", "upsertScheduleItem ok itemId=${item.id} status=${item.status}")
-                _ui.value = _ui.value.copy(isLoading = false)
+                
+                // Handle points based on status change
+                var earnedPoints: Int? = null
+                var earnedReason: String? = null
+                
+                if (pointsManager != null) {
+                    when (status) {
+                        StatusType.done -> {
+                            // Award points when task is completed
+                            earnedPoints = pointsManager.earnPoints(PointAction.TASK_COMPLETE)
+                            earnedReason = "Hoàn thành Task"
+                            pointsManager.updateStreak()
+                            Log.d("Timeline", "Awarded $earnedPoints points for task completion")
+                        }
+                        StatusType.planned -> {
+                            // Deduct points when task is uncompleted (prevent abuse)
+                            earnedPoints = pointsManager.earnPoints(PointAction.TASK_UNCOMPLETE)
+                            earnedReason = "Huỷ hoàn thành Task"
+                            Log.d("Timeline", "Deducted $earnedPoints points for task uncompletion")
+                        }
+                        else -> { /* No points change for delete */ }
+                    }
+                }
+                
+                _ui.value = _ui.value.copy(
+                    isLoading = false,
+                    earnedPoints = earnedPoints,
+                    earnedReason = earnedReason
+                )
                 load(_ui.value.date)
             } catch (e: Exception) {
                 Log.e("Timeline", "upsertScheduleItem FAILED: ${e.message}", e)
                 _ui.value = _ui.value.copy(isLoading = false, error = "Upsert failed: ${e.message}")
             }
         }
+    }
+    
+    fun clearEarnedPoints() {
+        _ui.value = _ui.value.copy(earnedPoints = null, earnedReason = null)
     }
 
     fun onSubtaskToggle(subtaskId: String, isDone: Boolean) {
