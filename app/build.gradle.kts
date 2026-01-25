@@ -128,6 +128,9 @@ dependencies {
     implementation(libs.compose.runtime.livedata)
     implementation(libs.lottie.compose)
     
+    // Material Icons Extended - for more icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    
     // Compose Debug
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

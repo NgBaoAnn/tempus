@@ -15,6 +15,7 @@ enum class PointAction(
     STREAK_BONUS_30(100, "Streak 1 tháng liên tiếp"),
     
     // Mất điểm
+    TASK_UNCOMPLETE(-10, "Huỷ hoàn thành task"),
     MISS_TASK(-5, "Bỏ lỡ task"),
     PLANT_TREE(-50, "Trồng cây mới (cơ bản)"),
     WATER_TREE(-10, "Tưới cây");

@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * DTO để map với bảng point_history trên Supabase
+ * DTO để đọc từ bảng point_history trên Supabase
  */
 @Serializable
 data class PointHistoryDto(
@@ -18,7 +18,19 @@ data class PointHistoryDto(
 )
 
 /**
- * Convert DTO sang Entity
+ * DTO riêng cho INSERT - không có id (để Supabase auto-generate)
+ */
+@Serializable
+data class PointHistoryInsertDto(
+    @SerialName("user_id")
+    val userId: String,
+    val points: Int,
+    val reason: String,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+/**
+ * Convert DTO sang Entity (khi đọc từ DB)
  */
 fun PointHistoryDto.toEntity(): PointHistoryEntity {
     return PointHistoryEntity(
@@ -30,10 +42,10 @@ fun PointHistoryDto.toEntity(): PointHistoryEntity {
 }
 
 /**
- * Convert Entity sang DTO
+ * Convert Entity sang InsertDto (khi INSERT vào DB)
  */
-fun PointHistoryEntity.toDto(userId: String): PointHistoryDto {
-    return PointHistoryDto(
+fun PointHistoryEntity.toInsertDto(userId: String): PointHistoryInsertDto {
+    return PointHistoryInsertDto(
         userId = userId,
         points = points,
         reason = reason,

@@ -140,10 +140,6 @@ class SettingsFragment : Fragment() {
         startActivity(intent)
     }
 
-    private fun onPrivacyClick() {
-        Toast.makeText(requireContext(), "Xem chính sách bảo mật", Toast.LENGTH_SHORT).show()
-    }
-
     // ===== EXPORT FUNCTIONS =====
 
     private fun exportToJson() {

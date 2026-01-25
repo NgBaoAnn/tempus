@@ -82,21 +82,32 @@ fun SettingsScreen(
             ProfileCard(
                 userName = userInfo.name.ifEmpty { "Người dùng" },
                 userEmail = userInfo.email.ifEmpty { "user@email.com" },
+                avatarUrl = userInfo.avatar,
                 onClick = onProfileClick
             )
             
             Spacer(modifier = Modifier.height(SettingsDimens.SectionSpacing))
+            
             // Section: CHUNG
             SectionHeader(text = "CHUNG")
             
             SettingsGroup {
                 SettingsItem(
+<<<<<<< HEAD
                 icon = Icons.Default.Settings,
                 iconBgColor = SettingsColors.IconBgBlue,
                 iconTint = SettingsColors.IconBlue,
                 title = "Giao diện",
                 onClick = onThemeClick
             )
+=======
+                    icon = Icons.Default.Settings,
+                    iconBgColor = SettingsColors.IconBgBlue,
+                    iconTint = SettingsColors.IconBlue,
+                    title = "Giao diện",
+                    onClick = onThemeClick
+                )
+>>>>>>> garden/vinh_nho
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Outlined.Notifications,
@@ -130,20 +141,20 @@ fun SettingsScreen(
             
             SettingsGroup {
                 SettingsItem(
-                icon = Icons.Default.Refresh,
-                iconBgColor = SettingsColors.IconBgCyan,
-                iconTint = SettingsColors.IconCyan,
-                title = "Đồng bộ dữ liệu",
-                onClick = onExportJsonClick
-            )
-            SettingsDivider()
-            SettingsItem(
-                icon = Icons.Default.Delete,
-                iconBgColor = SettingsColors.IconBgPink,
-                iconTint = SettingsColors.IconPink,
-                title = "Xóa dữ liệu",
-                onClick = onDeleteDataClick
-            )
+                    icon = Icons.Default.Refresh,
+                    iconBgColor = SettingsColors.IconBgCyan,
+                    iconTint = SettingsColors.IconCyan,
+                    title = "Đồng bộ dữ liệu",
+                    onClick = onExportJsonClick
+                )
+                SettingsDivider()
+                SettingsItem(
+                    icon = Icons.Default.Delete,
+                    iconBgColor = SettingsColors.IconBgPink,
+                    iconTint = SettingsColors.IconPink,
+                    title = "Xóa dữ liệu",
+                    onClick = onDeleteDataClick
+                )
             }
             
             Spacer(modifier = Modifier.height(SettingsDimens.SectionSpacing))
@@ -161,12 +172,12 @@ fun SettingsScreen(
                 )
                 SettingsDivider()
                 SettingsItem(
-                icon = Icons.Default.Send,
-                iconBgColor = SettingsColors.IconBgOrange,
-                iconTint = SettingsColors.IconOrange,
-                title = "Gửi phản hồi",
-                onClick = {}
-            )
+                    icon = Icons.Default.Send,
+                    iconBgColor = SettingsColors.IconBgOrange,
+                    iconTint = SettingsColors.IconOrange,
+                    title = "Gửi phản hồi",
+                    onClick = {}
+                )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Outlined.Star,
@@ -184,20 +195,20 @@ fun SettingsScreen(
             
             SettingsGroup {
                 SettingsItem(
-                icon = Icons.Default.Lock,
-                iconBgColor = SettingsColors.IconBgPurple,
-                iconTint = SettingsColors.IconPurple,
-                title = "Chính sách quyền riêng tư",
-                onClick = onPrivacyClick
-            )
-            SettingsDivider()
-            SettingsItem(
-                icon = Icons.Default.Info,
-                iconBgColor = SettingsColors.IconBgGreen,
-                iconTint = SettingsColors.IconGreen,
-                title = "Điều khoản dịch vụ",
-                onClick = onTermsClick
-            )
+                    icon = Icons.Default.Lock,
+                    iconBgColor = SettingsColors.IconBgPurple,
+                    iconTint = SettingsColors.IconPurple,
+                    title = "Chính sách quyền riêng tư",
+                    onClick = onPrivacyClick
+                )
+                SettingsDivider()
+                SettingsItem(
+                    icon = Icons.Default.Info,
+                    iconBgColor = SettingsColors.IconBgGreen,
+                    iconTint = SettingsColors.IconGreen,
+                    title = "Điều khoản dịch vụ",
+                    onClick = onTermsClick
+                )
             }
             
             Spacer(modifier = Modifier.height(SettingsDimens.SectionSpacing))
