@@ -38,6 +38,7 @@ import com.projectapp.tempus.ui.timeline.WeekItem
 import com.projectapp.tempus.ui.timeline.compose.TimelineScreen
 import com.projectapp.tempus.ui.voice.VoiceViewModel
 import com.projectapp.tempus.ui.voice.compose.VoiceInputSheet
+import com.projectapp.tempus.ui.components.PointsNotification
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
