@@ -211,11 +211,9 @@ class TimelineViewModel(
                 val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
                 val editedMap = repo.getEditedVersions(editedIds).associateBy { it.id }
 
-                // Load subtasks for all schedules
-                val subtasksMap = mutableMapOf<String, List<com.projectapp.tempus.data.schedule.dto.SubTaskRow>>()
-                for (taskId in taskIds) {
-                    subtasksMap[taskId] = repo.getSubTasks(taskId)
-                }
+                // OPTIMIZED: Batch load subtasks in 1 API call instead of N calls
+                val allSubtasks = repo.getSubTasksBatch(taskIds)
+                val subtasksMap = allSubtasks.groupBy { it.scheduleId }
 
                 val blocks = builder.build(date, schedules, scheduleItems, editedMap, subtasksMap)
 
