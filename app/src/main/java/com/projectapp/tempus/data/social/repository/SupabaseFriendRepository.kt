@@ -9,6 +9,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import java.time.Instant
 
 /**
@@ -53,14 +54,15 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
+            // Simple select without FK joins
             val results = supabase.from("friend_requests")
-                .select(Columns.raw("*, sender:users!sender_id(id, username, avatar, email)")) {
+                .select(Columns.raw("id, sender_id, receiver_id, status, created_at, updated_at")) {
                     filter {
                         eq("receiver_id", currentUserId)
                         eq("status", "pending")
                     }
                 }
-                .decodeList<FriendRequestDto>()
+                .decodeList<FriendRequestSimpleDto>()
             
             results.map { it.toDomain() }
         }
@@ -70,14 +72,15 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
+            // Simple select without FK joins
             val results = supabase.from("friend_requests")
-                .select(Columns.raw("*, receiver:users!receiver_id(id, username, avatar, email)")) {
+                .select(Columns.raw("id, sender_id, receiver_id, status, created_at, updated_at")) {
                     filter {
                         eq("sender_id", currentUserId)
                         eq("status", "pending")
                     }
                 }
-                .decodeList<FriendRequestDto>()
+                .decodeList<FriendRequestSimpleDto>()
             
             results.map { it.toDomain() }
         }
@@ -165,17 +168,9 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Query friendships where user is either user1 or user2
-            // Join with users table to get friend info
+            // Simple select without FK joins
             val results = supabase.from("friendships")
-                .select(Columns.raw("""
-                    id,
-                    user1_id,
-                    user2_id,
-                    created_at,
-                    friend1:users!user1_id(id, username, avatar, email),
-                    friend2:users!user2_id(id, username, avatar, email)
-                """.trimIndent())) {
+                .select(Columns.raw("id, user1_id, user2_id, created_at")) {
                     filter {
                         or {
                             eq("user1_id", currentUserId)
@@ -183,17 +178,16 @@ class SupabaseFriendRepository(
                         }
                     }
                 }
-                .decodeList<FriendshipWithBothUsersDto>()
+                .decodeList<FriendshipSimpleDto>()
             
             results.map { dto ->
-                // Xác định friend là user1 hay user2
-                val friend = if (dto.user1Id == currentUserId) dto.friend2 else dto.friend1
+                val friendId = if (dto.user1Id == currentUserId) dto.user2Id else dto.user1Id
                 Friendship(
                     id = dto.id,
-                    friendId = friend?.id ?: "",
-                    friendUsername = friend?.username ?: "Unknown",
-                    friendAvatar = friend?.avatar,
-                    friendEmail = friend?.email ?: "",
+                    friendId = friendId,
+                    friendUsername = "User", // Placeholder - can fetch later
+                    friendAvatar = null,
+                    friendEmail = "",
                     createdAt = try {
                         Instant.parse(dto.createdAt)
                     } catch (e: Exception) {
@@ -251,15 +245,24 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
+            // Simple select - just get blocked_id, we don't need joined user data for now
             val results = supabase.from("blocked_users")
-                .select(Columns.raw("blocked:users!blocked_id(id, username, avatar, email)")) {
+                .select(Columns.raw("id, blocker_id, blocked_id, created_at")) {
                     filter {
                         eq("blocker_id", currentUserId)
                     }
                 }
-                .decodeList<BlockedUserDto>()
+                .decodeList<BlockedUserSimpleDto>()
             
-            results.mapNotNull { it.blocked }
+            // Return simple DTOs with just the blocked user id
+            results.map { dto ->
+                UserBasicDto(
+                    id = dto.blockedId,
+                    username = "Blocked User", // Placeholder
+                    avatar = null,
+                    email = null
+                )
+            }
         }
     }
 
@@ -359,6 +362,26 @@ class SupabaseFriendRepository(
             }
             
             RelationshipStatus.None
+        }
+    }
+
+    // =============== DISCOVER / ALL USERS ===============
+
+    override suspend fun getAllUsers(): Result<List<UserBasicDto>> {
+        return runCatching {
+            val currentUserId = getCurrentUserId()
+            
+            // Lấy tất cả users trừ current user
+            // Sort theo username để dễ duyệt
+            supabase.from("users")
+                .select(Columns.raw("id, username, avatar, email")) {
+                    filter {
+                        neq("id", currentUserId)
+                    }
+                    order("username", Order.ASCENDING)
+                    limit(50) // Limit để tránh load quá nhiều
+                }
+                .decodeList<UserBasicDto>()
         }
     }
 }

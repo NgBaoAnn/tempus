@@ -81,6 +81,12 @@ interface FriendRepository {
      * Kiểm tra trạng thái quan hệ với một user
      */
     suspend fun getRelationshipStatus(userId: String): Result<RelationshipStatus>
+    
+    /**
+     * Lấy danh sách tất cả users (để hiển thị trong Discover tab)
+     * Exclude current user và blocked users
+     */
+    suspend fun getAllUsers(): Result<List<UserBasicDto>>
 }
 
 /**
