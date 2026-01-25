@@ -71,4 +71,9 @@
         android:name="com.projectapp.tempus.ui.garden.GardenFragment"
         android:label="Garden"
         tools:layout="@layout/fragment_garden" />
+
+    <fragment
+        android:id="@+id/socialFragment"
+        android:name="com.projectapp.tempus.ui.social.SocialFragment"
+        android:label="Friends" />
 </navigation>
