@@ -128,6 +128,9 @@ dependencies {
     implementation(libs.compose.runtime.livedata)
     implementation(libs.lottie.compose)
     
+    // Material Icons Extended - for more icons
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    
     // Compose Debug
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
@@ -141,4 +144,7 @@ dependencies {
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // DataStore for preferences
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

@@ -1,5 +1,6 @@
 package com.projectapp.tempus
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -7,27 +8,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.projectapp.tempus.data.focus.FocusModePreferences
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.PointsManager
-import com.projectapp.tempus.receiver.TimerActionReceiver
+import com.projectapp.tempus.service.focus.FocusModeService
+import com.projectapp.tempus.ui.components.PointsNotification
+import com.projectapp.tempus.ui.components.PointsNotificationState
+import com.projectapp.tempus.ui.focus.FocusLockActivity
+import com.projectapp.tempus.ui.focus.FocusSettingsActivity
 import com.projectapp.tempus.ui.timer.compose.TimerColors
 import com.projectapp.tempus.ui.timer.compose.TimerScreen
 import com.projectapp.tempus.ui.timer.compose.TimerState
 import com.projectapp.tempus.util.TimerEventBus
 import com.projectapp.tempus.util.TimerNotificationHelper
-import com.projectapp.tempus.data.timer.TimerPreferences
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class TimerFragment : Fragment() {
@@ -45,9 +54,18 @@ class TimerFragment : Fragment() {
     
     // Gamification
     private lateinit var pointsManager: PointsManager
+    
+    // Points notification state
+    private var pointsNotification by mutableStateOf(PointsNotificationState())
+    
+    // Focus Mode
+    private lateinit var focusModePreferences: FocusModePreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize Focus Mode preferences
+        focusModePreferences = FocusModePreferences(requireContext())
         
         // Request notification permission for Android 13+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -97,40 +115,59 @@ class TimerFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             
             setContent {
-                TimerScreen(
-                    timerState = timerState,
-                    hours = hours,
-                    minutes = minutes,
-                    secondsRemaining = secondsRemaining,
-                    totalSeconds = totalSeconds,
-                    selectedQuickIndex = selectedQuickIndex,
-                    selectedColor = selectedColor,
-                    onHoursChange = { hours = it },
-                    onMinutesChange = { minutes = it },
-                    onQuickSelect = { index ->
-                        selectedQuickIndex = index
-                        when (index) {
-                            0 -> { hours = 0; minutes = 1 }
-                            1 -> { hours = 0; minutes = 5 }
-                            2 -> { hours = 0; minutes = 30 }
-                            3 -> { hours = 1; minutes = 0 }
-                            // 4 = Custom, keep current values
+                val focusModeEnabled by focusModePreferences.focusModeEnabled.collectAsState(initial = false)
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TimerScreen(
+                        timerState = timerState,
+                        hours = hours,
+                        minutes = minutes,
+                        secondsRemaining = secondsRemaining,
+                        totalSeconds = totalSeconds,
+                        selectedQuickIndex = selectedQuickIndex,
+                        selectedColor = selectedColor,
+                        focusModeEnabled = focusModeEnabled,
+                        onHoursChange = { hours = it },
+                        onMinutesChange = { minutes = it },
+                        onQuickSelect = { index ->
+                            selectedQuickIndex = index
+                            when (index) {
+                                0 -> { hours = 0; minutes = 1 }
+                                1 -> { hours = 0; minutes = 5 }
+                                2 -> { hours = 0; minutes = 30 }
+                                3 -> { hours = 1; minutes = 0 }
+                                // 4 = Custom, keep current values
+                            }
+                        },
+                        onColorSelect = { selectedColor = it },
+                        onStart = { startTimer() },
+                        onPause = { pauseTimer() },
+                        onResume = { resumeTimer() },
+                        onCancel = { cancelTimer() },
+                        onReset = { 
+                            selectedQuickIndex = 4
+                            hours = 0
+                            minutes = 15
+                        },
+                        onNotesClick = {
+                            findNavController().navigate(R.id.action_timerFragment_to_notesFragment)
+                        },
+                        onFocusSettingsClick = {
+                            startActivity(Intent(requireContext(), FocusSettingsActivity::class.java))
                         }
-                    },
-                    onColorSelect = { selectedColor = it },
-                    onStart = { startTimer() },
-                    onPause = { pauseTimer() },
-                    onResume = { resumeTimer() },
-                    onCancel = { cancelTimer() },
-                    onReset = { 
-                        selectedQuickIndex = 4
-                        hours = 0
-                        minutes = 15
-                    },
-                    onNotesClick = {
-                        findNavController().navigate(R.id.action_timerFragment_to_notesFragment)
+                    )
+                    
+                    // Points earned notification overlay
+                    if (pointsNotification.show) {
+                        PointsNotification(
+                            points = pointsNotification.points,
+                            reason = pointsNotification.reason,
+                            onDismiss = {
+                                pointsNotification = PointsNotificationState()
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
@@ -152,6 +189,22 @@ class TimerFragment : Fragment() {
             false
         )
         
+        // Start Focus Lock Screen if enabled
+        lifecycleScope.launch {
+            val focusModeEnabled = focusModePreferences.focusModeEnabled.first()
+            val autoStart = focusModePreferences.autoStartWithTimer.first()
+            
+            if (focusModeEnabled && autoStart) {
+                // Launch the focus lock screen
+                FocusLockActivity.start(
+                    requireContext(),
+                    totalSeconds,
+                    selectedColor.hashCode()
+                )
+                Log.d("TimerFragment", "Focus Lock Screen started with timer")
+            }
+        }
+        
         startCountDown()
     }
     
@@ -166,6 +219,9 @@ class TimerFragment : Fragment() {
                     TimerNotificationHelper.formatTime(secondsRemaining),
                     false
                 )
+                
+                // Update Focus Lock Screen
+                FocusLockActivity.sendTimerUpdate(requireContext(), secondsRemaining)
             }
 
             override fun onFinish() {
@@ -175,16 +231,24 @@ class TimerFragment : Fragment() {
                 // Cancel notification
                 TimerNotificationHelper.cancelNotification(requireContext())
                 
+                // Close Focus Lock Screen
+                FocusLockActivity.sendTimerFinish(requireContext())
+                
                 // 🎮 Award Pomodoro points when timer completes
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val earnedPoints = pointsManager.earnPoints(PointAction.POMODORO_COMPLETE)
+                    // Calculate focus minutes from totalSeconds
+                    val focusMinutes = (totalSeconds / 60).toInt().coerceAtLeast(1)
+                    
+                    // Award 1 point per minute
+                    val earnedPoints = pointsManager.earnPomodoroPoints(focusMinutes)
                     pointsManager.updateStreak()
                     
-                    Toast.makeText(
-                        requireContext(),
-                        "🎉 Hoàn thành! +$earnedPoints điểm",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // Show visual notification with minutes info
+                    pointsNotification = PointsNotificationState(
+                        show = true,
+                        points = earnedPoints,
+                        reason = "Tập trung $focusMinutes phút"
+                    )
                 }
             }
         }.start()
@@ -222,6 +286,9 @@ class TimerFragment : Fragment() {
         
         // Cancel notification
         TimerNotificationHelper.cancelNotification(requireContext())
+        
+        // Stop Focus Mode
+        FocusModeService.stopFocusMode(requireContext())
     }
 
     override fun onDestroy() {
@@ -231,4 +298,3 @@ class TimerFragment : Fragment() {
         TimerNotificationHelper.cancelNotification(requireContext())
     }
 }
-

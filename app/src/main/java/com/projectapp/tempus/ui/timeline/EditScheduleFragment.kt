@@ -40,6 +40,8 @@ class EditScheduleFragment : Fragment() {
                     onClose = { findNavController().popBackStack() },
                     onSaveSuccess = { 
                         Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
+                        // Refresh widget to show new/updated task
+                        com.projectapp.tempus.widget.TasksWidgetProvider.refreshAllWidgets(requireContext())
                         findNavController().popBackStack() 
                     }
                 )
@@ -62,4 +64,3 @@ class EditScheduleFragment : Fragment() {
         }
     }
 }
-

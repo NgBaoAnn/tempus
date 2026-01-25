@@ -21,6 +21,7 @@ data class ScheduleRow(
     val repeat: RepeatType,
     @SerialName("repeat_days") val repeatDays: String? = null, // Các thứ lặp lại, VD: "1,3,5" = Thứ 2, Thứ 4, Thứ 6 (1=Mon, 7=Sun)
     @SerialName("end_date") val endDate: String? = null, // ISO date string (VD: 2026-01-26) - schedule won't show after this date
+
     val color: String? = null,
     val source: SourceType? = null,
     @SerialName("created_at") val createdAt: String? = null

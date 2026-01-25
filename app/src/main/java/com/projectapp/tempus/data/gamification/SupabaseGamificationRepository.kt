@@ -8,6 +8,7 @@ import com.projectapp.tempus.data.gamification.dto.TreeUpdateDto
 import com.projectapp.tempus.data.gamification.dto.UserPointsDto
 import com.projectapp.tempus.data.gamification.dto.toDto
 import com.projectapp.tempus.data.gamification.dto.toEntity
+import com.projectapp.tempus.data.gamification.dto.toInsertDto
 import com.projectapp.tempus.data.gamification.dto.toUpdateDto
 import com.projectapp.tempus.data.gamification.entity.PointHistoryEntity
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
@@ -128,7 +129,7 @@ class SupabaseGamificationRepository(
         
         try {
             supabase.from("point_history")
-                .insert(history.toDto(userId))
+                .insert(history.toInsertDto(userId))
         } catch (e: Exception) {
             android.util.Log.e("GamificationRepo", "Error adding point history: ${e.message}")
         }
@@ -334,6 +335,27 @@ class SupabaseGamificationRepository(
                 }
         } catch (e: Exception) {
             android.util.Log.e("GamificationRepo", "Error killing tree: ${e.message}")
+        }
+    }
+    
+    /**
+     * Xóa cây hoàn toàn khỏi database
+     */
+    suspend fun deleteTree(treeId: Long) {
+        val userId = getCurrentUserId() ?: return
+        
+        try {
+            supabase.from("trees")
+                .delete {
+                    filter {
+                        eq("id", treeId)
+                        eq("user_id", userId)
+                    }
+                }
+            android.util.Log.d("GamificationRepo", "Tree $treeId deleted successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("GamificationRepo", "Error deleting tree: ${e.message}")
+            throw e
         }
     }
 }

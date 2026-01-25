@@ -14,5 +14,8 @@
 .cxx
 local.properties
 .kotlin
+
+# Agent skills
 /.agent
 /.shared
+.agent/

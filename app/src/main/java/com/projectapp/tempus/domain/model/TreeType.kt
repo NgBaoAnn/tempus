@@ -14,6 +14,7 @@ enum class TreeType(
     SAKURA("Hoa Anh Đào", 100, "Cây hoa đẹp, nở hoa mùa xuân", "🌸"),
     BAMBOO("Cây Tre", 60, "Cây châu Á, mọc nhanh", "🎋"),
     PALM("Cây Cọ", 50, "Cây nhiệt đới, dễ trồng", "🌴"),
+    COCONUT("Cây Dừa", 90, "Cây nhiệt đới, cho trái dừa", "🥥"),
     APPLE("Cây Táo", 120, "Cây ăn quả, thưởng bonus khi trưởng thành", "🍎");
     
     companion object {
