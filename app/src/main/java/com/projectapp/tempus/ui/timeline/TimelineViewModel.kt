@@ -96,18 +96,33 @@ class TimelineViewModel(
                 val item = repo.upsertScheduleItem(taskId, dateStr, status)
                 Log.d("Timeline", "upsertScheduleItem ok itemId=${item.id} status=${item.status}")
                 
-                // Award points when task is completed
+                // Handle points based on status change
                 var earnedPoints: Int? = null
-                if (status == StatusType.completed && pointsManager != null) {
-                    earnedPoints = pointsManager.earnPoints(PointAction.TASK_COMPLETE)
-                    pointsManager.updateStreak()
-                    Log.d("Timeline", "Awarded $earnedPoints points for task completion")
+                var earnedReason: String? = null
+                
+                if (pointsManager != null) {
+                    when (status) {
+                        StatusType.done -> {
+                            // Award points when task is completed
+                            earnedPoints = pointsManager.earnPoints(PointAction.TASK_COMPLETE)
+                            earnedReason = "Hoàn thành Task"
+                            pointsManager.updateStreak()
+                            Log.d("Timeline", "Awarded $earnedPoints points for task completion")
+                        }
+                        StatusType.planned -> {
+                            // Deduct points when task is uncompleted (prevent abuse)
+                            earnedPoints = pointsManager.earnPoints(PointAction.TASK_UNCOMPLETE)
+                            earnedReason = "Huỷ hoàn thành Task"
+                            Log.d("Timeline", "Deducted $earnedPoints points for task uncompletion")
+                        }
+                        else -> { /* No points change for delete */ }
+                    }
                 }
                 
                 _ui.value = _ui.value.copy(
                     isLoading = false,
                     earnedPoints = earnedPoints,
-                    earnedReason = if (earnedPoints != null) "Hoàn thành Task" else null
+                    earnedReason = earnedReason
                 )
                 load(_ui.value.date)
             } catch (e: Exception) {
