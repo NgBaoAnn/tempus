@@ -51,7 +51,8 @@ class EditScheduleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         val taskIdArgs = arguments?.getString("taskId")
-        viewModel.initialize(taskIdArgs)
+        val selectedDateArgs = arguments?.getString("selectedDate") // Ngày user đang xem
+        viewModel.initialize(taskIdArgs, selectedDateArgs)
         
         // Error handling
         viewLifecycleOwner.lifecycleScope.launch {

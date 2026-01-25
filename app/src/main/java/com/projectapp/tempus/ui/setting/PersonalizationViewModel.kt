@@ -302,14 +302,11 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 val state = _uiState.value
                 val today = LocalDate.now()
                 
-                // Step 1: Delete all schedules from today onwards
-                val todayStart = today.atStartOfDay()
-                    .atZone(ZoneId.systemDefault())
-                    .withZoneSameInstant(ZoneId.of("UTC"))
-                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-                
-                val deletedCount = scheduleRepo.deleteSchedulesFromDate(userId, todayStart)
-                Log.d("PersonalizationVM", "Deleted $deletedCount schedules from today onwards")
+                // Step 1: Set end_date for all existing schedules to today
+                // This keeps historical data but stops them from appearing from today onwards
+                val todayStr = today.toString() // YYYY-MM-DD format
+                val updatedCount = scheduleRepo.setEndDateForAllSchedules(userId, todayStr)
+                Log.d("PersonalizationVM", "Set end_date for $updatedCount schedules to $todayStr")
 
                 // Step 2: Create Wake Up task
                 createDailyTask(

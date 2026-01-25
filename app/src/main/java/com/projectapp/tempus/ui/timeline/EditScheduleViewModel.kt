@@ -26,6 +26,7 @@ data class EditState(
     val title: String = "",
     val description: String = "",
     val date: LocalDate = LocalDate.now(),
+    val selectedDate: LocalDate = LocalDate.now(), // Ngày user đang xem trên timeline (dùng cho delete)
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726",
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
@@ -53,17 +54,15 @@ class EditScheduleViewModel(
 
 
     fun initialize(taskId: String?, initialDateString: String? = null) {
+        // Parse ngày đang xem từ timeline
+        val viewingDate = if (initialDateString != null) {
+            try { LocalDate.parse(initialDateString) } catch (e: Exception) { LocalDate.now() }
+        } else {
+            LocalDate.now()
+        }
+        
         if (taskId == null) {
-            val dateToUse = if (initialDateString != null) {
-                try {
-                    LocalDate.parse(initialDateString)
-                } catch (e: Exception) {
-                    LocalDate.now()
-                }
-            } else {
-                LocalDate.now()
-            }
-            _state.value = EditState(isEditMode = false, date = dateToUse)
+            _state.value = EditState(isEditMode = false, date = viewingDate, selectedDate = viewingDate)
         } else {
             viewModelScope.launch {
                 try {
@@ -84,6 +83,7 @@ class EditScheduleViewModel(
                             id = t.id,
                             title = t.name,
                             date = localZdt.toLocalDate(),
+                            selectedDate = viewingDate, // Ngày user đang xem (cho delete)
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
                             iconLabel = t.label ?: ScheduleLabel.book,
@@ -171,6 +171,51 @@ class EditScheduleViewModel(
                 Log.e("EditViewModel", "Error deleting task", e)
             }
         }
+    }
+
+    /**
+     * Xóa chỉ cho ngày đang xem - đặt status = delete trong schedule_items
+     * Tác vụ vẫn sẽ hiện ở các ngày khác
+     */
+    fun deleteForToday() {
+        viewModelScope.launch {
+            try {
+                val taskId = _state.value.id ?: return@launch
+                val dateStr = _state.value.selectedDate.toString() // Dùng selectedDate - ngày user đang xem
+                repo.upsertScheduleItem(taskId, dateStr, com.projectapp.tempus.data.schedule.dto.StatusType.delete)
+                Log.d("EditViewModel", "Deleted task for date: $taskId date=$dateStr")
+                _saveSuccessEvent.send(Unit)
+            } catch (e: Exception) {
+                Log.e("EditViewModel", "Error deleting task for today", e)
+                _errorEvent.send("Lỗi xóa tác vụ: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Xóa từ ngày đang xem trở đi - đặt end_date cho schedule
+     * Tác vụ vẫn sẽ hiện ở các ngày trước đó
+     */
+    fun deleteFromToday() {
+        viewModelScope.launch {
+            try {
+                val taskId = _state.value.id ?: return@launch
+                val endDateStr = _state.value.selectedDate.toString() // Dùng selectedDate - ngày user đang xem
+                repo.updateSchedule(taskId, mapOf("end_date" to endDateStr))
+                Log.d("EditViewModel", "Set end_date for task: $taskId endDate=$endDateStr")
+                _saveSuccessEvent.send(Unit)
+            } catch (e: Exception) {
+                Log.e("EditViewModel", "Error setting end date", e)
+                _errorEvent.send("Lỗi xóa tác vụ: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Kiểm tra xem tác vụ có phải là tác vụ lặp lại không
+     */
+    fun isRecurringTask(): Boolean {
+        return _state.value.repeat != RepeatType.once
     }
 
     fun setApplyTodayOnly(v: Boolean) {

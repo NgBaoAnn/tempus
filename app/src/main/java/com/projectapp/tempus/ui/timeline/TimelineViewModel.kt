@@ -181,6 +181,29 @@ class TimelineViewModel(
         }
     }
 
+    /**
+     * Kết thúc schedule từ một ngày cụ thể trở đi.
+     * Schedule sẽ không hiển thị từ ngày endDate trở về sau.
+     * @param taskId ID của task cần kết thúc
+     * @param endDate Ngày bắt đầu kết thúc (format: YYYY-MM-DD)
+     */
+    fun onEndScheduleFromDate(taskId: String, endDate: String) {
+        viewModelScope.launch {
+            try {
+                _ui.value = _ui.value.copy(isLoading = true, error = null)
+                repo.updateSchedule(taskId, mapOf("end_date" to endDate))
+                Log.d("Timeline", "set end_date ok taskId=$taskId endDate=$endDate")
+                _ui.value = _ui.value.copy(isLoading = false)
+                // Clear cached schedules to force reload
+                cachedSchedules = emptyList()
+                load(_ui.value.date)
+            } catch (e: Exception) {
+                Log.e("Timeline", "set end_date FAILED: ${e.message}", e)
+                _ui.value = _ui.value.copy(isLoading = false, error = "Set end date failed: ${e.message}")
+            }
+        }
+    }
+
 
 
     private fun load(date: LocalDate) {
@@ -393,6 +416,15 @@ class TimelineViewModel(
                 java.time.LocalDate.parse(s.startTimeDate.split(" ")[0]).atStartOfDay(ZoneId.systemDefault())
             }
             val startDate = startZdt.toLocalDate()
+
+            // Check end_date - if set, schedule doesn't appear after this date
+            val endDate = s.endDate?.let { 
+                try { java.time.LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
+                catch (_: Exception) { null } 
+            }
+            if (endDate != null && !d.isBefore(endDate)) {
+                return false // Schedule has ended
+            }
 
             return when (s.repeat) {
                 com.projectapp.tempus.data.schedule.dto.RepeatType.once -> d == startDate

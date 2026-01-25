@@ -73,6 +73,15 @@ class BuildTimelineUseCase {
             val startZdt = parseToZonedDateTime(s.startTimeDate).withZoneSameInstant(systemZone)
             val startDate = startZdt.toLocalDate()
 
+            // Check end_date - if set, schedule doesn't appear after this date
+            val endDate = s.endDate?.let { 
+                try { LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
+                catch (_: Exception) { null } 
+            }
+            if (endDate != null && !targetDate.isBefore(endDate)) {
+                return false // Schedule has ended
+            }
+
             return when (s.repeat) {
                 RepeatType.once -> targetDate == startDate
                 RepeatType.daily -> !targetDate.isBefore(startDate)

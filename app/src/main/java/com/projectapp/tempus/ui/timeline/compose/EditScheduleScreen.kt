@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -86,13 +88,13 @@ fun EditScheduleScreen(
     var subtasks by remember { mutableStateOf(listOf<String>()) }
     var newSubtaskText by remember { mutableStateOf("") }
     
-    // Sheet states
     var showIconSheet by remember { mutableStateOf(false) }
     var showDurationSheet by remember { mutableStateOf(false) }
     var showRepeatSheet by remember { mutableStateOf(false) }
     var showPrioritySheet by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     
     LaunchedEffect(state.title) {
         if (titleText.isEmpty() && state.title.isNotEmpty()) {
@@ -394,7 +396,15 @@ fun EditScheduleScreen(
                         text = "Xóa tác vụ",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { viewModel.deleteTask() }
+                            .clickable { 
+                                // Nếu là tác vụ lặp lại, hiển thị dialog
+                                if (viewModel.isRecurringTask()) {
+                                    showDeleteDialog = true
+                                } else {
+                                    // Tác vụ một lần - xóa trực tiếp
+                                    viewModel.deleteTask()
+                                }
+                            }
                             .padding(16.dp),
                         color = EditColors.Delete,
                         fontSize = 16.sp,
@@ -461,6 +471,25 @@ fun EditScheduleScreen(
             currentTime = state.time,
             onTimeSelected = { viewModel.setTime(it); showTimePicker = false },
             onDismiss = { showTimePicker = false }
+        )
+    }
+    
+    // Delete Options Dialog for recurring tasks
+    if (showDeleteDialog) {
+        DeleteOptionsDialog(
+            onDeleteForToday = {
+                viewModel.deleteForToday()
+                showDeleteDialog = false
+            },
+            onDeleteFromToday = {
+                viewModel.deleteFromToday()
+                showDeleteDialog = false
+            },
+            onDeleteCompletely = {
+                viewModel.deleteTask()
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
         )
     }
 }
@@ -1003,4 +1032,151 @@ private fun priorityToInfo(p: PriorityType): Pair<String, Color> = when (p) {
     PriorityType.high -> "Cao" to Color(0xFFFF3B30)
     PriorityType.medium -> "Trung bình" to Color(0xFFFF9500)
     PriorityType.low -> "Thấp" to Color(0xFF34C759)
+}
+
+// ============================================
+// DELETE OPTIONS DIALOG
+// ============================================
+@Composable
+private fun DeleteOptionsDialog(
+    onDeleteForToday: () -> Unit,
+    onDeleteFromToday: () -> Unit,
+    onDeleteCompletely: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = EditColors.Surface,
+        title = {
+            Text(
+                text = "Xóa tác vụ lặp lại",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = EditColors.TextPrimary
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Đây là tác vụ lặp lại. Bạn muốn xóa như thế nào?",
+                    fontSize = 14.sp,
+                    color = EditColors.TextSecondary
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Option 1: Delete for today only
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onDeleteForToday() },
+                    color = Color.Transparent
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = null,
+                            tint = EditColors.Primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Chỉ xóa hôm nay",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = EditColors.TextPrimary
+                            )
+                            Text(
+                                text = "Tác vụ vẫn còn ở các ngày khác",
+                                fontSize = 13.sp,
+                                color = EditColors.TextSecondary
+                            )
+                        }
+                    }
+                }
+                
+                Divider(color = EditColors.Divider)
+                
+                // Option 2: Delete from today onwards
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onDeleteFromToday() },
+                    color = Color.Transparent
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = EditColors.Warning,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Xóa từ hôm nay trở đi",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = EditColors.TextPrimary
+                            )
+                            Text(
+                                text = "Không còn lặp lại ở các ngày sau",
+                                fontSize = 13.sp,
+                                color = EditColors.TextSecondary
+                            )
+                        }
+                    }
+                }
+                
+                Divider(color = EditColors.Divider)
+                
+                // Option 3: Delete completely
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onDeleteCompletely() },
+                    color = Color.Transparent
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = EditColors.Delete,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Xóa hoàn toàn",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = EditColors.Delete
+                            )
+                            Text(
+                                text = "Xóa tác vụ và tất cả lịch sử",
+                                fontSize = 13.sp,
+                                color = EditColors.TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Hủy", color = EditColors.Primary)
+            }
+        }
+    )
 }
