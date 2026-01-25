@@ -14,6 +14,7 @@ data class ScheduleRow(
     @SerialName("category_id") val categoryId: String? = null,
     val description: String? = null,
     @SerialName("end_date") val endDate: String? = null,
+    @SerialName("repeat_days") val repeatDays: String? = null, // JSON array dạng string cho ngày lặp lại
     // ----------------------------------------------------
 
     @SerialName("start_time_date") val startTimeDate: String, // ISO string (VD: 2025-12-21 07:00:00+07)
