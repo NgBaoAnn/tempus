@@ -4,30 +4,21 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-<<<<<<< HEAD
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.TrendingDown
-=======
-import androidx.compose.foundation.shape.RoundedCornerShape
->>>>>>> master
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-<<<<<<< HEAD
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-=======
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
->>>>>>> master
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 /**
-<<<<<<< HEAD
  * Bright, vibrant colors following UI/UX Pro Max guidelines
  */
 private object PointsColors {
@@ -70,26 +60,6 @@ data class PointsNotificationState(
 /**
  * Modern horizontal layout points notification
  * Icon and points are aligned horizontally for better visual flow
-=======
- * Colors for points notification
- */
-private object PointsNotificationColors {
-    val SurfaceDark = Color(0xFF1A1A2E)
-    val SurfaceCard = Color(0xFF16213E)
-    val Gold = Color(0xFFFFD700)
-    val Green = Color(0xFF00D26A)
-    val Red = Color(0xFFFF6B6B)
-    val Text = Color.White
-    val TextSecondary = Color(0xFFB0B0B0)
-}
-
-/**
- * Center overlay notification hiển thị khi user kiếm hoặc mất điểm
- * 
- * @param points Số điểm thay đổi (dương = cộng, âm = trừ)
- * @param reason Lý do (vd: "Hoàn thành Task", "Huỷ hoàn thành Task")
- * @param onDismiss Callback khi notification bị đóng
->>>>>>> master
  */
 @Composable
 fun PointsNotification(
@@ -103,7 +73,6 @@ fun PointsNotification(
         onDismiss()
     }
     
-<<<<<<< HEAD
     val isEarning = points > 0
     val displayPoints = abs(points)
     val pointsText = if (isEarning) "+$displayPoints" else "-$displayPoints"
@@ -115,14 +84,6 @@ fun PointsNotification(
     }
     val accentColor = if (isEarning) PointsColors.EarnGradientStart else PointsColors.DeductGradientStart
     val icon: ImageVector = if (isEarning) Icons.Rounded.CheckCircle else Icons.Rounded.TrendingDown
-=======
-    // Determine if earning or losing points
-    val isEarning = points > 0
-    val displayPoints = abs(points)
-    val pointsText = if (isEarning) "+$displayPoints" else "-$displayPoints"
-    val pointsColor = if (isEarning) PointsNotificationColors.Green else PointsNotificationColors.Red
-    val emoji = if (isEarning) "🎉" else "📉"
->>>>>>> master
     
     Dialog(
         onDismissRequest = onDismiss,
@@ -131,13 +92,8 @@ fun PointsNotification(
             dismissOnClickOutside = true
         )
     ) {
-<<<<<<< HEAD
         // Bounce scale animation
         var scale by remember { mutableFloatStateOf(0.7f) }
-=======
-        // Scale animation
-        var scale by remember { mutableFloatStateOf(0.8f) }
->>>>>>> master
         val animatedScale by animateFloatAsState(
             targetValue = scale,
             animationSpec = spring(
@@ -153,7 +109,6 @@ fun PointsNotification(
         
         Card(
             modifier = Modifier
-<<<<<<< HEAD
                 .widthIn(min = 280.dp, max = 340.dp)
                 .scale(animatedScale)
                 .shadow(
@@ -254,94 +209,7 @@ fun PointsNotification(
                     fontSize = 12.sp,
                     color = PointsColors.TextMuted.copy(alpha = 0.5f)
                 )
-=======
-                .width(260.dp)
-                .scale(animatedScale)
-                .clickable { onDismiss() },
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                PointsNotificationColors.SurfaceCard,
-                                PointsNotificationColors.SurfaceDark
-                            )
-                        )
-                    )
-                    .padding(24.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Emoji
-                    Text(
-                        text = emoji,
-                        fontSize = 48.sp
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // Points with animation
-                    Text(
-                        text = pointsText,
-                        fontSize = 56.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = pointsColor,
-                        textAlign = TextAlign.Center
-                    )
-                    
-                    Text(
-                        text = "điểm",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = PointsNotificationColors.TextSecondary
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // Reason with chip style
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = pointsColor.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = reason,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = pointsColor,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Tap hint
-                    Text(
-                        text = "Nhấn để đóng",
-                        fontSize = 12.sp,
-                        color = PointsNotificationColors.TextSecondary.copy(alpha = 0.5f)
-                    )
-                }
->>>>>>> master
             }
         }
     }
 }
-<<<<<<< HEAD
-=======
-
-/**
- * State holder for showing points notification
- */
-data class PointsNotificationState(
-    val show: Boolean = false,
-    val points: Int = 0,
-    val reason: String = ""
-)
->>>>>>> master
