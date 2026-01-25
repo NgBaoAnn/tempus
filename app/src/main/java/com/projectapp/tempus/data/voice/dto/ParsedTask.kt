@@ -15,8 +15,9 @@ data class ParsedTask(
     val duration: Duration?,
     val confidence: Float = 0f
 ) {
+    // Valid if we have at least a task name - date/time have fallback defaults
     val isValid: Boolean
-        get() = taskName != null && (date != null || time != null)
+        get() = !taskName.isNullOrBlank()
 }
 
 /**

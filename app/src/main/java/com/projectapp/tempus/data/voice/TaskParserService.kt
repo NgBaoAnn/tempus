@@ -1,5 +1,6 @@
 package com.projectapp.tempus.data.voice
 
+import android.util.Log
 import com.projectapp.tempus.data.ai.AIRepository
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.voice.dto.ParsedTask
@@ -15,6 +16,10 @@ import java.time.Duration
 class TaskParserService(
     private val aiRepository: AIRepository
 ) {
+    
+    companion object {
+        private const val TAG = "TaskParserService"
+    }
     
     // System instruction for parsing voice commands
     private val parsingPrompt = """
@@ -48,6 +53,8 @@ Output: {"taskName": "Học tiếng Anh", "date": "2026-01-25", "time": "19:00",
      * Parse Vietnamese voice text into ParsedTask using AI
      */
     suspend fun parse(text: String, today: LocalDate = LocalDate.now()): ParsedTask {
+        Log.d(TAG, "Parsing voice text: $text")
+        
         val prompt = """
 $parsingPrompt
 
@@ -61,17 +68,19 @@ Output:
         
         return result.fold(
             onSuccess = { responseText ->
+                Log.d(TAG, "AI response: $responseText")
                 parseJsonResponse(text, responseText, today)
             },
-            onFailure = {
-                // Fallback: return raw text with no parsing
+            onFailure = { error ->
+                Log.e(TAG, "AI call failed: ${error.message}", error)
+                // Fallback: return raw text with error info
                 ParsedTask(
                     rawText = text,
-                    taskName = text,
-                    date = null,
+                    taskName = text, // Sử dụng text gốc làm task name
+                    date = today,    // Mặc định hôm nay
                     time = null,
-                    duration = null,
-                    confidence = 0f
+                    duration = Duration.ofMinutes(60),
+                    confidence = 0.5f // 50% confidence for fallback
                 )
             }
         )
