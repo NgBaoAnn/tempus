@@ -32,7 +32,8 @@ import com.projectapp.tempus.R
 
 data class UserInfo(
     val name: String = "",
-    val email: String = ""
+    val email: String = "",
+    val avatar: String? = null
 )
 
 /**

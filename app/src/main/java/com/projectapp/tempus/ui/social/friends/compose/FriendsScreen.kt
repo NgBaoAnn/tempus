@@ -1,0 +1,598 @@
+package com.projectapp.tempus.ui.social.friends.compose
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PersonRemove
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.projectapp.tempus.data.social.dto.UserBasicDto
+import com.projectapp.tempus.domain.social.model.FriendRequest
+import com.projectapp.tempus.domain.social.model.Friendship
+import com.projectapp.tempus.ui.social.friends.FriendsTab
+import com.projectapp.tempus.ui.social.friends.FriendsUiState
+import com.projectapp.tempus.ui.social.friends.FriendsViewModel
+
+/**
+ * Color scheme cho Social module
+ */
+object SocialColors {
+    val Primary = Color(0xFF6366F1)        // Indigo
+    val PrimaryLight = Color(0xFFEEF2FF)
+    val Secondary = Color(0xFF10B981)      // Emerald
+    val Background = Color(0xFFF8FAFC)
+    val CardBackground = Color.White
+    val TextPrimary = Color(0xFF1E293B)
+    val TextSecondary = Color(0xFF64748B)
+    val Danger = Color(0xFFEF4444)
+    val Warning = Color(0xFFF59E0B)
+    val GradientStart = Color(0xFF6366F1)
+    val GradientEnd = Color(0xFF8B5CF6)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FriendsScreen(
+    viewModel: FriendsViewModel = viewModel(),
+    onNavigateToChat: (String) -> Unit = {}
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var showSearchDialog by remember { mutableStateOf(false) }
+    
+    // Snackbar state
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Show error/success messages
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
+        }
+    }
+    
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSuccessMessage()
+        }
+    }
+    
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showSearchDialog = true },
+                containerColor = SocialColors.Primary,
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Filled.PersonAdd, contentDescription = "Tìm bạn bè")
+            }
+        },
+        containerColor = SocialColors.Background
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // Header
+            FriendsHeader(
+                pendingCount = uiState.pendingRequests.size
+            )
+            
+            // Tab Bar
+            FriendsTabBar(
+                selectedTab = uiState.selectedTab,
+                onTabSelected = viewModel::selectTab,
+                pendingCount = uiState.pendingRequests.size
+            )
+            
+            // Content
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = SocialColors.Primary)
+                }
+            } else {
+                when (uiState.selectedTab) {
+                    FriendsTab.FRIENDS -> FriendsList(
+                        friends = uiState.friends,
+                        onUnfriend = viewModel::unfriend,
+                        onChat = onNavigateToChat
+                    )
+                    FriendsTab.REQUESTS -> RequestsList(
+                        pendingRequests = uiState.pendingRequests,
+                        sentRequests = uiState.sentRequests,
+                        onAccept = viewModel::acceptRequest,
+                        onReject = viewModel::rejectRequest,
+                        onCancel = viewModel::cancelRequest
+                    )
+                    FriendsTab.BLOCKED -> BlockedList(
+                        blockedUsers = uiState.blockedUsers,
+                        onUnblock = viewModel::unblockUser
+                    )
+                }
+            }
+        }
+    }
+    
+    // Search Dialog
+    if (showSearchDialog) {
+        SearchUserDialog(
+            searchResults = uiState.searchResults,
+            isSearching = uiState.isSearching,
+            onSearch = viewModel::searchUsers,
+            onSendRequest = viewModel::sendFriendRequest,
+            onDismiss = { 
+                showSearchDialog = false
+                viewModel.clearSearchResults()
+            }
+        )
+    }
+}
+
+@Composable
+private fun FriendsHeader(pendingCount: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(SocialColors.GradientStart, SocialColors.GradientEnd)
+                )
+            )
+            .padding(horizontal = 20.dp, vertical = 24.dp)
+    ) {
+        Column {
+            Text(
+                text = "Bạn bè",
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (pendingCount > 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "$pendingCount lời mời đang chờ",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendsTabBar(
+    selectedTab: FriendsTab,
+    onTabSelected: (FriendsTab) -> Unit,
+    pendingCount: Int
+) {
+    TabRow(
+        selectedTabIndex = selectedTab.ordinal,
+        containerColor = SocialColors.CardBackground,
+        contentColor = SocialColors.Primary,
+        indicator = { tabPositions ->
+            if (selectedTab.ordinal < tabPositions.size) {
+                TabRowDefaults.SecondaryIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.BottomStart)
+                        .offset(x = tabPositions[selectedTab.ordinal].left)
+                        .width(tabPositions[selectedTab.ordinal].width),
+                    color = SocialColors.Primary
+                )
+            }
+        }
+    ) {
+        Tab(
+            selected = selectedTab == FriendsTab.FRIENDS,
+            onClick = { onTabSelected(FriendsTab.FRIENDS) },
+            text = { Text("Bạn bè") }
+        )
+        Tab(
+            selected = selectedTab == FriendsTab.REQUESTS,
+            onClick = { onTabSelected(FriendsTab.REQUESTS) },
+            text = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Lời mời")
+                    if (pendingCount > 0) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Badge(
+                            containerColor = SocialColors.Danger,
+                            contentColor = Color.White
+                        ) {
+                            Text(pendingCount.toString())
+                        }
+                    }
+                }
+            }
+        )
+        Tab(
+            selected = selectedTab == FriendsTab.BLOCKED,
+            onClick = { onTabSelected(FriendsTab.BLOCKED) },
+            text = { Text("Đã chặn") }
+        )
+    }
+}
+
+@Composable
+private fun FriendsList(
+    friends: List<Friendship>,
+    onUnfriend: (String) -> Unit,
+    onChat: (String) -> Unit
+) {
+    if (friends.isEmpty()) {
+        EmptyState(
+            icon = Icons.Filled.People,
+            title = "Chưa có bạn bè",
+            subtitle = "Tìm và kết nối với bạn bè mới!"
+        )
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(friends, key = { it.id }) { friend ->
+                FriendCard(
+                    friend = friend,
+                    onUnfriend = { onUnfriend(friend.id) },
+                    onChat = { onChat(friend.friendId) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendCard(
+    friend: Friendship,
+    onUnfriend: () -> Unit,
+    onChat: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar
+            UserAvatar(
+                username = friend.friendUsername,
+                avatarUrl = friend.friendAvatar,
+                size = 52
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = friend.friendUsername,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    color = SocialColors.TextPrimary
+                )
+                Text(
+                    text = friend.friendEmail,
+                    fontSize = 13.sp,
+                    color = SocialColors.TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // Chat button
+            IconButton(onClick = onChat) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Chat,
+                    contentDescription = "Nhắn tin",
+                    tint = SocialColors.Primary
+                )
+            }
+            
+            // More options
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        Icons.Filled.MoreVert,
+                        contentDescription = "Thêm",
+                        tint = SocialColors.TextSecondary
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Huỷ kết bạn", color = SocialColors.Danger) },
+                        onClick = {
+                            showMenu = false
+                            onUnfriend()
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Filled.PersonRemove, null, tint = SocialColors.Danger)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RequestsList(
+    pendingRequests: List<FriendRequest>,
+    sentRequests: List<FriendRequest>,
+    onAccept: (String) -> Unit,
+    onReject: (String) -> Unit,
+    onCancel: (String) -> Unit
+) {
+    if (pendingRequests.isEmpty() && sentRequests.isEmpty()) {
+        EmptyState(
+            icon = Icons.Filled.MailOutline,
+            title = "Không có lời mời",
+            subtitle = "Các lời mời kết bạn sẽ hiện ở đây"
+        )
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (pendingRequests.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Lời mời đã nhận",
+                        fontWeight = FontWeight.Bold,
+                        color = SocialColors.TextPrimary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                items(pendingRequests, key = { it.id }) { request ->
+                    FriendRequestCard(
+                        request = request,
+                        isReceived = true,
+                        onAccept = { onAccept(request.id) },
+                        onReject = { onReject(request.id) },
+                        onCancel = {}
+                    )
+                }
+            }
+            
+            if (sentRequests.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Lời mời đã gửi",
+                        fontWeight = FontWeight.Bold,
+                        color = SocialColors.TextPrimary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                items(sentRequests, key = { it.id }) { request ->
+                    FriendRequestCard(
+                        request = request,
+                        isReceived = false,
+                        onAccept = {},
+                        onReject = {},
+                        onCancel = { onCancel(request.id) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendRequestCard(
+    request: FriendRequest,
+    isReceived: Boolean,
+    onAccept: () -> Unit,
+    onReject: () -> Unit,
+    onCancel: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar
+            val displayName = if (isReceived) request.senderUsername else request.receiverUsername
+            val avatarUrl = if (isReceived) request.senderAvatar else request.receiverAvatar
+            
+            UserAvatar(
+                username = displayName,
+                avatarUrl = avatarUrl,
+                size = 48
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = displayName,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    color = SocialColors.TextPrimary
+                )
+                Text(
+                    text = if (isReceived) "Muốn kết bạn với bạn" else "Đang chờ phản hồi",
+                    fontSize = 13.sp,
+                    color = SocialColors.TextSecondary
+                )
+            }
+            
+            // Actions
+            if (isReceived) {
+                IconButton(onClick = onReject) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "Từ chối",
+                        tint = SocialColors.Danger
+                    )
+                }
+                IconButton(onClick = onAccept) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = "Chấp nhận",
+                        tint = SocialColors.Secondary
+                    )
+                }
+            } else {
+                TextButton(onClick = onCancel) {
+                    Text("Huỷ", color = SocialColors.Danger)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BlockedList(
+    blockedUsers: List<UserBasicDto>,
+    onUnblock: (String) -> Unit
+) {
+    if (blockedUsers.isEmpty()) {
+        EmptyState(
+            icon = Icons.Filled.Block,
+            title = "Không có ai bị chặn",
+            subtitle = "Người dùng bị chặn sẽ hiện ở đây"
+        )
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(blockedUsers, key = { it.id }) { user ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        UserAvatar(
+                            username = user.username,
+                            avatarUrl = user.avatar,
+                            size = 44
+                        )
+                        
+                        Spacer(modifier = Modifier.width(12.dp))
+                        
+                        Text(
+                            text = user.username,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        
+                        TextButton(onClick = { onUnblock(user.id) }) {
+                            Text("Bỏ chặn", color = SocialColors.Primary)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UserAvatar(
+    username: String,
+    avatarUrl: String?,
+    size: Int
+) {
+    Box(
+        modifier = Modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(SocialColors.PrimaryLight),
+        contentAlignment = Alignment.Center
+    ) {
+        // TODO: Load actual avatar with Coil/Glide
+        Text(
+            text = username.firstOrNull()?.uppercase() ?: "?",
+            color = SocialColors.Primary,
+            fontWeight = FontWeight.Bold,
+            fontSize = (size / 2).sp
+        )
+    }
+}
+
+@Composable
+private fun EmptyState(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = SocialColors.TextSecondary.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = title,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 18.sp,
+            color = SocialColors.TextPrimary
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = subtitle,
+            fontSize = 14.sp,
+            color = SocialColors.TextSecondary
+        )
+    }
+}
