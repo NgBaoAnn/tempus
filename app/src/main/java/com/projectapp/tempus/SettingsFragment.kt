@@ -95,8 +95,7 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 userInfoState.value = UserInfo(
                     name = user.username,
-                    email = user.email,
-                    avatar = user.avatar
+                    email = user.email
                 )
             }
         }
