@@ -155,7 +155,7 @@ class TasksRemoteViewsFactory(
                     .plusHours(duration.getOrNull(0)?.toLongOrNull() ?: 0)
                     .plusMinutes(duration.getOrNull(1)?.toLongOrNull() ?: 0)
                 
-                val timeRange = "${localStart.format(DateTimeFormatter.ofPattern("HH:mm"))} - ${endTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
+                val timeRange = "${localStart.format(DateTimeFormatter.ofPattern("HH:mm"))}-${endTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
                 views.setTextViewText(R.id.widget_task_time, timeRange)
             } catch (e: Exception) {
                 Log.e("TasksWidget", "Error formatting time", e)
