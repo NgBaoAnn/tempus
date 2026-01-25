@@ -27,13 +27,14 @@ data class EditState(
     val description: String = "",
     val date: LocalDate = LocalDate.now(),
     val time: LocalTime = LocalTime.now(),
-    val color: String = "#FFA726", // Cam mặc định
+    val color: String = "#FFA726",
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,
     val duration: String = "00:30:00",
     val priority: PriorityType = PriorityType.medium,
     val loading: Boolean = false,
-    val errorMessage: String? = null // ✅ Thêm field lỗi
+    val errorMessage: String? = null,
+    val subtasks: List<String> = emptyList() // Subtask titles
 )
 
 class EditScheduleViewModel(
@@ -74,6 +75,10 @@ class EditScheduleViewModel(
                         )
                         val localZdt = odt.atZoneSameInstant(ZoneId.systemDefault())
 
+                        // Load existing subtasks
+                        val existingSubtasks = repo.getSubTasks(taskId)
+                        val subtaskTitles = existingSubtasks.map { it.title }
+                        
                         _state.value = EditState(
                             isEditMode = true,
                             id = t.id,
@@ -81,10 +86,11 @@ class EditScheduleViewModel(
                             date = localZdt.toLocalDate(),
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
-                        iconLabel = t.label ?: ScheduleLabel.book,
-                        repeat = t.repeat,
-                        duration = t.implementationTime ?: "00:30:00",
-                        priority = t.priority ?: PriorityType.medium
+                            iconLabel = t.label ?: ScheduleLabel.book,
+                            repeat = t.repeat,
+                            duration = t.implementationTime ?: "00:30:00",
+                            priority = t.priority ?: PriorityType.medium,
+                            subtasks = subtaskTitles
                         )
                     }
                 } catch (e: Exception) {
@@ -94,7 +100,7 @@ class EditScheduleViewModel(
         }
     }
 
-    fun saveTask(title: String, desc: String) {
+    fun saveTask(title: String, desc: String, subtaskTitles: List<String> = emptyList()) {
         viewModelScope.launch {
             try {
                 val s = _state.value
@@ -117,7 +123,12 @@ class EditScheduleViewModel(
                 )
 
                 if (!s.isEditMode || s.id == null) {
-                    repo.insertSchedule(mapData)
+                    // Create new schedule
+                    val newSchedule = repo.insertSchedule(mapData)
+                    // Insert subtasks for the new schedule
+                    if (subtaskTitles.isNotEmpty()) {
+                        repo.insertSubTasks(newSchedule.id, subtaskTitles)
+                    }
                     _saveSuccessEvent.send(Unit)
                     return@launch
                 }
@@ -126,11 +137,15 @@ class EditScheduleViewModel(
 
                 if (!s.applyTodayOnly) {
                     repo.updateSchedule(taskId, mapData)
+                    // Update subtasks: delete old ones, insert new ones
+                    repo.deleteSubTasksByScheduleId(taskId)
+                    if (subtaskTitles.isNotEmpty()) {
+                        repo.insertSubTasks(taskId, subtaskTitles)
+                    }
                 } else {
                     val editedFields = mapOf(
                         "start_time_date" to isoDate,
                         "color" to s.color,
-                        // "label" -> Bỏ vì bảng edited_version dùng icon_id (cần update logic sau)
                         "implementation_time" to s.duration
                     )
                     val ev = repo.insertEditedVersion(editedFields)
@@ -140,7 +155,7 @@ class EditScheduleViewModel(
                 _saveSuccessEvent.send(Unit)
             } catch (e: Exception) {
                 Log.e("EditViewModel", "Error saving task: ${e.message}", e)
-                _errorEvent.send("Lỗi lưu dữ liệu: ${e.message}. Vui lòng kiểm tra lại label trong Database.")
+                _errorEvent.send("Lỗi lưu dữ liệu: ${e.message}")
             }
         }
     }
@@ -175,6 +190,7 @@ class EditScheduleViewModel(
     fun setTime(t: LocalTime) { _state.value = _state.value.copy(time = t) }
     fun setColor(c: String) { _state.value = _state.value.copy(color = c) }
     fun setPriority(p: PriorityType) { _state.value = _state.value.copy(priority = p) }
+    fun setSubtasks(list: List<String>) { _state.value = _state.value.copy(subtasks = list) }
     fun clearError() {
         _state.value = _state.value.copy(errorMessage = null)
     }

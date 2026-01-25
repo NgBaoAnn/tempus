@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.PointsManager
@@ -125,6 +126,9 @@ class TimerFragment : Fragment() {
                         selectedQuickIndex = 4
                         hours = 0
                         minutes = 15
+                    },
+                    onNotesClick = {
+                        findNavController().navigate(R.id.action_timerFragment_to_notesFragment)
                     }
                 )
             }

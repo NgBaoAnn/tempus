@@ -13,5 +13,6 @@ data class EditedVersionRow(
 
     val color: String? = null,
     @SerialName("start_time_date") val startTimeDate: String? = null,
-    @SerialName("implementation_time") val implementationTime: String? = null
+    @SerialName("implementation_time") val implementationTime: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )

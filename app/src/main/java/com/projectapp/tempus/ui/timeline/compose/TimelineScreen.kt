@@ -1,12 +1,18 @@
 package com.projectapp.tempus.ui.timeline.compose
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +23,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -25,9 +33,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
+import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.domain.model.TimelineBlock
+import com.projectapp.tempus.domain.model.SubtaskInfo
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -48,28 +58,69 @@ object TimelineColors {
     val TimelineGray = Color(0xFFE2E8F0)
 }
 
+/**
+ * Get drawable resource ID for schedule label - matches existing drawable files
+ */
+fun getLabelIconResId(label: String): Int = when (label.lowercase()) {
+    "wakeup" -> R.drawable.wakeup
+    "eat" -> R.drawable.eat
+    "cook" -> R.drawable.cook
+    "exercise" -> R.drawable.exercise
+    "rest" -> R.drawable.rest
+    "water" -> R.drawable.water
+    "book" -> R.drawable.book
+    "sleep" -> R.drawable.sleep
+    "clean" -> R.drawable.clean
+    "garden" -> R.drawable.ic_garden
+    else -> R.drawable.book  // Default
+}
+
 @Composable
 fun TimelineScreen(
     blocks: List<TimelineBlock>,
     selectedDate: LocalDate,
     monthYear: String,
     weeks: List<List<LocalDate>>,
+    dailyQuote: QuoteDto? = null,
+    isLoading: Boolean = false,
     onDateSelected: (LocalDate) -> Unit,
     onMonthPickerClick: () -> Unit,
     onAddClick: () -> Unit,
+    onVoiceClick: () -> Unit = {},
     onTaskClick: (TimelineBlock) -> Unit,
     onStatusToggle: (TimelineBlock) -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier.background(TimelineColors.Background),
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddClick,
-                containerColor = TimelineColors.Primary,
-                contentColor = Color.White
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Task")
+                // Voice Command FAB
+                FloatingActionButton(
+                    onClick = onVoiceClick,
+                    containerColor = Color(0xFF10B981), // Green color for mic
+                    contentColor = Color.White,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_mic),
+                        contentDescription = "Voice Command",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
+                // Add Task FAB
+                FloatingActionButton(
+                    onClick = onAddClick,
+                    containerColor = TimelineColors.Primary,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                }
             }
         },
         containerColor = TimelineColors.Background
@@ -85,8 +136,11 @@ fun TimelineScreen(
                 onMonthPickerClick = onMonthPickerClick
             )
             
-            // Week Calendar Strip
-            WeekCalendarStrip(
+            // Daily Quote Card
+            DailyQuoteCard(quote = dailyQuote)
+            
+            // Swipeable Week Calendar Strip
+            SwipeableWeekCalendarStrip(
                 weeks = weeks,
                 selectedDate = selectedDate,
                 onDateSelected = onDateSelected
@@ -94,15 +148,225 @@ fun TimelineScreen(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Timeline List
-            if (blocks.isEmpty()) {
-                EmptyState(onAddClick = onAddClick)
-            } else {
-                TimelineList(
-                    blocks = blocks,
-                    onTaskClick = onTaskClick,
-                    onStatusToggle = onStatusToggle
+            // Timeline List with Loading State
+            when {
+                isLoading -> {
+                    // Shimmer Loading Skeleton
+                    TimelineLoadingSkeleton()
+                }
+                blocks.isEmpty() -> {
+                    EmptyState(onAddClick = onAddClick)
+                }
+                else -> {
+                    TimelineList(
+                        blocks = blocks,
+                        onTaskClick = onTaskClick,
+                        onStatusToggle = onStatusToggle,
+                        onSubtaskToggle = onSubtaskToggle
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Shimmer Loading Skeleton for Timeline
+ */
+@Composable
+private fun TimelineLoadingSkeleton() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerTranslateAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1200,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+    
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFE2E8F0),
+            Color(0xFFF1F5F9),
+            Color(0xFFE2E8F0)
+        ),
+        start = Offset(shimmerTranslateAnim - 500f, 0f),
+        end = Offset(shimmerTranslateAnim, 0f)
+    )
+    
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(5) {
+            SkeletonTaskItem(shimmerBrush)
+        }
+    }
+}
+
+@Composable
+private fun SkeletonTaskItem(brush: Brush) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Time skeleton
+        Box(
+            modifier = Modifier
+                .width(50.dp)
+                .height(16.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(brush)
+        )
+        
+        // Task card skeleton
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .background(Color.White, RoundedCornerShape(12.dp))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Title skeleton
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(brush)
+            )
+            
+            // Subtitle skeleton
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(14.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(brush)
+            )
+            
+            // Duration skeleton
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(brush)
+            )
+        }
+    }
+}
+
+/**
+ * Swipeable Week Calendar Strip using HorizontalPager
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+fun SwipeableWeekCalendarStrip(
+    weeks: List<List<LocalDate>>,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    if (weeks.isEmpty()) return
+    
+    // Find the index of the current week containing selected date
+    val currentWeekIndex = weeks.indexOfFirst { week ->
+        week.any { it == selectedDate }
+    }.coerceAtLeast(0)
+    
+    val pagerState = rememberPagerState(
+        initialPage = currentWeekIndex,
+        pageCount = { weeks.size }
+    )
+    
+    // Sync pager with selected date
+    LaunchedEffect(selectedDate) {
+        val newIndex = weeks.indexOfFirst { week -> week.any { it == selectedDate } }
+        if (newIndex >= 0 && newIndex != pagerState.currentPage) {
+            pagerState.animateScrollToPage(newIndex)
+        }
+    }
+    
+    Column {
+        // Day labels (T2, T3, T4, T5, T6, T7, CN)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
+                Text(
+                    text = day,
+                    color = TimelineColors.TextMuted,
+                    fontSize = 13.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Swipeable week pages
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { pageIndex ->
+            val week = weeks.getOrNull(pageIndex) ?: return@HorizontalPager
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                week.forEach { date ->
+                    val isSelected = date == selectedDate
+                    val isToday = date == LocalDate.now()
+                    
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .padding(4.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when {
+                                    isSelected -> TimelineColors.Primary
+                                    else -> Color.Transparent
+                                }
+                            )
+                            .then(
+                                if (isToday && !isSelected) {
+                                    Modifier
+                                        .background(Color.Transparent)
+                                        .clip(CircleShape)
+                                } else Modifier
+                            )
+                            .clickable { onDateSelected(date) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = date.dayOfMonth.toString(),
+                            color = when {
+                                isSelected -> Color.White
+                                isToday -> TimelineColors.Primary
+                                else -> TimelineColors.TextPrimary
+                            },
+                            fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
             }
         }
     }
@@ -239,7 +503,8 @@ fun WeekCalendarStrip(
 fun TimelineList(
     blocks: List<TimelineBlock>,
     onTaskClick: (TimelineBlock) -> Unit,
-    onStatusToggle: (TimelineBlock) -> Unit
+    onStatusToggle: (TimelineBlock) -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -257,7 +522,8 @@ fun TimelineList(
                 block = block,
                 isLast = index == blocks.lastIndex,
                 onTaskClick = { onTaskClick(block) },
-                onStatusToggle = { onStatusToggle(block) }
+                onStatusToggle = { onStatusToggle(block) },
+                onSubtaskToggle = onSubtaskToggle
             )
             
             if (showFreeTime && nextBlock != null) {
@@ -280,7 +546,8 @@ fun TimelineItem(
     block: TimelineBlock,
     isLast: Boolean,
     onTaskClick: () -> Unit,
-    onStatusToggle: () -> Unit
+    onStatusToggle: () -> Unit,
+    onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val startTime = block.startTime.format(timeFormatter)
@@ -365,7 +632,7 @@ fun TimelineItem(
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Icon
+                // Icon based on label
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -374,10 +641,10 @@ fun TimelineItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = painterResource(id = getLabelIconResId(block.label)),
                         contentDescription = null,
                         tint = taskColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 
@@ -430,9 +697,62 @@ fun TimelineItem(
                         fontSize = 13.sp,
                         color = TimelineColors.TextMuted
                     )
+                    
+                    // Subtasks display
+                    if (block.subtasks.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Column {
+                            block.subtasks.take(3).forEach { subtask ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .clip(CircleShape)
+                                            .background(if (subtask.isDone) taskColor.copy(alpha = 0.7f) else Color.Transparent)
+                                            .border(
+                                                width = 1.dp,
+                                                color = if (subtask.isDone) Color.Transparent else TimelineColors.TextMuted,
+                                                shape = CircleShape
+                                            )
+                                            .clickable { onSubtaskToggle(subtask.id, !subtask.isDone) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (subtask.isDone) {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(10.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = subtask.title,
+                                        fontSize = 12.sp,
+                                        color = if (subtask.isDone) TimelineColors.TextMuted else TimelineColors.TextSecondary,
+                                        textDecoration = if (subtask.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            if (block.subtasks.size > 3) {
+                                Text(
+                                    text = "+${block.subtasks.size - 3} more",
+                                    fontSize = 11.sp,
+                                    color = TimelineColors.TextMuted,
+                                    modifier = Modifier.padding(start = 20.dp, top = 2.dp)
+                                )
+                            }
+                        }
+                    }
                 }
                 
-                // Checkbox
+                // Checkbox - visible border when not done
                 Box(
                     modifier = Modifier
                         .size(28.dp)
@@ -440,9 +760,11 @@ fun TimelineItem(
                         .background(if (isDone) taskColor else Color.Transparent)
                         .then(
                             if (!isDone) {
-                                Modifier
-                                    .background(Color.Transparent)
-                                    .clip(CircleShape)
+                                Modifier.border(
+                                    width = 2.dp,
+                                    color = TimelineColors.TextMuted,
+                                    shape = CircleShape
+                                )
                             } else Modifier
                         )
                         .clickable { onStatusToggle() },
@@ -455,21 +777,6 @@ fun TimelineItem(
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(Color.Transparent)
-                                .padding(2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(Color.Transparent)
-                            )
-                        }
                     }
                 }
             }

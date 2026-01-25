@@ -10,7 +10,10 @@ import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.domain.model.AgentProposal
 import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.ChatMode
+import com.projectapp.tempus.domain.model.EnergyContext
 import com.projectapp.tempus.domain.model.ExecutionResult
+import com.projectapp.tempus.domain.model.LifePlanProposal
+import com.projectapp.tempus.domain.model.LifePlanState
 import com.projectapp.tempus.domain.model.ScheduleSuggestion
 import com.projectapp.tempus.domain.usecase.ParseScheduleSuggestionUseCase
 import kotlinx.coroutines.launch
@@ -42,6 +45,13 @@ class AIViewModel(
     
     private val _agentState = MutableLiveData<AgentState>(AgentState.Idle)
     val agentState: LiveData<AgentState> = _agentState
+    
+    // ============================================
+    // LIFE PLANNER STATE
+    // ============================================
+    
+    private val _lifePlanState = MutableLiveData<LifePlanState>(LifePlanState.Idle)
+    val lifePlanState: LiveData<LifePlanState> = _lifePlanState
     
     // ============================================
     // CHAT MESSAGES
@@ -79,23 +89,26 @@ class AIViewModel(
     fun toggleMode() {
         val newMode = when (_chatMode.value) {
             ChatMode.ASK -> ChatMode.AGENT
-            ChatMode.AGENT -> ChatMode.ASK
+            ChatMode.AGENT -> ChatMode.LIFE_PLANNER
+            ChatMode.LIFE_PLANNER -> ChatMode.ASK
             else -> ChatMode.ASK
         }
         setMode(newMode)
     }
     
     fun setMode(mode: ChatMode) {
-        // Reset agent state when switching modes
+        // Reset states when switching modes
         if (_chatMode.value != mode) {
             _agentState.value = AgentState.Idle
+            _lifePlanState.value = LifePlanState.Idle
         }
         _chatMode.value = mode
         
         // Add mode switch message
         val modeMessage = when (mode) {
-            ChatMode.ASK -> "💬 Đã chuyển sang chế độ Ask. Tôi sẽ trả lời câu hỏi của bạn."
-            ChatMode.AGENT -> "🤖 Đã chuyển sang chế độ Agent. Tôi sẽ đề xuất hành động và chờ bạn xác nhận."
+            ChatMode.ASK -> " Đã chuyển sang chế độ Ask. Tôi sẽ trả lời câu hỏi của bạn."
+            ChatMode.AGENT -> " Đã chuyển sang chế độ Agent. Tôi sẽ đề xuất hành động và chờ bạn xác nhận."
+            ChatMode.LIFE_PLANNER -> " Đã chuyển sang chế độ Life Planner. Hãy chia sẻ mục tiêu dài hạn của bạn!"
         }
         
         addSystemMessage(modeMessage)
@@ -116,6 +129,7 @@ class AIViewModel(
             when (_chatMode.value) {
                 ChatMode.ASK -> handleAskMode(text)
                 ChatMode.AGENT -> handleAgentMode(text)
+                ChatMode.LIFE_PLANNER -> handleLifePlannerMode(text)
                 else -> handleAskMode(text)
             }
             
@@ -216,6 +230,96 @@ class AIViewModel(
     }
     
     // ============================================
+    // LIFE PLANNER MODE HANDLERS
+    // ============================================
+    
+    /**
+     * Handle messages in Life Planner mode
+     */
+    private suspend fun handleLifePlannerMode(text: String) {
+        _lifePlanState.value = LifePlanState.Analyzing
+        addAIMessage("🔍 Đang phân tích mục tiêu của bạn...")
+        
+        val result = aiRepository.requestLifePlan(text)
+        
+        result.onSuccess { proposal ->
+            _lifePlanState.value = LifePlanState.AwaitingApproval(proposal)
+            
+            val plan = proposal.plan
+            val summaryMessage = """
+                |🎯 **${plan.title}**
+                |
+                |📝 ${plan.description}
+                |
+                |📅 **Thời gian:** ${plan.milestones.size} milestones trong ${plan.endDate.toEpochDay() - plan.startDate.toEpochDay()} ngày
+                |⏰ **Mỗi tuần:** ~${plan.estimatedHoursPerWeek} giờ
+                |📋 **Tổng tasks:** ~${proposal.totalTasksToCreate} tasks sẽ được tạo
+                |
+                |${if (plan.warnings.isNotEmpty()) "⚠️ " + plan.warnings.joinToString("\n") else ""}
+                |
+                |Xem preview bên dưới và nhấn **Bắt đầu** để tạo lịch!
+            """.trimMargin()
+            
+            addAIMessage(summaryMessage)
+        }.onFailure { exception ->
+            _lifePlanState.value = LifePlanState.Error(exception.message ?: "Không thể tạo kế hoạch")
+            addAIMessage("❌ Xin lỗi, tôi không thể tạo kế hoạch. Vui lòng thử lại với mục tiêu cụ thể hơn.\n\n${exception.message}")
+        }
+    }
+    
+    /**
+     * Accept the life plan and create schedules
+     */
+    fun acceptLifePlan() {
+        val currentState = _lifePlanState.value
+        if (currentState !is LifePlanState.AwaitingApproval) return
+        
+        val proposal = currentState.proposal
+        
+        viewModelScope.launch {
+            _lifePlanState.value = LifePlanState.Creating
+            _isLoading.value = true
+            
+            val result = aiRepository.executeLifePlan(proposal.plan)
+            
+            result.onSuccess { schedulesCreated ->
+                _lifePlanState.value = LifePlanState.Done(
+                    plan = proposal.plan,
+                    schedulesCreated = schedulesCreated
+                )
+                
+                addAIMessage(
+                    "✅ **Đã tạo kế hoạch thành công!**\n\n" +
+                    "📋 Đã thêm **$schedulesCreated** công việc vào lịch\n\n" +
+                    "💡 **Tips:**\n" + 
+                    proposal.plan.tips.joinToString("\n") { "• $it" } +
+                    "\n\n🌱 Chúc bạn thành công!"
+                )
+            }.onFailure { exception ->
+                _lifePlanState.value = LifePlanState.Error(exception.message ?: "Lỗi khi tạo lịch")
+                addAIMessage("❌ Không thể tạo lịch: ${exception.message}")
+            }
+            
+            _isLoading.value = false
+        }
+    }
+    
+    /**
+     * Reject the life plan proposal
+     */
+    fun rejectLifePlan() {
+        _lifePlanState.value = LifePlanState.Idle
+        addSystemMessage("🚫 Đã hủy kế hoạch. Hãy chia sẻ mục tiêu khác nếu bạn muốn!")
+    }
+    
+    /**
+     * Reset life plan state
+     */
+    fun resetLifePlanState() {
+        _lifePlanState.value = LifePlanState.Idle
+    }
+    
+    // ============================================
     // HELPER METHODS
     // ============================================
     
@@ -224,7 +328,8 @@ class AIViewModel(
             val welcomeMessage = ChatMessage(
                 text = "Xin chào! 👋 Tôi là Tiramisu AI.\n\n" +
                        "💬 **Ask Mode**: Hỏi đáp, tư vấn\n" +
-                       "🤖 **Agent Mode**: Đề xuất và thực hiện hành động\n\n" +
+                       "🤖 **Agent Mode**: Đề xuất và thực hiện hành động\n" +
+                       "🎯 **Life Planner**: Lên kế hoạch dài hạn\n\n" +
                        "Chuyển đổi chế độ bằng toggle ở trên!",
                 isFromUser = false
             )

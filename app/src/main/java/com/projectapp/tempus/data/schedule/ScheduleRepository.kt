@@ -15,4 +15,12 @@ interface ScheduleRepository {
     suspend fun attachEditedVersionToDate(taskId: String, date: String, editedVersionId: String): ScheduleItemRow
     suspend fun getScheduleById(id: String): ScheduleRow?
     suspend fun deleteSchedule(id: String)
+    
+    // Subtask methods
+    suspend fun getSubTasks(scheduleId: String): List<SubTaskRow>
+    suspend fun getSubTasksBatch(scheduleIds: List<String>): List<SubTaskRow>
+    suspend fun insertSubTasks(scheduleId: String, titles: List<String>)
+    suspend fun deleteSubTasksByScheduleId(scheduleId: String)
+    suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean)
 }
+
