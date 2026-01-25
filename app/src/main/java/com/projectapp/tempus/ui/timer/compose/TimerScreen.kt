@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.projectapp.tempus.R
 import java.util.Calendar
 import java.util.Locale
@@ -136,7 +139,9 @@ private fun SetupContent(
     onReset: () -> Unit,
     onNotesClick: () -> Unit
 ) {
-    Column {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
         // Setup Card
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -284,42 +289,6 @@ private fun SetupContent(
                     selectedColor = selectedColor,
                     onColorSelect = onColorSelect
                 )
-                
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
-                
-                HorizontalDivider(
-                    color = TimerColors.SurfaceVariant,
-                    thickness = 1.dp
-                )
-                
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
-                
-                // Quick Notes button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNotesClick() }
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "📝",
-                            fontSize = 20.sp
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Ghi chú nhanh",
-                            style = TimerTypography.BodyMedium
-                        )
-                    }
-                    Text(
-                        text = "→",
-                        fontSize = 18.sp,
-                        color = TimerColors.TextMuted
-                    )
-                }
             }
         }
     }
