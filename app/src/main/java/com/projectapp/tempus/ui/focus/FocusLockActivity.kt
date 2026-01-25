@@ -46,14 +46,14 @@ import kotlin.math.sin
 
 // ===== DESIGN TOKENS =====
 private object FocusDesignTokens {
-    // Colors - Dark OLED + Glassmorphism
-    val backgroundDark = Color(0xFF000000)
-    val backgroundGradientStart = Color(0xFF0A0E1A)
-    val backgroundGradientEnd = Color(0xFF0D1B2A)
+    // Colors - Light Mode
+    val backgroundDark = Color(0xFFF8FAFC)          // Light gray
+    val backgroundGradientStart = Color(0xFFFFFFFF)  // White
+    val backgroundGradientEnd = Color(0xFFF1F5F9)    // Slate 100
     
-    val surfaceGlass = Color.White.copy(alpha = 0.05f)
-    val surfaceGlassElevated = Color.White.copy(alpha = 0.08f)
-    val borderGlass = Color.White.copy(alpha = 0.1f)
+    val surfaceGlass = Color(0xFF0F172A).copy(alpha = 0.03f)
+    val surfaceGlassElevated = Color(0xFF0F172A).copy(alpha = 0.05f)
+    val borderGlass = Color(0xFF0F172A).copy(alpha = 0.08f)
     
     val primaryBlue = Color(0xFF3B82F6)
     val primaryBlueGlow = Color(0xFF60A5FA)
@@ -61,9 +61,9 @@ private object FocusDesignTokens {
     val accentGreen = Color(0xFF10B981)
     val accentRed = Color(0xFFEF4444)
     
-    val textPrimary = Color.White
-    val textSecondary = Color.White.copy(alpha = 0.7f)
-    val textMuted = Color.White.copy(alpha = 0.4f)
+    val textPrimary = Color(0xFF0F172A)              // Slate 900
+    val textSecondary = Color(0xFF475569)            // Slate 600
+    val textMuted = Color(0xFF94A3B8)                // Slate 400
     
     // Typography
     val displayLarge = TextStyle(
@@ -264,7 +264,7 @@ fun PremiumFocusLockScreen(
             
             // Unlock hint
             Text(
-                text = "TAP BACK TO UNLOCK",
+                text = "NHẤN BACK ĐỂ MỞ KHOÁ",
                 style = FocusDesignTokens.labelSmall,
                 color = FocusDesignTokens.textMuted
             )
@@ -565,7 +565,7 @@ private fun FloatingParticles() {
             val x = (p.x + sin(time * 0.01f + p.y * 0.01f) * 20) % size.width
             
             drawCircle(
-                color = Color.White.copy(alpha = p.opacity),
+                color = Color(0xFF3B82F6).copy(alpha = p.opacity * 0.5f),
                 radius = p.size,
                 center = Offset(x, y)
             )
@@ -600,7 +600,7 @@ private fun PremiumUnlockDialog(
         },
         title = {
             Text(
-                "End Focus Session?",
+                "Kết thúc phiên tập trung?",
                 color = FocusDesignTokens.textPrimary,
                 style = FocusDesignTokens.headlineMedium,
                 textAlign = TextAlign.Center,
@@ -609,7 +609,7 @@ private fun PremiumUnlockDialog(
         },
         text = {
             Text(
-                "You're making great progress! Are you sure you want to unlock now?",
+                "Bạn đang làm rất tốt! Bạn có chắc muốn mở khoá ngay bây giờ?",
                 color = FocusDesignTokens.textSecondary,
                 style = FocusDesignTokens.bodyMedium,
                 textAlign = TextAlign.Center
@@ -618,7 +618,7 @@ private fun PremiumUnlockDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    "End Session",
+                    "Kết thúc",
                     color = FocusDesignTokens.accentRed,
                     fontWeight = FontWeight.Medium
                 )
@@ -632,7 +632,7 @@ private fun PremiumUnlockDialog(
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Keep Focused", fontWeight = FontWeight.SemiBold)
+                Text("Tiếp tục tập trung", fontWeight = FontWeight.SemiBold)
             }
         }
     )
@@ -662,11 +662,11 @@ private fun formatTime(seconds: Long): String {
 
 private fun getMotivationalMessages(progress: Float): Pair<String, String> {
     return when {
-        progress > 0.9f -> "Session Started" to "Deep work begins now"
-        progress > 0.75f -> "Building momentum" to "Stay in the zone"
-        progress > 0.5f -> "Halfway there" to "You're doing great"
-        progress > 0.25f -> "Almost done" to "Push through!"
-        progress > 0.1f -> "Final stretch" to "Just a bit more"
-        else -> "Excellent work" to "Session complete soon"
+        progress > 0.9f -> "Bắt đầu phiên" to "Làm việc sâu bắt đầu"
+        progress > 0.75f -> "Tạo đà tốt" to "Giữ vững trạng thái"
+        progress > 0.5f -> "Đã được nửa" to "Bạn đang làm rất tốt"
+        progress > 0.25f -> "Sắp xong rồi" to "Cố lên nào!"
+        progress > 0.1f -> "Chặng cuối" to "Chỉ còn một chút"
+        else -> "Xuất sắc" to "Sắp hoàn thành phiên"
     }
 }

@@ -33,14 +33,14 @@ import com.projectapp.tempus.ui.focus.InstalledApp
 
 // ===== DESIGN TOKENS =====
 private object SettingsDesignTokens {
-    // Colors - Dark OLED + Glassmorphism
-    val backgroundDark = Color(0xFF000000)
-    val backgroundGradientStart = Color(0xFF0A0E1A)
-    val backgroundGradientEnd = Color(0xFF0D1B2A)
+    // Colors - Light Mode
+    val backgroundDark = Color(0xFFF8FAFC)          // Light gray
+    val backgroundGradientStart = Color(0xFFFFFFFF)  // White
+    val backgroundGradientEnd = Color(0xFFF1F5F9)    // Slate 100
     
-    val surfaceGlass = Color.White.copy(alpha = 0.05f)
-    val surfaceGlassElevated = Color.White.copy(alpha = 0.08f)
-    val borderGlass = Color.White.copy(alpha = 0.08f)
+    val surfaceGlass = Color(0xFF0F172A).copy(alpha = 0.03f)
+    val surfaceGlassElevated = Color(0xFF0F172A).copy(alpha = 0.05f)
+    val borderGlass = Color(0xFF0F172A).copy(alpha = 0.08f)
     
     val primaryBlue = Color(0xFF3B82F6)
     val primaryBlueGlow = Color(0xFF60A5FA)
@@ -48,9 +48,9 @@ private object SettingsDesignTokens {
     val accentOrange = Color(0xFFF97316)
     val accentRed = Color(0xFFEF4444)
     
-    val textPrimary = Color.White
-    val textSecondary = Color.White.copy(alpha = 0.7f)
-    val textMuted = Color.White.copy(alpha = 0.4f)
+    val textPrimary = Color(0xFF0F172A)              // Slate 900
+    val textSecondary = Color(0xFF475569)            // Slate 600
+    val textMuted = Color(0xFF94A3B8)                // Slate 400
     
     // Typography
     val headlineLarge = TextStyle(
@@ -145,7 +145,7 @@ fun FocusSettingsScreen(
             
             // Settings Section
             item {
-                SectionTitle(text = "Settings")
+                SectionTitle(text = "Cài đặt")
             }
             
             item {
@@ -166,9 +166,9 @@ fun FocusSettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SectionTitle(text = "Blocked Apps")
+                    SectionTitle(text = "Ứng dụng bị chặn")
                     Text(
-                        text = "${uiState.blockedApps.size} apps",
+                        text = "${uiState.blockedApps.size} ứng dụng",
                         style = SettingsDesignTokens.labelSmall,
                         color = SettingsDesignTokens.textMuted
                     )
@@ -216,7 +216,7 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = "Quay lại",
                 tint = SettingsDesignTokens.textPrimary
             )
         }
@@ -225,12 +225,12 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
         
         Column {
             Text(
-                text = "Focus Mode",
+                text = "Chế độ Tập trung",
                 style = SettingsDesignTokens.headlineLarge,
                 color = SettingsDesignTokens.textPrimary
             )
             Text(
-                text = "Block distractions, stay productive",
+                text = "Chặn phân tâm, tăng hiệu suất",
                 style = SettingsDesignTokens.bodyMedium,
                 color = SettingsDesignTokens.textMuted
             )
@@ -266,7 +266,7 @@ private fun StatsCard(
         ) {
             StatItem(
                 value = formatFocusTime(totalMinutes),
-                label = "Focus Time",
+                label = "Thời gian",
                 icon = Icons.Outlined.Timer,
                 color = SettingsDesignTokens.primaryBlue
             )
@@ -280,7 +280,7 @@ private fun StatsCard(
             
             StatItem(
                 value = blockedAttempts.toString(),
-                label = "Blocks",
+                label = "Đã chặn",
                 icon = Icons.Outlined.Block,
                 color = SettingsDesignTokens.accentRed
             )
@@ -293,8 +293,8 @@ private fun StatsCard(
             )
             
             StatItem(
-                value = if (isEnabled) "ON" else "OFF",
-                label = "Status",
+                value = if (isEnabled) "BẬT" else "TẮT",
+                label = "Trạng thái",
                 icon = Icons.Outlined.PowerSettingsNew,
                 color = if (isEnabled) SettingsDesignTokens.accentGreen else SettingsDesignTokens.textMuted,
                 showPulse = isEnabled,
@@ -379,7 +379,7 @@ private fun PermissionsCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 
                 Text(
-                    text = "Permissions Required",
+                    text = "Cần cấp quyền",
                     style = SettingsDesignTokens.bodyLarge,
                     color = SettingsDesignTokens.accentOrange
                 )
@@ -390,8 +390,8 @@ private fun PermissionsCard(
             if (!hasUsagePermission) {
                 PermissionRow(
                     icon = Icons.Outlined.Visibility,
-                    title = "Usage Access",
-                    description = "Detect running apps",
+                    title = "Quyền truy cập dữ liệu",
+                    description = "Phát hiện ứng dụng đang chạy",
                     onClick = onRequestUsagePermission
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -400,8 +400,8 @@ private fun PermissionsCard(
             if (!hasOverlayPermission) {
                 PermissionRow(
                     icon = Icons.Outlined.Layers,
-                    title = "Overlay Permission",
-                    description = "Show blocking screen",
+                    title = "Quyền hiển thị trên ứng dụng",
+                    description = "Hiện màn hình khoá",
                     onClick = onRequestOverlayPermission
                 )
             }
@@ -449,7 +449,7 @@ private fun PermissionRow(
         
         Icon(
             Icons.Outlined.OpenInNew,
-            contentDescription = "Open",
+            contentDescription = "Mở",
             tint = SettingsDesignTokens.primaryBlue,
             modifier = Modifier.size(18.dp)
         )
@@ -469,8 +469,8 @@ private fun SettingsCard(
         Column(modifier = Modifier.padding(4.dp)) {
             SettingToggleRow(
                 icon = Icons.Outlined.CenterFocusStrong,
-                title = "Enable Focus Mode",
-                description = "Block distracting apps",
+                title = "Bật Chế độ Tập trung",
+                description = "Chặn ứng dụng gây phân tâm",
                 checked = focusModeEnabled,
                 onCheckedChange = onToggleFocusMode,
                 accentColor = SettingsDesignTokens.accentGreen
@@ -480,8 +480,8 @@ private fun SettingsCard(
             
             SettingToggleRow(
                 icon = Icons.Outlined.PlayCircle,
-                title = "Auto-start with Timer",
-                description = "Activate when timer starts",
+                title = "Tự động bật cùng Timer",
+                description = "Kích hoạt khi bắt đầu đếm giờ",
                 checked = autoStartWithTimer,
                 onCheckedChange = onToggleAutoStart,
                 enabled = focusModeEnabled,
@@ -492,8 +492,8 @@ private fun SettingsCard(
             
             SettingToggleRow(
                 icon = Icons.Outlined.Fullscreen,
-                title = "Show Lock Screen",
-                description = "Full-screen focus overlay",
+                title = "Hiện màn hình khoá",
+                description = "Màn hình tập trung toàn màn hình",
                 checked = showOverlay,
                 onCheckedChange = onToggleShowOverlay,
                 enabled = focusModeEnabled,
@@ -610,7 +610,7 @@ private fun AddAppButton(onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Add Apps to Block",
+            text = "Thêm ứng dụng cần chặn",
             style = SettingsDesignTokens.bodyLarge,
             color = SettingsDesignTokens.primaryBlue
         )
@@ -644,13 +644,13 @@ private fun EmptyAppsCard() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "No apps blocked",
+                text = "Chưa có ứng dụng bị chặn",
                 style = SettingsDesignTokens.bodyLarge,
                 color = SettingsDesignTokens.textSecondary
             )
             
             Text(
-                text = "Add distracting apps to stay focused",
+                text = "Thêm ứng dụng gây phân tâm để tập trung",
                 style = SettingsDesignTokens.labelSmall,
                 color = SettingsDesignTokens.textMuted
             )
@@ -713,7 +713,7 @@ private fun BlockedAppCard(
             ) {
                 Icon(
                     Icons.Outlined.Close,
-                    contentDescription = "Remove",
+                    contentDescription = "Xoá",
                     tint = SettingsDesignTokens.textMuted,
                     modifier = Modifier.size(18.dp)
                 )

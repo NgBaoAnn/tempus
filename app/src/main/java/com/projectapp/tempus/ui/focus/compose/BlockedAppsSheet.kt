@@ -157,12 +157,12 @@ private fun SheetHeader(
     ) {
         Column {
             Text(
-                text = "Select Apps",
+                text = "Chọn ứng dụng",
                 style = SheetDesignTokens.headlineMedium,
                 color = SheetDesignTokens.textPrimary
             )
             Text(
-                text = "$blockedCount of $appCount apps blocked",
+                text = "$blockedCount / $appCount ứng dụng bị chặn",
                 style = SheetDesignTokens.labelSmall,
                 color = SheetDesignTokens.textMuted
             )
@@ -215,7 +215,7 @@ private fun SearchBar(
             Box(modifier = Modifier.weight(1f)) {
                 if (query.isEmpty()) {
                     Text(
-                        text = "Search apps...",
+                        text = "Tìm kiếm ứng dụng...",
                         style = SheetDesignTokens.bodyMedium,
                         color = SheetDesignTokens.textMuted
                     )
@@ -239,7 +239,7 @@ private fun SearchBar(
                 ) {
                     Icon(
                         Icons.Outlined.Clear,
-                        contentDescription = "Clear",
+                        contentDescription = "Xoá",
                         tint = SheetDesignTokens.textMuted,
                         modifier = Modifier.size(16.dp)
                     )
@@ -276,7 +276,7 @@ private fun LoadingContent() {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Loading apps...",
+            text = "Đang tải...",
             style = SheetDesignTokens.bodyMedium,
             color = SheetDesignTokens.textMuted,
             modifier = Modifier.alpha(alpha)
@@ -310,13 +310,13 @@ private fun EmptySearchContent() {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "No apps found",
+            text = "Không tìm thấy",
             style = SheetDesignTokens.bodyLarge,
             color = SheetDesignTokens.textSecondary
         )
         
         Text(
-            text = "Try a different search term",
+            text = "Thử tìm với từ khác",
             style = SheetDesignTokens.labelSmall,
             color = SheetDesignTokens.textMuted
         )
@@ -340,7 +340,7 @@ private fun AppList(
         if (blockedApps.isNotEmpty()) {
             item {
                 Text(
-                    text = "BLOCKED",
+                    text = "ĐANG CHẶN",
                     style = SheetDesignTokens.labelSmall,
                     color = SheetDesignTokens.accentRed,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -360,7 +360,7 @@ private fun AppList(
         if (unblockedApps.isNotEmpty()) {
             item {
                 Text(
-                    text = "AVAILABLE",
+                    text = "CÓ THỂ CHẶN",
                     style = SheetDesignTokens.labelSmall,
                     color = SheetDesignTokens.textMuted,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -462,7 +462,7 @@ private fun AppRow(
                     Icons.Outlined.RemoveCircle
                 else
                     Icons.Outlined.AddCircle,
-                contentDescription = if (app.isBlocked) "Unblock" else "Block",
+                contentDescription = if (app.isBlocked) "Bỏ chặn" else "Chặn",
                 tint = if (app.isBlocked)
                     SheetDesignTokens.accentRed
                 else
