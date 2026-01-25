@@ -39,7 +39,7 @@ class StatisticsFragment : Fragment() {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository(requireContext())
+                val repo = SupabaseScheduleRepository()
                 val useCase = GetStatisticsUseCase()
                 return StatisticsViewModel(myUserId, repo, useCase) as T
             }

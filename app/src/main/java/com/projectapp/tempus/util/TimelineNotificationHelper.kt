@@ -34,7 +34,8 @@ object TimelineNotificationHelper {
         context: Context,
         taskId: String,
         title: String,
-        startTime: String
+        startTime: String,
+        endTime: String
     ) {
         createNotificationChannel(context)
 
@@ -52,10 +53,12 @@ object TimelineNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val timeRange = if (endTime.isNotEmpty()) "Từ $startTime đến $endTime" else "Bắt đầu lúc $startTime"
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_timer) // Reuse timer icon or app icon
             .setContentTitle(title)
-            .setContentText("Bắt đầu lúc $startTime")
+            .setContentText(timeRange)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

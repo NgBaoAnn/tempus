@@ -15,10 +15,18 @@ class ReminderScheduler(private val context: Context) {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    fun scheduleReminder(taskId: String, title: String, startDateTime: String) {
+    fun scheduleReminder(taskId: String, title: String, startDateTime: String, endDateTime: String) {
+        Log.d("ReminderScheduler", "=== SCHEDULING REMINDER ===")
+        Log.d("ReminderScheduler", "Task ID: $taskId")
+        Log.d("ReminderScheduler", "Title: $title")
+        Log.d("ReminderScheduler", "Start: $startDateTime")
+        Log.d("ReminderScheduler", "End: $endDateTime")
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.w("ReminderScheduler", "Permission SCHEDULE_EXACT_ALARM not granted")
+            val canSchedule = alarmManager.canScheduleExactAlarms()
+            Log.d("ReminderScheduler", "Can schedule exact alarms: $canSchedule")
+            if (!canSchedule) {
+                Log.w("ReminderScheduler", "⚠️ Permission not granted, alarm will not be scheduled")
                 return
             }
         }
@@ -27,6 +35,7 @@ class ReminderScheduler(private val context: Context) {
             putExtra("TASK_ID", taskId)
             putExtra("TITLE", title)
             putExtra("START_TIME", formatTime(startDateTime))
+            putExtra("END_TIME", formatTime(endDateTime))
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -38,16 +47,25 @@ class ReminderScheduler(private val context: Context) {
 
         try {
             val triggerTime = parseDateTime(startDateTime)
-            if (triggerTime > System.currentTimeMillis()) {
+            val currentTime = System.currentTimeMillis()
+            val delayMinutes = (triggerTime - currentTime) / 60000
+            
+            Log.d("ReminderScheduler", "Current time: $currentTime")
+            Log.d("ReminderScheduler", "Trigger time: $triggerTime")
+            Log.d("ReminderScheduler", "Delay: $delayMinutes minutes")
+            
+            if (triggerTime > currentTime) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerTime,
                     pendingIntent
                 )
-                Log.d("ReminderScheduler", "Scheduled alarm for $title at $startDateTime")
+                Log.d("ReminderScheduler", "✅ Alarm scheduled successfully!")
+            } else {
+                Log.w("ReminderScheduler", "⚠️ Time is in the past, not scheduling")
             }
         } catch (e: Exception) {
-            Log.e("ReminderScheduler", "Failed to schedule alarm", e)
+            Log.e("ReminderScheduler", "❌ Failed to schedule alarm", e)
         }
     }
 
@@ -65,25 +83,21 @@ class ReminderScheduler(private val context: Context) {
 
     private fun parseDateTime(dateTimeStr: String): Long {
         return try {
-            // Assumes ISO-8601 format or similar "yyyy-MM-dd HH:mm"
-            // If repository passes formatted string, adjust parsing
-            val ldt = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME) 
-            ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            // Use OffsetDateTime to properly handle timezone information
+            val offsetDateTime = java.time.OffsetDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME)
+            offsetDateTime.toInstant().toEpochMilli()
         } catch (e: Exception) {
-            // Fallback for simple date format if ISO fails
-            try {
-                // Try "HH:mm" if only time? No, schedule needs full date
-                System.currentTimeMillis() // Fail safe
-            } catch (e2: Exception) {
-                System.currentTimeMillis()
-            }
+            Log.e("ReminderScheduler", "Failed to parse datetime: $dateTimeStr", e)
+            System.currentTimeMillis()
         }
     }
     
     private fun formatTime(dateTimeStr: String): String {
         return try {
-            val ldt = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME)
-            ldt.format(DateTimeFormatter.ofPattern("HH:mm"))
+            // Use OffsetDateTime and convert to system timezone for display
+            val offsetDateTime = java.time.OffsetDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME)
+            val localDateTime = offsetDateTime.atZoneSameInstant(java.time.ZoneId.systemDefault()).toLocalDateTime()
+            localDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
         } catch (e: Exception) {
             dateTimeStr
         }

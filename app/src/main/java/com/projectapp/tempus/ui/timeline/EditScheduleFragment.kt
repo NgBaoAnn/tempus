@@ -37,7 +37,7 @@ class EditScheduleFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val currentUserId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
                     .auth.currentSessionOrNull()?.user?.id ?: ""
-                return EditScheduleViewModel(SupabaseScheduleRepository(requireContext()), currentUserId) as T
+                return EditScheduleViewModel(SupabaseScheduleRepository(), currentUserId) as T
             }
         }
     }
@@ -112,7 +112,16 @@ class EditScheduleFragment : Fragment() {
             if (title.isBlank()) {
                 Toast.makeText(context, "Chưa nhập tên", Toast.LENGTH_SHORT).show()
             } else {
-                viewModel.saveTask(title, binding.edtDescription.text.toString())
+                // Check alarm permission first
+                if (!com.projectapp.tempus.util.PermissionHelper.canScheduleExactAlarms(requireContext())) {
+                    com.projectapp.tempus.util.PermissionHelper.showAlarmPermissionDialog(requireContext()) {
+                        // Save task after user sees the dialog
+                        viewModel.saveTask(title, binding.edtDescription.text.toString())
+                    }
+                } else {
+                    // Has permission, save directly
+                    viewModel.saveTask(title, binding.edtDescription.text.toString())
+                }
             }
         }
 

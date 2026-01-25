@@ -36,7 +36,7 @@ class TimelineFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository(requireContext())
+                val repo = SupabaseScheduleRepository()
                 return TimelineViewModel(userId = myUserId, repo = repo) as T
             }
         }
@@ -93,6 +93,10 @@ class TimelineFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.onRefresh()
+        
+        // Sync all timeline alarms when timeline loads
+        // At this point, user auth is guaranteed to be ready
+        com.projectapp.tempus.service.TimelineAlarmManager.syncAllAlarms(requireContext())
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

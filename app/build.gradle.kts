@@ -137,4 +137,7 @@ dependencies {
     
     // Media Notification
     implementation("androidx.media:media:1.7.0")
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

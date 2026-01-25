@@ -9,12 +9,8 @@ import com.projectapp.tempus.data.schedule.dto.*
 import io.github.jan.supabase.postgrest.query.Returning
 import java.time.OffsetDateTime
 
-import android.content.Context
-import com.projectapp.tempus.service.ReminderScheduler
-
-class SupabaseScheduleRepository(private val context: Context) : ScheduleRepository {
+class SupabaseScheduleRepository : ScheduleRepository {
     private val supabase = SupabaseClientProvider.client
-    private val reminderScheduler = ReminderScheduler(context)
 
     override suspend fun getAllSchedules(userId: String): List<ScheduleRow> {
         return supabase.from("schedule")
@@ -89,14 +85,9 @@ class SupabaseScheduleRepository(private val context: Context) : ScheduleReposit
             }
         }
 
-        val result = supabase.from("schedule")
+        return supabase.from("schedule")
             .insert(body) { select() }
-            .decodeSingle<ScheduleRow>()
-            
-        // Schedule alarm
-        reminderScheduler.scheduleReminder(result.id, result.name, result.startTimeDate)
-        
-        return result
+            .decodeSingle()
     }
 
     override suspend fun upsertScheduleItem(taskId: String, date: String, status: StatusType): ScheduleItemRow {
@@ -146,18 +137,28 @@ class SupabaseScheduleRepository(private val context: Context) : ScheduleReposit
             }
         }
 
-        val result = supabase.from("schedule")
+        return supabase.from("schedule")
             .update(body) {
                 select()
                 filter { eq("id", taskId) }
             }
-            .decodeSingle<ScheduleRow>()
+            .decodeSingle()
+    }
+    
+    private fun calculateEndTime(startIso: String, durationStr: String): String {
+        return try {
+            val start = java.time.LocalDateTime.parse(startIso, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+            // durationStr format "HH:mm:ss"
+            val parts = durationStr.split(":")
+            val h = parts.getOrNull(0)?.toLongOrNull() ?: 0
+            val m = parts.getOrNull(1)?.toLongOrNull() ?: 0
+            val s = parts.getOrNull(2)?.toLongOrNull() ?: 0
             
-        // Cancel old alarm and schedule new one
-        reminderScheduler.cancelReminder(taskId)
-        reminderScheduler.scheduleReminder(result.id, result.name, result.startTimeDate)
-        
-        return result
+            val end = start.plusHours(h).plusMinutes(m).plusSeconds(s)
+            end.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)
+        } catch (e: Exception) {
+            startIso // Fallback
+        }
     }
 
     override suspend fun insertEditedVersion(fields: Map<String, Any?>): EditedVersionRow {
@@ -219,8 +220,6 @@ class SupabaseScheduleRepository(private val context: Context) : ScheduleReposit
     }
 
     override suspend fun deleteSchedule(id: String) {
-        reminderScheduler.cancelReminder(id)
-        
         supabase.from("schedule")
             .delete {
                 filter { eq("id", id) }
