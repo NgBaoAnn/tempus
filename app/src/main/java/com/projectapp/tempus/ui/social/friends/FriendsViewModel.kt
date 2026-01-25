@@ -23,14 +23,17 @@ data class FriendsUiState(
     val sentRequests: List<FriendRequest> = emptyList(),
     val searchResults: List<UserBasicDto> = emptyList(),
     val blockedUsers: List<UserBasicDto> = emptyList(),
+    val discoverUsers: List<UserBasicDto> = emptyList(), // All users for Discover tab
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
+    val isLoadingDiscover: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null,
-    val selectedTab: FriendsTab = FriendsTab.FRIENDS
+    val selectedTab: FriendsTab = FriendsTab.DISCOVER // Default to Discover tab
 )
 
 enum class FriendsTab {
+    DISCOVER,  // Thêm Discover tab - hiển thị tất cả users
     FRIENDS,
     REQUESTS,
     BLOCKED
@@ -48,6 +51,7 @@ class FriendsViewModel(
 
     init {
         loadData()
+        loadAllUsers() // Load discover users since DISCOVER is default tab
     }
 
     /**
@@ -63,7 +67,7 @@ class FriendsViewModel(
                     _uiState.update { it.copy(friends = friends) }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể tải danh sách bạn bè: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể tải danh sách bạn bè") }
                 }
             
             // Load pending requests
@@ -72,7 +76,7 @@ class FriendsViewModel(
                     _uiState.update { it.copy(pendingRequests = requests) }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể tải lời mời: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể tải lời mời") }
                 }
             
             // Load sent requests
@@ -91,9 +95,41 @@ class FriendsViewModel(
     fun selectTab(tab: FriendsTab) {
         _uiState.update { it.copy(selectedTab = tab) }
         
-        // Load blocked users when switching to that tab
-        if (tab == FriendsTab.BLOCKED && _uiState.value.blockedUsers.isEmpty()) {
-            loadBlockedUsers()
+        // Load data based on tab
+        when (tab) {
+            FriendsTab.DISCOVER -> {
+                if (_uiState.value.discoverUsers.isEmpty()) {
+                    loadAllUsers()
+                }
+            }
+            FriendsTab.BLOCKED -> {
+                if (_uiState.value.blockedUsers.isEmpty()) {
+                    loadBlockedUsers()
+                }
+            }
+            else -> { /* Data already loaded in loadData() */ }
+        }
+    }
+
+    /**
+     * Load tất cả users cho Discover tab
+     */
+    fun loadAllUsers() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingDiscover = true) }
+            
+            friendRepository.getAllUsers()
+                .onSuccess { users ->
+                    _uiState.update { it.copy(discoverUsers = users, isLoadingDiscover = false) }
+                }
+                .onFailure { e ->
+                    _uiState.update { 
+                        it.copy(
+                            error = "Không thể tải danh sách users",
+                            isLoadingDiscover = false
+                        ) 
+                    }
+                }
         }
     }
 
@@ -118,7 +154,7 @@ class FriendsViewModel(
                         it.copy(
                             searchResults = emptyList(), 
                             isSearching = false,
-                            error = "Không thể tìm kiếm: ${e.message}"
+                            error = "Không thể tìm kiếm"
                         ) 
                     }
                 }
@@ -141,7 +177,7 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể gửi lời mời: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể gửi lời mời") }
                 }
         }
     }
@@ -157,7 +193,7 @@ class FriendsViewModel(
                     loadData() // Reload to update friends list
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể chấp nhận: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể chấp nhận") }
                 }
         }
     }
@@ -177,7 +213,7 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể từ chối: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể từ chối") }
                 }
         }
     }
@@ -197,7 +233,7 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể huỷ: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể huỷ") }
                 }
         }
     }
@@ -217,7 +253,7 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể huỷ kết bạn: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể huỷ kết bạn") }
                 }
         }
     }
@@ -234,7 +270,7 @@ class FriendsViewModel(
                     loadBlockedUsers()
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể chặn: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể chặn") }
                 }
         }
     }
@@ -254,7 +290,7 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể bỏ chặn: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể bỏ chặn") }
                 }
         }
     }
@@ -269,7 +305,7 @@ class FriendsViewModel(
                     _uiState.update { it.copy(blockedUsers = users) }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể tải blocked list: ${e.message}") }
+                    _uiState.update { it.copy(error = "Không thể tải blocked list") }
                 }
         }
     }
