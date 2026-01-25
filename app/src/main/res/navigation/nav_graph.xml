@@ -29,6 +29,10 @@
         <action
             android:id="@+id/action_timelineFragment_to_editScheduleFragment"
             app:destination="@id/editScheduleFragment" />
+            
+        <action
+            android:id="@+id/action_timelineFragment_to_gardenFragment"
+            app:destination="@id/gardenFragment" />
 
     </fragment>
     <fragment

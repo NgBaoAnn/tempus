@@ -106,6 +106,7 @@ fun TimelineScreen(
     onFilterStatusChanged: (StatusType?) -> Unit = {},
     onClearAllFilters: () -> Unit = {},
     onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> },
+    onGardenClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -149,7 +150,8 @@ fun TimelineScreen(
             // Top Bar
             TimelineTopBar(
                 monthYear = monthYear,
-                onMonthPickerClick = onMonthPickerClick
+                onMonthPickerClick = onMonthPickerClick,
+                onGardenClick = onGardenClick
             )
             
             // Daily Quote Card
@@ -408,7 +410,8 @@ fun SwipeableWeekCalendarStrip(
 @Composable
 private fun TimelineTopBar(
     monthYear: String,
-    onMonthPickerClick: () -> Unit
+    onMonthPickerClick: () -> Unit,
+    onGardenClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -441,13 +444,25 @@ private fun TimelineTopBar(
             )
         }
         
-        // Inbox icon
-        IconButton(onClick = { }) {
-            Icon(
-                painter = painterResource(id = R.drawable.inbox),
-                contentDescription = "Inbox",
-                tint = TimelineColors.Primary
-            )
+        // Right icons
+        Row {
+            // Garden button
+            IconButton(onClick = onGardenClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_garden),
+                    contentDescription = "Garden",
+                    tint = Color(0xFF10B981) // Green color for garden
+                )
+            }
+            
+            // Inbox icon
+            IconButton(onClick = { }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.inbox),
+                    contentDescription = "Inbox",
+                    tint = TimelineColors.Primary
+                )
+            }
         }
     }
 }
