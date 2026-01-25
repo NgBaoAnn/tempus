@@ -56,6 +56,14 @@ fun ModeToggle(
                 onClick = { if (enabled) onModeChange(ChatMode.AGENT) },
                 enabled = enabled
             )
+            
+            ModeButton(
+                text = "Planner",
+                icon = "🎯",
+                isSelected = currentMode == ChatMode.LIFE_PLANNER,
+                onClick = { if (enabled) onModeChange(ChatMode.LIFE_PLANNER) },
+                enabled = enabled
+            )
         }
     }
 }
@@ -131,6 +139,7 @@ fun ModeIndicator(
     val (icon, text, color) = when (mode) {
         ChatMode.ASK -> Triple("💬", "Ask", ChatColors.TextSecondary)
         ChatMode.AGENT -> Triple("🤖", "Agent", ChatColors.Accent)
+        ChatMode.LIFE_PLANNER -> Triple("🎯", "Planner", ChatColors.Primary)
     }
     
     Surface(
