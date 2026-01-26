@@ -52,10 +52,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import com.projectapp.tempus.ui.components.TempusCard
 import com.projectapp.tempus.R
-import com.projectapp.tempus.data.ai.ChatMessage
-import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.ChatMode
+import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.LifePlanState
 import com.projectapp.tempus.ui.ai.AIViewModel
 
@@ -88,56 +90,55 @@ fun ChatScreen(
         }
     }
     
-    ChatTheme {
-        Scaffold(
-            topBar = {
-                PremiumChatHeader(
-                    isLoading = isLoading,
-                    chatMode = chatMode,
-                    onClearChat = { viewModel.clearChat() }
-                )
-            },
-            bottomBar = {
-                Column(
+    Scaffold(
+        topBar = {
+            PremiumChatHeader(
+                isLoading = isLoading,
+                chatMode = chatMode,
+                onClearChat = { viewModel.clearChat() }
+            )
+        },
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                // Mode Toggle
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(ChatColors.Surface)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    // Mode Toggle
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        ModeToggle(
-                            currentMode = chatMode,
-                            onModeChange = { viewModel.setMode(it) },
-                            enabled = agentState is AgentState.Idle && !isLoading
-                        )
-                    }
-                    
-                    // Chat Input
-                    ChatInput(
-                        value = inputText,
-                        onValueChange = { inputText = it },
-                        onSend = {
-                            viewModel.sendMessage(inputText)
-                            inputText = ""
-                        },
-                        enabled = !isLoading && agentState !is AgentState.AwaitingAccept && lifePlanState !is LifePlanState.AwaitingApproval,
-                        placeholder = when (chatMode) {
-                            ChatMode.ASK -> "Hỏi điều gì đó..."
-                            ChatMode.AGENT -> "Yêu cầu một hành động..."
-                            ChatMode.LIFE_PLANNER -> "Chia sẻ mục tiêu của bạn..."
-                        },
-                        modifier = Modifier.imePadding()
+                    ModeToggle(
+                        currentMode = chatMode,
+                        onModeChange = { viewModel.setMode(it) },
+                        enabled = agentState is AgentState.Idle && !isLoading
                     )
                 }
-            },
-            containerColor = ChatColors.Background,
-            modifier = modifier.fillMaxSize()
-        ) { paddingValues ->
+                
+                // Chat Input
+                ChatInput(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    onSend = {
+                        viewModel.sendMessage(inputText)
+                        inputText = ""
+                    },
+                    enabled = !isLoading && agentState !is AgentState.AwaitingAccept && lifePlanState !is LifePlanState.AwaitingApproval,
+                    placeholder = when (chatMode) {
+                        ChatMode.ASK -> "Hỏi điều gì đó..."
+                        ChatMode.AGENT -> "Yêu cầu một hành động..."
+                        ChatMode.LIFE_PLANNER -> "Chia sẻ mục tiêu của bạn..."
+                    },
+                    modifier = Modifier.imePadding()
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
             
             Box(
                 modifier = Modifier
@@ -246,7 +247,6 @@ fun ChatScreen(
                     }
                 }
             }
-        }
         
         // Legacy Schedule Suggestion Sheet
         if (showSuggestionSheet && suggestions.isNotEmpty()) {
@@ -277,7 +277,7 @@ private fun ProposingIndicator(
         Text(
             text = "Đang phân tích và tạo đề xuất...",
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.Accent
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }
@@ -300,7 +300,7 @@ private fun ExecutingIndicator(
         Text(
             text = "Đang thực hiện các thay đổi...",
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.Online
+            color = TempusDesignSystem.Success
         )
     }
 }
@@ -357,7 +357,7 @@ private fun PremiumChatHeader(
                             .offset(x = (-2).dp, y = (-2).dp)
                             .blur(10.dp)
                             .clip(CircleShape)
-                            .background(ChatColors.Typing.copy(alpha = glowAlpha * 0.5f))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = glowAlpha * 0.5f))
                     )
                 } else {
                     Box(
@@ -366,7 +366,7 @@ private fun PremiumChatHeader(
                             .offset(x = (-2).dp, y = (-2).dp)
                             .blur(8.dp)
                             .clip(CircleShape)
-                            .background(ChatColors.GlowCyan.copy(alpha = 0.3f))
+                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
                     )
                 }
                 
@@ -378,11 +378,11 @@ private fun PremiumChatHeader(
                             width = 2.dp,
                             brush = Brush.linearGradient(
                                 colors = if (isLoading) listOf(
-                                    ChatColors.Typing,
-                                    ChatColors.TypingGlow
+                                    MaterialTheme.colorScheme.secondary,
+                                    TempusDesignSystem.SecondaryLight
                                 ) else listOf(
-                                    ChatColors.Accent,
-                                    ChatColors.AccentLight
+                                    MaterialTheme.colorScheme.tertiary,
+                                    TempusDesignSystem.AccentLight
                                 )
                             ),
                             shape = CircleShape
@@ -406,7 +406,7 @@ private fun PremiumChatHeader(
                     Text(
                         text = "Tiramisu AI",
                         style = MaterialTheme.typography.titleLarge,
-                        color = ChatColors.TextPrimary
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     
                     Spacer(modifier = Modifier.width(10.dp))
@@ -424,8 +424,8 @@ private fun PremiumChatHeader(
                             .size(8.dp)
                             .clip(CircleShape)
                             .background(
-                                if (isLoading) ChatColors.Typing.copy(alpha = glowAlpha)
-                                else ChatColors.Online
+                                if (isLoading) MaterialTheme.colorScheme.secondary.copy(alpha = glowAlpha)
+                                else TempusDesignSystem.Success
                             )
                     )
                     
@@ -434,7 +434,7 @@ private fun PremiumChatHeader(
                     Text(
                         text = if (isLoading) "Đang xử lý..." else "Sẵn sàng hỗ trợ",
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isLoading) ChatColors.Typing else ChatColors.Online
+                        color = if (isLoading) MaterialTheme.colorScheme.secondary else TempusDesignSystem.Success
                     )
                 }
             }
@@ -444,10 +444,10 @@ private fun PremiumChatHeader(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(ChatColors.SurfaceGlass)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f))
                     .border(
                         width = 1.dp,
-                        color = ChatColors.BorderGlass,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha=0.2f),
                         shape = CircleShape
                     )
                     .clickable(
@@ -460,7 +460,7 @@ private fun PremiumChatHeader(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
                     contentDescription = "Xóa cuộc trò chuyện",
-                    tint = ChatColors.TextMuted,
+                    tint = TempusDesignSystem.TextMuted,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -477,9 +477,9 @@ private fun PremiumModeIndicator(
     modifier: Modifier = Modifier
 ) {
     val (text, color) = when (mode) {
-        ChatMode.ASK -> "Ask" to ChatColors.Accent
-        ChatMode.AGENT -> "Agent" to ChatColors.Primary
-        ChatMode.LIFE_PLANNER -> "Planner" to ChatColors.Online
+        ChatMode.ASK -> "Ask" to MaterialTheme.colorScheme.tertiary
+        ChatMode.AGENT -> "Agent" to MaterialTheme.colorScheme.primary
+        ChatMode.LIFE_PLANNER -> "Planner" to TempusDesignSystem.Success
     }
     
     Box(
@@ -525,8 +525,8 @@ private fun PremiumEmptyState(
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                ChatColors.Primary.copy(alpha = 0.4f),
-                                ChatColors.Accent.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
                                 Color.Transparent
                             )
                         )
@@ -541,8 +541,8 @@ private fun PremiumEmptyState(
                         width = 3.dp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                ChatColors.Primary,
-                                ChatColors.Accent
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
                             )
                         ),
                         shape = CircleShape
@@ -572,7 +572,7 @@ private fun PremiumEmptyState(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = ChatColors.TextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
@@ -590,7 +590,7 @@ private fun PremiumEmptyState(
                 ChatMode.LIFE_PLANNER -> "Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.TextMuted,
+            color = TempusDesignSystem.TextMuted,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
         )
@@ -605,7 +605,7 @@ private fun PremiumEmptyState(
             Text(
                 text = "THỬ HỎI",
                 style = MaterialTheme.typography.labelSmall,
-                color = ChatColors.TextDim,
+                color = TempusDesignSystem.TextMuted,
                 letterSpacing = 1.5.sp
             )
             
@@ -638,10 +638,10 @@ private fun PremiumSuggestionChip(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(ChatColors.SurfaceVariant)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .border(
                 width = 1.dp,
-                color = ChatColors.BorderGlass,
+                color = MaterialTheme.colorScheme.outline.copy(alpha=0.2f),
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -649,7 +649,7 @@ private fun PremiumSuggestionChip(
         Text(
             text = "\"$text\"",
             style = MaterialTheme.typography.bodySmall,
-            color = ChatColors.Accent
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }
@@ -674,7 +674,7 @@ private fun LifePlanAnalyzingIndicator(
         Text(
             text = "Đang phân tích mục tiêu và tạo kế hoạch...",
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.Accent
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }
@@ -697,7 +697,7 @@ private fun LifePlanCreatingIndicator(
         Text(
             text = "Đang tạo lịch từ kế hoạch...",
             style = MaterialTheme.typography.bodyMedium,
-            color = ChatColors.Online
+            color = TempusDesignSystem.Success
         )
     }
 }
