@@ -142,6 +142,7 @@ class TimelineFragment : Fragment() {
                     )
                 }
                 val voiceState by voiceViewModel.state.collectAsState()
+                val voicePartialText by voiceViewModel.partialText.collectAsState()
                 
                 TimelineScreen(
                     // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
@@ -228,12 +229,7 @@ class TimelineFragment : Fragment() {
                     ) {
                         VoiceInputSheet(
                             state = voiceState,
-                            partialText = voiceState.let { 
-                                when (it) {
-                                    is com.projectapp.tempus.ui.voice.compose.VoiceInputState.Listening -> ""
-                                    else -> ""
-                                }
-                            },
+                            partialText = voicePartialText,
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
                             onConfirmTask = { task ->
