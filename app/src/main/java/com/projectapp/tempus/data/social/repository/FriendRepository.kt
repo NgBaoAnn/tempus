@@ -1,6 +1,7 @@
 package com.projectapp.tempus.data.social.repository
 
 import com.projectapp.tempus.data.social.dto.UserBasicDto
+import com.projectapp.tempus.data.social.dto.UserProfile
 import com.projectapp.tempus.domain.social.model.FriendRequest
 import com.projectapp.tempus.domain.social.model.Friendship
 
@@ -86,7 +87,12 @@ interface FriendRepository {
      * Lấy danh sách tất cả users (để hiển thị trong Discover tab)
      * Exclude current user và blocked users
      */
-    suspend fun getAllUsers(): Result<List<UserBasicDto>>
+    /**
+     * Lấy thông tin chi tiết user profile
+     */
+    suspend fun getUserProfile(userId: String): Result<UserProfile>
+
+    suspend fun getAllUsers(excludedIds: List<String> = emptyList()): Result<List<UserBasicDto>>
 }
 
 /**

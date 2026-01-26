@@ -24,6 +24,7 @@ sealed class SocialScreen {
     object Friends : SocialScreen()
     object Conversations : SocialScreen()
     data class Chat(val friendId: String, val friendUsername: String, val friendAvatar: String?) : SocialScreen()
+    data class Profile(val userId: String) : SocialScreen()
 }
 
 /**
@@ -67,16 +68,31 @@ fun SocialNavHost(
 ) {
     var currentScreen by remember { mutableStateOf<SocialScreen>(SocialScreen.Friends) }
     val messagesViewModel: MessagesViewModel = viewModel()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(Unit) {
+        messagesViewModel.notificationEvents.collect { event ->
+            com.projectapp.tempus.util.MessageNotificationHelper.showNotification(
+                context = context,
+                conversationId = event.conversationId,
+                senderName = event.senderName,
+                messageContent = event.messageContent
+            )
+        }
+    }
 
     when (val screen = currentScreen) {
         is SocialScreen.Friends -> {
             FriendsScreen(
                 viewModel = friendsViewModel,
-                onNavigateToChat = { friendId ->
-                    // TODO: Navigate to chat with friend
+                onNavigateToChat = { friendId, friendUsername, friendAvatar ->
+                    currentScreen = SocialScreen.Chat(friendId, friendUsername, friendAvatar)
                 },
                 onNavigateToMessages = {
                     currentScreen = SocialScreen.Conversations
+                },
+                onUserClick = { userId ->
+                    currentScreen = SocialScreen.Profile(userId)
                 }
             )
         }
@@ -101,6 +117,15 @@ fun SocialNavHost(
                 viewModel = messagesViewModel,
                 onNavigateBack = {
                     currentScreen = SocialScreen.Conversations
+                }
+            )
+        }
+        
+        is SocialScreen.Profile -> {
+            com.projectapp.tempus.ui.social.profile.FriendProfileScreen(
+                userId = screen.userId,
+                onBack = {
+                    currentScreen = SocialScreen.Friends
                 }
             )
         }

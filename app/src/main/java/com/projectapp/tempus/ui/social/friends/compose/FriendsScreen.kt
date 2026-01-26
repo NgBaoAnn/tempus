@@ -1,6 +1,7 @@
 package com.projectapp.tempus.ui.social.friends.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,8 +52,9 @@ import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 @Composable
 fun FriendsScreen(
     viewModel: FriendsViewModel = viewModel(),
-    onNavigateToChat: (String) -> Unit = {},
-    onNavigateToMessages: () -> Unit = {}
+    onNavigateToChat: (String, String, String?) -> Unit = { _, _, _ -> },
+    onNavigateToMessages: () -> Unit = {},
+    onUserClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSearchDialog by remember { mutableStateOf(false) }
@@ -128,13 +130,16 @@ fun FriendsScreen(
                     when (uiState.selectedTab) {
                         FriendsTab.DISCOVER -> DiscoverList(
                             users = uiState.discoverUsers,
+                            sentRequests = uiState.sentRequests,
                             onSendRequest = viewModel::sendFriendRequest,
-                            onRefresh = viewModel::loadAllUsers
+                            onRefresh = viewModel::loadAllUsers,
+                            onUserClick = onUserClick
                         )
                         FriendsTab.FRIENDS -> FriendsList(
                             friends = uiState.friends,
                             onUnfriend = viewModel::unfriend,
-                            onChat = onNavigateToChat
+                            onChat = onNavigateToChat,
+                            onUserClick = onUserClick
                         )
                         FriendsTab.REQUESTS -> RequestsList(
                             pendingRequests = uiState.pendingRequests,
@@ -328,7 +333,8 @@ private fun FriendsTabBar(
 private fun FriendsList(
     friends: List<Friendship>,
     onUnfriend: (String) -> Unit,
-    onChat: (String) -> Unit
+    onChat: (String, String, String?) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     if (friends.isEmpty()) {
         EmptyState(
@@ -345,7 +351,8 @@ private fun FriendsList(
                 FriendCard(
                     friend = friend,
                     onUnfriend = { onUnfriend(friend.id) },
-                    onChat = { onChat(friend.friendId) }
+                    onChat = { onChat(friend.friendId, friend.friendUsername, friend.friendAvatar) },
+                    onClick = { onUserClick(friend.friendId) }
                 )
             }
         }
@@ -356,12 +363,15 @@ private fun FriendsList(
 private fun FriendCard(
     friend: Friendship,
     onUnfriend: () -> Unit,
-    onChat: () -> Unit
+    onChat: () -> Unit,
+    onClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -636,13 +646,21 @@ private fun UserAvatar(
             .background(TempusDesignSystem.PrimaryLight),
         contentAlignment = Alignment.Center
     ) {
-        // TODO: Load actual avatar with Coil/Glide
-        Text(
-            text = username.firstOrNull()?.uppercase() ?: "?",
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            fontSize = (size / 2).sp
-        )
+        if (!avatarUrl.isNullOrBlank()) {
+            coil.compose.AsyncImage(
+                model = avatarUrl,
+                contentDescription = "Avatar $username",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = username.firstOrNull()?.uppercase() ?: "?",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = (size / 2).sp
+            )
+        }
     }
 }
 
@@ -686,8 +704,10 @@ private fun EmptyState(
 @Composable
 private fun DiscoverList(
     users: List<UserBasicDto>,
+    sentRequests: List<FriendRequest>,
     onSendRequest: (String) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     if (users.isEmpty()) {
         EmptyState(
@@ -733,9 +753,12 @@ private fun DiscoverList(
             }
             
             items(users, key = { it.id }) { user ->
+                val isRequestSent = sentRequests.any { it.receiverId == user.id }
                 DiscoverUserCard(
                     user = user,
-                    onSendRequest = { onSendRequest(user.id) }
+                    isRequestSent = isRequestSent,
+                    onSendRequest = { onSendRequest(user.id) },
+                    onClick = { onUserClick(user.id) }
                 )
             }
         }
@@ -745,13 +768,17 @@ private fun DiscoverList(
 @Composable
 private fun DiscoverUserCard(
     user: UserBasicDto,
-    onSendRequest: () -> Unit
+    isRequestSent: Boolean,
+    onSendRequest: () -> Unit,
+    onClick: () -> Unit
 ) {
-    var requestSent by remember { mutableStateOf(false) }
+    var localRequestSent by remember { mutableStateOf(false) }
+    val isSent = isRequestSent || localRequestSent
     
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -781,12 +808,21 @@ private fun DiscoverUserCard(
                         .background(TempusDesignSystem.PrimaryLight),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
+                    if (!user.avatar.isNullOrBlank()) {
+                        coil.compose.AsyncImage(
+                            model = user.avatar,
+                            contentDescription = "Avatar ${user.username}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = user.username.firstOrNull()?.uppercase() ?: "?",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                    }
                 }
             }
             
@@ -812,24 +848,25 @@ private fun DiscoverUserCard(
             }
             
             // Action button
-            if (requestSent) {
-                Surface(
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(20.dp)
+            if (isSent) {
+                OutlinedButton(
+                    onClick = onClick,
+                    shape = RoundedCornerShape(20.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 ) {
                     Text(
-                        text = "Đã gửi",
-                        color = MaterialTheme.colorScheme.secondary,
+                        "Xem",
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        fontSize = 13.sp
                     )
                 }
             } else {
                 FilledTonalButton(
                     onClick = {
                         onSendRequest()
-                        requestSent = true
+                        localRequestSent = true
                     },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,

@@ -51,7 +51,6 @@ class FriendsViewModel(
 
     init {
         loadData()
-        loadAllUsers() // Load discover users since DISCOVER is default tab
     }
 
     /**
@@ -76,7 +75,7 @@ class FriendsViewModel(
                     _uiState.update { it.copy(pendingRequests = requests) }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể tải lời mời") }
+                    // Just log error for requests, don't show user error yet if other parts succeed
                 }
             
             // Load sent requests
@@ -86,6 +85,9 @@ class FriendsViewModel(
                 }
             
             _uiState.update { it.copy(isLoading = false) }
+            
+            // Load discover users (with filtering) after loading other data
+            loadAllUsers()
         }
     }
 
@@ -118,7 +120,26 @@ class FriendsViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDiscover = true) }
             
-            friendRepository.getAllUsers()
+            // Gather IDs to exclude
+            val state = _uiState.value
+            val excludedIds = mutableListOf<String>()
+            
+            // Exclude Friends
+            excludedIds.addAll(state.friends.map { it.friendId })
+            
+            // Exclude Pending Requests (Senders) - Don't show people who sent us requests
+            excludedIds.addAll(state.pendingRequests.map { it.senderId })
+            
+            // Exclude Pending Requests (Senders) - Don't show people who sent us requests
+            excludedIds.addAll(state.pendingRequests.map { it.senderId })
+            
+            // Allow Sent Requests to appear (so we can show 'View' button)
+            // excludedIds.addAll(state.sentRequests.map { it.receiverId })
+            
+            // Exclude Blocked Users
+            excludedIds.addAll(state.blockedUsers.map { it.id })
+            
+            friendRepository.getAllUsers(excludedIds)
                 .onSuccess { users ->
                     _uiState.update { it.copy(discoverUsers = users, isLoadingDiscover = false) }
                 }
@@ -177,7 +198,8 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể gửi lời mời") }
+                    // Show actual error for debugging
+                    _uiState.update { it.copy(error = "Lỗi gửi lời mời: ${e.message}") }
                 }
         }
     }
