@@ -7,6 +7,9 @@ import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.postgresChangeFlow
 import java.time.Instant
 
 /**
@@ -141,6 +144,33 @@ class SupabaseMessageRepository(
                         eq("is_read", false)
                     }
                 }
+        }
+    }
+
+    override fun getMessagesFlow(conversationId: String): kotlinx.coroutines.flow.Flow<List<MessageDto>> = kotlinx.coroutines.flow.flow {
+        // 1. Emit initial data
+        val initialData = getMessages(conversationId).getOrDefault(emptyList())
+        emit(initialData)
+
+        // 2. Setup Realtime
+        try {
+            val channel = supabase.channel("messages_$conversationId")
+            
+            val messageFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
+                table = "messages"
+                filter = "conversation_id=eq.$conversationId"
+            }
+            
+            channel.subscribe()
+            
+            // 3. Listen to new messages
+            messageFlow.collect { action ->
+                // Re-fetch to get updated list
+                val updatedList = getMessages(conversationId).getOrDefault(emptyList())
+                emit(updatedList)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SupabaseRepo", "Realtime error: ${e.message}")
         }
     }
 }

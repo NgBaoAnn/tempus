@@ -11,8 +11,14 @@ import com.projectapp.tempus.data.social.repository.SupabaseMessageRepository
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.postgresChangeFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,7 +49,8 @@ data class ConversationWithUser(
  * ViewModel cho Messages feature
  */
 class MessagesViewModel(
-    private val messageRepository: MessageRepository = SupabaseMessageRepository()
+    private val messageRepository: MessageRepository = SupabaseMessageRepository(),
+    private val friendRepository: com.projectapp.tempus.data.social.repository.FriendRepository = com.projectapp.tempus.data.social.repository.SupabaseFriendRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MessagesUiState())
@@ -53,6 +60,8 @@ class MessagesViewModel(
 
     init {
         loadConversations()
+        // Start listening for notifications
+        listenForNewMessages()
     }
 
     private fun getCurrentUserId(): String {
@@ -61,40 +70,82 @@ class MessagesViewModel(
 
     /**
      * Load danh sách conversations
+     * Merge với danh sách bạn bè để hiển thị cả những người chưa chat
      */
     fun loadConversations() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            messageRepository.getConversations()
-                .onSuccess { conversations ->
-                    // Load user info cho mỗi conversation
-                    val conversationsWithUsers = conversations.mapNotNull { conv ->
-                        val otherUserId = if (conv.participant1Id == getCurrentUserId()) {
-                            conv.participant2Id
-                        } else {
-                            conv.participant1Id
-                        }
-                        
-                        val user = loadUserInfo(otherUserId)
-                        user?.let { ConversationWithUser(conv, it) }
-                    }
+            val currentUserId = getCurrentUserId()
+            
+            // 1. Get Active Conversations
+            val conversationsResult = messageRepository.getConversations()
+            val activeConversations = conversationsResult.getOrDefault(emptyList())
+            
+            // 2. Get All Friends
+            val friendsResult = friendRepository.getFriends()
+            val friends = friendsResult.getOrDefault(emptyList())
+            
+            // 3. Process Active Conversations
+            val loadedConversations = activeConversations.mapNotNull { conv ->
+                val otherUserId = if (conv.participant1Id == currentUserId) {
+                    conv.participant2Id
+                } else {
+                    conv.participant1Id
+                }
+                
+                val user = loadUserInfo(otherUserId)
+                user?.let { ConversationWithUser(conv, it) }
+            }.toMutableList()
+            
+            // 4. Add Empty Conversations for Friends who are not in list
+            friends.forEach { friend ->
+                val friendId = friend.friendId
+                val isAlreadyInList = loadedConversations.any { it.otherUser.id == friendId }
+                
+                if (!isAlreadyInList) {
+                    // Create a placeholder conversation
+                    val placeholderConv = ConversationDto(
+                        id = "temporary_$friendId",
+                        participant1Id = currentUserId,
+                        participant2Id = friendId,
+                        lastMessageAt = null,
+                        lastMessagePreview = null,
+                        createdAt = java.time.Instant.now().toString()
+                    )
                     
-                    _uiState.update { 
-                        it.copy(
-                            conversations = conversationsWithUsers,
-                            isLoading = false
-                        ) 
-                    }
+                    val friendUser = UserBasicDto(
+                        id = friendId,
+                        username = friend.friendUsername,
+                        avatar = friend.friendAvatar,
+                        email = friend.friendEmail
+                    )
+                    
+                    loadedConversations.add(
+                        ConversationWithUser(
+                            conversation = placeholderConv,
+                            otherUser = friendUser,
+                            unreadCount = 0
+                        )
+                    )
                 }
-                .onFailure { e ->
-                    _uiState.update { 
-                        it.copy(
-                            error = "Không thể tải tin nhắn",
-                            isLoading = false
-                        ) 
-                    }
-                }
+            }
+            
+            // Sort by last message time desc (nulls last)
+            loadedConversations.sortWith(compareByDescending<ConversationWithUser> { 
+                it.conversation.lastMessageAt ?: "" 
+            })
+            
+            _uiState.update { 
+                it.copy(
+                    conversations = loadedConversations,
+                    isLoading = false
+                ) 
+            }
+            
+            if (conversationsResult.isFailure && friendsResult.isFailure) {
+                 _uiState.update { it.copy(error = "Không thể tải dữ liệu") }
+            }
         }
     }
 
@@ -138,17 +189,29 @@ class MessagesViewModel(
     /**
      * Load messages của conversation hiện tại
      */
+    /**
+     * Load messages của conversation hiện tại (Realtime)
+     */
     fun loadMessages(conversationId: String) {
         viewModelScope.launch {
-            messageRepository.getMessages(conversationId)
-                .onSuccess { messages ->
+            messageRepository.getMessagesFlow(conversationId)
+                .collect { messages ->
                     _uiState.update { it.copy(currentMessages = messages) }
                     
                     // Mark messages as read
-                    messageRepository.markMessagesAsRead(conversationId)
-                }
-                .onFailure { e ->
-                    _uiState.update { it.copy(error = "Không thể tải tin nhắn") }
+                    // Check if last message is from other user and unread
+                    val lastMessage = messages.lastOrNull()
+                    if (lastMessage != null && lastMessage.senderId != getCurrentUserId() && !lastMessage.isRead) {
+                        messageRepository.markMessagesAsRead(conversationId)
+                    }
+                    
+                    // Simple notification trigger if we are in background logic (simulated)
+                    // Note: This only works if VM is alive. For true background, need Service/Worker.
+                    if (messages.isNotEmpty()) {
+                        val limit = 3
+                        // Logic to detect NEW message: compare size or ID
+                        // Simplified: just update UI
+                    }
                 }
         }
     }
@@ -206,6 +269,63 @@ class MessagesViewModel(
     /**
      * Load thông tin user từ database
      */
+    // Notification State
+    private val _notificationEvents = kotlinx.coroutines.flow.MutableSharedFlow<NotificationEvent>()
+    val notificationEvents = _notificationEvents.asSharedFlow()
+
+    data class NotificationEvent(
+        val conversationId: String,
+        val senderName: String, 
+        val messageContent: String
+    )
+
+    /**
+     * Listen for ANY new message addressed to current user to show notification
+     */
+    private fun listenForNewMessages() {
+        viewModelScope.launch {
+            try {
+                val currentUserId = getCurrentUserId()
+                if (currentUserId.isBlank()) return@launch
+
+                val channel = supabase.channel("user_messages_$currentUserId")
+                
+                val flow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
+                    table = "messages"
+                }
+                
+                channel.subscribe()
+                
+                flow.collect { action ->
+                    // Get the new record from the action's record field
+                    val record = action.record
+                    val senderId = record["sender_id"] as? String ?: return@collect
+                    val conversationId = record["conversation_id"] as? String ?: return@collect
+                    val content = record["content"] as? String ?: return@collect
+                    
+                    if (senderId != currentUserId) {
+                        // Check if we are NOT currently chatting with this user
+                        val currentConvId = _uiState.value.currentConversation?.id
+                        if (currentConvId != conversationId) {
+                            // Fetch sender info
+                             val sender = loadUserInfo(senderId)
+                             sender?.let {
+                                 _notificationEvents.emit(
+                                     NotificationEvent(
+                                         conversationId = conversationId,
+                                         senderName = it.username,
+                                         messageContent = content
+                                     )
+                                 )
+                             }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MessagesVM", "Realtime error: ${e.message}")
+            }
+        }
+    }
     private suspend fun loadUserInfo(userId: String): UserBasicDto? {
         return try {
             supabase.from("users")
