@@ -44,8 +44,8 @@ fun DailyQuoteCard(
 ) {
     if (quote == null) return
     
-    // Collapsible state - default collapsed to save space
-    var isExpanded by remember { mutableStateOf(false) }
+    // Collapsible state - default expanded to show quote on first load
+    var isExpanded by remember { mutableStateOf(true) }
     
     // Subtle shimmer animation
     val infiniteTransition = rememberInfiniteTransition(label = "quote_shimmer")
