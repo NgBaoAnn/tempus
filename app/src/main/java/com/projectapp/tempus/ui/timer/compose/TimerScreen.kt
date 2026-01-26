@@ -37,8 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+
+import androidx.compose.material3.MaterialTheme
 import com.projectapp.tempus.R
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import com.projectapp.tempus.ui.components.TempusCard
+
 import java.util.Calendar
 import java.util.Locale
 
@@ -80,16 +84,16 @@ fun TimerScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(TimerColors.Background)
+            .background(MaterialTheme.colorScheme.background)
             .padding(20.dp)
     ) {
         // Header
         Text(
             text = if (timerState == TimerState.SETUP) "Hẹn giờ" else "Đếm ngược",
-            style = TimerTypography.HeaderLarge
+            style = MaterialTheme.typography.headlineLarge
         )
         
-        Spacer(modifier = Modifier.height(TimerDimens.SpacingLarge))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Animated content switch between setup and running
         AnimatedContent(
@@ -149,14 +153,14 @@ private fun SetupContent(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
         // Setup Card
-        Surface(
+        // Setup Card
+        TempusCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(TimerDimens.CardCornerRadius),
-            color = TimerColors.Surface,
-            shadowElevation = TimerDimens.CardElevation
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            elevation = 2.dp
         ) {
             Column(
-                modifier = Modifier.padding(TimerDimens.CardPadding),
+                modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Quick select buttons
@@ -165,7 +169,7 @@ private fun SetupContent(
                     onSelect = onQuickSelect
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 // Time picker
                 TimePickerDisplay(
@@ -175,7 +179,7 @@ private fun SetupContent(
                     onMinutesChange = onMinutesChange
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 // Action buttons
                 Row(
@@ -185,8 +189,8 @@ private fun SetupContent(
                     // Reset button
                     ActionButton(
                         iconResId = R.drawable.ic_close,
-                        backgroundColor = TimerColors.SurfaceVariant,
-                        iconTint = TimerColors.TextMuted,
+                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                        iconTint = TempusDesignSystem.TextMuted,
                         onClick = onReset,
                         modifier = Modifier.weight(1f)
                     )
@@ -201,14 +205,14 @@ private fun SetupContent(
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 HorizontalDivider(
-                    color = TimerColors.SurfaceVariant,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     thickness = 1.dp
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 // Quick Notes button - prominent position
                 Surface(
@@ -234,13 +238,13 @@ private fun SetupContent(
                             Column {
                                 Text(
                                     text = "Ghi chú nhanh",
-                                    style = TimerTypography.BodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     text = "Ghi lại ý tưởng khi tập trung",
                                     fontSize = 12.sp,
-                                    color = TimerColors.TextMuted
+                                    color = TempusDesignSystem.TextMuted
                                 )
                             }
                         }
@@ -252,7 +256,7 @@ private fun SetupContent(
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingSmall))
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 // Focus Mode button
                 Surface(
@@ -278,13 +282,13 @@ private fun SetupContent(
                             Column {
                                 Text(
                                     text = "Focus Mode",
-                                    style = TimerTypography.BodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     text = if (focusModeEnabled) "Đang bật - Chặn app phân tâm" else "Chặn app phân tâm khi tập trung",
                                     fontSize = 12.sp,
-                                    color = TimerColors.TextMuted
+                                    color = TempusDesignSystem.TextMuted
                                 )
                             }
                         }
@@ -308,17 +312,17 @@ private fun SetupContent(
             }
         }
         
-        Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+        Spacer(modifier = Modifier.height(12.dp))
         
         // Settings Card
-        Surface(
+        // Settings Card
+        TempusCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(TimerDimens.CardCornerRadius),
-            color = TimerColors.Surface,
-            shadowElevation = TimerDimens.CardElevation
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            elevation = 2.dp
         ) {
             Column(
-                modifier = Modifier.padding(TimerDimens.CardPadding)
+                modifier = Modifier.padding(16.dp)
             ) {
                 // Tag row
                 Row(
@@ -327,22 +331,22 @@ private fun SetupContent(
                 ) {
                     Text(
                         text = "Nhãn",
-                        style = TimerTypography.BodyMedium
+                        style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
                         text = "Hẹn giờ",
-                        style = TimerTypography.BodyMedium
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 HorizontalDivider(
-                    color = TimerColors.SurfaceVariant,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     thickness = 1.dp
                 )
                 
-                Spacer(modifier = Modifier.height(TimerDimens.SpacingMedium))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 // Color selector
                 ColorSelector(
@@ -371,16 +375,15 @@ private fun RunningContent(
     val statusText = if (isRunning) "Đang chạy" else "Đã tạm dừng"
     val endTimeText = calculateEndTime(secondsRemaining)
     
-    Surface(
+    TempusCard(
         modifier = Modifier.fillMaxSize(),
-        shape = RoundedCornerShape(TimerDimens.CardCornerRadius),
-        color = TimerColors.Surface,
-        shadowElevation = TimerDimens.CardElevation
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        elevation = 2.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(TimerDimens.CardPadding),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -408,8 +411,8 @@ private fun RunningContent(
                 // Cancel button
                 ControlButton(
                     iconResId = R.drawable.ic_close,
-                    backgroundColor = TimerColors.SurfaceVariant,
-                    iconTint = TimerColors.TextPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    iconTint = MaterialTheme.colorScheme.onSurface,
                     onClick = onCancel
                 )
                 
