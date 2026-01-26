@@ -102,6 +102,13 @@ fun EditScheduleScreen(
         }
     }
     
+    // Sync description from state (for edit mode)
+    LaunchedEffect(state.description) {
+        if (descriptionText.isEmpty() && state.description.isNotEmpty()) {
+            descriptionText = state.description
+        }
+    }
+    
     // Sync subtasks from state (for edit mode)
     LaunchedEffect(state.subtasks) {
         subtasks = state.subtasks
