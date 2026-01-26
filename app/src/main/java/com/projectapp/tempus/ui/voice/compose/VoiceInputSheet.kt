@@ -126,20 +126,22 @@ private fun ListeningState(partialText: String, onStop: () -> Unit) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Partial text display
-        if (partialText.isNotEmpty()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Text(
-                    text = partialText,
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        // Always show text display area
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Text(
+                text = if (partialText.isNotEmpty()) partialText else "Hãy nói gì đó...",
+                modifier = Modifier.padding(16.dp),
+                fontSize = 16.sp,
+                color = if (partialText.isNotEmpty()) 
+                    MaterialTheme.colorScheme.onSurfaceVariant 
+                else 
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center
+            )
         }
         
         Spacer(modifier = Modifier.height(24.dp))
