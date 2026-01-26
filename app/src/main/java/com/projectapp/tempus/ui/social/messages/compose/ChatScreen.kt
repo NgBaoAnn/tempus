@@ -23,9 +23,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.social.dto.MessageDto
-import com.projectapp.tempus.ui.social.friends.compose.SocialColors
-import com.projectapp.tempus.ui.social.messages.MessagesViewModel
 import io.github.jan.supabase.gotrue.auth
+
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import com.projectapp.tempus.ui.components.TempusCard
+import com.projectapp.tempus.ui.social.messages.MessagesViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -71,12 +73,7 @@ fun ChatScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .background(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(
-                                            SocialColors.GradientStart,
-                                            SocialColors.GradientEnd
-                                        )
-                                    ),
+                                    color = MaterialTheme.colorScheme.primary,
                                     shape = CircleShape
                                 )
                                 .padding(2.dp)
@@ -85,12 +82,12 @@ fun ChatScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
-                                    .background(SocialColors.PrimaryLight),
+                                    .background(TempusDesignSystem.PrimaryLight),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = friendUsername.firstOrNull()?.uppercase() ?: "?",
-                                    color = SocialColors.Primary,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
                                 )
@@ -114,14 +111,14 @@ fun ChatScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SocialColors.CardBackground
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         bottomBar = {
             // Message input
             Surface(
-                color = SocialColors.CardBackground,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 8.dp
             ) {
                 Row(
@@ -137,8 +134,8 @@ fun ChatScreen(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = SocialColors.Primary,
-                            unfocusedBorderColor = SocialColors.SurfaceVariant
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant
                         ),
                         maxLines = 4
                     )
@@ -154,7 +151,7 @@ fun ChatScreen(
                         },
                         enabled = messageText.isNotBlank() && !uiState.isSending,
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = SocialColors.Primary,
+                            containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White
                         )
                     ) {
@@ -171,7 +168,7 @@ fun ChatScreen(
                 }
             }
         },
-        containerColor = SocialColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(
             modifier = Modifier
@@ -181,7 +178,7 @@ fun ChatScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = SocialColors.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
             } else if (uiState.currentMessages.isEmpty()) {
                 // Empty chat
@@ -191,7 +188,7 @@ fun ChatScreen(
                 ) {
                     Text(
                         text = "Gửi tin nhắn đầu tiên!",
-                        color = SocialColors.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
@@ -222,7 +219,7 @@ private fun MessageBubble(
         horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
     ) {
         Surface(
-            color = if (isMe) SocialColors.Primary else SocialColors.SurfaceVariant,
+            color = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp,
@@ -236,7 +233,7 @@ private fun MessageBubble(
             ) {
                 Text(
                     text = message.content,
-                    color = if (isMe) Color.White else SocialColors.TextPrimary,
+                    color = if (isMe) Color.White else MaterialTheme.colorScheme.onBackground,
                     fontSize = 15.sp
                 )
                 
@@ -244,7 +241,7 @@ private fun MessageBubble(
                 
                 Text(
                     text = formatMessageTime(message.createdAt),
-                    color = if (isMe) Color.White.copy(alpha = 0.7f) else SocialColors.TextMuted,
+                    color = if (isMe) Color.White.copy(alpha = 0.7f) else TempusDesignSystem.TextMuted,
                     fontSize = 11.sp
                 )
             }

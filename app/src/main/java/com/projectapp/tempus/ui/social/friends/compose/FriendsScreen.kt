@@ -37,64 +37,15 @@ import com.projectapp.tempus.domain.social.model.FriendRequest
 import com.projectapp.tempus.domain.social.model.Friendship
 import com.projectapp.tempus.ui.social.friends.FriendsTab
 import com.projectapp.tempus.ui.social.friends.FriendsUiState
+
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import com.projectapp.tempus.ui.components.TempusCard
 import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 
 /**
  * Premium Blue Liquid Glass Design System
  * Style: Flowing glass, smooth transitions, translucent, modern premium
  */
-object SocialColors {
-    // === PRIMARY BLUE PALETTE ===
-    val Primary = Color(0xFF2563EB)        // Blue 600 - Main brand
-    val PrimaryDark = Color(0xFF1D4ED8)    // Blue 700
-    val PrimaryLight = Color(0xFFDBEAFE)   // Blue 100
-    val PrimaryLighter = Color(0xFFEFF6FF) // Blue 50
-    
-    // === SECONDARY & ACCENT ===
-    val Secondary = Color(0xFF60A5FA)      // Blue 400 - Lighter blue
-    val Accent = Color(0xFF3B82F6)         // Blue 500
-    val CTA = Color(0xFFF43F5E)            // Rose 500 - Action buttons
-    val CTALight = Color(0xFFFFF1F2)       // Rose 50
-    
-    // === BACKGROUND & SURFACE (Liquid Glass) ===
-    val Background = Color(0xFFF0F9FF)     // Sky 50 - Soft blue tint
-    val BackgroundGradientStart = Color(0xFFF0F9FF) // Sky 50
-    val BackgroundGradientEnd = Color(0xFFE0F2FE)   // Sky 100
-    val CardBackground = Color(0xFFFFFFFF)
-    val CardBackgroundGlass = Color(0xF2FFFFFF)     // White 95% for glass effect
-    val SurfaceVariant = Color(0xFFE0F2FE) // Sky 100
-    val SurfaceElevated = Color(0xFFFAFAFF)
-    
-    // === TEXT COLORS ===
-    val TextPrimary = Color(0xFF1E293B)    // Slate 800
-    val TextSecondary = Color(0xFF475569)  // Slate 600
-    val TextMuted = Color(0xFF94A3B8)      // Slate 400
-    val TextOnPrimary = Color.White
-    
-    // === STATUS COLORS ===
-    val Success = Color(0xFF22C55E)        // Green 500
-    val Warning = Color(0xFFF59E0B)        // Amber 500
-    val Danger = Color(0xFFEF4444)         // Red 500
-    val Info = Color(0xFF0EA5E9)           // Sky 500
-    
-    // === GRADIENT COLORS (Blue Spectrum) ===
-    val GradientStart = Color(0xFF2563EB)  // Blue 600
-    val GradientMid = Color(0xFF3B82F6)    // Blue 500
-    val GradientEnd = Color(0xFF60A5FA)    // Blue 400
-    val GradientLight = Color(0xFF93C5FD)  // Blue 300
-    
-    // === GLASS & SHADOW EFFECTS ===
-    val GlassBorder = Color(0x40FFFFFF)    // White 25%
-    val GlassOverlay = Color(0x0AFFFFFF)   // White 4%
-    val CardShadow = Color(0x1A2563EB)     // Blue shadow
-    val SoftShadow = Color(0x0D000000)     // Very soft black shadow
-    val Overlay = Color(0x80000000)        // Black 50%
-    
-    // === ONLINE/STATUS INDICATORS ===
-    val Online = Color(0xFF22C55E)         // Green
-    val Away = Color(0xFFF59E0B)           // Amber
-    val Offline = Color(0xFF94A3B8)        // Slate 400
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,13 +80,13 @@ fun FriendsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showSearchDialog = true },
-                containerColor = SocialColors.Primary,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             ) {
                 Icon(Icons.Filled.PersonAdd, contentDescription = "Tìm bạn bè")
             }
         },
-        containerColor = SocialColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -162,7 +113,7 @@ fun FriendsScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = SocialColors.Primary)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
                 uiState.isLoading -> {
@@ -170,7 +121,7 @@ fun FriendsScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = SocialColors.Primary)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
                 else -> {
@@ -225,23 +176,11 @@ private fun FriendsHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        SocialColors.GradientStart,
-                        SocialColors.GradientMid,
-                        SocialColors.GradientEnd
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                )
-            )
+            .background(MaterialTheme.colorScheme.primary)
     ) {
-        // Glass overlay pattern
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SocialColors.GlassOverlay)
                 .padding(horizontal = 24.dp, vertical = 28.dp)
         ) {
             Row(
@@ -264,7 +203,7 @@ private fun FriendsHeader(
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
-                                .background(SocialColors.Online, CircleShape)
+                                .background(TempusDesignSystem.Success, CircleShape)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -282,7 +221,7 @@ private fun FriendsHeader(
                     modifier = Modifier.size(48.dp),
                     shape = CircleShape,
                     color = Color.White.copy(alpha = 0.15f),
-                    border = BorderStroke(1.dp, SocialColors.GlassBorder)
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha=0.2f))
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -309,8 +248,8 @@ private fun FriendsTabBar(
 ) {
     ScrollableTabRow(
         selectedTabIndex = selectedTab.ordinal,
-        containerColor = SocialColors.CardBackground,
-        contentColor = SocialColors.Primary,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary,
         edgePadding = 16.dp,
         indicator = { tabPositions ->
             if (selectedTab.ordinal < tabPositions.size) {
@@ -321,7 +260,7 @@ private fun FriendsTabBar(
                         .offset(x = tabPositions[selectedTab.ordinal].left)
                         .width(tabPositions[selectedTab.ordinal].width),
                     height = 3.dp,
-                    color = SocialColors.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         },
@@ -362,7 +301,7 @@ private fun FriendsTabBar(
                     if (pendingCount > 0) {
                         Spacer(modifier = Modifier.width(6.dp))
                         Badge(
-                            containerColor = SocialColors.Accent,
+                            containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = Color.White
                         ) {
                             Text(pendingCount.toString())
@@ -423,7 +362,7 @@ private fun FriendCard(
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -448,12 +387,12 @@ private fun FriendCard(
                     text = friend.friendUsername,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = SocialColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = friend.friendEmail,
                     fontSize = 13.sp,
-                    color = SocialColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -464,7 +403,7 @@ private fun FriendCard(
                 Icon(
                     Icons.AutoMirrored.Filled.Chat,
                     contentDescription = "Nhắn tin",
-                    tint = SocialColors.Primary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             
@@ -474,7 +413,7 @@ private fun FriendCard(
                     Icon(
                         Icons.Filled.MoreVert,
                         contentDescription = "Thêm",
-                        tint = SocialColors.TextSecondary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 DropdownMenu(
@@ -482,13 +421,13 @@ private fun FriendCard(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Huỷ kết bạn", color = SocialColors.Danger) },
+                        text = { Text("Huỷ kết bạn", color = TempusDesignSystem.Error) },
                         onClick = {
                             showMenu = false
                             onUnfriend()
                         },
                         leadingIcon = {
-                            Icon(Icons.Filled.PersonRemove, null, tint = SocialColors.Danger)
+                            Icon(Icons.Filled.PersonRemove, null, tint = TempusDesignSystem.Error)
                         }
                     )
                 }
@@ -521,7 +460,7 @@ private fun RequestsList(
                     Text(
                         text = "Lời mời đã nhận",
                         fontWeight = FontWeight.Bold,
-                        color = SocialColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -542,7 +481,7 @@ private fun RequestsList(
                     Text(
                         text = "Lời mời đã gửi",
                         fontWeight = FontWeight.Bold,
-                        color = SocialColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -570,7 +509,7 @@ private fun FriendRequestCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -598,12 +537,12 @@ private fun FriendRequestCard(
                     text = displayName,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
-                    color = SocialColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = if (isReceived) "Muốn kết bạn với bạn" else "Đang chờ phản hồi",
                     fontSize = 13.sp,
-                    color = SocialColors.TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -613,7 +552,7 @@ private fun FriendRequestCard(
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = "Từ chối",
-                        tint = SocialColors.Danger
+                        tint = TempusDesignSystem.Error
                     )
                 }
                 IconButton(onClick = onAccept) {
@@ -625,7 +564,7 @@ private fun FriendRequestCard(
                 }
             } else {
                 TextButton(onClick = onCancel) {
-                    Text("Huỷ", color = SocialColors.Danger)
+                    Text("Huỷ", color = TempusDesignSystem.Error)
                 }
             }
         }
@@ -651,7 +590,7 @@ private fun BlockedList(
             items(blockedUsers, key = { it.id }) { user ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = SocialColors.CardBackground),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
@@ -675,7 +614,7 @@ private fun BlockedList(
                         )
                         
                         TextButton(onClick = { onUnblock(user.id) }) {
-                            Text("Bỏ chặn", color = SocialColors.Primary)
+                            Text("Bỏ chặn", color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -694,13 +633,13 @@ private fun UserAvatar(
         modifier = Modifier
             .size(size.dp)
             .clip(CircleShape)
-            .background(SocialColors.PrimaryLight),
+            .background(TempusDesignSystem.PrimaryLight),
         contentAlignment = Alignment.Center
     ) {
         // TODO: Load actual avatar with Coil/Glide
         Text(
             text = username.firstOrNull()?.uppercase() ?: "?",
-            color = SocialColors.Primary,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             fontSize = (size / 2).sp
         )
@@ -724,20 +663,20 @@ private fun EmptyState(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = SocialColors.TextSecondary.copy(alpha = 0.5f)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = title,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
-            color = SocialColors.TextPrimary
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = subtitle,
             fontSize = 14.sp,
-            color = SocialColors.TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -775,19 +714,19 @@ private fun DiscoverList(
                             text = "Khám phá bạn bè",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
-                            color = SocialColors.TextPrimary
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "${users.size} người dùng",
                             fontSize = 13.sp,
-                            color = SocialColors.TextSecondary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     IconButton(onClick = onRefresh) {
                         Icon(
                             Icons.Filled.Refresh,
                             contentDescription = "Làm mới",
-                            tint = SocialColors.Primary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -814,7 +753,7 @@ private fun DiscoverUserCard(
         modifier = Modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = SocialColors.CardBackground
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -830,13 +769,7 @@ private fun DiscoverUserCard(
                 modifier = Modifier
                     .size(56.dp)
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                SocialColors.GradientStart,
-                                SocialColors.GradientMid,
-                                SocialColors.GradientEnd
-                            )
-                        ),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = CircleShape
                     )
                     .padding(3.dp)
@@ -845,12 +778,12 @@ private fun DiscoverUserCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(SocialColors.PrimaryLight),
+                        .background(TempusDesignSystem.PrimaryLight),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = SocialColors.Primary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp
                     )
@@ -865,13 +798,13 @@ private fun DiscoverUserCard(
                     text = user.username,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = SocialColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 user.email?.let { email ->
                     Text(
                         text = email,
                         fontSize = 13.sp,
-                        color = SocialColors.TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -881,12 +814,12 @@ private fun DiscoverUserCard(
             // Action button
             if (requestSent) {
                 Surface(
-                    color = SocialColors.Secondary.copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Text(
                         text = "Đã gửi",
-                        color = SocialColors.Secondary,
+                        color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Medium,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -899,8 +832,8 @@ private fun DiscoverUserCard(
                         requestSent = true
                     },
                     colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = SocialColors.PrimaryLight,
-                        contentColor = SocialColors.Primary
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(20.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
