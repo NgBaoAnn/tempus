@@ -346,16 +346,23 @@ fun EditScheduleScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Clickable Add icon
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .border(2.dp, EditColors.Primary, CircleShape),
+                                .border(2.dp, EditColors.Primary, CircleShape)
+                                .clickable {
+                                    if (newSubtaskText.isNotBlank()) {
+                                        subtasks = subtasks + newSubtaskText.trim()
+                                        newSubtaskText = ""
+                                    }
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Add,
-                                contentDescription = null,
+                                contentDescription = "Thêm nhiệm vụ con",
                                 tint = EditColors.Primary,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -373,7 +380,7 @@ fun EditScheduleScreen(
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     if (newSubtaskText.isNotBlank()) {
-                                        subtasks = subtasks + newSubtaskText
+                                        subtasks = subtasks + newSubtaskText.trim()
                                         newSubtaskText = ""
                                     }
                                 }
@@ -383,8 +390,28 @@ fun EditScheduleScreen(
                                     Text("Thêm nhiệm vụ con...", color = EditColors.TextHint, fontSize = 16.sp)
                                 }
                                 innerTextField()
-                            }
+                            },
+                            singleLine = true
                         )
+                        
+                        // Add button (visible when there's text)
+                        if (newSubtaskText.isNotBlank()) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = {
+                                    subtasks = subtasks + newSubtaskText.trim()
+                                    newSubtaskText = ""
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Thêm",
+                                    tint = EditColors.Primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
