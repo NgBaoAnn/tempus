@@ -28,10 +28,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.voice.SpeechRecognitionManager
 import com.projectapp.tempus.data.voice.TaskParserService
+import com.projectapp.tempus.domain.usecase.PointsManager
 import com.projectapp.tempus.ui.timeline.MonthCalendarDialogFragment
 import com.projectapp.tempus.ui.timeline.TimelineViewModel
 import com.projectapp.tempus.ui.timeline.WeekItem
@@ -55,10 +57,13 @@ class TimelineFragment : Fragment() {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 val repo = SupabaseScheduleRepository()
+                val gamificationRepo = SupabaseGamificationRepository()
+                val pointsManager = PointsManager(gamificationRepo)
                 return TimelineViewModel(
                     application = requireActivity().application,
                     userId = myUserId,
-                    repo = repo
+                    repo = repo,
+                    pointsManager = pointsManager
                 ) as T
             }
         }
@@ -137,6 +142,7 @@ class TimelineFragment : Fragment() {
                     )
                 }
                 val voiceState by voiceViewModel.state.collectAsState()
+                val voicePartialText by voiceViewModel.partialText.collectAsState()
                 
                 TimelineScreen(
                     // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
@@ -223,12 +229,7 @@ class TimelineFragment : Fragment() {
                     ) {
                         VoiceInputSheet(
                             state = voiceState,
-                            partialText = voiceState.let { 
-                                when (it) {
-                                    is com.projectapp.tempus.ui.voice.compose.VoiceInputState.Listening -> ""
-                                    else -> ""
-                                }
-                            },
+                            partialText = voicePartialText,
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
                             onConfirmTask = { task ->

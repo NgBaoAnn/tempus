@@ -83,6 +83,7 @@ class EditScheduleViewModel(
                             isEditMode = true,
                             id = t.id,
                             title = t.name,
+                            description = t.description ?: "",
                             date = localZdt.toLocalDate(),
                             selectedDate = viewingDate, // Ngày user đang xem (cho delete)
                             time = localZdt.toLocalTime(),
@@ -115,6 +116,7 @@ class EditScheduleViewModel(
                 val mapData = mutableMapOf<String, Any?>(
                     "user_id" to userId,
                     "name_schedule" to title,
+                    "description" to desc.ifBlank { null },
                     "start_time_date" to isoDate,
                     "color" to s.color,
                     "label" to s.iconLabel.name,

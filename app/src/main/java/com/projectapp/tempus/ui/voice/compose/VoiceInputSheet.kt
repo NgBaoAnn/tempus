@@ -15,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.projectapp.tempus.R
 import com.projectapp.tempus.data.voice.dto.ParsedTask
 import java.time.format.DateTimeFormatter
 
@@ -124,20 +126,22 @@ private fun ListeningState(partialText: String, onStop: () -> Unit) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Partial text display
-        if (partialText.isNotEmpty()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Text(
-                    text = partialText,
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        // Always show text display area
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Text(
+                text = if (partialText.isNotEmpty()) partialText else "Hãy nói gì đó...",
+                modifier = Modifier.padding(16.dp),
+                fontSize = 16.sp,
+                color = if (partialText.isNotEmpty()) 
+                    MaterialTheme.colorScheme.onSurfaceVariant 
+                else 
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center
+            )
         }
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -345,12 +349,21 @@ private fun MicrophoneButton(
             onClick = onClick,
             modifier = Modifier.size(80.dp)
         ) {
-            Icon(
-                imageVector = if (isListening) Icons.Default.Close else Icons.Default.Settings,
-                contentDescription = if (isListening) "Stop" else "Start",
-                modifier = Modifier.size(36.dp),
-                tint = Color.White
-            )
+            if (isListening) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Dừng",
+                    modifier = Modifier.size(36.dp),
+                    tint = Color.White
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_mic),
+                    contentDescription = "Bắt đầu nói",
+                    modifier = Modifier.size(36.dp),
+                    tint = Color.White
+                )
+            }
         }
     }
 }

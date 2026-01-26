@@ -156,66 +156,140 @@ fun TimelineScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
+        // Use LazyColumn for collapsible header behavior
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Top Bar
-            TimelineTopBar(
-                monthYear = monthYear,
-                onMonthPickerClick = onMonthPickerClick,
-                onGardenClick = onGardenClick
-            )
+            // Fixed Top Bar (always visible)
+            item(key = "topbar") {
+                TimelineTopBar(
+                    monthYear = monthYear,
+                    onMonthPickerClick = onMonthPickerClick,
+                    onGardenClick = onGardenClick
+                )
+            }
             
-            // Daily Quote Card
-            DailyQuoteCard(quote = dailyQuote)
+            // Daily Quote Card (scrolls away)
+            item(key = "quote") {
+                DailyQuoteCard(quote = dailyQuote)
+            }
             
-            // Swipeable Week Calendar Strip
-            SwipeableWeekCalendarStrip(
-                weeks = weeks,
-                selectedDate = selectedDate,
-                onDateSelected = onDateSelected
-            )
+            // Week Calendar - STICKY (sticks to top when scrolling)
+            stickyHeader(key = "week_calendar") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    SwipeableWeekCalendarStrip(
+                        weeks = weeks,
+                        selectedDate = selectedDate,
+                        onDateSelected = onDateSelected
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
             
-            // Filter/Sort Bar
-            FilterSortBar(
-                searchQuery = searchQuery,
-                sortBy = sortBy,
-                filterLabels = filterLabels,
-                filterPriorities = filterPriorities,
-                filterStatus = filterStatus,
-                isFilterActive = isFilterActive,
-                onSearchQueryChanged = onSearchQueryChanged,
-                onSortChanged = onSortChanged,
-                onFilterLabelToggle = onFilterLabelToggle,
-                onFilterPriorityToggle = onFilterPriorityToggle,
-                onFilterStatusChanged = onFilterStatusChanged,
-                onClearAllFilters = onClearAllFilters
-            )
+            // Filter/Sort Bar (scrolls with content but after calendar)
+            item(key = "filter_bar") {
+                FilterSortBar(
+                    searchQuery = searchQuery,
+                    sortBy = sortBy,
+                    filterLabels = filterLabels,
+                    filterPriorities = filterPriorities,
+                    filterStatus = filterStatus,
+                    isFilterActive = isFilterActive,
+                    onSearchQueryChanged = onSearchQueryChanged,
+                    onSortChanged = onSortChanged,
+                    onFilterLabelToggle = onFilterLabelToggle,
+                    onFilterPriorityToggle = onFilterPriorityToggle,
+                    onFilterStatusChanged = onFilterStatusChanged,
+                    onClearAllFilters = onClearAllFilters
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Timeline List with Loading State
+            // Timeline Content
             when {
                 isLoading -> {
-                    // Shimmer Loading Skeleton
-                    TimelineLoadingSkeleton()
+                    // Shimmer Loading Skeleton items
+                    items(5, key = { "skeleton_$it" }) {
+                        SkeletonTaskItemInline()
+                    }
                 }
                 blocks.isEmpty() -> {
-                    EmptyState(onAddClick = onAddClick)
+                    item(key = "empty") {
+                        EmptyState(onAddClick = onAddClick)
+                    }
                 }
                 else -> {
-                    TimelineList(
-                        blocks = blocks,
-                        onTaskClick = onTaskClick,
-                        onStatusToggle = onStatusToggle,
-                        onSubtaskToggle = onSubtaskToggle
-                    )
+                    // Task items
+                    itemsIndexed(
+                        items = blocks,
+                        key = { _, block -> block.taskId }
+                    ) { index, block ->
+                        val nextBlock = blocks.getOrNull(index + 1)
+                        val showFreeTime = nextBlock != null && 
+                            block.startTime.plus(block.duration).isBefore(nextBlock.startTime)
+                        
+                        TimelineItem(
+                            block = block,
+                            isLast = index == blocks.lastIndex,
+                            onTaskClick = { onTaskClick(block) },
+                            onStatusToggle = { onStatusToggle(block) },
+                            onSubtaskToggle = onSubtaskToggle
+                        )
+                        
+                        if (showFreeTime && nextBlock != null) {
+                            val freeStart = block.startTime.plus(block.duration)
+                            val freeEnd = nextBlock.startTime
+                            val freeMinutes = java.time.Duration.between(freeStart, freeEnd).toMinutes()
+                            
+                            FreeTimeBlock(
+                                startTime = freeStart.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                endTime = freeEnd.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                durationMinutes = freeMinutes.toInt()
+                            )
+                        }
+                    }
+                    
+                    // Bottom padding for FAB
+                    item(key = "bottom_spacer") {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Inline skeleton item for LazyColumn
+ */
+@Composable
+private fun SkeletonTaskItemInline() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerTranslateAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+    
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(Color(0xFFE2E8F0), Color(0xFFF1F5F9), Color(0xFFE2E8F0)),
+        start = Offset(shimmerTranslateAnim - 500f, 0f),
+        end = Offset(shimmerTranslateAnim, 0f)
+    )
+    
+    SkeletonTaskItem(shimmerBrush)
 }
 
 /**

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,26 +17,36 @@ import java.util.Locale
  */
 class SpeechRecognitionManager(private val context: Context) {
     
+    companion object {
+        private const val TAG = "SpeechRecognition"
+    }
+    
     private var speechRecognizer: SpeechRecognizer? = null
     
     /**
      * Check if speech recognition is available
      */
     fun isAvailable(): Boolean {
-        return SpeechRecognizer.isRecognitionAvailable(context)
+        val available = SpeechRecognizer.isRecognitionAvailable(context)
+        Log.d(TAG, "isAvailable: $available")
+        return available
     }
     
     /**
      * Start listening and return results as Flow
      */
     fun startListening(): Flow<SpeechResult> = callbackFlow {
+        Log.d(TAG, "startListening called")
+        
         if (!isAvailable()) {
+            Log.e(TAG, "Speech recognition not available on this device")
             trySend(SpeechResult.Error("Speech recognition not available"))
             close()
             return@callbackFlow
         }
         
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        Log.d(TAG, "SpeechRecognizer created")
         
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
@@ -45,23 +56,30 @@ class SpeechRecognitionManager(private val context: Context) {
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
+        Log.d(TAG, "Intent created for vi-VN")
         
         speechRecognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(params: Bundle?) {
+                Log.d(TAG, "onReadyForSpeech - Microphone ready")
                 trySend(SpeechResult.Listening)
             }
             
             override fun onBeginningOfSpeech() {
+                Log.d(TAG, "onBeginningOfSpeech - User started speaking")
                 trySend(SpeechResult.Speaking)
             }
             
             override fun onRmsChanged(rmsdB: Float) {
+                // Don't log this - it fires too frequently
                 trySend(SpeechResult.RmsChanged(rmsdB))
             }
             
-            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onBufferReceived(buffer: ByteArray?) {
+                Log.d(TAG, "onBufferReceived - buffer size: ${buffer?.size ?: 0}")
+            }
             
             override fun onEndOfSpeech() {
+                Log.d(TAG, "onEndOfSpeech - User stopped speaking")
                 trySend(SpeechResult.Processing)
             }
             
@@ -78,6 +96,7 @@ class SpeechRecognitionManager(private val context: Context) {
                     SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
                     else -> "Unknown error"
                 }
+                Log.e(TAG, "onError: code=$error message=$message")
                 trySend(SpeechResult.Error(message))
                 close()
             }
@@ -85,6 +104,7 @@ class SpeechRecognitionManager(private val context: Context) {
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val text = matches?.firstOrNull() ?: ""
+                Log.d(TAG, "onResults: '$text' (${matches?.size ?: 0} matches)")
                 trySend(SpeechResult.Success(text))
                 close()
             }
@@ -93,16 +113,21 @@ class SpeechRecognitionManager(private val context: Context) {
                 val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val text = matches?.firstOrNull() ?: ""
                 if (text.isNotEmpty()) {
+                    Log.d(TAG, "onPartialResults: '$text'")
                     trySend(SpeechResult.Partial(text))
                 }
             }
             
-            override fun onEvent(eventType: Int, params: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {
+                Log.d(TAG, "onEvent: type=$eventType")
+            }
         })
         
+        Log.d(TAG, "Starting speech recognition...")
         speechRecognizer?.startListening(intent)
         
         awaitClose {
+            Log.d(TAG, "Flow closed - stopping recognition")
             stopListening()
         }
     }
