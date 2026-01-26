@@ -46,19 +46,15 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-// Color definitions
-object TimelineColors {
-    val Background = Color(0xFFF8FAFC)
-    val Surface = Color(0xFFFFFFFF)
-    val Primary = Color(0xFF3B82F6)
-    val TextPrimary = Color(0xFF1E293B)
-    val TextSecondary = Color(0xFF64748B)
-    val TextMuted = Color(0xFF94A3B8)
-    val PriorityHigh = Color(0xFFEF4444)
-    val PriorityMedium = Color(0xFFF59E0B)
-    val PriorityLow = Color(0xFF22C55E)
-    val TimelineGray = Color(0xFFE2E8F0)
-}
+
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import com.projectapp.tempus.ui.components.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material.ripple.rememberRipple
 
 /**
  * Get drawable resource ID for schedule label - matches existing drawable files
@@ -110,37 +106,55 @@ fun TimelineScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = modifier.background(TimelineColors.Background),
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
         floatingActionButton = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Voice Command FAB
+                // Voice Command (Small FAB style)
                 FloatingActionButton(
                     onClick = onVoiceClick,
-                    containerColor = Color(0xFF10B981), // Green color for mic
-                    contentColor = Color.White,
-                    modifier = Modifier.size(48.dp)
+                    containerColor = Color.Transparent, // We'll apply gradient background
+                    elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Success),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .scalePressEffect()
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_mic),
                         contentDescription = "Voice Command",
+                        tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
                 }
                 
-                // Add Task FAB
+                // Add Task FAB (Main)
                 FloatingActionButton(
                     onClick = onAddClick,
-                    containerColor = TimelineColors.Primary,
-                    contentColor = Color.White
+                    containerColor = Color.Transparent,
+                    elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Primary),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .scalePressEffect()
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                    Icon(
+                        Icons.Default.Add, 
+                        contentDescription = "Add Task",
+                        tint = Color.White
+                    )
                 }
             }
         },
-        containerColor = TimelineColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -340,7 +354,7 @@ fun SwipeableWeekCalendarStrip(
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
                 Text(
                     text = day,
-                    color = TimelineColors.TextMuted,
+                    color = TempusDesignSystem.TextMuted,
                     fontSize = 13.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -375,7 +389,7 @@ fun SwipeableWeekCalendarStrip(
                             .clip(CircleShape)
                             .background(
                                 when {
-                                    isSelected -> TimelineColors.Primary
+                                    isSelected -> MaterialTheme.colorScheme.primary
                                     else -> Color.Transparent
                                 }
                             )
@@ -393,8 +407,8 @@ fun SwipeableWeekCalendarStrip(
                             text = date.dayOfMonth.toString(),
                             color = when {
                                 isSelected -> Color.White
-                                isToday -> TimelineColors.Primary
-                                else -> TimelineColors.TextPrimary
+                                isToday -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.onBackground
                             },
                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 16.sp
@@ -424,14 +438,14 @@ private fun TimelineTopBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(TimelineColors.Primary.copy(alpha = 0.1f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                 .clickable { onMonthPickerClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = monthYear,
-                color = TimelineColors.Primary,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -439,7 +453,7 @@ private fun TimelineTopBar(
             Icon(
                 painter = painterResource(id = R.drawable.ic_unfold_more),
                 contentDescription = null,
-                tint = TimelineColors.Primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -460,7 +474,7 @@ private fun TimelineTopBar(
                 Icon(
                     painter = painterResource(id = R.drawable.inbox),
                     contentDescription = "Inbox",
-                    tint = TimelineColors.Primary
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -488,7 +502,7 @@ fun WeekCalendarStrip(
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
                 Text(
                     text = day,
-                    color = TimelineColors.TextMuted,
+                    color = TempusDesignSystem.TextMuted,
                     fontSize = 13.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -517,7 +531,7 @@ fun WeekCalendarStrip(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> TimelineColors.Primary
+                                isSelected -> MaterialTheme.colorScheme.primary
                                 else -> Color.Transparent
                             }
                         )
@@ -535,8 +549,8 @@ fun WeekCalendarStrip(
                         text = date.dayOfMonth.toString(),
                         color = when {
                             isSelected -> Color.White
-                            isToday -> TimelineColors.Primary
-                            else -> TimelineColors.TextPrimary
+                            isToday -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onBackground
                         },
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 16.sp
@@ -554,6 +568,13 @@ fun TimelineList(
     onStatusToggle: (TimelineBlock) -> Unit,
     onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
+    // Staggered animation state
+    var visible by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(blocks) {
+        visible = true
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 80.dp)
@@ -566,24 +587,41 @@ fun TimelineList(
             val showFreeTime = nextBlock != null && 
                 block.startTime.plus(block.duration).isBefore(nextBlock.startTime)
             
-            TimelineItem(
-                block = block,
-                isLast = index == blocks.lastIndex,
-                onTaskClick = { onTaskClick(block) },
-                onStatusToggle = { onStatusToggle(block) },
-                onSubtaskToggle = onSubtaskToggle
-            )
+            Box(
+                modifier = Modifier.fadeInSlideUp(
+                    index = index,
+                    visible = visible,
+                    delayPerItem = 40 // Faster cascade
+                )
+            ) {
+                TimelineItem(
+                    block = block,
+                    isLast = index == blocks.lastIndex,
+                    onTaskClick = { onTaskClick(block) },
+                    onStatusToggle = { onStatusToggle(block) },
+                    onSubtaskToggle = onSubtaskToggle
+                )
+            }
             
             if (showFreeTime && nextBlock != null) {
                 val freeStart = block.startTime.plus(block.duration)
                 val freeEnd = nextBlock.startTime
                 val freeMinutes = java.time.Duration.between(freeStart, freeEnd).toMinutes()
                 
-                FreeTimeBlock(
-                    startTime = freeStart.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    endTime = freeEnd.format(DateTimeFormatter.ofPattern("HH:mm")),
-                    durationMinutes = freeMinutes.toInt()
-                )
+                Box(
+                    modifier = Modifier.fadeInSlideUp(
+                        index = index, // Sync with task item
+                        visible = visible,
+                        delayPerItem = 40,
+                        initialOffsetY = 10f
+                    )
+                ) {
+                    FreeTimeBlock(
+                        startTime = freeStart.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        endTime = freeEnd.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        durationMinutes = freeMinutes.toInt()
+                    )
+                }
             }
         }
     }
@@ -603,7 +641,7 @@ fun TimelineItem(
     val taskColor = try {
         Color(android.graphics.Color.parseColor(block.color))
     } catch (e: Exception) {
-        TimelineColors.Primary
+        MaterialTheme.colorScheme.primary
     }
     
     val isDone = block.status == StatusType.done
@@ -623,17 +661,17 @@ fun TimelineItem(
             Text(
                 text = startTime,
                 fontSize = 14.sp,
-                color = TimelineColors.TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = "↓",
                 fontSize = 12.sp,
-                color = TimelineColors.TextMuted
+                color = TempusDesignSystem.TextMuted
             )
             Text(
                 text = endTime,
                 fontSize = 14.sp,
-                color = TimelineColors.TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
@@ -658,7 +696,7 @@ fun TimelineItem(
                     modifier = Modifier
                         .width(3.dp)
                         .height(60.dp)
-                        .background(TimelineColors.TimelineGray)
+                        .background(MaterialTheme.colorScheme.outline)
                 )
             }
         }
@@ -666,13 +704,20 @@ fun TimelineItem(
         Spacer(modifier = Modifier.width(12.dp))
         
         // Task Card
-        Card(
+        // Task Card with Premium Styling
+        val isHighPriority = block.priority == PriorityType.high
+        
+        TempusCard(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 4.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = TimelineColors.Surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            elevation = if (isHighPriority) 4.dp else 2.dp,
+            variant = if (isHighPriority) CardVariant.Gradient else CardVariant.Default,
+            gradientColors = if (isHighPriority) 
+                listOf(TempusDesignSystem.Error.copy(alpha = 0.1f), MaterialTheme.colorScheme.surface)
+            else TempusDesignSystem.Gradients.Primary,
+            onClick = onTaskClick // Enable press animation
         ) {
             Row(
                 modifier = Modifier
@@ -680,19 +725,19 @@ fun TimelineItem(
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Icon based on label
+                // Icon based on label with simplified container
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(taskColor.copy(alpha = 0.15f)),
+                        .clip(RoundedCornerShape(12.dp)) // Softer corners
+                        .background(taskColor.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(id = getLabelIconResId(block.label)),
                         contentDescription = null,
                         tint = taskColor,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 
@@ -705,24 +750,28 @@ fun TimelineItem(
                             text = block.title,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (isDone) TimelineColors.TextMuted else TimelineColors.TextPrimary,
+                            color = if (isDone) TempusDesignSystem.TextMuted else MaterialTheme.colorScheme.onBackground,
                             textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         
-                        // Priority Badge
+                        // Priority Badge - Premium Glow
                         if (block.priority != PriorityType.medium) {
                             Spacer(modifier = Modifier.width(6.dp))
                             Box(
                                 modifier = Modifier
                                     .size(8.dp)
+                                    .glowEffect(
+                                        color = if (block.priority == PriorityType.high) TempusDesignSystem.Error else TempusDesignSystem.Success,
+                                        enabled = block.priority == PriorityType.high
+                                    )
                                     .clip(CircleShape)
                                     .background(
                                         when (block.priority) {
-                                            PriorityType.high -> TimelineColors.PriorityHigh
-                                            PriorityType.low -> TimelineColors.PriorityLow
+                                            PriorityType.high -> TempusDesignSystem.Error
+                                            PriorityType.low -> TempusDesignSystem.Success
                                             else -> Color.Transparent
                                         }
                                     )
@@ -741,76 +790,25 @@ fun TimelineItem(
                     }
                     
                     Text(
-                        text = "$startTime - $endTime ($durationText)",
+                        text = "$startTime - $endTime • $durationText",
                         fontSize = 13.sp,
-                        color = TimelineColors.TextMuted
+                        color = TempusDesignSystem.TextMuted
                     )
-                    
-                    // Subtasks display
-                    if (block.subtasks.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Column {
-                            block.subtasks.take(3).forEach { subtask ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(vertical = 2.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(14.dp)
-                                            .clip(CircleShape)
-                                            .background(if (subtask.isDone) taskColor.copy(alpha = 0.7f) else Color.Transparent)
-                                            .border(
-                                                width = 1.dp,
-                                                color = if (subtask.isDone) Color.Transparent else TimelineColors.TextMuted,
-                                                shape = CircleShape
-                                            )
-                                            .clickable { onSubtaskToggle(subtask.id, !subtask.isDone) },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (subtask.isDone) {
-                                            Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(10.dp)
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = subtask.title,
-                                        fontSize = 12.sp,
-                                        color = if (subtask.isDone) TimelineColors.TextMuted else TimelineColors.TextSecondary,
-                                        textDecoration = if (subtask.isDone) TextDecoration.LineThrough else TextDecoration.None,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                            if (block.subtasks.size > 3) {
-                                Text(
-                                    text = "+${block.subtasks.size - 3} more",
-                                    fontSize = 11.sp,
-                                    color = TimelineColors.TextMuted,
-                                    modifier = Modifier.padding(start = 20.dp, top = 2.dp)
-                                )
-                            }
-                        }
-                    }
                 }
                 
-                // Checkbox - visible border when not done
+                // Checkbox with Premium Animation
                 Box(
                     modifier = Modifier
+                        .padding(start = 8.dp)
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(if (isDone) taskColor else Color.Transparent)
+                        .scalePressEffect() // Interactive feel
                         .then(
                             if (!isDone) {
                                 Modifier.border(
                                     width = 2.dp,
-                                    color = TimelineColors.TextMuted,
+                                    color = TempusDesignSystem.TextMuted.copy(alpha = 0.4f),
                                     shape = CircleShape
                                 )
                             } else Modifier
@@ -818,12 +816,68 @@ fun TimelineItem(
                         .clickable { onStatusToggle() },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (isDone) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isDone,
+                        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+                        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
+                    ) {
                         Icon(
                             Icons.Default.Check,
                             contentDescription = "Done",
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            
+            // Subtasks display moved outside main row for better layout
+            if (block.subtasks.isNotEmpty()) {
+                Column(modifier = Modifier.padding(start = 64.dp, end = 12.dp, bottom = 12.dp)) {
+                    block.subtasks.take(3).forEach { subtask ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 3.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(if (subtask.isDone) taskColor.copy(alpha = 0.7f) else Color.Transparent)
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (subtask.isDone) Color.Transparent else TempusDesignSystem.TextMuted.copy(alpha = 0.5f),
+                                        shape = CircleShape
+                                    )
+                                    .clickable { onSubtaskToggle(subtask.id, !subtask.isDone) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (subtask.isDone) {
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(10.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = subtask.title,
+                                fontSize = 12.sp,
+                                color = if (subtask.isDone) TempusDesignSystem.TextMuted else MaterialTheme.colorScheme.onSurfaceVariant,
+                                textDecoration = if (subtask.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    if (block.subtasks.size > 3) {
+                        Text(
+                            text = "+${block.subtasks.size - 3} more",
+                            fontSize = 11.sp,
+                            color = TempusDesignSystem.TextMuted,
+                            modifier = Modifier.padding(start = 22.dp, top = 2.dp)
                         )
                     }
                 }
@@ -861,17 +915,17 @@ fun FreeTimeBlock(
             Text(
                 text = startTime,
                 fontSize = 14.sp,
-                color = TimelineColors.TextMuted
+                color = TempusDesignSystem.TextMuted
             )
             Text(
                 text = "↓",
                 fontSize = 12.sp,
-                color = TimelineColors.TextMuted.copy(alpha = 0.5f)
+                color = TempusDesignSystem.TextMuted.copy(alpha = 0.5f)
             )
             Text(
                 text = endTime,
                 fontSize = 14.sp,
-                color = TimelineColors.TextMuted
+                color = TempusDesignSystem.TextMuted
             )
         }
         
@@ -886,7 +940,7 @@ fun FreeTimeBlock(
                 modifier = Modifier
                     .width(3.dp)
                     .height(50.dp)
-                    .background(TimelineColors.TimelineGray.copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             )
         }
         
@@ -907,7 +961,7 @@ fun FreeTimeBlock(
                 Text(
                     text = "$durationText thời gian rảnh!",
                     fontSize = 14.sp,
-                    color = TimelineColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -915,7 +969,7 @@ fun FreeTimeBlock(
             Text(
                 text = "Khung giờ đó đã qua—hãy nắm bắt cái tiếp theo.",
                 fontSize = 13.sp,
-                color = TimelineColors.TextMuted
+                color = TempusDesignSystem.TextMuted
             )
         }
     }
@@ -933,7 +987,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         Icon(
             painter = painterResource(id = R.drawable.inbox),
             contentDescription = null,
-            tint = TimelineColors.TextMuted.copy(alpha = 0.3f),
+            tint = TempusDesignSystem.TextMuted.copy(alpha = 0.3f),
             modifier = Modifier.size(100.dp)
         )
         
@@ -942,7 +996,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         Text(
             text = "Không có task nào",
             fontSize = 18.sp,
-            color = TimelineColors.TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(4.dp))
@@ -950,14 +1004,14 @@ fun EmptyState(onAddClick: () -> Unit) {
         Text(
             text = "Nhấn + để thêm task mới",
             fontSize = 14.sp,
-            color = TimelineColors.TextMuted
+            color = TempusDesignSystem.TextMuted
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
         Button(
             onClick = onAddClick,
-            colors = ButtonDefaults.buttonColors(containerColor = TimelineColors.Primary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
