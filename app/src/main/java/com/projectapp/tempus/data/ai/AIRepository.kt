@@ -122,6 +122,25 @@ class AIRepository(
                 |Request: "tạo lịch tập gym 7h sáng"
                 |→ {"actions": [{"type": "CREATE_SCHEDULE", "name": "Tập gym", "startTime": "07:00", "duration": 60, "label": "exercise", "color": "#FF3B30"}]}
                 |
+                |=== UPDATE_SCHEDULE ===
+                |Format: {"type": "UPDATE_SCHEDULE", "id": "uuid-từ-context", "name": "Tên mới", "startTime": "HH:MM", "duration": 60}
+                |- PHẢI có "id" từ CONTEXT đã cung cấp
+                |- Chỉ bao gồm các field cần thay đổi (không cần tất cả)
+                |- Fields có thể cập nhật: name, startTime, duration, date, label, color
+                |
+                |VÍ DỤ UPDATE_SCHEDULE:
+                |Request: "đổi lịch học IELTS sang 10h"
+                |Context: [HÔM NAY] - ID: abc-123, Tên: Học IELTS, Giờ: 09:00
+                |→ {"intent": "Đổi giờ học IELTS", "actions": [{"type": "UPDATE_SCHEDULE", "id": "abc-123", "name": "Học IELTS", "startTime": "10:00"}], "impact": "Cập nhật 1 lịch trình"}
+                |
+                |Request: "đổi tên Tập gym thành Tập Yoga"
+                |Context: - ID: def-456, Tên: Tập gym, Giờ: 07:00
+                |→ {"intent": "Đổi tên hoạt động", "actions": [{"type": "UPDATE_SCHEDULE", "id": "def-456", "name": "Tập Yoga"}], "impact": "Cập nhật 1 lịch trình"}
+                |
+                |Request: "sửa thời gian học thành 2 tiếng"
+                |Context: - ID: ghi-789, Tên: Học bài, Giờ: 14:00, (lặp: daily)
+                |→ {"intent": "Tăng thời gian học", "actions": [{"type": "UPDATE_SCHEDULE", "id": "ghi-789", "name": "Học bài", "duration": 120}], "impact": "Cập nhật 1 lịch trình"}
+                |
                 |=== XÓA LỊCH RECURRING (daily/weekly) ===
                 |
                 |1. SKIP_INSTANCE: Dùng khi XÓA/BỎ QUA cho MỘT NGÀY CỤ THỂ
@@ -136,7 +155,7 @@ class AIRepository(
                 |
                 |QUAN TRỌNG:
                 |- CHỈ trả về JSON, không thêm text giải thích
-                |- LUÔN bao gồm "id" từ CONTEXT khi UPDATE/DELETE
+                |- LUÔN bao gồm "id" từ CONTEXT khi UPDATE/DELETE/SKIP_INSTANCE
                 |- LUÔN gán label và color phù hợp khi CREATE_SCHEDULE
                 """.trimMargin()
             )
@@ -581,15 +600,52 @@ ${scheduleLines.joinToString("\n")}"""
                     ActionType.UPDATE_SCHEDULE -> {
                         val taskId = action.data["id"] as? String ?: action.data["taskId"] as? String
                         if (taskId != null) {
-                            val fields = mutableMapOf<String, Any?>()
+                            val dbFields = mutableMapOf<String, Any?>()
+                            
+                            // Map AI field names to database column names
                             action.data.forEach { (key, value) ->
-                                if (key != "id" && key != "taskId") {
-                                    fields[key] = value
+                                when (key) {
+                                    "name" -> dbFields["name_schedule"] = value
+                                    "startTime" -> {
+                                        // Need to build full datetime - get existing date or use today
+                                        val time = value as? String ?: return@forEach
+                                        val date = action.data["date"] as? String 
+                                            ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                        dbFields["start_time_date"] = "${date}T${time}:00+07:00"
+                                    }
+                                    "duration" -> {
+                                        // Convert minutes to HH:MM:SS format
+                                        val minutes = (value as? Number)?.toInt() ?: return@forEach
+                                        val hours = minutes / 60
+                                        val mins = minutes % 60
+                                        dbFields["implementation_time"] = String.format("%02d:%02d:00", hours, mins)
+                                    }
+                                    "label" -> dbFields["label"] = value
+                                    "color" -> dbFields["color"] = value
+                                    "date" -> {
+                                        // Date change - need to update start_time_date
+                                        // Only process if startTime wasn't already handled
+                                        if (!dbFields.containsKey("start_time_date")) {
+                                            val newDate = value as? String ?: return@forEach
+                                            // Use a default time if only date is changing
+                                            // The AI should provide startTime when changing date
+                                            dbFields["start_time_date"] = "${newDate}T00:00:00+07:00"
+                                        }
+                                    }
+                                    // Skip id/taskId and unknown fields
+                                    "id", "taskId" -> { }
+                                    else -> { 
+                                        android.util.Log.d("AIRepository", "Unknown update field: $key")
+                                    }
                                 }
                             }
-                            if (fields.isNotEmpty()) {
-                                scheduleRepository.updateSchedule(taskId, fields)
+                            
+                            if (dbFields.isNotEmpty()) {
+                                android.util.Log.d("AIRepository", "Updating schedule $taskId with: $dbFields")
+                                scheduleRepository.updateSchedule(taskId, dbFields)
                                 appliedChanges.add("✅ Cập nhật: ${action.description}")
+                            } else {
+                                appliedChanges.add("⚠️ Không có field hợp lệ để cập nhật: ${action.description}")
                             }
                         } else {
                             appliedChanges.add("⚠️ Bỏ qua cập nhật (thiếu ID): ${action.description}")
