@@ -14,8 +14,15 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.lifecycleScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.projectapp.tempus.MainActivity
+import com.projectapp.tempus.R
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.auth.AuthService
 import kotlinx.coroutines.launch
@@ -78,8 +85,67 @@ class LoginActivity : ComponentActivity() {
         }
     }
     
+    
     private fun handleGoogleLogin() {
-        Toast.makeText(this, "Chức năng đang phát triển", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            try {
+                // Khởi tạo Credential Manager
+                val credentialManager = CredentialManager.create(this@LoginActivity)
+                
+                // Tạo Google ID Option với Web Client ID
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(getString(R.string.google_web_client_id))
+                    .build()
+                
+                // Tạo request để lấy credential
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+                
+                // Lấy credential từ Google
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = this@LoginActivity,
+                )
+                
+                // Xử lý credential nhận được
+                val credential = result.credential
+                
+                // Kiểm tra xem có phải Google ID Token không
+                if (credential is androidx.credentials.CustomCredential && 
+                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    
+                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    val idToken = googleIdTokenCredential.idToken
+                    
+                    Log.d("LoginActivity", "Google Sign-In successful, authenticating with Supabase...")
+                    
+                    // Đăng nhập với Supabase sử dụng ID Token
+                    authService.signInWithGoogle(idToken)
+                    
+                    Toast.makeText(this@LoginActivity, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    finish()
+                } else {
+                    Log.e("LoginActivity", "Unexpected credential type: ${credential.type}")
+                    Toast.makeText(this@LoginActivity, "Lỗi: Loại credential không hợp lệ", Toast.LENGTH_SHORT).show()
+                }
+                
+            } catch (e: GetCredentialCancellationException) {
+                Log.d("LoginActivity", "User cancelled Google Sign-In")
+                // Người dùng hủy, không cần hiển thị lỗi
+            } catch (e: NoCredentialException) {
+                Log.e("LoginActivity", "No Google account found", e)
+                Toast.makeText(this@LoginActivity, "Không tìm thấy tài khoản Google", Toast.LENGTH_SHORT).show()
+            } catch (e: HttpException) {
+                Log.e("LoginActivity", "Supabase authentication failed: ${e.code()}", e)
+                Toast.makeText(this@LoginActivity, "Lỗi xác thực với server", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "Google Sign-In failed", e)
+                Toast.makeText(this@LoginActivity, "Lỗi đăng nhập Google: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
     
     private fun handleForgotPassword(email: String) {

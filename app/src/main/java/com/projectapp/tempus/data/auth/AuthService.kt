@@ -3,6 +3,8 @@ package com.projectapp.tempus.data.auth
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.github.jan.supabase.gotrue.providers.builtin.IDToken
+import io.github.jan.supabase.gotrue.providers.Google
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -31,6 +33,17 @@ class AuthService(
         supabaseClient.auth.signInWith(Email) {
             this.email = email
             this.password = password
+        }
+    }
+
+    /**
+     * Đăng nhập với Google sử dụng ID Token
+     * @param idToken Google ID Token nhận được từ Credential Manager
+     */
+    suspend fun signInWithGoogle(idToken: String) {
+        supabaseClient.auth.signInWith(IDToken) {
+            this.idToken = idToken
+            this.provider = Google
         }
     }
 
