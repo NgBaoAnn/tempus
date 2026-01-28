@@ -57,16 +57,7 @@ class LegalDocumentActivity : ComponentActivity() {
     }
 }
 
-// ======================== COLORS ========================
-
-private object LegalColors {
-    val Background = TempusDesignSystem.Slate50
-    val Surface = TempusDesignSystem.White
-    val TextPrimary = TempusDesignSystem.TextPrimary
-    val TextSecondary = TempusDesignSystem.TextSecondary
-    val Blue = TempusDesignSystem.Primary
-    val Divider = TempusDesignSystem.Slate200
-}
+// Colors are now provided by MaterialTheme.colorScheme for proper theme support
 
 // ======================== PRIVACY POLICY SCREEN ========================
 
@@ -78,7 +69,7 @@ private fun PrivacyPolicyScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(LegalColors.Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Header
         LegalHeader(
@@ -205,7 +196,7 @@ private fun TermsOfServiceScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(LegalColors.Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Header
         LegalHeader(
@@ -335,7 +326,7 @@ private fun LegalHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LegalColors.Background)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -345,14 +336,14 @@ private fun LegalHeader(
         ) {
             Text(
                 text = "← Quay lại",
-                color = LegalColors.Blue,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 17.sp
             )
         }
 
         Text(
             text = title,
-            color = LegalColors.TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -370,7 +361,7 @@ private fun LegalCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = LegalColors.Surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -386,7 +377,7 @@ private fun LegalSectionTitle(text: String) {
         text = text,
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
-        color = LegalColors.TextPrimary,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(bottom = 12.dp)
     )
 }
@@ -397,7 +388,7 @@ private fun LegalSubsection(text: String) {
         text = text,
         fontSize = 15.sp,
         fontWeight = FontWeight.SemiBold,
-        color = LegalColors.TextPrimary,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
     )
 }
@@ -407,7 +398,7 @@ private fun LegalParagraph(text: String) {
     Text(
         text = text,
         fontSize = 15.sp,
-        color = LegalColors.TextSecondary,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         lineHeight = 22.sp
     )
 }
@@ -417,13 +408,13 @@ private fun LegalFooter(text: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = LegalColors.Blue.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Text(
             text = text,
             fontSize = 13.sp,
-            color = LegalColors.Blue,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             modifier = Modifier

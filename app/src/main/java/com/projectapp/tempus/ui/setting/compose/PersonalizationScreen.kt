@@ -1641,27 +1641,45 @@ private fun ResetConfirmationDialog(
 
 // ======================== COLORS ========================
 
+/**
+ * Personalization screen colors that adapt to current theme
+ * Use PersonalizationColors inside @Composable functions
+ */
 private object PersonalizationColors {
-    // Light Theme Base Colors
-    val Background = Color(0xFFF5F7FA)
-    val SurfaceCard = Color(0xFFFFFFFF)
-    val SurfaceDark = Color(0xFFF0F2F5)
+    // These will be populated by the rememberPersonalizationColors() composable
+    // For now, they serve as fallback values matching light theme
     
-    // Glassmorphism (Light mode)
-    val GlassBackground = Color(0xFFFFFFFF).copy(alpha = 0.9f)
-    val GlassBorder = Color(0xFF6366F1).copy(alpha = 0.2f)
+    // Base Colors - these should be accessed via MaterialTheme.colorScheme
+    val Background: Color
+        @Composable get() = MaterialTheme.colorScheme.background
+    val SurfaceCard: Color 
+        @Composable get() = MaterialTheme.colorScheme.surface
+    val SurfaceDark: Color
+        @Composable get() = MaterialTheme.colorScheme.surfaceVariant
+    
+    // Glassmorphism
+    val GlassBackground: Color
+        @Composable get() = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+    val GlassBorder: Color
+        @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
     
     // Text Colors
-    val TextPrimary = Color(0xFF1A1A2E)
-    val TextSecondary = Color(0xFF6B7280)
-    val TextHint = Color(0xFFA0AEC0)
+    val TextPrimary: Color
+        @Composable get() = MaterialTheme.colorScheme.onBackground
+    val TextSecondary: Color
+        @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
+    val TextHint: Color
+        @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     
-    // Accent Colors (Gradient)
-    val AccentPrimary = Color(0xFF6366F1)      // Indigo
-    val AccentSecondary = Color(0xFF8B5CF6)    // Purple
-    val AccentTertiary = Color(0xFF7C3AED)     // Violet
+    // Accent Colors - use primary from theme
+    val AccentPrimary: Color
+        @Composable get() = MaterialTheme.colorScheme.primary
+    val AccentSecondary: Color
+        @Composable get() = MaterialTheme.colorScheme.secondary
+    val AccentTertiary: Color
+        @Composable get() = MaterialTheme.colorScheme.tertiary
     
-    // Status Colors
+    // Status Colors (semantic - stay consistent across themes)
     val Blue = Color(0xFF3B82F6)
     val Orange = Color(0xFFF59E0B)
     val Purple = Color(0xFF8B5CF6)
@@ -1671,12 +1689,17 @@ private object PersonalizationColors {
     val Pink = Color(0xFFEC4899)
     
     // Utility Colors
-    val Divider = Color(0xFFE5E7EB)
-    val ChipBackground = Color(0xFFF3F4F6)
-    val ChipBackgroundActive = Color(0xFFEEF2FF)
+    val Divider: Color
+        @Composable get() = MaterialTheme.colorScheme.outlineVariant
+    val ChipBackground: Color
+        @Composable get() = MaterialTheme.colorScheme.surfaceVariant
+    val ChipBackgroundActive: Color
+        @Composable get() = MaterialTheme.colorScheme.primaryContainer
     val WarningBackground = Color(0xFFFEF3C7)
     
-    // Glow Effects (softer for light theme)
-    val GlowPrimary = Color(0xFF6366F1).copy(alpha = 0.15f)
-    val GlowSecondary = Color(0xFF8B5CF6).copy(alpha = 0.12f)
+    // Glow Effects
+    val GlowPrimary: Color
+        @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    val GlowSecondary: Color
+        @Composable get() = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
 }
