@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.LocalFlorist
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -417,12 +419,17 @@ fun SwipeableWeekCalendarStrip(
         }
     }
     
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // Ensure white background
+            .padding(bottom = 8.dp)
+    ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
@@ -436,7 +443,7 @@ fun SwipeableWeekCalendarStrip(
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Swipeable week pages
         HorizontalPager(
@@ -463,7 +470,7 @@ fun SwipeableWeekCalendarStrip(
                             .clip(CircleShape)
                             .background(
                                 when {
-                                    isSelected -> MaterialTheme.colorScheme.primary
+                                    isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
                                     else -> Color.Transparent
                                 }
                             )
@@ -481,8 +488,8 @@ fun SwipeableWeekCalendarStrip(
                             text = date.dayOfMonth.toString(),
                             color = when {
                                 isSelected -> Color.White
-                                isToday -> MaterialTheme.colorScheme.primary
-                                else -> MaterialTheme.colorScheme.onBackground
+                                isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
+                                else -> TempusDesignSystem.TextPrimary
                             },
                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 16.sp
@@ -504,6 +511,7 @@ private fun TimelineTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White) // Ensure white background
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -512,14 +520,14 @@ private fun TimelineTopBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                .background(TempusDesignSystem.Primary.copy(alpha = 0.1f)) // Explicit primary tint
                 .clickable { onMonthPickerClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = monthYear,
-                color = MaterialTheme.colorScheme.primary,
+                color = TempusDesignSystem.Primary, // Explicit Primary Blue
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -537,18 +545,9 @@ private fun TimelineTopBar(
             // Garden button
             IconButton(onClick = onGardenClick) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_garden),
+                    imageVector = Icons.Outlined.LocalFlorist,
                     contentDescription = "Garden",
                     tint = Color(0xFF10B981) // Green color for garden
-                )
-            }
-            
-            // Inbox icon
-            IconButton(onClick = { }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.inbox),
-                    contentDescription = "Inbox",
-                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -565,12 +564,17 @@ fun WeekCalendarStrip(
         week.any { it == selectedDate } 
     } ?: weeks.firstOrNull() ?: return
     
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // Ensure white background
+            .padding(bottom = 8.dp)
+    ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
@@ -584,7 +588,7 @@ fun WeekCalendarStrip(
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Day numbers
         Row(
@@ -605,7 +609,7 @@ fun WeekCalendarStrip(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> MaterialTheme.colorScheme.primary
+                                isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
                                 else -> Color.Transparent
                             }
                         )
@@ -623,8 +627,8 @@ fun WeekCalendarStrip(
                         text = date.dayOfMonth.toString(),
                         color = when {
                             isSelected -> Color.White
-                            isToday -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onBackground
+                            isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
+                            else -> TempusDesignSystem.TextPrimary
                         },
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 16.sp
@@ -1059,7 +1063,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.inbox),
+            imageVector = Icons.Default.DateRange,
             contentDescription = null,
             tint = TempusDesignSystem.TextMuted.copy(alpha = 0.3f),
             modifier = Modifier.size(100.dp)
