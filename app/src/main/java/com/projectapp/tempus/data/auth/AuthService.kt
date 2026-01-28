@@ -131,27 +131,28 @@ class AuthService(
             // 4. Clear local Room data để đảm bảo data isolation giữa các users
             android.util.Log.d("AuthService", "=== CLEARING LOCAL DATA START ===")
             try {
-                // Clear Schedule data
-                android.util.Log.d("AuthService", "Getting LocalRepository...")
-                val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
-                android.util.Log.d("AuthService", "Calling clearAllLocalData()...")
-                localRepo.clearAllLocalData()
-                android.util.Log.d("AuthService", "✓ Cleared Schedule data")
-                
-                // Clear Gamification data
-                android.util.Log.d("AuthService", "Getting GamificationDatabase...")
-                val gamificationDb = com.projectapp.tempus.data.gamification.GamificationDatabase.getDatabase(context)
-                android.util.Log.d("AuthService", "Calling clearAllTables()...")
-                gamificationDb.clearAllTables()
-                android.util.Log.d("AuthService", "✓ Cleared Gamification data")
-                
-                // Clear Notes data
-                android.util.Log.d("AuthService", "Getting NotesRepository...")
-                val notesRepo = com.projectapp.tempus.data.RepositoryProvider.getNotesRepository(context)
-                android.util.Log.d("AuthService", "Calling clearAllNotes()...")
-                notesRepo.clearAllNotes()
-                android.util.Log.d("AuthService", "✓ Cleared Notes data")
-                
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    // Clear Schedule data
+                    android.util.Log.d("AuthService", "Getting LocalRepository...")
+                    val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
+                    android.util.Log.d("AuthService", "Calling clearAllLocalData()...")
+                    localRepo.clearAllLocalData()
+                    android.util.Log.d("AuthService", "✓ Cleared Schedule data")
+                    
+                    // Clear Gamification data
+                    android.util.Log.d("AuthService", "Getting GamificationDatabase...")
+                    val gamificationDb = com.projectapp.tempus.data.gamification.GamificationDatabase.getDatabase(context)
+                    android.util.Log.d("AuthService", "Calling clearAllTables()...")
+                    gamificationDb.clearAllTables()
+                    android.util.Log.d("AuthService", "✓ Cleared Gamification data")
+                    
+                    // Clear Notes data
+                    android.util.Log.d("AuthService", "Getting NotesRepository...")
+                    val notesRepo = com.projectapp.tempus.data.RepositoryProvider.getNotesRepository(context)
+                    android.util.Log.d("AuthService", "Calling clearAllNotes()...")
+                    notesRepo.clearAllNotes()
+                    android.util.Log.d("AuthService", "✓ Cleared Notes data")
+                }
                 android.util.Log.d("AuthService", "=== CLEARING LOCAL DATA COMPLETE ===")
             } catch (e: Exception) {
                 android.util.Log.e("AuthService", "=== CLEARING LOCAL DATA FAILED ===")

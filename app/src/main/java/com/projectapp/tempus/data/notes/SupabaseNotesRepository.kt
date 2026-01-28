@@ -3,6 +3,7 @@ package com.projectapp.tempus.data.notes
 import android.util.Log
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.notes.dto.NoteInsert
+import com.projectapp.tempus.data.notes.dto.NoteInsertWithId
 import com.projectapp.tempus.data.notes.dto.NoteRow
 import com.projectapp.tempus.data.notes.entity.NoteEntity
 import io.github.jan.supabase.gotrue.auth
@@ -47,7 +48,6 @@ class SupabaseNotesRepository {
         Log.d("SupabaseNotesRepo", "Entity userId: ${entity.userId}")
         Log.d("SupabaseNotesRepo", "Current auth userId: $userId")
         Log.d("SupabaseNotesRepo", "Title: ${entity.title}")
-        Log.d("SupabaseNotesRepo", "Content length: ${entity.content.length}")
         
         if (userId == null) {
             Log.e("SupabaseNotesRepo", "INSERT FAILED: User not authenticated")
@@ -55,19 +55,19 @@ class SupabaseNotesRepository {
         }
         
         return try {
-            // Use authenticated user's ID for RLS compliance
-            val insertData = mapOf(
-                "id" to entity.id,
-                "user_id" to userId,  // Use current auth user ID, not entity.userId
-                "title" to entity.title,
-                "content" to entity.content,
-                "is_pinned" to entity.isPinned,
-                "color" to entity.color
+            // Use serializable DTO for proper serialization
+            val insertDto = NoteInsertWithId(
+                id = entity.id,
+                userId = userId,  // Use current auth user ID for RLS compliance
+                title = entity.title,
+                content = entity.content,
+                isPinned = entity.isPinned,
+                color = entity.color
             )
             
-            Log.d("SupabaseNotesRepo", "Inserting with data: $insertData")
+            Log.d("SupabaseNotesRepo", "Inserting with DTO: id=${insertDto.id}, userId=${insertDto.userId}")
             
-            supabase.from(TABLE_NAME).insert(insertData)
+            supabase.from(TABLE_NAME).insert(insertDto)
             
             Log.d("SupabaseNotesRepo", "=== INSERT SUCCESS: ${entity.id} ===")
             true

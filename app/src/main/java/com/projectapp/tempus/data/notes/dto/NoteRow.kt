@@ -35,3 +35,18 @@ data class NoteInsert(
     val isPinned: Boolean = false,
     val color: String? = null
 )
+
+/**
+ * DTO để insert note với ID cụ thể (dùng để sync từ local)
+ */
+@Serializable
+data class NoteInsertWithId(
+    val id: String,
+    @SerialName("user_id")
+    val userId: String,
+    val title: String = "",
+    val content: String,
+    @SerialName("is_pinned")
+    val isPinned: Boolean = false,
+    val color: String? = null
+)
