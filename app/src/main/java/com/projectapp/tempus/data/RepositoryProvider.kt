@@ -11,6 +11,7 @@ import com.projectapp.tempus.data.local.TempusDatabase
 import com.projectapp.tempus.data.schedule.OfflineFirstScheduleRepository
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.sync.GamificationSyncManager
 import com.projectapp.tempus.data.sync.SyncManager
 
 /**
@@ -45,6 +46,9 @@ object RepositoryProvider {
     
     @Volatile
     private var remoteGamificationRepository: SupabaseGamificationRepository? = null
+    
+    @Volatile
+    private var gamificationSyncManager: GamificationSyncManager? = null
     
     // ==================== SCHEDULE REPOSITORIES ====================
     
@@ -127,6 +131,17 @@ object RepositoryProvider {
         }
     }
     
+    /**
+     * Get gamification sync manager for pushing/pulling gamification data
+     */
+    fun getGamificationSyncManager(context: Context): GamificationSyncManager {
+        return gamificationSyncManager ?: synchronized(this) {
+            gamificationSyncManager ?: createGamificationSyncManager(context).also {
+                gamificationSyncManager = it
+            }
+        }
+    }
+    
     // ==================== CLEAR ====================
     
     /**
@@ -138,6 +153,7 @@ object RepositoryProvider {
         syncManager = null
         gamificationRepository = null
         localGamificationRepository = null
+        gamificationSyncManager = null
         // Note: Don't clear remote repositories as they're stateless
     }
     
@@ -167,6 +183,12 @@ object RepositoryProvider {
     private fun createLocalGamificationRepository(context: Context): LocalGamificationRepository {
         val database = GamificationDatabase.getDatabase(context)
         return LocalGamificationRepository(database.gamificationDao())
+    }
+    
+    private fun createGamificationSyncManager(context: Context): GamificationSyncManager {
+        val localRepo = getLocalGamificationRepository(context)
+        val remoteRepo = getRemoteGamificationRepository()
+        return GamificationSyncManager(localRepo, remoteRepo)
     }
 }
 

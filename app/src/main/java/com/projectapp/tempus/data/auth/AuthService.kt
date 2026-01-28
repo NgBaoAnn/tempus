@@ -101,16 +101,25 @@ class AuthService(
     ) {
         // Auto-sync: Push pending changes before logout
         if (syncBeforeLogout && context != null) {
+            // 1. Sync Schedule data
             try {
                 val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(context)
                 val result = syncManager.pushToServer()
-                android.util.Log.d("AuthService", "Auto-sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+                android.util.Log.d("AuthService", "Schedule sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
             } catch (e: Exception) {
-                android.util.Log.e("AuthService", "Auto-sync failed, continuing with logout", e)
-                // Continue with logout even if sync fails
+                android.util.Log.e("AuthService", "Schedule sync failed, continuing with logout", e)
             }
             
-            // Clear local Room data để đảm bảo data isolation giữa các users
+            // 2. Sync Gamification data (points, trees)
+            try {
+                val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(context)
+                val result = gamificationSyncManager.pushToServer()
+                android.util.Log.d("AuthService", "Gamification sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Gamification sync failed, continuing with logout", e)
+            }
+            
+            // 3. Clear local Room data để đảm bảo data isolation giữa các users
             try {
                 val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
                 localRepo.clearAllLocalData()
