@@ -44,7 +44,12 @@
         android:id="@+id/statisticsFragment"
         android:name="com.projectapp.tempus.StatisticsFragment"
         android:label="fragment_statistics"
-        tools:layout="@layout/fragment_statistics" />
+        tools:layout="@layout/fragment_statistics">
+        
+        <action
+            android:id="@+id/action_statistics_to_heatmap"
+            app:destination="@id/heatmapFragment" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.projectapp.tempus.SettingsFragment"
@@ -80,4 +85,20 @@
         android:id="@+id/socialFragment"
         android:name="com.projectapp.tempus.ui.social.SocialFragment"
         android:label="Friends" />
+
+    <fragment
+        android:id="@+id/heatmapFragment"
+        android:name="com.projectapp.tempus.ui.heatmap.HeatmapFragment"
+        android:label="Productivity Heatmap">
+        
+        <argument
+            android:name="initialMonth"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+            
+        <action
+            android:id="@+id/action_heatmap_to_editSchedule"
+            app:destination="@id/editScheduleFragment" />
+    </fragment>
 </navigation>

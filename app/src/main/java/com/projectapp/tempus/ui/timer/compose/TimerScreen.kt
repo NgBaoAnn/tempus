@@ -84,13 +84,14 @@ fun TimerScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
             .padding(20.dp)
     ) {
         // Header
         Text(
             text = if (timerState == TimerState.SETUP) "Hẹn giờ" else "Đếm ngược",
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold
         )
         
         Spacer(modifier = Modifier.height(16.dp))

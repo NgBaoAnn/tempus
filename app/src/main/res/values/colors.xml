@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Legacy colors removed - use TempusDesignSystem in Compose -->
+    
+    <!-- Base colors for XML layouts -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Colors for Timer Labels -->
-    <color name="label_red">#FF3B30</color>
-    <color name="label_orange">#FF9500</color>
-    <color name="label_green">#34C759</color>
-    <color name="label_blue">#007AFF</color>
-    <color name="label_purple">#AF52DE</color>
+    <!-- Colors for Timer Labels (Keep for legacy XML views) -->
+    <color name="label_red">#FFEF4444</color>
+    <color name="label_orange">#FFF97316</color>
+    <color name="label_green">#FF10B981</color>
+    <color name="label_blue">#FF3B82F6</color>
+    <color name="label_purple">#FF60A5FA</color>
 
     <color name="toggle_bg">#E0E0E0</color>
-    <color name="background_setting">#F1F0F5</color>
+    <color name="background_setting">#F8FAFC</color>
     
-    <!-- Bottom Navigation Colors -->
+    <!-- Bottom Navigation Colors - aligned with TempusDesignSystem -->
     <color name="nav_primary">#3B82F6</color>
-    <color name="nav_primary_light">#EFF6FF</color>
+    <color name="nav_primary_light">#DBEAFE</color>
     <color name="nav_inactive">#94A3B8</color>
     <color name="nav_background">#FFFFFF</color>
     <color name="nav_surface">#F8FAFC</color>

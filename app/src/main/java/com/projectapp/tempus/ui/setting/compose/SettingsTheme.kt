@@ -3,66 +3,67 @@ package com.projectapp.tempus.ui.setting.compose
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
 /**
- * Modern Settings screen color palette - iOS-inspired
+ * Settings screen color palette - Aligned with TempusDesignSystem
  */
 object SettingsColors {
     // Background
-    val Background = Color(0xFFF2F2F7)  // iOS system gray 6
-    val Surface = Color.White
+    val Background = TempusDesignSystem.Slate50
+    val Surface = TempusDesignSystem.White
     
-    // Pro/Premium gradient - coral to pink
+    // Pro/Premium gradient - coral to pink (keep for visual distinction)
     val ProGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
     
-    // Profile gradient - purple
+    // Profile gradient - using primary blue
     val ProfileGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF667EEA), Color(0xFF764BA2))
+        colors = listOf(TempusDesignSystem.Primary, TempusDesignSystem.PrimaryLight)
     )
     
-    // Icon backgrounds - soft pastels matching reference
-    val IconBgBlue = Color(0xFF007AFF).copy(alpha = 0.12f)
-    val IconBlue = Color(0xFF007AFF)
+    // Icon colors - aligned with TempusDesignSystem
+    val IconBgBlue = TempusDesignSystem.Primary.copy(alpha = 0.12f)
+    val IconBlue = TempusDesignSystem.Primary
     
-    val IconBgPurple = Color(0xFFAF52DE).copy(alpha = 0.12f)
-    val IconPurple = Color(0xFFAF52DE)
+    val IconBgPurple = TempusDesignSystem.Accent.copy(alpha = 0.12f)
+    val IconPurple = TempusDesignSystem.Accent
     
-    val IconBgGreen = Color(0xFF34C759).copy(alpha = 0.12f)
-    val IconGreen = Color(0xFF34C759)
+    val IconBgGreen = TempusDesignSystem.Success.copy(alpha = 0.12f)
+    val IconGreen = TempusDesignSystem.Success
     
-    val IconBgTeal = Color(0xFF5AC8FA).copy(alpha = 0.12f)
-    val IconTeal = Color(0xFF5AC8FA)
+    val IconBgTeal = TempusDesignSystem.Secondary.copy(alpha = 0.12f)
+    val IconTeal = TempusDesignSystem.Secondary
     
-    val IconBgOrange = Color(0xFFFF9500).copy(alpha = 0.12f)
-    val IconOrange = Color(0xFFFF9500)
+    val IconBgOrange = TempusDesignSystem.Warning.copy(alpha = 0.12f)
+    val IconOrange = TempusDesignSystem.Warning
     
-    val IconBgPink = Color(0xFFFF2D55).copy(alpha = 0.12f)
-    val IconPink = Color(0xFFFF2D55)
+    val IconBgPink = TempusDesignSystem.Error.copy(alpha = 0.12f)
+    val IconPink = TempusDesignSystem.Error
     
-    val IconBgYellow = Color(0xFFFFCC00).copy(alpha = 0.12f)
+    val IconBgYellow = Color(0xFFFFCC00).copy(alpha = 0.12f)  // Keep yellow for star/rating
     val IconYellow = Color(0xFFFFCC00)
     
-    val IconBgGray = Color(0xFF8E8E93).copy(alpha = 0.12f)
-    val IconGray = Color(0xFF8E8E93)
+    val IconBgGray = TempusDesignSystem.Slate400.copy(alpha = 0.12f)
+    val IconGray = TempusDesignSystem.Slate400
     
-    val IconBgRed = Color(0xFFFF3B30).copy(alpha = 0.12f)
-    val IconRed = Color(0xFFFF3B30)
+    val IconBgRed = TempusDesignSystem.Error.copy(alpha = 0.12f)
+    val IconRed = TempusDesignSystem.Error
     
-    val IconBgCyan = Color(0xFF32ADE6).copy(alpha = 0.12f)
-    val IconCyan = Color(0xFF32ADE6)
+    val IconBgCyan = TempusDesignSystem.Secondary.copy(alpha = 0.12f)
+    val IconCyan = TempusDesignSystem.Secondary
     
     // Text
-    val TextPrimary = Color(0xFF000000)
-    val TextSecondary = Color(0xFF8E8E93)
-    val TextMuted = Color(0xFFC7C7CC)
+    val TextPrimary = TempusDesignSystem.TextPrimary
+    val TextSecondary = TempusDesignSystem.TextSecondary
+    val TextMuted = TempusDesignSystem.Slate300
     
     // Divider
-    val Divider = Color(0xFFC6C6C8)
+    val Divider = TempusDesignSystem.Slate200
     
     // Logout button
-    val LogoutBackground = Color(0xFF1C1C1E)
+    val LogoutBackground = TempusDesignSystem.Slate900
 }
 
 /**

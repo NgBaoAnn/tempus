@@ -57,7 +57,7 @@ fun LoginScreen(
         // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.drawable.ic_tempus),
+                painter = painterResource(id = R.drawable.ic_logo_tiramisu),
                 contentDescription = "Logo",
                 modifier = Modifier.size(50.dp)
             )

@@ -17,8 +17,8 @@ object TempusDesignSystem {
     val Secondary = Color(0xFF14B8A6)      // Teal - Growth/Focus
     val SecondaryLight = Color(0xFFCCFBF1) // Light Teal
     
-    val Accent = Color(0xFF8B5CF6)         // Violet - Premium/AI
-    val AccentLight = Color(0xFFEDE9FE)    // Light Violet
+    val Accent = Color(0xFF60A5FA)         // Light Blue - Premium/AI (was Violet)
+    val AccentLight = Color(0xFFDBEAFE)    // Light Blue background
     
     // Functional Colors
     val Success = Color(0xFF10B981)        // Emerald
@@ -63,7 +63,7 @@ object TempusDesignSystem {
     // Gradient Colors
     object Gradients {
         val Primary: List<Color> = listOf(TempusDesignSystem.Primary, Color(0xFF60A5FA))      // Blue gradient
-        val Accent: List<Color> = listOf(TempusDesignSystem.Accent, Color(0xFFA78BFA))        // Purple gradient
+        val Accent: List<Color> = listOf(TempusDesignSystem.Primary, Color(0xFF93C5FD))        // Blue gradient (was Purple)
         val Success: List<Color> = listOf(TempusDesignSystem.Success, Color(0xFF34D399))      // Green gradient
         val Sunset = listOf(Color(0xFFF97316), Color(0xFFFBBF24)) // Orange-Yellow
         val Ocean = listOf(Color(0xFF0EA5E9), Color(0xFF14B8A6))  // Sky-Teal
@@ -119,7 +119,7 @@ val TempusLightScheme = lightColorScheme(
     tertiary = TempusDesignSystem.Accent,
     onTertiary = TempusDesignSystem.White,
     tertiaryContainer = TempusDesignSystem.AccentLight,
-    onTertiaryContainer = Color(0xFF5B21B6),
+    onTertiaryContainer = Color(0xFF1D4ED8),  // Blue 700
     
     background = TempusDesignSystem.BackgroundLight,
     onBackground = TempusDesignSystem.TextPrimary,
@@ -148,7 +148,7 @@ val TempusDarkScheme = darkColorScheme(
     
     tertiary = TempusDesignSystem.Accent,
     onTertiary = TempusDesignSystem.White,
-    tertiaryContainer = Color(0xFF4C1D95),
+    tertiaryContainer = Color(0xFF1E3A8A),  // Blue 800
     onTertiaryContainer = TempusDesignSystem.AccentLight,
     
     background = TempusDesignSystem.BackgroundDark,

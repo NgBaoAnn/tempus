@@ -1,16 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Tempus" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+    <!-- Base application theme - Night mode aligned with TempusDesignSystem -->
+    <style name="Theme.Tempus" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color - Blue 400 for dark mode -->
+        <item name="colorPrimary">#FF60A5FA</item>
+        <item name="colorPrimaryVariant">#FF1E3A8A</item>
+        <item name="colorOnPrimary">#FF0F172A</item>
+        <!-- Secondary brand color - Teal 400 -->
+        <item name="colorSecondary">#FF2DD4BF</item>
+        <item name="colorSecondaryVariant">#FF14B8A6</item>
+        <item name="colorOnSecondary">#FF0F172A</item>
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
