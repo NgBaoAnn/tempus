@@ -256,7 +256,7 @@ fun EditScheduleScreen(
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Ngày",
-                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale("vi", "VN"))),
+                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
                         onClick = { showDatePicker = true }
                     )
                     
@@ -1189,7 +1189,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 2: Delete from today onwards
                 Surface(
@@ -1225,7 +1225,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 3: Delete completely
                 Surface(

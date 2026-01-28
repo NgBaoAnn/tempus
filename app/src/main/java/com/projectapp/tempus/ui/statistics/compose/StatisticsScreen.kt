@@ -827,7 +827,7 @@ private fun InsightsCard(insights: InsightsData) {
             val (trendIcon, trendText, trendColor) = when (insights.trend) {
                 TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", StatsDesign.Success)
                 TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", StatsDesign.Error)
-                TrendType.STABLE -> Triple(Icons.Filled.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
+                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
             }
             InsightItem(
                 icon = trendIcon,

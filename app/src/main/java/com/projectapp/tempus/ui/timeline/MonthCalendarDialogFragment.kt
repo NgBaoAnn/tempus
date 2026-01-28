@@ -70,7 +70,7 @@ class MonthCalendarDialogFragment(
     }
 
     private fun render() {
-        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("vi"))
         tvTitle.text = ym.atDay(1).format(formatter)
         adapter.submit(buildMonthCells(ym, data))
     }
