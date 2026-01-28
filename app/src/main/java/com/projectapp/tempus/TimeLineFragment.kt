@@ -1,6 +1,7 @@
 package com.projectapp.tempus
 
 import android.Manifest
+import android.util.Log
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
@@ -143,6 +145,20 @@ class TimelineFragment : Fragment() {
                 }
                 val voiceState by voiceViewModel.state.collectAsState()
                 val voicePartialText by voiceViewModel.partialText.collectAsState()
+
+                // Handle navigation argument
+                LaunchedEffect(Unit) {
+                    arguments?.getString("date")?.let { dateStr ->
+                        try {
+                            val pickedDate = LocalDate.parse(dateStr)
+                            viewModel.onSelectDate(pickedDate)
+                            // Clear argument to avoid re-triggering on rotation/recomposition
+                            arguments?.remove("date")
+                        } catch (e: Exception) {
+                            Log.e("TimelineFragment", "Invalid date arg: $dateStr")
+                        }
+                    }
+                }
                 
                 TimelineScreen(
                     // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc

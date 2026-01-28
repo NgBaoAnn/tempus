@@ -26,6 +26,12 @@
         android:label="fragment_timeline"
         tools:layout="@layout/fragment_timeline">
 
+        <argument
+            android:name="date"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
         <action
             android:id="@+id/action_timelineFragment_to_editScheduleFragment"
             app:destination="@id/editScheduleFragment" />

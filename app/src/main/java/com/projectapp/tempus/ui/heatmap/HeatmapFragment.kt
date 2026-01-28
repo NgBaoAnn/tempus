@@ -20,6 +20,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.projectapp.tempus.R
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
@@ -137,11 +139,22 @@ class HeatmapFragment : Fragment() {
      */
     private fun navigateToTimeline(dateStr: String) {
         try {
-            // Note: Timeline doesn't have a date argument yet
-            // For now, we just navigate back (Timeline is in the bottom nav)
-            findNavController().popBackStack()
-            // TODO: Add date argument to TimelineFragment if needed
+            findNavController().navigate(
+                R.id.timelineFragment,
+                bundleOf("date" to dateStr),
+                navOptions {
+                    // Pop up to the start destination of the graph to avoid building a huge stack
+                    popUpTo(findNavController().graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            )
         } catch (e: Exception) {
+            // Fallback
             findNavController().popBackStack()
         }
     }
