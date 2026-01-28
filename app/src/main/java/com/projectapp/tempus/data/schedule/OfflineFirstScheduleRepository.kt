@@ -85,8 +85,9 @@ class OfflineFirstScheduleRepository(
         return localRepo.getEditedVersionsByIds(ids).map { entity ->
             EditedVersionRow(
                 id = entity.id,
-                nameSchedule = entity.nameSchedule,
-                iconId = entity.iconId,
+                name = entity.name ?: "",
+                iconId = entity.iconId ?: "",
+                label = entity.label?.let { ScheduleLabel.entries.find { l -> l.name == it } },
                 startTimeDate = entity.startTimeDate,
                 implementationTime = entity.implementationTime,
                 color = entity.color,
@@ -167,8 +168,9 @@ class OfflineFirstScheduleRepository(
     override suspend fun insertEditedVersion(fields: Map<String, Any?>): EditedVersionRow {
         val entity = EditedVersionEntity(
             id = (fields["id"] as? String) ?: UUID.randomUUID().toString(),
-            nameSchedule = fields["name_schedule"] as? String,
-            iconId = fields["icon_id"] as? Int,
+            name = fields["name_schedule"] as? String,
+            iconId = fields["icon_id"]?.toString(),
+            label = fields["label"] as? String,
             startTimeDate = fields["start_time_date"] as? String,
             implementationTime = fields["implementation_time"] as? String,
             color = fields["color"] as? String,
@@ -179,8 +181,9 @@ class OfflineFirstScheduleRepository(
         val inserted = localRepo.insertEditedVersion(entity)
         return EditedVersionRow(
             id = inserted.id,
-            nameSchedule = inserted.nameSchedule,
-            iconId = inserted.iconId,
+            name = inserted.name ?: "",
+            iconId = inserted.iconId ?: "",
+            label = inserted.label?.let { ScheduleLabel.entries.find { l -> l.name == it } },
             startTimeDate = inserted.startTimeDate,
             implementationTime = inserted.implementationTime,
             color = inserted.color,

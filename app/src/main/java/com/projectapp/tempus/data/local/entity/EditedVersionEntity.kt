@@ -16,8 +16,9 @@ data class EditedVersionEntity(
     val id: String,
     
     // Override fields (chỉ những field được sửa mới có giá trị)
-    val nameSchedule: String? = null,
-    val iconId: Int? = null,
+    val name: String? = null,
+    val iconId: String? = null,
+    val label: String? = null,
     val startTimeDate: String? = null,    // ISO datetime
     val implementationTime: String? = null, // Duration
     val color: String? = null,
@@ -33,8 +34,9 @@ data class EditedVersionEntity(
         fun fromRow(row: com.projectapp.tempus.data.schedule.dto.EditedVersionRow): EditedVersionEntity {
             return EditedVersionEntity(
                 id = row.id,
-                nameSchedule = row.nameSchedule,
+                name = row.name,
                 iconId = row.iconId,
+                label = row.label?.name,
                 startTimeDate = row.startTimeDate,
                 implementationTime = row.implementationTime,
                 color = row.color,
