@@ -28,7 +28,7 @@ class OfflineFirstGamificationRepository(
         val newPoints = UserPointsEntity(
             id = "current_user",
             totalPoints = 0,
-            currentPoints = 0,
+            currentStreak = 0,
             level = 1
         )
         localRepo.updateUserPoints(newPoints)
