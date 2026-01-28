@@ -8,10 +8,13 @@ import com.projectapp.tempus.data.gamification.OfflineFirstGamificationRepositor
 import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.local.LocalScheduleRepository
 import com.projectapp.tempus.data.local.TempusDatabase
+import com.projectapp.tempus.data.notes.NotesRepository
+import com.projectapp.tempus.data.notes.SupabaseNotesRepository
 import com.projectapp.tempus.data.schedule.OfflineFirstScheduleRepository
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
 import com.projectapp.tempus.data.sync.GamificationSyncManager
+import com.projectapp.tempus.data.sync.NotesSyncManager
 import com.projectapp.tempus.data.sync.SyncManager
 
 /**
@@ -49,6 +52,16 @@ object RepositoryProvider {
     
     @Volatile
     private var gamificationSyncManager: GamificationSyncManager? = null
+    
+    // Notes repositories
+    @Volatile
+    private var notesRepository: NotesRepository? = null
+    
+    @Volatile
+    private var remoteNotesRepository: SupabaseNotesRepository? = null
+    
+    @Volatile
+    private var notesSyncManager: NotesSyncManager? = null
     
     // ==================== SCHEDULE REPOSITORIES ====================
     
@@ -142,6 +155,41 @@ object RepositoryProvider {
         }
     }
     
+    // ==================== NOTES REPOSITORIES ====================
+    
+    /**
+     * Get notes repository (local-first)
+     */
+    fun getNotesRepository(context: Context): NotesRepository {
+        return notesRepository ?: synchronized(this) {
+            notesRepository ?: NotesRepository(context).also {
+                notesRepository = it
+            }
+        }
+    }
+    
+    /**
+     * Get remote notes repository (Supabase operations, for sync only)
+     */
+    fun getRemoteNotesRepository(): SupabaseNotesRepository {
+        return remoteNotesRepository ?: synchronized(this) {
+            remoteNotesRepository ?: SupabaseNotesRepository().also {
+                remoteNotesRepository = it
+            }
+        }
+    }
+    
+    /**
+     * Get notes sync manager for pushing/pulling notes data
+     */
+    fun getNotesSyncManager(context: Context): NotesSyncManager {
+        return notesSyncManager ?: synchronized(this) {
+            notesSyncManager ?: createNotesSyncManager(context).also {
+                notesSyncManager = it
+            }
+        }
+    }
+    
     // ==================== CLEAR ====================
     
     /**
@@ -154,6 +202,8 @@ object RepositoryProvider {
         gamificationRepository = null
         localGamificationRepository = null
         gamificationSyncManager = null
+        notesRepository = null
+        notesSyncManager = null
         // Note: Don't clear remote repositories as they're stateless
     }
     
@@ -190,5 +240,10 @@ object RepositoryProvider {
         val remoteRepo = getRemoteGamificationRepository()
         return GamificationSyncManager(localRepo, remoteRepo)
     }
+    
+    private fun createNotesSyncManager(context: Context): NotesSyncManager {
+        val localRepo = getNotesRepository(context)
+        val remoteRepo = getRemoteNotesRepository()
+        return NotesSyncManager(localRepo, remoteRepo)
+    }
 }
-

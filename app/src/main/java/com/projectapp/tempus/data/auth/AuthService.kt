@@ -119,7 +119,16 @@ class AuthService(
                 android.util.Log.e("AuthService", "Gamification sync failed, continuing with logout", e)
             }
             
-            // 3. Clear local Room data để đảm bảo data isolation giữa các users
+            // 3. Sync Notes data
+            try {
+                val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(context)
+                val result = notesSyncManager.pushToServer()
+                android.util.Log.d("AuthService", "Notes sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Notes sync failed, continuing with logout", e)
+            }
+            
+            // 4. Clear local Room data để đảm bảo data isolation giữa các users
             try {
                 val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
                 localRepo.clearAllLocalData()

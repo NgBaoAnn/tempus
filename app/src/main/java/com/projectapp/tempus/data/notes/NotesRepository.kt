@@ -129,14 +129,24 @@ class NotesRepository(context: Context) {
     // ==================== SYNC OPERATIONS ====================
     
     /**
-     * Lấy các notes cần sync
+     * Lấy các notes cần sync (PENDING_CREATE, PENDING_UPDATE, PENDING_DELETE)
      */
     suspend fun getPendingNotes(): List<NoteEntity> = noteDao.getPendingNotes()
+    
+    /**
+     * Alias for getPendingNotes - used by NotesSyncManager
+     */
+    suspend fun getPendingSyncNotes(): List<NoteEntity> = getPendingNotes()
     
     /**
      * Đánh dấu note đã sync
      */
     suspend fun markNoteSynced(noteId: String, serverTime: Long) = noteDao.markNoteSynced(noteId, serverTime)
+    
+    /**
+     * Đánh dấu note đã sync (alias)
+     */
+    suspend fun markAsSynced(noteId: String) = noteDao.markNoteSynced(noteId, System.currentTimeMillis())
     
     /**
      * Xóa tất cả notes (dùng khi logout)
@@ -147,6 +157,18 @@ class NotesRepository(context: Context) {
      * Insert nhiều notes cùng lúc (khi pull từ server)
      */
     suspend fun insertAll(notes: List<NoteEntity>) = noteDao.insertAll(notes)
+    
+    /**
+     * Insert hoặc update một note
+     */
+    suspend fun insertOrUpdate(note: NoteEntity) {
+        val existing = noteDao.getNoteById(note.id)
+        if (existing == null) {
+            noteDao.insertNote(note)
+        } else {
+            noteDao.updateNote(note)
+        }
+    }
     
     /**
      * Xóa note đã sync khỏi local
