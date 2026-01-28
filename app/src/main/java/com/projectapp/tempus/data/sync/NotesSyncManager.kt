@@ -36,45 +36,56 @@ class NotesSyncManager(
             
             // Get all notes that need sync
             val pendingNotes = localRepo.getPendingSyncNotes()
+            Log.d(TAG, "=== NOTES SYNC START ===")
+            Log.d(TAG, "Found ${pendingNotes.size} pending notes to sync")
             
             for (note in pendingNotes) {
+                Log.d(TAG, "Processing note: id=${note.id}, status=${note.syncStatus}, title=${note.title}")
                 try {
                     when (note.syncStatus) {
                         PENDING_CREATE -> {
+                            Log.d(TAG, "Attempting INSERT for note ${note.id}")
                             val success = remoteRepo.insertNote(note)
                             if (success) {
                                 localRepo.markAsSynced(note.id)
                                 inserted++
-                                Log.d(TAG, "Inserted note: ${note.id}")
+                                Log.d(TAG, "INSERT SUCCESS: ${note.id}")
                             } else {
                                 failed++
+                                Log.e(TAG, "INSERT FAILED: ${note.id}")
                             }
                         }
                         PENDING_UPDATE -> {
+                            Log.d(TAG, "Attempting UPDATE for note ${note.id}")
                             val success = remoteRepo.updateNote(note)
                             if (success) {
                                 localRepo.markAsSynced(note.id)
                                 updated++
-                                Log.d(TAG, "Updated note: ${note.id}")
+                                Log.d(TAG, "UPDATE SUCCESS: ${note.id}")
                             } else {
                                 failed++
+                                Log.e(TAG, "UPDATE FAILED: ${note.id}")
                             }
                         }
                         PENDING_DELETE -> {
+                            Log.d(TAG, "Attempting DELETE for note ${note.id}")
                             val success = remoteRepo.deleteNote(note.id)
                             if (success) {
                                 // Actually delete from local after syncing delete
                                 localRepo.hardDeleteNote(note.id)
                                 deleted++
-                                Log.d(TAG, "Deleted note: ${note.id}")
+                                Log.d(TAG, "DELETE SUCCESS: ${note.id}")
                             } else {
                                 failed++
+                                Log.e(TAG, "DELETE FAILED: ${note.id}")
                             }
                         }
-                        else -> { /* Already synced, skip */ }
+                        else -> {
+                            Log.d(TAG, "Skipping note ${note.id} - status: ${note.syncStatus}")
+                        }
                     }
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to sync note ${note.id}", e)
+                    Log.e(TAG, "Failed to sync note ${note.id}: ${e.message}", e)
                     failed++
                 }
             }
@@ -86,7 +97,7 @@ class NotesSyncManager(
                 failed = failed
             )
             
-            Log.d(TAG, "Sync completed: $result")
+            Log.d(TAG, "=== NOTES SYNC COMPLETED: $result ===")
             Result.success(result)
             
         } catch (e: Exception) {

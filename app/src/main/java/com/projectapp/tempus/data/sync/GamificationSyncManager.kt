@@ -99,23 +99,40 @@ class GamificationSyncManager(
             var pointsSynced = false
             var treesSynced = 0
             
+            Log.d(TAG, "=== GAMIFICATION PULL START ===")
+            
             // 1. Pull User Points
+            Log.d(TAG, "Fetching user points from Supabase...")
             val serverPoints = remoteRepo.getUserPointsOnce()
+            Log.d(TAG, "Server points: ${serverPoints?.totalPoints ?: "null"}")
+            
             if (serverPoints != null) {
+                Log.d(TAG, "Saving to Room: totalPoints=${serverPoints.totalPoints}, level=${serverPoints.level}")
                 localRepo.updateUserPoints(serverPoints)
                 pointsSynced = true
                 Log.d(TAG, "Pulled user points: ${serverPoints.totalPoints}")
+                
+                // Verify saved
+                val savedPoints = localRepo.getUserPointsOnce()
+                Log.d(TAG, "Verification - Room now has: ${savedPoints?.totalPoints ?: "null"}")
+            } else {
+                Log.d(TAG, "No user points found on server")
             }
             
             // 2. Pull Trees
+            Log.d(TAG, "Fetching trees from Supabase...")
             val serverTrees = remoteRepo.getAliveTreesOnce()
+            Log.d(TAG, "Found ${serverTrees.size} trees on server")
+            
             for (tree in serverTrees) {
                 try {
                     val existingTree = localRepo.getTreeById(tree.id)
                     if (existingTree == null) {
                         localRepo.plantTree(tree)
+                        Log.d(TAG, "Inserted tree: ${tree.id}")
                     } else {
                         localRepo.updateTree(tree)
+                        Log.d(TAG, "Updated tree: ${tree.id}")
                     }
                     treesSynced++
                 } catch (e: Exception) {
@@ -129,7 +146,7 @@ class GamificationSyncManager(
                 historySynced = 0
             )
             
-            Log.d(TAG, "Pull completed: $result")
+            Log.d(TAG, "=== GAMIFICATION PULL COMPLETED: $result ===")
             Result.success(result)
             
         } catch (e: Exception) {
