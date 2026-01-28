@@ -254,4 +254,13 @@ class LocalScheduleRepository(
     suspend fun insertSubTasks(subTasks: List<SubTaskEntity>) {
         scheduleDao.insertSubTasks(subTasks)
     }
+    
+    // ==================== CLEAR DATA (for logout) ====================
+    
+    /**
+     * Clear ALL local data - gọi khi logout để đảm bảo data isolation giữa các users
+     */
+    suspend fun clearAllLocalData() {
+        scheduleDao.clearAllLocalData()
+    }
 }

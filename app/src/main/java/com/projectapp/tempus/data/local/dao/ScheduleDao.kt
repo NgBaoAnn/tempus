@@ -225,4 +225,33 @@ interface ScheduleDao {
         insertScheduleItems(items)
         insertSubTasks(subTasks)
     }
+    
+    // ==================== CLEAR ALL DATA (for logout) ====================
+    
+    @Query("DELETE FROM schedules")
+    suspend fun deleteAllSchedules()
+    
+    @Query("DELETE FROM schedule_items")
+    suspend fun deleteAllScheduleItems()
+    
+    @Query("DELETE FROM sub_tasks")
+    suspend fun deleteAllSubTasks()
+    
+    @Query("DELETE FROM categories")
+    suspend fun deleteAllCategories()
+    
+    @Query("DELETE FROM edited_versions")
+    suspend fun deleteAllEditedVersions()
+    
+    /**
+     * Clear ALL local data - gọi khi logout để đảm bảo data isolation giữa các users
+     */
+    @Transaction
+    suspend fun clearAllLocalData() {
+        deleteAllSubTasks()
+        deleteAllScheduleItems()
+        deleteAllEditedVersions()
+        deleteAllSchedules()
+        deleteAllCategories()
+    }
 }

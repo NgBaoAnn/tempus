@@ -109,9 +109,18 @@ class AuthService(
                 android.util.Log.e("AuthService", "Auto-sync failed, continuing with logout", e)
                 // Continue with logout even if sync fails
             }
+            
+            // Clear local Room data để đảm bảo data isolation giữa các users
+            try {
+                val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
+                localRepo.clearAllLocalData()
+                android.util.Log.d("AuthService", "Cleared local Room data after logout")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Failed to clear local data", e)
+            }
         }
         
-        // Clear local repository cache
+        // Clear local repository cache in memory
         com.projectapp.tempus.data.RepositoryProvider.clear()
         
         supabaseClient.auth.signOut()
