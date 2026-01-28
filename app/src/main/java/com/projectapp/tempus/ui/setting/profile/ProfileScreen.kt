@@ -44,12 +44,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
     onNavigateToGarden: () -> Unit,
     onBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val application = context.applicationContext as android.app.Application
+    val viewModel: ProfileViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return ProfileViewModel(application) as T
+            }
+        }
+    )
+    
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showEditDialog by remember { mutableStateOf(false) }
     
     // Show success message

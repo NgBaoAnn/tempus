@@ -28,6 +28,7 @@ import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.auth.AuthService
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import io.github.jan.supabase.gotrue.auth
 
 /**
  * Login Activity using Jetpack Compose
@@ -74,7 +75,34 @@ class LoginActivity : ComponentActivity() {
             try {
                 authService.login(email, password)
                 
-                // Fetch user profile to update cache and theme
+                // Auto-sync: Pull data from Supabase to local Room
+                val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                if (userId != null) {
+                    try {
+                        Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                        
+                        // 1. Pull Schedule data
+                        val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
+                        val scheduleResult = syncManager.pullFromServer(userId)
+                        Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
+                        
+                        // 2. Pull Gamification data
+                        val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
+                        val gamificationResult = gamificationSyncManager.pullFromServer()
+                        Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
+                        
+                        // 3. Pull Notes data
+                        val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
+                        val notesResult = notesSyncManager.pullFromServer(userId)
+                        Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
+                        
+                    } catch (e: Exception) {
+                        Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
+                        // Continue to main screen even if sync fails
+                    }
+                }
+                
+                // Fetch user profile to update cache and theme (from master)
                 val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
                 val user = userRepo.getCurrentUser()
                 
@@ -136,7 +164,33 @@ class LoginActivity : ComponentActivity() {
                     // Đăng nhập với Supabase sử dụng ID Token
                     authService.signInWithGoogle(idToken)
                     
-                    // Fetch user profile to update cache and theme
+                    // Auto-sync: Pull data from Supabase to local Room
+                    val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                    if (userId != null) {
+                        try {
+                            Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                            
+                            // 1. Pull Schedule data
+                            val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
+                            val scheduleResult = syncManager.pullFromServer(userId)
+                            Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
+                            
+                            // 2. Pull Gamification data
+                            val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
+                            val gamificationResult = gamificationSyncManager.pullFromServer()
+                            Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
+                            
+                            // 3. Pull Notes data
+                            val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
+                            val notesResult = notesSyncManager.pullFromServer(userId)
+                            Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
+                            
+                        } catch (e: Exception) {
+                            Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
+                        }
+                    }
+                    
+                    // Fetch user profile to update cache and theme (from master)
                     val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
                     try {
                         val user = userRepo.getCurrentUser()

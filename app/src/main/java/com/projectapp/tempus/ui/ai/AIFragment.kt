@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.ui.ai.compose.ChatScreen
 import io.github.jan.supabase.gotrue.auth
 
@@ -27,8 +27,8 @@ class AIFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize ViewModel with dependencies
-        val scheduleRepository = SupabaseScheduleRepository()
+        // Initialize ViewModel with dependencies - use OfflineFirstScheduleRepository
+        val scheduleRepository = RepositoryProvider.getScheduleRepository(requireContext())
         val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
         
         val factory = object : ViewModelProvider.Factory {

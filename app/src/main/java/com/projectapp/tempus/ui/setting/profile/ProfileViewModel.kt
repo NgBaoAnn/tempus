@@ -1,14 +1,16 @@
 package com.projectapp.tempus.ui.setting.profile
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.user.SupabaseUserRepository
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -29,10 +31,11 @@ data class ProfileUiState(
     val saveSuccess: Boolean = false
 )
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     
     private val supabase = SupabaseClientProvider.client
-    private val gamificationRepo = SupabaseGamificationRepository()
+    // Use OfflineFirstGamificationRepository for offline-first functionality
+    private val gamificationRepo = RepositoryProvider.getGamificationRepository(application)
     private val userRepository = SupabaseUserRepository()
     
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -76,7 +79,7 @@ class ProfileViewModel : ViewModel() {
                 
                 val createdAt = authUser.createdAt?.toString()?.take(10) ?: ""
                 
-                // Get gamification data
+                // Get gamification data from Room (offline-first)
                 val userPoints = gamificationRepo.getUserPointsOnce()
                 val treeCount = gamificationRepo.getAliveTreeCount()
                 

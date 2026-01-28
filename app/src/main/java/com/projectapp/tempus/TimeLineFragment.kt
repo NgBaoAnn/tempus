@@ -30,8 +30,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
-import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.voice.SpeechRecognitionManager
 import com.projectapp.tempus.data.voice.TaskParserService
@@ -58,8 +57,9 @@ class TimelineFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository()
-                val gamificationRepo = SupabaseGamificationRepository()
+                // Use OfflineFirstScheduleRepository for offline-first functionality
+                val repo = RepositoryProvider.getScheduleRepository(requireContext())
+                val gamificationRepo = RepositoryProvider.getGamificationRepository(requireContext())
                 val pointsManager = PointsManager(gamificationRepo)
                 return TimelineViewModel(
                     application = requireActivity().application,
@@ -131,10 +131,10 @@ class TimelineFragment : Fragment() {
                 // Capture the setter for permission callback
                 val openVoiceSheet = { showVoiceSheet = true }
                 
-                // Voice ViewModel - use correct constructor
+                // Voice ViewModel - use OfflineFirstScheduleRepository
                 val supabaseForVoice = SupabaseClientProvider.client
                 val voiceUserId = supabaseForVoice.auth.currentUserOrNull()?.id ?: ""
-                val voiceRepo = SupabaseScheduleRepository()
+                val voiceRepo = RepositoryProvider.getScheduleRepository(requireContext())
                 
                 val voiceViewModel = remember {
                     VoiceViewModel(

@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.domain.model.TreeGrowthCalculator
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
@@ -96,7 +96,8 @@ private fun TreeDetailScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val repository = remember { SupabaseGamificationRepository() }
+    // Use offline-first repository
+    val repository = remember { RepositoryProvider.getGamificationRepository(context) }
     val pointsManager = remember { PointsManager(repository) }
     val treeCalculator = remember { TreeGrowthCalculator() }
     
@@ -128,7 +129,7 @@ private fun TreeDetailScreen(
                         scope.launch {
                             isDeleting = true
                             try {
-                                repository.deleteTree(treeId)
+                                repository.killTree(treeId)
                                 Toast.makeText(context, "Đã xóa $initialName", Toast.LENGTH_SHORT).show()
                                 onBack()
                             } catch (e: Exception) {

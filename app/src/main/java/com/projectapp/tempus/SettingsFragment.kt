@@ -315,11 +315,53 @@ class SettingsFragment : Fragment() {
     }
 
     private fun logout() {
-        // Clear user profile cache on logout
-        com.projectapp.tempus.data.user.UserProfileCache.clearCache()
+        // Check network connectivity first
+        val connectivityManager = requireContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        val hasInternet = networkCapabilities?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
         
-        val intent = Intent(requireContext(), LoginActivity::class.java)
-        startActivity(intent)
-        requireActivity().finish()
+        if (!hasInternet) {
+            // Show warning dialog if no internet
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("⚠️ Không có kết nối mạng")
+                .setMessage("Nếu bạn đăng xuất khi không có mạng, dữ liệu chưa đồng bộ sẽ bị mất.\n\nBạn có chắc muốn đăng xuất?")
+                .setPositiveButton("Đăng xuất") { _, _ ->
+                    performLogout(syncBeforeLogout = false)
+                }
+                .setNegativeButton("Hủy", null)
+                .show()
+        } else {
+            performLogout(syncBeforeLogout = true)
+        }
+    }
+    
+    private fun performLogout(syncBeforeLogout: Boolean) {
+        lifecycleScope.launch {
+            try {
+                if (syncBeforeLogout) {
+                    Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                }
+                
+                // Call AuthService logout with context for auto-sync push
+                val authService = com.projectapp.tempus.data.auth.AuthService(SupabaseClientProvider.client)
+                authService.logout(
+                    syncBeforeLogout = syncBeforeLogout,
+                    context = requireContext()
+                )
+                
+                // Clear user profile cache on logout (from master)
+                com.projectapp.tempus.data.user.UserProfileCache.clearCache()
+                
+                Toast.makeText(requireContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                android.util.Log.e("Settings", "Logout error", e)
+                // Continue to login screen even if logout fails
+            }
+            
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 }

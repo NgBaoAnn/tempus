@@ -1,8 +1,9 @@
 package com.projectapp.tempus.ui.garden.compose
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.domain.model.TreeGrowthCalculator
 import com.projectapp.tempus.domain.model.TreeState
@@ -46,11 +47,12 @@ data class TreeUiModel(
 )
 
 /**
- * ViewModel cho Garden Screen với Compose
+ * ViewModel cho Garden Screen với Compose - Offline-First
  */
-class GardenViewModel : ViewModel() {
+class GardenViewModel(application: Application) : AndroidViewModel(application) {
     
-    private val repository = SupabaseGamificationRepository()
+    // Use OfflineFirstGamificationRepository for offline-first functionality
+    private val repository = RepositoryProvider.getGamificationRepository(application)
     private val pointsManager = PointsManager(repository)
     private val treeCalculator = TreeGrowthCalculator()
     

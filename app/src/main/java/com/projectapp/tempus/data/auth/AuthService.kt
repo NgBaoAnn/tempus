@@ -92,8 +92,78 @@ class AuthService(
 
     /**
      * Đăng xuất và xóa Session trong máy
+     * @param syncBeforeLogout Nếu true, sẽ push pending changes lên server trước khi logout
+     * @param context Context để access SyncManager (cần cho auto-sync)
      */
-    suspend fun logout() {
+    suspend fun logout(
+        syncBeforeLogout: Boolean = true,
+        context: android.content.Context? = null
+    ) {
+        // Auto-sync: Push pending changes before logout
+        if (syncBeforeLogout && context != null) {
+            // 1. Sync Schedule data
+            try {
+                val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(context)
+                val result = syncManager.pushToServer()
+                android.util.Log.d("AuthService", "Schedule sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Schedule sync failed, continuing with logout", e)
+            }
+            
+            // 2. Sync Gamification data (points, trees)
+            try {
+                val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(context)
+                val result = gamificationSyncManager.pushToServer()
+                android.util.Log.d("AuthService", "Gamification sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Gamification sync failed, continuing with logout", e)
+            }
+            
+            // 3. Sync Notes data
+            try {
+                val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(context)
+                val result = notesSyncManager.pushToServer()
+                android.util.Log.d("AuthService", "Notes sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Notes sync failed, continuing with logout", e)
+            }
+            
+            // 4. Clear local Room data để đảm bảo data isolation giữa các users
+            android.util.Log.d("AuthService", "=== CLEARING LOCAL DATA START ===")
+            try {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    // Clear Schedule data
+                    android.util.Log.d("AuthService", "Getting LocalRepository...")
+                    val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
+                    android.util.Log.d("AuthService", "Calling clearAllLocalData()...")
+                    localRepo.clearAllLocalData()
+                    android.util.Log.d("AuthService", "✓ Cleared Schedule data")
+                    
+                    // Clear Gamification data
+                    android.util.Log.d("AuthService", "Getting GamificationDatabase...")
+                    val gamificationDb = com.projectapp.tempus.data.gamification.GamificationDatabase.getDatabase(context)
+                    android.util.Log.d("AuthService", "Calling clearAllTables()...")
+                    gamificationDb.clearAllTables()
+                    android.util.Log.d("AuthService", "✓ Cleared Gamification data")
+                    
+                    // Clear Notes data
+                    android.util.Log.d("AuthService", "Getting NotesRepository...")
+                    val notesRepo = com.projectapp.tempus.data.RepositoryProvider.getNotesRepository(context)
+                    android.util.Log.d("AuthService", "Calling clearAllNotes()...")
+                    notesRepo.clearAllNotes()
+                    android.util.Log.d("AuthService", "✓ Cleared Notes data")
+                }
+                android.util.Log.d("AuthService", "=== CLEARING LOCAL DATA COMPLETE ===")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "=== CLEARING LOCAL DATA FAILED ===")
+                android.util.Log.e("AuthService", "Error: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+        
+        // Clear local repository cache in memory
+        com.projectapp.tempus.data.RepositoryProvider.clear()
+        
         supabaseClient.auth.signOut()
     }
 }
