@@ -16,6 +16,8 @@ local.properties
 .kotlin
 
 # Agent skills
-/.agent
-/.shared
 .agent/
+
+# Build outputs
+app/build/
+build_output.txt

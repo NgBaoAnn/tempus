@@ -30,7 +30,7 @@ import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
 import com.projectapp.tempus.domain.usecase.PointsManager
 import com.projectapp.tempus.ui.garden.compose.ProceduralTree
-import com.projectapp.tempus.ui.garden.compose.ProceduralTreeSize
+import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 import com.projectapp.tempus.ui.garden.compose.WateringAnimation
 import com.projectapp.tempus.ui.theme.TempusTheme
 import kotlinx.coroutines.launch
