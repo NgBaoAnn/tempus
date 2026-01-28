@@ -42,22 +42,13 @@ class GamificationSyncManager(
                 }
             }
             
-            // 2. Sync Trees
+            // 2. Sync Trees using upsert to avoid duplicate key errors
             val localTrees = localRepo.getAliveTrees().first()
             for (tree in localTrees) {
                 try {
-                    // Check if tree exists on server
-                    val serverTree = remoteRepo.getTreeById(tree.id)
-                    if (serverTree == null) {
-                        // Insert new tree
-                        remoteRepo.plantTree(tree)
-                        Log.d(TAG, "Inserted tree: ${tree.id}")
-                    } else {
-                        // Update existing tree
-                        remoteRepo.updateTree(tree)
-                        Log.d(TAG, "Updated tree: ${tree.id}")
-                    }
+                    remoteRepo.upsertTree(tree)
                     treesSynced++
+                    Log.d(TAG, "Upserted tree: ${tree.id}")
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to sync tree ${tree.id}", e)
                 }

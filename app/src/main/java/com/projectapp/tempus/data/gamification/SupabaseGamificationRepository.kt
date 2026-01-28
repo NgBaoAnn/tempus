@@ -322,6 +322,24 @@ class SupabaseGamificationRepository(
         }
     }
     
+    /**
+     * Upsert tree - insert hoặc update nếu đã tồn tại
+     * Dùng cho sync để tránh duplicate key error
+     */
+    suspend fun upsertTree(tree: TreeEntity) {
+        val userId = getCurrentUserId() ?: return
+        
+        try {
+            supabase.from("trees")
+                .upsert(tree.toDto(userId)) {
+                    onConflict = "id"
+                }
+            android.util.Log.d("GamificationRepo", "Upserted tree: ${tree.id}")
+        } catch (e: Exception) {
+            android.util.Log.e("GamificationRepo", "Error upserting tree: ${e.message}")
+        }
+    }
+    
     override suspend fun killTree(treeId: Long) {
         val userId = getCurrentUserId() ?: return
         
