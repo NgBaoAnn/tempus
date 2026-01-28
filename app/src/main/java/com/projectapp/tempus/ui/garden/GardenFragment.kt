@@ -8,7 +8,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.projectapp.tempus.ui.garden.compose.GardenScreen
+import com.projectapp.tempus.ui.garden.compose.GardenViewModel
 import com.projectapp.tempus.ui.theme.TempusTheme
 
 /**
@@ -17,7 +20,14 @@ import com.projectapp.tempus.ui.theme.TempusTheme
  */
 class GardenFragment : Fragment() {
 
-    private val viewModel: GardenViewModel by viewModels()
+    private val viewModel: GardenViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GardenViewModel(requireActivity().application) as T
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

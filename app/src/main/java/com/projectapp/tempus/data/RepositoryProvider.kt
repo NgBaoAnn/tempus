@@ -1,6 +1,11 @@
 package com.projectapp.tempus.data
 
 import android.content.Context
+import com.projectapp.tempus.data.gamification.GamificationDatabase
+import com.projectapp.tempus.data.gamification.GamificationRepository
+import com.projectapp.tempus.data.gamification.LocalGamificationRepository
+import com.projectapp.tempus.data.gamification.OfflineFirstGamificationRepository
+import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.local.LocalScheduleRepository
 import com.projectapp.tempus.data.local.TempusDatabase
 import com.projectapp.tempus.data.schedule.OfflineFirstScheduleRepository
@@ -18,6 +23,7 @@ import com.projectapp.tempus.data.sync.SyncManager
  */
 object RepositoryProvider {
     
+    // Schedule repositories
     @Volatile
     private var scheduleRepository: OfflineFirstScheduleRepository? = null
     
@@ -29,6 +35,18 @@ object RepositoryProvider {
     
     @Volatile
     private var syncManager: SyncManager? = null
+    
+    // Gamification repositories
+    @Volatile
+    private var gamificationRepository: OfflineFirstGamificationRepository? = null
+    
+    @Volatile
+    private var localGamificationRepository: LocalGamificationRepository? = null
+    
+    @Volatile
+    private var remoteGamificationRepository: SupabaseGamificationRepository? = null
+    
+    // ==================== SCHEDULE REPOSITORIES ====================
     
     /**
      * Get the offline-first schedule repository (main repository for UI)
@@ -74,6 +92,43 @@ object RepositoryProvider {
         }
     }
     
+    // ==================== GAMIFICATION REPOSITORIES ====================
+    
+    /**
+     * Get the offline-first gamification repository (main repository for UI)
+     */
+    fun getGamificationRepository(context: Context): GamificationRepository {
+        return gamificationRepository ?: synchronized(this) {
+            gamificationRepository ?: createGamificationRepository(context).also {
+                gamificationRepository = it
+            }
+        }
+    }
+    
+    /**
+     * Get local gamification repository (Room operations only)
+     */
+    fun getLocalGamificationRepository(context: Context): LocalGamificationRepository {
+        return localGamificationRepository ?: synchronized(this) {
+            localGamificationRepository ?: createLocalGamificationRepository(context).also {
+                localGamificationRepository = it
+            }
+        }
+    }
+    
+    /**
+     * Get remote gamification repository (Supabase operations, for sync only)
+     */
+    fun getRemoteGamificationRepository(): SupabaseGamificationRepository {
+        return remoteGamificationRepository ?: synchronized(this) {
+            remoteGamificationRepository ?: SupabaseGamificationRepository().also {
+                remoteGamificationRepository = it
+            }
+        }
+    }
+    
+    // ==================== CLEAR ====================
+    
     /**
      * Clear all instances (call on logout)
      */
@@ -81,7 +136,9 @@ object RepositoryProvider {
         scheduleRepository = null
         localRepository = null
         syncManager = null
-        // Note: Don't clear remoteRepository as it's stateless
+        gamificationRepository = null
+        localGamificationRepository = null
+        // Note: Don't clear remote repositories as they're stateless
     }
     
     // ==================== PRIVATE FACTORY METHODS ====================
@@ -101,4 +158,15 @@ object RepositoryProvider {
         val remoteRepo = getRemoteRepository()
         return SyncManager(localRepo, remoteRepo)
     }
+    
+    private fun createGamificationRepository(context: Context): OfflineFirstGamificationRepository {
+        val localRepo = getLocalGamificationRepository(context)
+        return OfflineFirstGamificationRepository(localRepo)
+    }
+    
+    private fun createLocalGamificationRepository(context: Context): LocalGamificationRepository {
+        val database = GamificationDatabase.getDatabase(context)
+        return LocalGamificationRepository(database.gamificationDao())
+    }
 }
+

@@ -309,14 +309,37 @@ class SettingsFragment : Fragment() {
     }
 
     private fun logout() {
+        // Check network connectivity first
+        val connectivityManager = requireContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+        val hasInternet = networkCapabilities?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+        
+        if (!hasInternet) {
+            // Show warning dialog if no internet
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("⚠️ Không có kết nối mạng")
+                .setMessage("Nếu bạn đăng xuất khi không có mạng, dữ liệu chưa đồng bộ sẽ bị mất.\n\nBạn có chắc muốn đăng xuất?")
+                .setPositiveButton("Đăng xuất") { _, _ ->
+                    performLogout(syncBeforeLogout = false)
+                }
+                .setNegativeButton("Hủy", null)
+                .show()
+        } else {
+            performLogout(syncBeforeLogout = true)
+        }
+    }
+    
+    private fun performLogout(syncBeforeLogout: Boolean) {
         lifecycleScope.launch {
             try {
-                Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                if (syncBeforeLogout) {
+                    Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                }
                 
                 // Call AuthService logout with context for auto-sync push
                 val authService = com.projectapp.tempus.data.auth.AuthService(SupabaseClientProvider.client)
                 authService.logout(
-                    syncBeforeLogout = true,
+                    syncBeforeLogout = syncBeforeLogout,
                     context = requireContext()
                 )
                 
