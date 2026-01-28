@@ -26,7 +26,13 @@ class SupabaseUserRepository(
             .decodeList<UserDto>()
 
         val userDto = list.firstOrNull() ?: throw IllegalStateException("User data not found in database")
-        return userDto.toDomain()
+        val user = userDto.toDomain()
+        
+        // Cache profile data for offline use
+        val email = supabase.auth.currentUserOrNull()?.email ?: ""
+        UserProfileCache.saveProfile(user.username, email, user.avatar)
+        
+        return user
     }
 
     override suspend fun updateUser(user: User) {
@@ -63,6 +69,10 @@ class SupabaseUserRepository(
         val user = getCurrentUser()
         val updatedUser = user.copy(avatar = publicUrl)
         updateUser(updatedUser)
+        
+        // Update cache with new avatar URL
+        val email = supabase.auth.currentUserOrNull()?.email ?: ""
+        UserProfileCache.saveProfile(user.username, email, publicUrl)
 
         return publicUrl
     }

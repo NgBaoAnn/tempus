@@ -51,6 +51,9 @@ class SettingsFragment : Fragment() {
     ): View {
         isLoggedIn = checkLogin()
         exportRepository = DataExportRepository(requireContext())
+        
+        // Initialize user profile cache
+        com.projectapp.tempus.data.user.UserProfileCache.init(requireContext())
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -95,7 +98,8 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 userInfoState.value = UserInfo(
                     name = user.username,
-                    email = user.email
+                    email = user.email,
+                    avatar = user.avatar
                 )
             }
         }
@@ -309,6 +313,9 @@ class SettingsFragment : Fragment() {
     }
 
     private fun logout() {
+        // Clear user profile cache on logout
+        com.projectapp.tempus.data.user.UserProfileCache.clearCache()
+        
         val intent = Intent(requireContext(), LoginActivity::class.java)
         startActivity(intent)
         requireActivity().finish()
