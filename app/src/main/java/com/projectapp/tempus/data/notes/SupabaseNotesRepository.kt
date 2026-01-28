@@ -41,29 +41,41 @@ class SupabaseNotesRepository {
      * Insert note mới lên Supabase
      */
     suspend fun insertNote(entity: NoteEntity): Boolean {
+        val userId = getCurrentUserId()
+        Log.d("SupabaseNotesRepo", "=== INSERT NOTE START ===")
+        Log.d("SupabaseNotesRepo", "Entity id: ${entity.id}")
+        Log.d("SupabaseNotesRepo", "Entity userId: ${entity.userId}")
+        Log.d("SupabaseNotesRepo", "Current auth userId: $userId")
+        Log.d("SupabaseNotesRepo", "Title: ${entity.title}")
+        Log.d("SupabaseNotesRepo", "Content length: ${entity.content.length}")
+        
+        if (userId == null) {
+            Log.e("SupabaseNotesRepo", "INSERT FAILED: User not authenticated")
+            return false
+        }
+        
         return try {
-            val insert = NoteInsert(
-                userId = entity.userId,
-                title = entity.title,
-                content = entity.content,
-                isPinned = entity.isPinned,
-                color = entity.color
+            // Use authenticated user's ID for RLS compliance
+            val insertData = mapOf(
+                "id" to entity.id,
+                "user_id" to userId,  // Use current auth user ID, not entity.userId
+                "title" to entity.title,
+                "content" to entity.content,
+                "is_pinned" to entity.isPinned,
+                "color" to entity.color
             )
             
-            supabase.from(TABLE_NAME)
-                .insert(mapOf(
-                    "id" to entity.id,
-                    "user_id" to entity.userId,
-                    "title" to entity.title,
-                    "content" to entity.content,
-                    "is_pinned" to entity.isPinned,
-                    "color" to entity.color
-                ))
+            Log.d("SupabaseNotesRepo", "Inserting with data: $insertData")
             
-            Log.d("SupabaseNotesRepo", "Insert note success: ${entity.id}")
+            supabase.from(TABLE_NAME).insert(insertData)
+            
+            Log.d("SupabaseNotesRepo", "=== INSERT SUCCESS: ${entity.id} ===")
             true
         } catch (e: Exception) {
-            Log.e("SupabaseNotesRepo", "Insert note failed: ${e.message}")
+            Log.e("SupabaseNotesRepo", "=== INSERT FAILED ===")
+            Log.e("SupabaseNotesRepo", "Error type: ${e.javaClass.simpleName}")
+            Log.e("SupabaseNotesRepo", "Error message: ${e.message}")
+            e.printStackTrace()
             false
         }
     }
