@@ -205,8 +205,9 @@ fun EditScheduleScreen(
                             value = titleText,
                             onValueChange = { titleText = it },
                             modifier = Modifier.fillMaxWidth(),
+                            enabled = !state.isEditMode, // Disable title editing in edit mode
                             textStyle = TextStyle(
-                                color = EditColors.TextPrimary,
+                                color = if (state.isEditMode) EditColors.TextSecondary else EditColors.TextPrimary,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.SemiBold
                             ),

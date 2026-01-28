@@ -765,7 +765,7 @@ fun TimelineItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onTaskClick() }
+            .clickable(enabled = !isDone) { onTaskClick() } // Disable click on completed tasks
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -833,7 +833,7 @@ fun TimelineItem(
             gradientColors = if (isHighPriority) 
                 listOf(TempusDesignSystem.Error.copy(alpha = 0.1f), MaterialTheme.colorScheme.surface)
             else TempusDesignSystem.Gradients.Primary,
-            onClick = onTaskClick // Enable press animation
+            onClick = if (isDone) null else onTaskClick // Disable click on completed tasks
         ) {
             Row(
                 modifier = Modifier

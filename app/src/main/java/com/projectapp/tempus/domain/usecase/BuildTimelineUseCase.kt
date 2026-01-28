@@ -74,12 +74,13 @@ class BuildTimelineUseCase {
             val startDate = startZdt.toLocalDate()
 
             // Check end_date - if set, schedule doesn't appear after this date
+            // endDate is the LAST day the schedule appears (inclusive)
             val endDate = s.endDate?.let { 
                 try { LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
                 catch (_: Exception) { null } 
             }
-            if (endDate != null && !targetDate.isBefore(endDate)) {
-                return false // Schedule has ended
+            if (endDate != null && targetDate.isAfter(endDate)) {
+                return false // Schedule has ended, don't show on days AFTER endDate
             }
 
             // Phải sau ngày bắt đầu
@@ -141,16 +142,22 @@ class BuildTimelineUseCase {
                     )
                 } ?: emptyList()
 
+                // ----- title -----
+                val titleStr = ev?.name ?: s.name
+
+                // ----- priority -----
+                val priorityVal = ev?.priority ?: s.priority ?: PriorityType.medium
+
                 TimelineBlock(
                     taskId = s.id,
                     scheduleItemId = item?.id,
-                    title = s.name,
+                    title = titleStr,
                     label = labelStr,
                     labelEnum = lbEnum,
                     color = colorStr,
                     startTime = uiStartTime,
                     duration = uiDuration,
-                    priority = s.priority ?: PriorityType.medium,
+                    priority = priorityVal,
                     status = status,
                     createdAt = createdAtLdt,
                     subtasks = subtaskInfos
