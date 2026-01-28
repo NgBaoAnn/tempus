@@ -58,7 +58,7 @@ class TimelineFragment : Fragment() {
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                 // Use OfflineFirstScheduleRepository for offline-first functionality
                 val repo = RepositoryProvider.getScheduleRepository(requireContext())
-                val gamificationRepo = SupabaseGamificationRepository()
+                val gamificationRepo = RepositoryProvider.getGamificationRepository(requireContext())
                 val pointsManager = PointsManager(gamificationRepo)
                 return TimelineViewModel(
                     application = requireActivity().application,

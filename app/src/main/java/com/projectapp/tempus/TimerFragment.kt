@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.data.focus.FocusModePreferences
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.domain.model.PointAction
 import com.projectapp.tempus.domain.usecase.PointsManager
 import com.projectapp.tempus.service.focus.FocusModeService
@@ -107,8 +107,8 @@ class TimerFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize gamification
-        val repository = SupabaseGamificationRepository()
+        // Initialize gamification with offline-first repository
+        val repository = RepositoryProvider.getGamificationRepository(requireContext())
         pointsManager = PointsManager(repository)
         
         return ComposeView(requireContext()).apply {
