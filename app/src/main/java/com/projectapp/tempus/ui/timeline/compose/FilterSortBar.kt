@@ -29,22 +29,23 @@ import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.data.schedule.dto.PriorityType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.StatusType
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.timeline.SortOption
 
-// Color definitions for filter UI
+// Color definitions for filter UI - aligned with TempusDesignSystem
 private object FilterColors {
-    val Background = Color(0xFFF1F5F9)
-    val Surface = Color(0xFFFFFFFF)
-    val Primary = Color(0xFF3B82F6)
-    val TextPrimary = Color(0xFF1E293B)
-    val TextSecondary = Color(0xFF64748B)
-    val ChipSelected = Color(0xFF3B82F6)
-    val ChipUnselected = Color(0xFFE2E8F0)
-    val PriorityHigh = Color(0xFFEF4444)
-    val PriorityMedium = Color(0xFFF59E0B)
-    val PriorityLow = Color(0xFF22C55E)
-    val StatusPlanned = Color(0xFF3B82F6)
-    val StatusDone = Color(0xFF22C55E)
+    val Background = TempusDesignSystem.Slate100
+    val Surface = TempusDesignSystem.White
+    val Primary = TempusDesignSystem.Primary
+    val TextPrimary = TempusDesignSystem.TextPrimary
+    val TextSecondary = TempusDesignSystem.TextSecondary
+    val ChipSelected = TempusDesignSystem.Primary
+    val ChipUnselected = TempusDesignSystem.Slate200
+    val PriorityHigh = TempusDesignSystem.Error
+    val PriorityMedium = TempusDesignSystem.Warning
+    val PriorityLow = TempusDesignSystem.Success
+    val StatusPlanned = TempusDesignSystem.Primary
+    val StatusDone = TempusDesignSystem.Success
 }
 
 /**

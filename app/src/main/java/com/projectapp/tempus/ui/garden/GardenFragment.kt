@@ -40,7 +40,10 @@ class GardenFragment : Fragment() {
             setContent {
                 TempusTheme {
                     GardenScreen(
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        onNavigateBack = {
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
                     )
                 }
             }

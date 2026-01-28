@@ -33,42 +33,44 @@ import com.projectapp.tempus.domain.usecase.CategoryStats
 import com.projectapp.tempus.domain.usecase.DayStats
 import com.projectapp.tempus.domain.usecase.InsightsData
 import com.projectapp.tempus.domain.usecase.TrendType
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
 // ======================== MODERN DESIGN SYSTEM ========================
+// Using TempusDesignSystem for consistent colors across the app
 
 private object StatsDesign {
-    // Primary Palette
-    val Primary = Color(0xFF3B82F6)        // Blue 500
-    val PrimaryLight = Color(0xFF60A5FA)    // Blue 400
-    val PrimaryDark = Color(0xFF1D4ED8)     // Blue 700
+    // Primary Palette - from TempusDesignSystem
+    val Primary = TempusDesignSystem.Primary
+    val PrimaryLight = TempusDesignSystem.PrimaryLight
+    val PrimaryDark = TempusDesignSystem.PrimaryDark
     
-    // Accent Colors
-    val Accent = Color(0xFF8B5CF6)          // Violet 500
-    val Success = Color(0xFF10B981)         // Emerald 500
-    val Warning = Color(0xFFF59E0B)         // Amber 500
-    val Error = Color(0xFFEF4444)           // Red 500
+    // Accent Colors - from TempusDesignSystem
+    val Accent = TempusDesignSystem.Accent
+    val Success = TempusDesignSystem.Success
+    val Warning = TempusDesignSystem.Warning
+    val Error = TempusDesignSystem.Error
     
-    // Backgrounds
-    val Background = Color(0xFFF8FAFC)      // Slate 50
-    val Surface = Color(0xFFFFFFFF)
-    val SurfaceElevated = Color(0xFFF1F5F9) // Slate 100
+    // Backgrounds - from TempusDesignSystem
+    val Background = TempusDesignSystem.BackgroundLight
+    val Surface = TempusDesignSystem.SurfaceLight
+    val SurfaceElevated = TempusDesignSystem.Slate100
     
-    // Text Colors
-    val TextPrimary = Color(0xFF0F172A)     // Slate 900
-    val TextSecondary = Color(0xFF475569)   // Slate 600
-    val TextMuted = Color(0xFF94A3B8)       // Slate 400
+    // Text Colors - from TempusDesignSystem
+    val TextPrimary = TempusDesignSystem.TextPrimary
+    val TextSecondary = TempusDesignSystem.TextSecondary
+    val TextMuted = TempusDesignSystem.TextMuted
     
     // Chart Colors
-    val ChartBar = Color(0xFF3B82F6)
-    val ChartBarLight = Color(0xFF60A5FA)
-    val GridLine = Color(0xFFE2E8F0)        // Slate 200
+    val ChartBar = TempusDesignSystem.Primary
+    val ChartBarLight = TempusDesignSystem.PrimaryLight
+    val GridLine = TempusDesignSystem.Slate200
     
     // Gradients
     val PrimaryGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))
+        colors = listOf(TempusDesignSystem.Primary, TempusDesignSystem.PrimaryLight)
     )
     val SuccessGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF10B981), Color(0xFF34D399))
+        colors = listOf(TempusDesignSystem.Success, Color(0xFF34D399))
     )
     val PomodoroGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
@@ -98,6 +100,7 @@ fun StatisticsScreen(
     onModeChange: (Boolean) -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
+    onOpenHeatmap: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -118,7 +121,12 @@ fun StatisticsScreen(
             onModeChange = onModeChange
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Heatmap Preview Card
+        HeatmapPreviewCard(onClick = onOpenHeatmap)
+        
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Stats Overview Cards
         StatsOverviewRow(
@@ -827,7 +835,7 @@ private fun InsightsCard(insights: InsightsData) {
             val (trendIcon, trendText, trendColor) = when (insights.trend) {
                 TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", StatsDesign.Success)
                 TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", StatsDesign.Error)
-                TrendType.STABLE -> Triple(Icons.Filled.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
+                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
             }
             InsightItem(
                 icon = trendIcon,
@@ -1034,6 +1042,79 @@ private fun CategoryItem(category: CategoryStats) {
                             colors = listOf(StatsDesign.Primary, StatsDesign.Accent)
                         )
                     )
+            )
+        }
+    }
+}
+
+// ======================== HEATMAP PREVIEW CARD ========================
+
+@Composable
+private fun HeatmapPreviewCard(
+    onClick: () -> Unit = {}
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = StatsDesign.Success.copy(alpha = 0.15f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = StatsDesign.Surface,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    StatsDesign.Success.copy(alpha = 0.2f),
+                                    StatsDesign.Primary.copy(alpha = 0.2f)
+                                )
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🔥",
+                        fontSize = 20.sp
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column {
+                    Text(
+                        text = "Heatmap Năng suất",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp,
+                        color = StatsDesign.TextPrimary
+                    )
+                    Text(
+                        text = "Xem bức tranh tổng quan theo tháng",
+                        fontSize = 12.sp,
+                        color = StatsDesign.TextSecondary
+                    )
+                }
+            }
+            
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = "Mở Heatmap",
+                tint = StatsDesign.Primary,
+                modifier = Modifier.size(24.dp)
             )
         }
     }

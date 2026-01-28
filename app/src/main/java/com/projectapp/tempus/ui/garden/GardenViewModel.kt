@@ -76,15 +76,22 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
     }
     
     fun refresh() {
-        checkDeadTrees()
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            checkDeadTrees()
+            // isLoading will be set to false when trees flow emits
+        }
     }
 
     fun plantTree(type: TreeType, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
             val treeId = pointsManager.plantTree(type)
             if (treeId != null) {
                 onSuccess()
+                // isLoading will be set to false when trees flow emits
             } else {
+                _uiState.value = _uiState.value.copy(isLoading = false)
                 onError("Không đủ điểm để trồng cây!")
             }
         }
@@ -103,10 +110,13 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
 
     fun deleteTree(tree: TreeEntity, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 repository.killTree(tree.id)
                 onSuccess()
+                // isLoading will be set to false when trees flow emits
             } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(isLoading = false)
                 onError(e.message ?: "Lỗi khi xóa cây")
             }
         }

@@ -120,7 +120,12 @@ class FriendsViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDiscover = true) }
             
-            // Gather IDs to exclude
+            // 1. First, fetch all blocked user IDs (both directions)
+            val allBlockedIds = friendRepository.getAllBlockedUserIds()
+                .getOrDefault(emptyList())
+                .toMutableList()
+            
+            // Gather other IDs to exclude
             val state = _uiState.value
             val excludedIds = mutableListOf<String>()
             
@@ -130,14 +135,8 @@ class FriendsViewModel(
             // Exclude Pending Requests (Senders) - Don't show people who sent us requests
             excludedIds.addAll(state.pendingRequests.map { it.senderId })
             
-            // Exclude Pending Requests (Senders) - Don't show people who sent us requests
-            excludedIds.addAll(state.pendingRequests.map { it.senderId })
-            
-            // Allow Sent Requests to appear (so we can show 'View' button)
-            // excludedIds.addAll(state.sentRequests.map { it.receiverId })
-            
-            // Exclude Blocked Users
-            excludedIds.addAll(state.blockedUsers.map { it.id })
+            // Exclude ALL Blocked Users (both directions)
+            excludedIds.addAll(allBlockedIds)
             
             friendRepository.getAllUsers(excludedIds)
                 .onSuccess { users ->
@@ -198,8 +197,8 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    // Show actual error for debugging
-                    _uiState.update { it.copy(error = "Lỗi gửi lời mời: ${e.message}") }
+                    // User-friendly error message
+                    _uiState.update { it.copy(error = "Kết bạn không thành công") }
                 }
         }
     }
@@ -320,7 +319,7 @@ class FriendsViewModel(
     /**
      * Load danh sách user đã chặn
      */
-    private fun loadBlockedUsers() {
+    fun loadBlockedUsers() {
         viewModelScope.launch {
             friendRepository.getBlockedUsers()
                 .onSuccess { users ->

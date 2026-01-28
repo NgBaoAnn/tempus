@@ -47,8 +47,25 @@ class FriendProfileViewModel(
     }
 
     fun sendFriendRequest(userId: String) {
-        performAction {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isActionLoading = true, error = null) }
+            
             friendRepository.sendFriendRequest(userId)
+                .onSuccess {
+                    _uiState.update { it.copy(isActionLoading = false, successMessage = "Đã gửi lời mời!") }
+                    // Reload profile to update relationship status
+                    _uiState.value.profile?.id?.let { loadProfile(it) }
+                }
+                .onFailure { e ->
+                    // User requested specific friendly error message for blocked/failed cases
+                    val errorMessage = "Kết bạn không thành công"
+                    _uiState.update { 
+                        it.copy(
+                            isActionLoading = false, 
+                            error = errorMessage
+                        ) 
+                    }
+                }
         }
     }
     
@@ -77,10 +94,11 @@ class FriendProfileViewModel(
                     _uiState.value.profile?.id?.let { loadProfile(it) }
                 }
                 .onFailure { e ->
+                    // User-friendly error message
                     _uiState.update { 
                         it.copy(
                             isActionLoading = false, 
-                            error = "Thất bại: ${e.message}"
+                            error = "Thao tác không thành công"
                         ) 
                     }
                 }

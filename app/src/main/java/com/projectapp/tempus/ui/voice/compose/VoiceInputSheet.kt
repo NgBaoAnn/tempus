@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.voice.dto.ParsedTask
+import com.projectapp.tempus.domain.model.AgentProposal
 import java.time.format.DateTimeFormatter
 
 /**
@@ -32,6 +33,7 @@ sealed class VoiceInputState {
     object Listening : VoiceInputState()
     object Processing : VoiceInputState()
     data class Parsed(val task: ParsedTask) : VoiceInputState()
+    data class ProposalReady(val proposal: AgentProposal) : VoiceInputState()
     data class Error(val message: String) : VoiceInputState()
 }
 
@@ -45,7 +47,7 @@ fun VoiceInputSheet(
     partialText: String,
     onStartListening: () -> Unit,
     onStopListening: () -> Unit,
-    onConfirmTask: (ParsedTask) -> Unit,
+    onConfirmProposal: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -76,15 +78,115 @@ fun VoiceInputSheet(
                 is VoiceInputState.Idle -> IdleState(onStartListening)
                 is VoiceInputState.Listening -> ListeningState(partialText, onStopListening)
                 is VoiceInputState.Processing -> ProcessingState()
-                is VoiceInputState.Parsed -> ParsedState(
+                is VoiceInputState.Parsed -> ParsedState( // Keep for backward compatibility if needed, or remove
                     task = state.task,
-                    onConfirm = { onConfirmTask(state.task) },
+                    onConfirm = { /* Legacy path */ },
+                    onRetry = onStartListening
+                )
+                is VoiceInputState.ProposalReady -> ProposalState(
+                    proposal = state.proposal,
+                    onConfirm = onConfirmProposal,
                     onRetry = onStartListening
                 )
                 is VoiceInputState.Error -> ErrorState(state.message, onStartListening)
             }
             
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun ProposalState(
+    proposal: AgentProposal,
+    onConfirm: () -> Unit,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Intent
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome, // AI icon
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = proposal.intent,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Impact / Details
+                Text(
+                    text = proposal.impact,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Actions preview (simple list)
+                proposal.actions.forEach { action ->
+                    Row(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color(0xFF4CAF50)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = action.description,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Action buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onRetry,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Thử lại")
+            }
+            
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Xác nhận")
+            }
         }
     }
 }

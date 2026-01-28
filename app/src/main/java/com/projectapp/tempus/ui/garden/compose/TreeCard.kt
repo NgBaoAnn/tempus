@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.TreeState
+import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 
 /**
  * Simplified Tree Card với AnimatedTree

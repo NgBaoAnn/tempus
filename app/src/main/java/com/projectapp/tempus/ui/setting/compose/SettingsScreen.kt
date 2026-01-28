@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import coil.compose.AsyncImage
+
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.components.TempusCard
 
@@ -241,13 +243,14 @@ fun SettingsScreen(
                     imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Đăng xuất",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
             
@@ -450,11 +453,17 @@ private fun ProfileCard(
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
+                AsyncImage(
+                    model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                        .data(avatarUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = "Avatar",
-                    modifier = Modifier.size(32.dp),
-                    tint = Color.Gray
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    error = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
+                    fallback = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
+                    placeholder = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person)
                 )
             }
             

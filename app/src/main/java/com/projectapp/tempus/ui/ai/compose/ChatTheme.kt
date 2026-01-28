@@ -26,10 +26,10 @@ import androidx.compose.ui.unit.sp
  * Style: AI-Native UI with Purple/Cyan accents - Light Mode
  */
 object ChatColors {
-    // ═══ PRIMARY PALETTE - Deep Purple Gradient ═══
-    val Primary = Color(0xFF7C3AED)         // Violet 600
-    val PrimaryLight = Color(0xFFA78BFA)    // Violet 400
-    val PrimaryDark = Color(0xFF5B21B6)     // Violet 800
+    // ═══ PRIMARY PALETTE - Blue Gradient ═══
+    val Primary = Color(0xFF3B82F6)         // Blue 500
+    val PrimaryLight = Color(0xFF60A5FA)    // Blue 400
+    val PrimaryDark = Color(0xFF1D4ED8)     // Blue 700
     
     // ═══ ACCENT - Cyan/Turquoise ═══
     val Accent = Color(0xFF06B6D4)          // Cyan 500
@@ -53,8 +53,8 @@ object ChatColors {
     val TextDim = Color(0xFFCBD5E1)         // Slate 300
     
     // ═══ CHAT BUBBLES ═══
-    val UserBubble = Color(0xFF7C3AED)      // Violet gradient start
-    val UserBubbleEnd = Color(0xFF8B5CF6)   // Violet gradient end
+    val UserBubble = Color(0xFF3B82F6)      // Blue gradient start
+    val UserBubbleEnd = Color(0xFF60A5FA)   // Blue gradient end
     val UserBubbleText = Color(0xFFFFFFFF)
     
     val AIBubble = Color(0xFFF1F5F9)        // Slate 100
@@ -71,18 +71,18 @@ object ChatColors {
     val Success = Color(0xFF22C55E)         // Green 500
     
     // ═══ SPECIAL EFFECTS ═══
-    val GlowPurple = Color(0xFF7C3AED).copy(alpha = 0.15f)
+    val GlowPurple = Color(0xFF3B82F6).copy(alpha = 0.15f)  // Now Blue glow
     val GlowCyan = Color(0xFF06B6D4).copy(alpha = 0.15f)
     val Shimmer = Color(0xFF0F172A).copy(alpha = 0.05f)
     
     // ═══ INPUT FIELD ═══
     val InputBackground = Color(0xFFF1F5F9) // Slate 100
     val InputBorder = Color(0xFFE2E8F0)     // Slate 200
-    val InputBorderFocused = Color(0xFF7C3AED)
+    val InputBorderFocused = Color(0xFF3B82F6)  // Blue
     val InputPlaceholder = Color(0xFF94A3B8) // Slate 400
     
     // ═══ MODE TOGGLE ═══
-    val ModeActive = Color(0xFF7C3AED)
+    val ModeActive = Color(0xFF3B82F6)      // Blue
     val ModeInactive = Color(0xFFE2E8F0)    // Slate 200
     val ModeText = Color(0xFFFFFFFF)
     val ModeTextInactive = Color(0xFF64748B) // Slate 500

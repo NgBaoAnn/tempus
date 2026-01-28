@@ -47,7 +47,25 @@ class SupabaseFriendRepository(
                 }
                 .decodeSingle<FriendRequestSimpleDto>()
             
-            result.toDomain()
+            // Fix: Fetch receiver details to return full object for UI
+            val receiverProfile = fetchUsersDetails(listOf(receiverId))[receiverId]
+            
+            FriendRequest(
+                id = result.id,
+                senderId = result.senderId,
+                senderUsername = "Me",
+                senderAvatar = null,
+                receiverId = result.receiverId,
+                receiverUsername = receiverProfile?.username ?: "User",
+                receiverAvatar = receiverProfile?.avatar,
+                status = FriendRequestStatus.fromString(result.status ?: "pending"),
+                createdAt = try {
+                    result.createdAt?.let { Instant.parse(it) } ?: Instant.now()
+                } catch (e: Exception) { Instant.now() },
+                updatedAt = try {
+                    result.updatedAt?.let { Instant.parse(it) } ?: Instant.now()
+                } catch (e: Exception) { Instant.now() }
+            )
         }.fold(
             onSuccess = { Result.success(it) },
             onFailure = { e ->
@@ -305,18 +323,61 @@ class SupabaseFriendRepository(
     // =============== BLOCKED USERS ===============
 
     override suspend fun blockUser(userId: String): Result<Unit> {
-        return runCatching {
-            val currentUserId = getCurrentUserId()
-            
-            val dto = CreateBlockedUserDto(
-                blockerId = currentUserId,
-                blockedId = userId
-            )
-            
-            supabase.from("blocked_users").insert(dto)
+    return runCatching {
+        val currentUserId = getCurrentUserId()
+        
+        // 1. Remove any existing friendship (auto-unfriend)
+        // Try to delete where current user is user1 or user2
+        try {
+            supabase.from("friendships")
+                .delete {
+                    filter {
+                        or {
+                            and {
+                                eq("user1_id", currentUserId)
+                                eq("user2_id", userId)
+                            }
+                            and {
+                                eq("user1_id", userId)
+                                eq("user2_id", currentUserId)
+                            }
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            // Ignore if no friendship exists
         }
+        
+        // 2. Also delete any pending friend requests between the two users
+        try {
+            supabase.from("friend_requests")
+                .delete {
+                    filter {
+                        or {
+                            and {
+                                eq("sender_id", currentUserId)
+                                eq("receiver_id", userId)
+                            }
+                            and {
+                                eq("sender_id", userId)
+                                eq("receiver_id", currentUserId)
+                            }
+                        }
+                    }
+                }
+        } catch (e: Exception) {
+            // Ignore if no requests exist
+        }
+        
+        // 3. Add to blocked users
+        val dto = CreateBlockedUserDto(
+            blockerId = currentUserId,
+            blockedId = userId
+        )
+        
+        supabase.from("blocked_users").insert(dto)
     }
-
+}
     override suspend fun unblockUser(blockedUserId: String): Result<Unit> {
         return runCatching {
             val currentUserId = getCurrentUserId()
@@ -355,6 +416,85 @@ class SupabaseFriendRepository(
                 val user = blockedUsersMap[dto.blockedId]
                 user // We return the UserBasicDto directly as per return type
             }
+        }
+    }
+
+    /**
+     * Get all blocked user IDs (both directions)
+     * - Users I have blocked
+     * - Users who have blocked me
+     */
+    override suspend fun getAllBlockedUserIds(): Result<List<String>> {
+        return runCatching {
+            val currentUserId = getCurrentUserId()
+            val blockedIds = mutableSetOf<String>()
+            
+            // 1. Users I have blocked - Try/Catch independently
+            try {
+                val iBlocked = supabase.from("blocked_users")
+                    .select(Columns.raw("blocked_id")) {
+                        filter {
+                            eq("blocker_id", currentUserId)
+                        }
+                    }
+                    .decodeList<BlockedIdDto>()
+                blockedIds.addAll(iBlocked.map { it.blockedId })
+            } catch (e: Exception) {
+                // Log error but continue
+                e.printStackTrace()
+            }
+            
+            // 2. Users who have blocked me - Try/Catch independently
+            try {
+                val blockedMe = supabase.from("blocked_users")
+                    .select(Columns.raw("blocker_id")) {
+                        filter {
+                            eq("blocked_id", currentUserId)
+                        }
+                    }
+                    .decodeList<BlockerIdDto>()
+                blockedIds.addAll(blockedMe.map { it.blockerId })
+            } catch (e: Exception) {
+                // Log error but continue
+                e.printStackTrace()
+            }
+            
+            blockedIds.toList()
+        }
+    }
+
+    /**
+     * Check if a user is blocked (either direction)
+     */
+    override suspend fun isUserBlocked(userId: String): Result<Boolean> {
+        return runCatching {
+            val currentUserId = getCurrentUserId()
+            
+            // Check if I blocked them
+            val iBlocked = supabase.from("blocked_users")
+                .select(Columns.raw("id")) {
+                    filter {
+                        eq("blocker_id", currentUserId)
+                        eq("blocked_id", userId)
+                    }
+                    limit(1)
+                }
+                .decodeList<BlockedUserSimpleDto>()
+            
+            if (iBlocked.isNotEmpty()) return@runCatching true
+            
+            // Check if they blocked me
+            val theyBlocked = supabase.from("blocked_users")
+                .select(Columns.raw("id")) {
+                    filter {
+                        eq("blocker_id", userId)
+                        eq("blocked_id", currentUserId)
+                    }
+                    limit(1)
+                }
+                .decodeList<BlockedUserSimpleDto>()
+            
+            theyBlocked.isNotEmpty()
         }
     }
 

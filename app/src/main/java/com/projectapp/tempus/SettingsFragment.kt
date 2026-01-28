@@ -26,6 +26,7 @@ import com.projectapp.tempus.ui.setting.LegalDocumentActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
+import com.projectapp.tempus.ui.setting.ThemeSettingsActivity
 import com.projectapp.tempus.ui.setting.compose.SettingsScreen
 import com.projectapp.tempus.ui.setting.compose.UserInfo
 import com.projectapp.tempus.ui.theme.TempusTheme
@@ -51,6 +52,9 @@ class SettingsFragment : Fragment() {
     ): View {
         isLoggedIn = checkLogin()
         exportRepository = DataExportRepository(requireContext())
+        
+        // Initialize user profile cache
+        com.projectapp.tempus.data.user.UserProfileCache.init(requireContext())
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -95,7 +99,8 @@ class SettingsFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 userInfoState.value = UserInfo(
                     name = user.username,
-                    email = user.email
+                    email = user.email,
+                    avatar = user.avatar
                 )
             }
         }
@@ -125,7 +130,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun onThemeClick() {
-        Toast.makeText(requireContext(), "Cài đặt giao diện", Toast.LENGTH_SHORT).show()
+        val intent = Intent(requireContext(), ThemeSettingsActivity::class.java)
+        startActivity(intent)
     }
     
     private fun navigateToPrivacyPolicy() {
@@ -342,6 +348,9 @@ class SettingsFragment : Fragment() {
                     syncBeforeLogout = syncBeforeLogout,
                     context = requireContext()
                 )
+                
+                // Clear user profile cache on logout (from master)
+                com.projectapp.tempus.data.user.UserProfileCache.clearCache()
                 
                 Toast.makeText(requireContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {

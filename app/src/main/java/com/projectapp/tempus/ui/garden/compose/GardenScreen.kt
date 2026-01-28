@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -21,20 +22,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.projectapp.tempus.R
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.domain.model.TreeGrowthCalculator
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
 import com.projectapp.tempus.ui.garden.GardenViewModel
 import com.projectapp.tempus.ui.garden.TreeDetailActivity
+import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 
 // ======================== DESIGN SYSTEM ========================
 
@@ -46,12 +48,120 @@ private object GardenDesign {
     val PointsGold = Color(0xFFFFB300)
 }
 
+// ======================== SKELETON LOADING ========================
+
+/**
+ * Shimmer Loading Skeleton for Garden - displays grid of skeleton tree cards
+ */
+@Composable
+private fun GardenLoadingSkeleton(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerTranslateAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1200,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+    
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFE2E8F0),
+            Color(0xFFF1F5F9),
+            Color(0xFFE2E8F0)
+        ),
+        start = Offset(shimmerTranslateAnim - 500f, 0f),
+        end = Offset(shimmerTranslateAnim, 0f)
+    )
+    
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 100.dp
+        ),
+        modifier = modifier.fillMaxSize()
+    ) {
+        items(6) {
+            SkeletonTreeCard(shimmerBrush)
+        }
+    }
+}
+
+@Composable
+private fun SkeletonTreeCard(brush: Brush) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(4.dp, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        color = GardenDesign.CardBg
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Tree placeholder
+            Box(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(brush)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Name placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(16.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(brush)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // State badge placeholder
+            Box(
+                modifier = Modifier
+                    .width(50.dp)
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(brush)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Progress bar placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(brush)
+            )
+        }
+    }
+}
+
 // ======================== MAIN SCREEN ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
-    viewModel: GardenViewModel
+    viewModel: GardenViewModel,
+    onNavigateBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -89,6 +199,14 @@ fun GardenScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back to Timeline"
+                        )
+                    }
+                },
                 actions = {
                     // Compact inline stats
                     CompactStats(
@@ -124,14 +242,7 @@ fun GardenScreen(
         }
     ) { padding ->
         if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = GardenDesign.Primary)
-            }
+            GardenLoadingSkeleton(modifier = Modifier.padding(padding))
         } else {
             if (uiState.trees.isEmpty()) {
                 EmptyGardenState(
@@ -270,15 +381,16 @@ private fun TreeCard(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Tree Image
+            // Tree with ProceduralTree (same as TreeDetailActivity)
             Box(
                 modifier = Modifier.height(100.dp),
-                contentAlignment = Alignment.BottomCenter
+                contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = getTreeDrawable(type, state)),
-                    contentDescription = tree.name,
-                    modifier = Modifier.size(80.dp)
+                ProceduralTree(
+                    treeType = type,
+                    growthStage = state,
+                    treeId = tree.id,
+                    size = ProceduralTreeSize.SMALL.dp
                 )
             }
             
@@ -501,38 +613,6 @@ private fun PlantTreeDialog(
 }
 
 // ======================== HELPERS ========================
-
-private fun getTreeDrawable(type: TreeType, state: TreeState): Int {
-    return when (state) {
-        TreeState.SEED -> R.drawable.ic_seed
-        TreeState.SPROUT -> when (type) {
-            TreeType.PINE -> R.drawable.ic_pine_sprout
-            TreeType.BAMBOO -> R.drawable.ic_bamboo_sprout
-            TreeType.PALM, TreeType.COCONUT -> R.drawable.ic_palm_sprout
-            TreeType.APPLE -> R.drawable.ic_sprout // Apple sprout fallback
-            else -> R.drawable.ic_sprout
-        }
-        TreeState.SAPLING -> when (type) {
-            TreeType.OAK -> R.drawable.ic_oak_sapling
-            TreeType.PINE -> R.drawable.ic_pine_sapling
-            TreeType.SAKURA -> R.drawable.ic_sakura_sapling
-            TreeType.BAMBOO -> R.drawable.ic_bamboo_sapling
-            TreeType.PALM, TreeType.COCONUT -> R.drawable.ic_palm_sapling
-            TreeType.APPLE -> R.drawable.ic_apple_sapling
-            else -> R.drawable.ic_oak_sapling
-        }
-        TreeState.TREE -> when (type) {
-            TreeType.OAK -> R.drawable.ic_oak_tree
-            TreeType.PINE -> R.drawable.ic_pine_tree
-            TreeType.SAKURA -> R.drawable.ic_sakura_tree
-            TreeType.BAMBOO -> R.drawable.ic_bamboo_tree
-            TreeType.PALM, TreeType.COCONUT -> R.drawable.ic_palm_tree
-            TreeType.APPLE -> R.drawable.ic_apple_tree
-            else -> R.drawable.ic_oak_tree
-        }
-        TreeState.DEAD -> R.drawable.ic_tree_dead
-    }
-}
 
 private fun getTreeStateColor(state: TreeState): Color {
     return when (state) {

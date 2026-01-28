@@ -45,8 +45,8 @@ object NotesDesignSystem {
     val PrimaryDark = Color(0xFF1D4ED8)     // Blue 700
     
     // Accent Colors
-    val Accent = Color(0xFF8B5CF6)          // Violet 500
-    val AccentLight = Color(0xFFA78BFA)     // Violet 400
+    val Accent = Color(0xFF60A5FA)          // Blue 400 (was Violet)
+    val AccentLight = Color(0xFF93C5FD)     // Blue 300
     val Success = Color(0xFF10B981)         // Emerald 500
     val Warning = Color(0xFFF59E0B)         // Amber 500
     
@@ -71,7 +71,7 @@ object NotesDesignSystem {
     
     // Gradients
     val PrimaryGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))
+        colors = listOf(Color(0xFF3B82F6), Color(0xFF60A5FA))  // Blue gradient
     )
     val WarmGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFF97316), Color(0xFFEC4899))

@@ -73,3 +73,21 @@ data class BlockedUserSimpleDto(
     @SerialName("created_at")
     val createdAt: String? = null  // Nullable để tương thích với database
 )
+
+/**
+ * Helper DTO for decoding blocked_id only
+ */
+@Serializable
+data class BlockedIdDto(
+    @SerialName("blocked_id")
+    val blockedId: String
+)
+
+/**
+ * Helper DTO for decoding blocker_id only
+ */
+@Serializable
+data class BlockerIdDto(
+    @SerialName("blocker_id")
+    val blockerId: String
+)

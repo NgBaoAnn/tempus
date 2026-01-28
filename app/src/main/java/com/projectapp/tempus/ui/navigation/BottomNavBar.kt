@@ -78,7 +78,7 @@ object BottomNavColors {
     val Background = Color(0xFFFFFFFF)
     val ActivePrimary = Color(0xFF3B82F6)  // Blue 500
     val ActiveGradientStart = Color(0xFF3B82F6)
-    val ActiveGradientEnd = Color(0xFF8B5CF6)  // Violet 500
+    val ActiveGradientEnd = Color(0xFF60A5FA)  // Blue 400 (was Violet)
     val ActiveBackground = Color(0xFFEFF6FF)  // Blue 50
     val InactiveIcon = Color(0xFF94A3B8)  // Slate 400
     val InactiveText = Color(0xFF64748B)  // Slate 500

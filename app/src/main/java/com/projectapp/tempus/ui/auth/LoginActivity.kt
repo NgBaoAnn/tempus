@@ -102,6 +102,15 @@ class LoginActivity : ComponentActivity() {
                     }
                 }
                 
+                // Fetch user profile to update cache and theme (from master)
+                val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
+                val user = userRepo.getCurrentUser()
+                
+                user.themeColor?.takeIf { it.isNotEmpty() }?.let { themeColor ->
+                    val mode = com.projectapp.tempus.ui.theme.ThemeMode.fromValue(themeColor)
+                    com.projectapp.tempus.ui.theme.ThemeManager.updateThemeLocally(mode)
+                }
+                
                 Toast.makeText(this@LoginActivity, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
@@ -152,8 +161,10 @@ class LoginActivity : ComponentActivity() {
                     Log.d("LoginActivity", "Google Sign-In successful, authenticating with Supabase...")
                     
                     // Đăng nhập với Supabase sử dụng ID Token
+                    // Đăng nhập với Supabase sử dụng ID Token
                     authService.signInWithGoogle(idToken)
                     
+<<<<<<< HEAD
                     // Auto-sync: Pull data from Supabase to local Room
                     val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
@@ -178,6 +189,19 @@ class LoginActivity : ComponentActivity() {
                         } catch (e: Exception) {
                             Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
                         }
+=======
+                    // Fetch user profile to update cache and theme
+                    val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
+                    try {
+                        val user = userRepo.getCurrentUser()
+                        user.themeColor?.takeIf { it.isNotEmpty() }?.let { themeColor ->
+                            val mode = com.projectapp.tempus.ui.theme.ThemeMode.fromValue(themeColor)
+                            com.projectapp.tempus.ui.theme.ThemeManager.updateThemeLocally(mode)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("LoginActivity", "Failed to fetch user profile after Google login", e)
+                        // Continue anyway, just theme might be wrong initially
+>>>>>>> origin/master
                     }
                     
                     Toast.makeText(this@LoginActivity, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()

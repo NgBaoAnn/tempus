@@ -71,6 +71,17 @@ interface FriendRepository {
      */
     suspend fun getBlockedUsers(): Result<List<UserBasicDto>>
     
+    /**
+     * Lấy tất cả blocked user IDs (cả 2 chiều: người tôi chặn + người chặn tôi)
+     * Dùng để lọc khỏi Discover tab
+     */
+    suspend fun getAllBlockedUserIds(): Result<List<String>>
+    
+    /**
+     * Kiểm tra xem user có bị chặn không (bởi current user hoặc user chặn current user)
+     */
+    suspend fun isUserBlocked(userId: String): Result<Boolean>
+    
     // =============== USER SEARCH ===============
     
     /**

@@ -78,6 +78,11 @@ class MessagesViewModel(
             
             val currentUserId = getCurrentUserId()
             
+            // 0. Get Blocked User IDs first (both directions)
+            val blockedUserIds = friendRepository.getAllBlockedUserIds()
+                .getOrDefault(emptyList())
+                .toSet()
+            
             // 1. Get Active Conversations
             val conversationsResult = messageRepository.getConversations()
             val activeConversations = conversationsResult.getOrDefault(emptyList())
@@ -86,7 +91,7 @@ class MessagesViewModel(
             val friendsResult = friendRepository.getFriends()
             val friends = friendsResult.getOrDefault(emptyList())
             
-            // 3. Process Active Conversations
+            // 3. Process Active Conversations (filter out blocked users)
             val loadedConversations = activeConversations.mapNotNull { conv ->
                 val otherUserId = if (conv.participant1Id == currentUserId) {
                     conv.participant2Id
@@ -94,13 +99,24 @@ class MessagesViewModel(
                     conv.participant1Id
                 }
                 
+                // Skip if blocked
+                if (otherUserId in blockedUserIds) {
+                    return@mapNotNull null
+                }
+                
                 val user = loadUserInfo(otherUserId)
                 user?.let { ConversationWithUser(conv, it) }
             }.toMutableList()
             
-            // 4. Add Empty Conversations for Friends who are not in list
+            // 4. Add Empty Conversations for Friends who are not in list (and not blocked)
             friends.forEach { friend ->
                 val friendId = friend.friendId
+                
+                // Skip if blocked
+                if (friendId in blockedUserIds) {
+                    return@forEach
+                }
+                
                 val isAlreadyInList = loadedConversations.any { it.otherUser.id == friendId }
                 
                 if (!isAlreadyInList) {
@@ -152,22 +168,32 @@ class MessagesViewModel(
     /**
      * Mở chat với bạn bè
      */
+    /**
+     * Mở chat với bạn bè
+     */
     fun openChat(friendId: String, friendUsername: String, friendAvatar: String?) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            // Optimistically set the chat partner so we have context even if conversation fails to load initially
+            val partner = UserBasicDto(
+                id = friendId,
+                username = friendUsername,
+                avatar = friendAvatar
+            )
+            
+            _uiState.update { 
+                it.copy(
+                    isLoading = true, 
+                    error = null,
+                    currentChatPartner = partner, // Set immediately
+                    currentConversation = null // Clear old one
+                ) 
+            }
             
             messageRepository.getOrCreateConversation(friendId)
                 .onSuccess { conversation ->
-                    val partner = UserBasicDto(
-                        id = friendId,
-                        username = friendUsername,
-                        avatar = friendAvatar
-                    )
-                    
                     _uiState.update { 
                         it.copy(
                             currentConversation = conversation,
-                            currentChatPartner = partner,
                             isLoading = false
                         ) 
                     }
@@ -176,9 +202,11 @@ class MessagesViewModel(
                     loadMessages(conversation.id)
                 }
                 .onFailure { e ->
+                    // Even if loading fails, we still have the partner info allowing user to TRY sending
                     _uiState.update { 
                         it.copy(
-                            error = "Không thể mở cuộc trò chuyện",
+                            // Keep error internal mostly, or show small toast
+                            // error = "Không thể tải cuộc trò chuyện", 
                             isLoading = false
                         ) 
                     }
@@ -186,9 +214,6 @@ class MessagesViewModel(
         }
     }
 
-    /**
-     * Load messages của conversation hiện tại
-     */
     /**
      * Load messages của conversation hiện tại (Realtime)
      */
@@ -220,29 +245,82 @@ class MessagesViewModel(
      * Gửi tin nhắn
      */
     fun sendMessage(content: String) {
-        val conversationId = _uiState.value.currentConversation?.id ?: return
         if (content.isBlank()) return
         
         viewModelScope.launch {
             _uiState.update { it.copy(isSending = true) }
             
-            messageRepository.sendMessage(conversationId, content.trim())
-                .onSuccess { message ->
-                    _uiState.update { state ->
-                        state.copy(
-                            currentMessages = state.currentMessages + message,
-                            isSending = false
-                        )
+            val currentUserId = getCurrentUserId()
+            
+            // Get partner ID from currentChatPartner OR from conversation participants
+            var partnerId = _uiState.value.currentChatPartner?.id
+            if (partnerId == null) {
+                // Try to get from conversation
+                val conv = _uiState.value.currentConversation
+                if (conv != null) {
+                    partnerId = if (conv.participant1Id == currentUserId) {
+                        conv.participant2Id
+                    } else {
+                        conv.participant1Id
                     }
                 }
-                .onFailure { e ->
+            }
+            
+            // Check if user is blocked before sending
+            if (partnerId != null) {
+                val isBlockedResult = friendRepository.isUserBlocked(partnerId)
+                if (isBlockedResult.getOrDefault(false)) {
                     _uiState.update { 
                         it.copy(
-                            error = "Không thể gửi tin nhắn",
-                            isSending = false
+                            isSending = false, 
+                            error = "Người này đã bị chặn. Không thể gửi tin nhắn."
                         ) 
                     }
+                    return@launch
                 }
+            }
+            
+            var conversationId = _uiState.value.currentConversation?.id
+            
+            // If we don't have a conversation ID yet (e.g. initial load failed/race cond), try to get it now
+            if (conversationId == null) {
+                if (partnerId != null) {
+                    val result = messageRepository.getOrCreateConversation(partnerId)
+                    result.onSuccess { conv ->
+                        conversationId = conv.id
+                        _uiState.update { it.copy(currentConversation = conv) }
+                        // Start listening to this new conversation
+                        loadMessages(conv.id)
+                    }.onFailure { ex ->
+                        _uiState.update { it.copy(isSending = false, error = "Lỗi kết nối: ${ex.message}") }
+                        return@launch
+                    }
+                } else {
+                    _uiState.update { it.copy(isSending = false, error = "Không xác định người nhận") }
+                    return@launch
+                }
+            }
+            
+            // Now proceed with sending if we have an ID
+            if (conversationId != null) {
+                messageRepository.sendMessage(conversationId!!, content.trim())
+                    .onSuccess { message ->
+                        _uiState.update { state ->
+                            state.copy(
+                                currentMessages = state.currentMessages + message,
+                                isSending = false
+                            )
+                        }
+                    }
+                    .onFailure { e ->
+                        _uiState.update { 
+                            it.copy(
+                                error = "Không thể gửi tin nhắn: ${e.message}",
+                                isSending = false
+                            ) 
+                        }
+                    }
+            }
         }
     }
 

@@ -26,7 +26,13 @@ class SupabaseUserRepository(
             .decodeList<UserDto>()
 
         val userDto = list.firstOrNull() ?: throw IllegalStateException("User data not found in database")
-        return userDto.toDomain()
+        val user = userDto.toDomain()
+        
+        // Cache profile data for offline use
+        val email = supabase.auth.currentUserOrNull()?.email ?: ""
+        UserProfileCache.saveProfile(user.username, email, user.avatar, user.themeColor)
+        
+        return user
     }
 
     override suspend fun updateUser(user: User) {
@@ -63,7 +69,28 @@ class SupabaseUserRepository(
         val user = getCurrentUser()
         val updatedUser = user.copy(avatar = publicUrl)
         updateUser(updatedUser)
+        
+        // Update cache with new avatar URL
+        val email = supabase.auth.currentUserOrNull()?.email ?: ""
+        UserProfileCache.saveProfile(user.username, email, publicUrl)
 
         return publicUrl
+    }
+    
+    /**
+     * Update only the theme_color for current user
+     */
+    override suspend fun updateThemeColor(themeColor: String) {
+        val userId = supabase.auth.currentUserOrNull()?.id
+            ?: return // Silently fail if not logged in
+        
+        supabase.from("users")
+            .update(
+                mapOf("theme_color" to themeColor)
+            ) {
+                filter {
+                    eq("id", userId)
+                }
+            }
     }
 }

@@ -90,6 +90,12 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+                "garden" -> {
+                    // Navigate to Garden fragment
+                    binding.root.post {
+                        navController.navigate(R.id.gardenFragment)
+                    }
+                }
             }
         }
     }

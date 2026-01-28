@@ -205,8 +205,9 @@ fun EditScheduleScreen(
                             value = titleText,
                             onValueChange = { titleText = it },
                             modifier = Modifier.fillMaxWidth(),
+                            enabled = !state.isEditMode, // Disable title editing in edit mode
                             textStyle = TextStyle(
-                                color = EditColors.TextPrimary,
+                                color = if (state.isEditMode) EditColors.TextSecondary else EditColors.TextPrimary,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.SemiBold
                             ),
@@ -252,12 +253,14 @@ fun EditScheduleScreen(
             // ============ CARD 2: Settings ============
             ModernCard {
                 Column {
-                    // Date
+                    // Date - In edit mode, show the date user clicked on timeline and disable picker
+                    val displayDate = if (state.isEditMode) state.selectedDate else state.date
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Ngày",
-                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale("vi", "VN"))),
-                        onClick = { showDatePicker = true }
+                        value = displayDate.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
+                        enabled = !state.isEditMode, // Disable date change in edit mode
+                        onClick = { if (!state.isEditMode) showDatePicker = true }
                     )
                     
                     ModernDivider()
@@ -794,7 +797,13 @@ private fun DurationPickerSheet(
         "01:00:00" to "1 giờ",
         "01:30:00" to "1 giờ 30 phút",
         "02:00:00" to "2 giờ",
-        "03:00:00" to "3 giờ"
+        "02:30:00" to "2 giờ 30 phút",
+        "03:00:00" to "3 giờ",
+        "04:00:00" to "4 giờ",
+        "05:00:00" to "5 giờ",
+        "06:00:00" to "6 giờ",
+        "07:00:00" to "7 giờ",
+        "08:00:00" to "8 giờ"
     )
     
     ModalBottomSheet(
@@ -1189,7 +1198,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 2: Delete from today onwards
                 Surface(
@@ -1225,7 +1234,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 3: Delete completely
                 Surface(

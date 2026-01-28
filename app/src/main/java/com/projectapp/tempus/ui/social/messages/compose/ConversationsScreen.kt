@@ -42,6 +42,11 @@ fun ConversationsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Auto-reload conversations when screen opens to ensure blocked users are filtered
+    LaunchedEffect(Unit) {
+        viewModel.loadConversations()
+    }
+
     // Show errors
     LaunchedEffect(uiState.error) {
         uiState.error?.let {

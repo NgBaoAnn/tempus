@@ -108,7 +108,12 @@ class EditScheduleViewModel(
             try {
                 val s = _state.value
 
-                val localDT = LocalDateTime.of(s.date, s.time)
+                // When editing, use selectedDate (the date user clicked on timeline)
+                // so that repeat starts from that date
+                // For new tasks, use the date field
+                val dateToUse = if (s.isEditMode) s.selectedDate else s.date
+
+                val localDT = LocalDateTime.of(dateToUse, s.time)
                 val isoDate = localDT.atZone(ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneId.of("UTC"))
                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -141,20 +146,46 @@ class EditScheduleViewModel(
                 val taskId = s.id
 
                 if (!s.applyTodayOnly) {
-                    repo.updateSchedule(taskId, mapData)
-                    // Update subtasks: delete old ones, insert new ones
-                    repo.deleteSubTasksByScheduleId(taskId)
-                    if (subtaskTitles.isNotEmpty()) {
-                        repo.insertSubTasks(taskId, subtaskTitles)
+                    // Check if we're editing from a different date than the original start date
+                    // If so, we need to SPLIT: keep original task until day before selectedDate,
+                    // then create a NEW task starting from selectedDate
+                    val isEditingFromDifferentDate = s.selectedDate != s.date
+                    
+                    if (isEditingFromDifferentDate && s.repeat != RepeatType.once) {
+                        // SPLIT: Set end_date on original task (day before user clicked)
+                        val endDateForOriginal = s.selectedDate.minusDays(1).toString()
+                        repo.updateSchedule(taskId, mapOf("end_date" to endDateForOriginal))
+                        
+                        // CREATE NEW task starting from selectedDate with new settings
+                        val newSchedule = repo.insertSchedule(mapData)
+                        // Copy subtasks to new schedule
+                        if (subtaskTitles.isNotEmpty()) {
+                            repo.insertSubTasks(newSchedule.id, subtaskTitles)
+                        }
+                    } else {
+                        // Same date edit OR non-repeating task: just update normally
+                        repo.updateSchedule(taskId, mapData)
+                        // Update subtasks: delete old ones, insert new ones
+                        repo.deleteSubTasksByScheduleId(taskId)
+                        if (subtaskTitles.isNotEmpty()) {
+                            repo.insertSubTasks(taskId, subtaskTitles)
+                        }
                     }
                 } else {
+                    // Apply changes only for this specific day (selectedDate)
+                    // Create an edited version with all changed fields
                     val editedFields = mapOf(
+                        "name_schedule" to title,
+                        "description" to desc.ifBlank { null },
                         "start_time_date" to isoDate,
                         "color" to s.color,
-                        "implementation_time" to s.duration
+                        "label" to s.iconLabel.name,
+                        "implementation_time" to s.duration,
+                        "priority" to s.priority.name
                     )
                     val ev = repo.insertEditedVersion(editedFields)
-                    repo.attachEditedVersionToDate(taskId, s.date.toString(), ev.id)
+                    // Use selectedDate (the date user clicked on timeline) not the original date
+                    repo.attachEditedVersionToDate(taskId, s.selectedDate.toString(), ev.id)
                 }
 
                 _saveSuccessEvent.send(Unit)

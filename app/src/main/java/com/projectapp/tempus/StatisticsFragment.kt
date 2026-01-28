@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.domain.usecase.GetStatisticsUseCase
@@ -52,7 +53,10 @@ class StatisticsFragment : Fragment() {
                         isLoading = isLoading,
                         onModeChange = { isWeek -> viewModel.setMode(isWeek) },
                         onPrevious = { viewModel.navigateRange(-1) },
-                        onNext = { viewModel.navigateRange(1) }
+                        onNext = { viewModel.navigateRange(1) },
+                        onOpenHeatmap = {
+                            findNavController().navigate(R.id.action_statistics_to_heatmap)
+                        }
                     )
                 }
             }
@@ -64,3 +68,4 @@ class StatisticsFragment : Fragment() {
         viewModel.setMode(true) // Start with week mode
     }
 }
+

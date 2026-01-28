@@ -1,6 +1,7 @@
 package com.projectapp.tempus
 
 import android.Manifest
+import android.util.Log
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
@@ -143,6 +145,20 @@ class TimelineFragment : Fragment() {
                 }
                 val voiceState by voiceViewModel.state.collectAsState()
                 val voicePartialText by voiceViewModel.partialText.collectAsState()
+
+                // Handle navigation argument
+                LaunchedEffect(Unit) {
+                    arguments?.getString("date")?.let { dateStr ->
+                        try {
+                            val pickedDate = LocalDate.parse(dateStr)
+                            viewModel.onSelectDate(pickedDate)
+                            // Clear argument to avoid re-triggering on rotation/recomposition
+                            arguments?.remove("date")
+                        } catch (e: Exception) {
+                            Log.e("TimelineFragment", "Invalid date arg: $dateStr")
+                        }
+                    }
+                }
                 
                 TimelineScreen(
                     // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
@@ -202,7 +218,8 @@ class TimelineFragment : Fragment() {
                     },
                     onGardenClick = {
                         findNavController().navigate(R.id.action_timelineFragment_to_gardenFragment)
-                    }
+                    },
+                    currentStreak = uiState.currentStreak
                 )
                 
                 // Points earned notification overlay
@@ -232,15 +249,16 @@ class TimelineFragment : Fragment() {
                             partialText = voicePartialText,
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
-                            onConfirmTask = { task ->
-                                // Create task directly in database
-                                voiceViewModel.createTask(task)
+                            onConfirmProposal = {
+                                // Confirm proposal via AI Agent
+                                voiceViewModel.confirmProposal()
                                 
                                 // Close sheet and refresh timeline
                                 scope.launch {
                                     sheetState.hide()
                                     showVoiceSheet = false
-                                    // Refresh timeline to show new task
+                                    // Refresh timeline to show changes
+                                    // Note: Ideally we should wait for confirmation, but for now we follow existing pattern
                                     viewModel.onRefresh()
                                 }
                             },

@@ -50,6 +50,20 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             try {
+                // First try to load from cache for instant display (offline support)
+                val cachedProfile = com.projectapp.tempus.data.user.UserProfileCache.getProfile()
+                if (cachedProfile != null) {
+                    // Use cached data immediately
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false,
+                            fullName = cachedProfile.username,
+                            email = cachedProfile.email,
+                            avatarUrl = cachedProfile.avatarUrl
+                        )
+                    }
+                }
+                
                 // Get current user from Supabase Auth for auth check
                 val authUser = supabase.auth.currentUserOrNull()
                 
@@ -82,8 +96,16 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(isLoading = false, error = "Lỗi tải thông tin: ${e.message}") 
+                // If network fetch fails, keep showing cached data (already set above)
+                // Only update loading state and error if no cached data was shown
+                _uiState.update { currentState ->
+                    if (currentState.fullName.isEmpty()) {
+                        // No cached data, show error
+                        currentState.copy(isLoading = false, error = "Lỗi tải thông tin: ${e.message}")
+                    } else {
+                        // Has cached data, just stop loading
+                        currentState.copy(isLoading = false)
+                    }
                 }
             }
         }
