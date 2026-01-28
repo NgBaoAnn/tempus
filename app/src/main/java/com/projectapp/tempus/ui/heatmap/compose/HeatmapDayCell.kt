@@ -87,20 +87,21 @@ fun HeatmapDayCell(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier.padding(1.dp)
         ) {
             // Day number
             Text(
                 text = day.date.dayOfMonth.toString(),
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
                 color = textColor,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                lineHeight = 14.sp
             )
             
             // Completion indicator (only show if has tasks)
             if (day.totalTasks > 0) {
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(1.dp))
                 
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -109,19 +110,20 @@ fun HeatmapDayCell(
                     // Status dot
                     Box(
                         modifier = Modifier
-                            .size(6.dp)
+                            .size(5.dp)
                             .clip(CircleShape)
                             .background(indicatorColor)
                     )
                     
-                    Spacer(modifier = Modifier.width(3.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
                     
                     // Task count
                     Text(
                         text = "${day.completedTasks}/${day.totalTasks}",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Medium,
-                        color = textColor.copy(alpha = 0.8f)
+                        color = textColor.copy(alpha = 0.9f),
+                        lineHeight = 10.sp
                     )
                 }
             }
