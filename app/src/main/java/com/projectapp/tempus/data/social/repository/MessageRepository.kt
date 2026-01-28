@@ -33,4 +33,9 @@ interface MessageRepository {
      * Đánh dấu messages đã đọc
      */
     suspend fun markMessagesAsRead(conversationId: String): Result<Unit>
+    
+    /**
+     * Subscribe to messages flow for real-time updates
+     */
+    fun getMessagesFlow(conversationId: String): kotlinx.coroutines.flow.Flow<List<MessageDto>>
 }

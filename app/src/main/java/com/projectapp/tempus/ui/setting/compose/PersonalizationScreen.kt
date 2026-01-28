@@ -1,7 +1,9 @@
 package com.projectapp.tempus.ui.setting.compose
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -13,13 +15,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -757,34 +767,63 @@ private fun ColorPaletteRow(
 
 @Composable
 private fun PersonalizationHeader(onBackClick: () -> Unit) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(PersonalizationColors.Background)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        PersonalizationColors.AccentPrimary.copy(alpha = 0.15f),
+                        PersonalizationColors.Background
+                    )
+                )
+            )
+            .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
-        TextButton(
-            onClick = onBackClick,
-            contentPadding = PaddingValues(0.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            TextButton(
+                onClick = onBackClick,
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = PersonalizationColors.AccentPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Quay lại",
+                    color = PersonalizationColors.AccentPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = null,
+                tint = PersonalizationColors.AccentPrimary,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "← Cài đặt",
-                color = PersonalizationColors.Blue,
-                fontSize = 17.sp
+                text = "Cá nhân hóa",
+                color = PersonalizationColors.TextPrimary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
         }
-
-        Text(
-            text = "Cá nhân hóa",
-            color = PersonalizationColors.TextPrimary,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 60.dp)
-        )
     }
 }
 
@@ -792,14 +831,33 @@ private fun PersonalizationHeader(onBackClick: () -> Unit) {
 
 @Composable
 private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        color = PersonalizationColors.TextSecondary,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 0.5.sp,
-        modifier = Modifier.padding(start = 12.dp, top = 8.dp)
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(16.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            PersonalizationColors.AccentPrimary,
+                            PersonalizationColors.AccentSecondary
+                        )
+                    )
+                )
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            color = PersonalizationColors.TextSecondary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.sp
+        )
+    }
 }
 
 // ======================== LIFESTYLE CARD ========================
@@ -811,22 +869,38 @@ private fun LifestyleCard(
 ) {
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = PersonalizationColors.GlowPrimary,
+                spotColor = PersonalizationColors.GlowPrimary
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            PersonalizationColors.AccentPrimary.copy(alpha = 0.1f),
+                            Color.Transparent
+                        )
+                    )
+                )
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(PersonalizationColors.Blue)
+            // Icon indicator
+            Icon(
+                imageVector = Icons.Filled.TrackChanges,
+                contentDescription = null,
+                tint = PersonalizationColors.AccentPrimary,
+                modifier = Modifier.size(24.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -835,21 +909,23 @@ private fun LifestyleCard(
                 text = "Lối sống",
                 color = PersonalizationColors.TextPrimary,
                 fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f)
             )
 
             Text(
                 text = lifestyle.displayName,
-                color = PersonalizationColors.TextSecondary,
-                fontSize = 16.sp
+                color = PersonalizationColors.AccentTertiary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             Text(
                 text = "›",
                 color = PersonalizationColors.TextHint,
-                fontSize = 20.sp
+                fontSize = 24.sp
             )
         }
     }
@@ -864,18 +940,47 @@ private fun DaysCard(
     onToggleDay: (Int) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = PersonalizationColors.GlowSecondary,
+                spotColor = PersonalizationColors.GlowSecondary
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = activeDaysLabel,
-                color = PersonalizationColors.TextSecondary,
-                fontSize = 14.sp,
+        Column(
+            modifier = Modifier
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            PersonalizationColors.AccentSecondary.copy(alpha = 0.08f),
+                            Color.Transparent
+                        )
+                    )
+                )
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 12.dp)
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarMonth,
+                    contentDescription = null,
+                    tint = PersonalizationColors.AccentSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = activeDaysLabel,
+                    color = PersonalizationColors.TextSecondary,
+                    fontSize = 14.sp
+                )
+            }
             DayOfWeekSelector(
                 activeDays = activeDays,
                 onToggleDay = onToggleDay
@@ -905,8 +1010,13 @@ private fun DayOfWeekSelector(
     ) {
         days.forEach { (dayNum, dayLabel) ->
             val isActive = activeDays.contains(dayNum)
+            val scale by animateFloatAsState(
+                targetValue = if (isActive) 1.1f else 1f,
+                animationSpec = spring(),
+                label = "dayScale"
+            )
             val backgroundColor by animateColorAsState(
-                targetValue = if (isActive) PersonalizationColors.Blue else PersonalizationColors.ChipBackground,
+                targetValue = if (isActive) PersonalizationColors.AccentPrimary else PersonalizationColors.ChipBackground,
                 animationSpec = tween(200),
                 label = "dayBgColor"
             )
@@ -920,7 +1030,17 @@ private fun DayOfWeekSelector(
                 onClick = { onToggleDay(dayNum) },
                 shape = CircleShape,
                 color = backgroundColor,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier
+                    .size(40.dp)
+                    .scale(scale)
+                    .then(
+                        if (isActive) Modifier.shadow(
+                            elevation = 6.dp,
+                            shape = CircleShape,
+                            ambientColor = PersonalizationColors.AccentPrimary,
+                            spotColor = PersonalizationColors.AccentPrimary
+                        ) else Modifier
+                    )
             ) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -930,7 +1050,7 @@ private fun DayOfWeekSelector(
                         text = dayLabel,
                         color = textColor,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium
                     )
                 }
             }
@@ -946,9 +1066,16 @@ private fun TimeSettingsCard(
     onShowTimePicker: (TimePickerTarget) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = PersonalizationColors.GlowPrimary,
+                spotColor = PersonalizationColors.GlowPrimary
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
@@ -963,11 +1090,19 @@ private fun TimeSettingsCard(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(item.accentColor)
+                        // Icon based on type
+                        val icon = when (item.target) {
+                            TimePickerTarget.WAKE_UP -> Icons.Outlined.WbSunny
+                            TimePickerTarget.SLEEP -> Icons.Outlined.Bedtime
+                            TimePickerTarget.WORK_START -> Icons.Outlined.Work
+                            TimePickerTarget.WORK_END -> Icons.Outlined.Home
+                            else -> Icons.Outlined.Schedule
+                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = item.accentColor,
+                            modifier = Modifier.size(22.dp)
                         )
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -976,19 +1111,33 @@ private fun TimeSettingsCard(
                             text = item.label,
                             color = PersonalizationColors.TextPrimary,
                             fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
                             modifier = Modifier.weight(1f)
                         )
 
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(PersonalizationColors.ChipBackground)
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            item.accentColor.copy(alpha = 0.3f),
+                                            item.accentColor.copy(alpha = 0.15f)
+                                        )
+                                    )
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = item.accentColor.copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 8.dp)
                         ) {
                             Text(
                                 text = item.time,
                                 color = PersonalizationColors.TextPrimary,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
@@ -996,7 +1145,7 @@ private fun TimeSettingsCard(
                 
                 if (index < items.size - 1) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 16.dp),
+                        modifier = Modifier.padding(start = 52.dp),
                         thickness = 1.dp,
                         color = PersonalizationColors.Divider
                     )
@@ -1014,16 +1163,23 @@ private fun CustomPeriodsCard(
     onRemove: (String) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = PersonalizationColors.GlowSecondary,
+                spotColor = PersonalizationColors.GlowSecondary
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
             periods.forEachIndexed { index, period ->
                 val periodColor = try {
                     Color(android.graphics.Color.parseColor(period.color))
-                } catch (e: Exception) { PersonalizationColors.Blue }
+                } catch (e: Exception) { PersonalizationColors.AccentPrimary }
 
                 Row(
                     modifier = Modifier
@@ -1033,9 +1189,22 @@ private fun CustomPeriodsCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(periodColor)
+                            .size(28.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        periodColor,
+                                        periodColor.copy(alpha = 0.7f)
+                                    )
+                                )
+                            )
+                            .shadow(
+                                elevation = 4.dp,
+                                shape = RoundedCornerShape(8.dp),
+                                ambientColor = periodColor,
+                                spotColor = periodColor
+                            )
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -1044,30 +1213,40 @@ private fun CustomPeriodsCard(
                         Text(
                             text = period.name,
                             color = PersonalizationColors.TextPrimary,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = "${period.startTime} - ${period.endTime}",
                             color = PersonalizationColors.TextSecondary,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         )
                     }
 
                     TextButton(
                         onClick = { onRemove(period.id) },
-                        contentPadding = PaddingValues(0.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = null,
+                            tint = PersonalizationColors.Red,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Xóa",
                             color = PersonalizationColors.Red,
-                            fontSize = 14.sp
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
                 
                 if (index < periods.size - 1) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 16.dp),
+                        modifier = Modifier.padding(start = 56.dp),
                         thickness = 1.dp,
                         color = PersonalizationColors.Divider
                     )
@@ -1083,9 +1262,20 @@ private fun CustomPeriodsCard(
 private fun AddCustomPeriodCard(onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        PersonalizationColors.AccentPrimary.copy(alpha = 0.5f),
+                        PersonalizationColors.AccentSecondary.copy(alpha = 0.5f)
+                    )
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceDark),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -1095,10 +1285,17 @@ private fun AddCustomPeriodCard(onClick: () -> Unit) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = null,
+                tint = PersonalizationColors.AccentTertiary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "+ Thêm khoảng thời gian",
-                color = PersonalizationColors.Blue,
-                fontSize = 16.sp,
+                text = "Thêm khoảng thời gian",
+                color = PersonalizationColors.AccentTertiary,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -1117,25 +1314,57 @@ private fun ResetPlanButton(
         enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(12.dp),
+            .height(56.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = PersonalizationColors.AccentPrimary,
+                spotColor = PersonalizationColors.AccentPrimary
+            ),
+        shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-            contentColor = PersonalizationColors.Blue
+            containerColor = Color.Transparent,
+            contentColor = PersonalizationColors.TextPrimary
         ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, PersonalizationColors.Divider)
+        contentPadding = PaddingValues(0.dp)
     ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = PersonalizationColors.Blue,
-                strokeWidth = 2.dp
-            )
-        } else {
-            Text(
-                text = "Tạo lại kế hoạch",
-                fontSize = 16.sp
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            PersonalizationColors.AccentPrimary,
+                            PersonalizationColors.AccentSecondary
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Tạo lại kế hoạch",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
@@ -1413,16 +1642,41 @@ private fun ResetConfirmationDialog(
 // ======================== COLORS ========================
 
 private object PersonalizationColors {
-    val Background = Color(0xFFF2F2F7)
-    val TextPrimary = Color(0xFF000000)
-    val TextSecondary = Color(0xFF8E8E93)
-    val TextHint = Color(0xFFC7C7CC)
-    val Blue = Color(0xFF007AFF)
-    val Orange = Color(0xFFFF9500)
-    val Purple = Color(0xFF5856D6)
-    val Green = Color(0xFF34C759)
-    val Red = Color(0xFFFF3B30)
-    val Divider = Color(0xFFE5E5EA)
-    val ChipBackground = Color(0xFFF2F2F7)
-    val WarningBackground = Color(0xFFFFF3CD)
+    // Light Theme Base Colors
+    val Background = Color(0xFFF5F7FA)
+    val SurfaceCard = Color(0xFFFFFFFF)
+    val SurfaceDark = Color(0xFFF0F2F5)
+    
+    // Glassmorphism (Light mode)
+    val GlassBackground = Color(0xFFFFFFFF).copy(alpha = 0.9f)
+    val GlassBorder = Color(0xFF6366F1).copy(alpha = 0.2f)
+    
+    // Text Colors
+    val TextPrimary = Color(0xFF1A1A2E)
+    val TextSecondary = Color(0xFF6B7280)
+    val TextHint = Color(0xFFA0AEC0)
+    
+    // Accent Colors (Gradient)
+    val AccentPrimary = Color(0xFF6366F1)      // Indigo
+    val AccentSecondary = Color(0xFF8B5CF6)    // Purple
+    val AccentTertiary = Color(0xFF7C3AED)     // Violet
+    
+    // Status Colors
+    val Blue = Color(0xFF3B82F6)
+    val Orange = Color(0xFFF59E0B)
+    val Purple = Color(0xFF8B5CF6)
+    val Green = Color(0xFF10B981)
+    val Red = Color(0xFFEF4444)
+    val Cyan = Color(0xFF06B6D4)
+    val Pink = Color(0xFFEC4899)
+    
+    // Utility Colors
+    val Divider = Color(0xFFE5E7EB)
+    val ChipBackground = Color(0xFFF3F4F6)
+    val ChipBackgroundActive = Color(0xFFEEF2FF)
+    val WarningBackground = Color(0xFFFEF3C7)
+    
+    // Glow Effects (softer for light theme)
+    val GlowPrimary = Color(0xFF6366F1).copy(alpha = 0.15f)
+    val GlowSecondary = Color(0xFF8B5CF6).copy(alpha = 0.12f)
 }

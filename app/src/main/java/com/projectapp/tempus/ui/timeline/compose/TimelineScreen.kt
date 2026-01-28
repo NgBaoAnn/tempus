@@ -19,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Park
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.LocalFlorist
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -157,66 +159,140 @@ fun TimelineScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Column(
+        // Use LazyColumn for collapsible header behavior
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Top Bar
-            TimelineTopBar(
-                monthYear = monthYear,
-                onMonthPickerClick = onMonthPickerClick,
-                onGardenClick = onGardenClick
-            )
+            // Fixed Top Bar (always visible)
+            item(key = "topbar") {
+                TimelineTopBar(
+                    monthYear = monthYear,
+                    onMonthPickerClick = onMonthPickerClick,
+                    onGardenClick = onGardenClick
+                )
+            }
             
-            // Daily Quote Card
-            DailyQuoteCard(quote = dailyQuote)
+            // Daily Quote Card (scrolls away)
+            item(key = "quote") {
+                DailyQuoteCard(quote = dailyQuote)
+            }
             
-            // Swipeable Week Calendar Strip
-            SwipeableWeekCalendarStrip(
-                weeks = weeks,
-                selectedDate = selectedDate,
-                onDateSelected = onDateSelected
-            )
+            // Week Calendar - STICKY (sticks to top when scrolling)
+            stickyHeader(key = "week_calendar") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    SwipeableWeekCalendarStrip(
+                        weeks = weeks,
+                        selectedDate = selectedDate,
+                        onDateSelected = onDateSelected
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
             
-            // Filter/Sort Bar
-            FilterSortBar(
-                searchQuery = searchQuery,
-                sortBy = sortBy,
-                filterLabels = filterLabels,
-                filterPriorities = filterPriorities,
-                filterStatus = filterStatus,
-                isFilterActive = isFilterActive,
-                onSearchQueryChanged = onSearchQueryChanged,
-                onSortChanged = onSortChanged,
-                onFilterLabelToggle = onFilterLabelToggle,
-                onFilterPriorityToggle = onFilterPriorityToggle,
-                onFilterStatusChanged = onFilterStatusChanged,
-                onClearAllFilters = onClearAllFilters
-            )
+            // Filter/Sort Bar (scrolls with content but after calendar)
+            item(key = "filter_bar") {
+                FilterSortBar(
+                    searchQuery = searchQuery,
+                    sortBy = sortBy,
+                    filterLabels = filterLabels,
+                    filterPriorities = filterPriorities,
+                    filterStatus = filterStatus,
+                    isFilterActive = isFilterActive,
+                    onSearchQueryChanged = onSearchQueryChanged,
+                    onSortChanged = onSortChanged,
+                    onFilterLabelToggle = onFilterLabelToggle,
+                    onFilterPriorityToggle = onFilterPriorityToggle,
+                    onFilterStatusChanged = onFilterStatusChanged,
+                    onClearAllFilters = onClearAllFilters
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Timeline List with Loading State
+            // Timeline Content
             when {
                 isLoading -> {
-                    // Shimmer Loading Skeleton
-                    TimelineLoadingSkeleton()
+                    // Shimmer Loading Skeleton items
+                    items(5, key = { "skeleton_$it" }) {
+                        SkeletonTaskItemInline()
+                    }
                 }
                 blocks.isEmpty() -> {
-                    EmptyState(onAddClick = onAddClick)
+                    item(key = "empty") {
+                        EmptyState(onAddClick = onAddClick)
+                    }
                 }
                 else -> {
-                    TimelineList(
-                        blocks = blocks,
-                        onTaskClick = onTaskClick,
-                        onStatusToggle = onStatusToggle,
-                        onSubtaskToggle = onSubtaskToggle
-                    )
+                    // Task items
+                    itemsIndexed(
+                        items = blocks,
+                        key = { _, block -> block.taskId }
+                    ) { index, block ->
+                        val nextBlock = blocks.getOrNull(index + 1)
+                        val showFreeTime = nextBlock != null && 
+                            block.startTime.plus(block.duration).isBefore(nextBlock.startTime)
+                        
+                        TimelineItem(
+                            block = block,
+                            isLast = index == blocks.lastIndex,
+                            onTaskClick = { onTaskClick(block) },
+                            onStatusToggle = { onStatusToggle(block) },
+                            onSubtaskToggle = onSubtaskToggle
+                        )
+                        
+                        if (showFreeTime && nextBlock != null) {
+                            val freeStart = block.startTime.plus(block.duration)
+                            val freeEnd = nextBlock.startTime
+                            val freeMinutes = java.time.Duration.between(freeStart, freeEnd).toMinutes()
+                            
+                            FreeTimeBlock(
+                                startTime = freeStart.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                endTime = freeEnd.format(DateTimeFormatter.ofPattern("HH:mm")),
+                                durationMinutes = freeMinutes.toInt()
+                            )
+                        }
+                    }
+                    
+                    // Bottom padding for FAB
+                    item(key = "bottom_spacer") {
+                        Spacer(modifier = Modifier.height(80.dp))
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Inline skeleton item for LazyColumn
+ */
+@Composable
+private fun SkeletonTaskItemInline() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerTranslateAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmer"
+    )
+    
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(Color(0xFFE2E8F0), Color(0xFFF1F5F9), Color(0xFFE2E8F0)),
+        start = Offset(shimmerTranslateAnim - 500f, 0f),
+        end = Offset(shimmerTranslateAnim, 0f)
+    )
+    
+    SkeletonTaskItem(shimmerBrush)
 }
 
 /**
@@ -344,12 +420,17 @@ fun SwipeableWeekCalendarStrip(
         }
     }
     
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // Ensure white background
+            .padding(bottom = 8.dp)
+    ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
@@ -363,7 +444,7 @@ fun SwipeableWeekCalendarStrip(
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Swipeable week pages
         HorizontalPager(
@@ -390,7 +471,7 @@ fun SwipeableWeekCalendarStrip(
                             .clip(CircleShape)
                             .background(
                                 when {
-                                    isSelected -> MaterialTheme.colorScheme.primary
+                                    isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
                                     else -> Color.Transparent
                                 }
                             )
@@ -408,8 +489,8 @@ fun SwipeableWeekCalendarStrip(
                             text = date.dayOfMonth.toString(),
                             color = when {
                                 isSelected -> Color.White
-                                isToday -> MaterialTheme.colorScheme.primary
-                                else -> MaterialTheme.colorScheme.onBackground
+                                isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
+                                else -> TempusDesignSystem.TextPrimary
                             },
                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 16.sp
@@ -431,6 +512,7 @@ private fun TimelineTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White) // Ensure white background
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -439,14 +521,14 @@ private fun TimelineTopBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                .background(TempusDesignSystem.Primary.copy(alpha = 0.1f)) // Explicit primary tint
                 .clickable { onMonthPickerClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = monthYear,
-                color = MaterialTheme.colorScheme.primary,
+                color = TempusDesignSystem.Primary, // Explicit Primary Blue
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -464,19 +546,10 @@ private fun TimelineTopBar(
             // Garden button - dùng icon cây đẹp hơn
             IconButton(onClick = onGardenClick) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_garden),
+                    imageVector = Icons.Outlined.LocalFlorist,
                     contentDescription = "Garden",
                     tint = Color.Unspecified, // Giữ màu gốc từ drawable
                     modifier = Modifier.size(28.dp)
-                )
-            }
-            
-            // Inbox icon
-            IconButton(onClick = { }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.inbox),
-                    contentDescription = "Inbox",
-                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -493,12 +566,17 @@ fun WeekCalendarStrip(
         week.any { it == selectedDate } 
     } ?: weeks.firstOrNull() ?: return
     
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // Ensure white background
+            .padding(bottom = 8.dp)
+    ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
@@ -512,7 +590,7 @@ fun WeekCalendarStrip(
             }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Day numbers
         Row(
@@ -533,7 +611,7 @@ fun WeekCalendarStrip(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> MaterialTheme.colorScheme.primary
+                                isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
                                 else -> Color.Transparent
                             }
                         )
@@ -551,8 +629,8 @@ fun WeekCalendarStrip(
                         text = date.dayOfMonth.toString(),
                         color = when {
                             isSelected -> Color.White
-                            isToday -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onBackground
+                            isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
+                            else -> TempusDesignSystem.TextPrimary
                         },
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 16.sp
@@ -987,7 +1065,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.inbox),
+            imageVector = Icons.Default.DateRange,
             contentDescription = null,
             tint = TempusDesignSystem.TextMuted.copy(alpha = 0.3f),
             modifier = Modifier.size(100.dp)

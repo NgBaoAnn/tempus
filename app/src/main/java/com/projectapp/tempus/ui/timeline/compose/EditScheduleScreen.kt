@@ -102,6 +102,13 @@ fun EditScheduleScreen(
         }
     }
     
+    // Sync description from state (for edit mode)
+    LaunchedEffect(state.description) {
+        if (descriptionText.isEmpty() && state.description.isNotEmpty()) {
+            descriptionText = state.description
+        }
+    }
+    
     // Sync subtasks from state (for edit mode)
     LaunchedEffect(state.subtasks) {
         subtasks = state.subtasks
@@ -249,7 +256,7 @@ fun EditScheduleScreen(
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Ngày",
-                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale("vi", "VN"))),
+                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
                         onClick = { showDatePicker = true }
                     )
                     
@@ -346,16 +353,23 @@ fun EditScheduleScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Clickable Add icon
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .border(2.dp, EditColors.Primary, CircleShape),
+                                .border(2.dp, EditColors.Primary, CircleShape)
+                                .clickable {
+                                    if (newSubtaskText.isNotBlank()) {
+                                        subtasks = subtasks + newSubtaskText.trim()
+                                        newSubtaskText = ""
+                                    }
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Add,
-                                contentDescription = null,
+                                contentDescription = "Thêm nhiệm vụ con",
                                 tint = EditColors.Primary,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -373,7 +387,7 @@ fun EditScheduleScreen(
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     if (newSubtaskText.isNotBlank()) {
-                                        subtasks = subtasks + newSubtaskText
+                                        subtasks = subtasks + newSubtaskText.trim()
                                         newSubtaskText = ""
                                     }
                                 }
@@ -383,8 +397,28 @@ fun EditScheduleScreen(
                                     Text("Thêm nhiệm vụ con...", color = EditColors.TextHint, fontSize = 16.sp)
                                 }
                                 innerTextField()
-                            }
+                            },
+                            singleLine = true
                         )
+                        
+                        // Add button (visible when there's text)
+                        if (newSubtaskText.isNotBlank()) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = {
+                                    subtasks = subtasks + newSubtaskText.trim()
+                                    newSubtaskText = ""
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Thêm",
+                                    tint = EditColors.Primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -760,7 +794,13 @@ private fun DurationPickerSheet(
         "01:00:00" to "1 giờ",
         "01:30:00" to "1 giờ 30 phút",
         "02:00:00" to "2 giờ",
-        "03:00:00" to "3 giờ"
+        "02:30:00" to "2 giờ 30 phút",
+        "03:00:00" to "3 giờ",
+        "04:00:00" to "4 giờ",
+        "05:00:00" to "5 giờ",
+        "06:00:00" to "6 giờ",
+        "07:00:00" to "7 giờ",
+        "08:00:00" to "8 giờ"
     )
     
     ModalBottomSheet(
@@ -1155,7 +1195,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 2: Delete from today onwards
                 Surface(
@@ -1191,7 +1231,7 @@ private fun DeleteOptionsDialog(
                     }
                 }
                 
-                Divider(color = EditColors.Divider)
+                HorizontalDivider(color = EditColors.Divider)
                 
                 // Option 3: Delete completely
                 Surface(

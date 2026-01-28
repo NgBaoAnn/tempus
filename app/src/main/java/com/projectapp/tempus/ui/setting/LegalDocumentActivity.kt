@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.theme.TempusTheme
 
 /**
@@ -59,12 +60,12 @@ class LegalDocumentActivity : ComponentActivity() {
 // ======================== COLORS ========================
 
 private object LegalColors {
-    val Background = Color(0xFFF2F2F7)
-    val Surface = Color.White
-    val TextPrimary = Color(0xFF000000)
-    val TextSecondary = Color(0xFF6B7280)
-    val Blue = Color(0xFF007AFF)
-    val Divider = Color(0xFFE5E5EA)
+    val Background = TempusDesignSystem.Slate50
+    val Surface = TempusDesignSystem.White
+    val TextPrimary = TempusDesignSystem.TextPrimary
+    val TextSecondary = TempusDesignSystem.TextSecondary
+    val Blue = TempusDesignSystem.Primary
+    val Divider = TempusDesignSystem.Slate200
 }
 
 // ======================== PRIVACY POLICY SCREEN ========================

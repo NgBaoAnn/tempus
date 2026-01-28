@@ -1,6 +1,7 @@
 package com.projectapp.tempus.ui.social.friends.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,11 +52,28 @@ import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 @Composable
 fun FriendsScreen(
     viewModel: FriendsViewModel = viewModel(),
-    onNavigateToChat: (String) -> Unit = {},
-    onNavigateToMessages: () -> Unit = {}
+    onNavigateToChat: (String, String, String?) -> Unit = { _, _, _ -> },
+    onNavigateToMessages: () -> Unit = {},
+    onUserClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSearchDialog by remember { mutableStateOf(false) }
+    
+    // Auto-reload data when screen opens (e.g. returning from Profile after blocking)
+    LaunchedEffect(Unit) {
+        viewModel.loadData()
+        // If on discovery tab, we might want to reload that too, but loadData gets friends/blocked
+        // which drives the filtering. loadAllUsers is usually triggered by tab change or pull-refresh.
+        // But to be safe if user blocked someone, we should refresh blocked list.
+        // loadData() calls getFriends and getPending.
+        // We probably also want to refresh the blocked list explicitly to ensure filters are up to date.
+        viewModel.loadBlockedUsers()
+        
+        // If we are in Discovery tab, reload all users to apply new block filter
+        if (uiState.selectedTab == FriendsTab.DISCOVER) {
+            viewModel.loadAllUsers()
+        }
+    }
     
     // Snackbar state
     val snackbarHostState = remember { SnackbarHostState() }
@@ -128,13 +146,20 @@ fun FriendsScreen(
                     when (uiState.selectedTab) {
                         FriendsTab.DISCOVER -> DiscoverList(
                             users = uiState.discoverUsers,
+                            friends = uiState.friends,
+                            sentRequests = uiState.sentRequests,
+                            pendingRequests = uiState.pendingRequests,
+                            blockedUsers = uiState.blockedUsers,
                             onSendRequest = viewModel::sendFriendRequest,
-                            onRefresh = viewModel::loadAllUsers
+                            onAcceptRequest = viewModel::acceptRequest,
+                            onRefresh = viewModel::loadAllUsers,
+                            onUserClick = onUserClick
                         )
                         FriendsTab.FRIENDS -> FriendsList(
                             friends = uiState.friends,
                             onUnfriend = viewModel::unfriend,
-                            onChat = onNavigateToChat
+                            onChat = onNavigateToChat,
+                            onUserClick = onUserClick
                         )
                         FriendsTab.REQUESTS -> RequestsList(
                             pendingRequests = uiState.pendingRequests,
@@ -328,7 +353,8 @@ private fun FriendsTabBar(
 private fun FriendsList(
     friends: List<Friendship>,
     onUnfriend: (String) -> Unit,
-    onChat: (String) -> Unit
+    onChat: (String, String, String?) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     if (friends.isEmpty()) {
         EmptyState(
@@ -345,7 +371,8 @@ private fun FriendsList(
                 FriendCard(
                     friend = friend,
                     onUnfriend = { onUnfriend(friend.id) },
-                    onChat = { onChat(friend.friendId) }
+                    onChat = { onChat(friend.friendId, friend.friendUsername, friend.friendAvatar) },
+                    onClick = { onUserClick(friend.friendId) }
                 )
             }
         }
@@ -356,12 +383,15 @@ private fun FriendsList(
 private fun FriendCard(
     friend: Friendship,
     onUnfriend: () -> Unit,
-    onChat: () -> Unit
+    onChat: () -> Unit,
+    onClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -636,13 +666,21 @@ private fun UserAvatar(
             .background(TempusDesignSystem.PrimaryLight),
         contentAlignment = Alignment.Center
     ) {
-        // TODO: Load actual avatar with Coil/Glide
-        Text(
-            text = username.firstOrNull()?.uppercase() ?: "?",
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            fontSize = (size / 2).sp
-        )
+        if (!avatarUrl.isNullOrBlank()) {
+            coil.compose.AsyncImage(
+                model = avatarUrl,
+                contentDescription = "Avatar $username",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = username.firstOrNull()?.uppercase() ?: "?",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = (size / 2).sp
+            )
+        }
     }
 }
 
@@ -686,9 +724,21 @@ private fun EmptyState(
 @Composable
 private fun DiscoverList(
     users: List<UserBasicDto>,
+    friends: List<Friendship>,
+    sentRequests: List<FriendRequest>,
+    pendingRequests: List<FriendRequest>,
+    blockedUsers: List<UserBasicDto>,
     onSendRequest: (String) -> Unit,
-    onRefresh: () -> Unit
+    onAcceptRequest: (String) -> Unit,
+    onRefresh: () -> Unit,
+    onUserClick: (String) -> Unit
 ) {
+    // Pre-compute lookup sets for O(1) checks
+    val friendIds = remember(friends) { friends.map { it.friendId }.toSet() }
+    val sentRequestUserIds = remember(sentRequests) { sentRequests.map { it.receiverId }.toSet() }
+    val pendingRequestMap = remember(pendingRequests) { pendingRequests.associateBy { it.senderId } }
+    val blockedUserIds = remember(blockedUsers) { blockedUsers.map { it.id }.toSet() }
+    
     if (users.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.Explore,
@@ -733,9 +783,21 @@ private fun DiscoverList(
             }
             
             items(users, key = { it.id }) { user ->
+                // Determine relationship status
+                val isFriend = user.id in friendIds
+                val isRequestSent = user.id in sentRequestUserIds
+                val pendingRequest = pendingRequestMap[user.id]
+                val isBlocked = user.id in blockedUserIds
+                
                 DiscoverUserCard(
                     user = user,
-                    onSendRequest = { onSendRequest(user.id) }
+                    isFriend = isFriend,
+                    isRequestSent = isRequestSent,
+                    pendingRequestId = pendingRequest?.id,
+                    isBlocked = isBlocked,
+                    onSendRequest = { onSendRequest(user.id) },
+                    onAcceptRequest = { pendingRequest?.id?.let { onAcceptRequest(it) } },
+                    onClick = { onUserClick(user.id) }
                 )
             }
         }
@@ -745,13 +807,22 @@ private fun DiscoverList(
 @Composable
 private fun DiscoverUserCard(
     user: UserBasicDto,
-    onSendRequest: () -> Unit
+    isFriend: Boolean,
+    isRequestSent: Boolean,
+    pendingRequestId: String?,
+    isBlocked: Boolean,
+    onSendRequest: () -> Unit,
+    onAcceptRequest: () -> Unit,
+    onClick: () -> Unit
 ) {
-    var requestSent by remember { mutableStateOf(false) }
+    var localRequestSent by remember { mutableStateOf(false) }
+    val hasSentRequest = isRequestSent || localRequestSent
+    val hasReceivedRequest = pendingRequestId != null
     
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -781,12 +852,21 @@ private fun DiscoverUserCard(
                         .background(TempusDesignSystem.PrimaryLight),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
+                    if (!user.avatar.isNullOrBlank()) {
+                        coil.compose.AsyncImage(
+                            model = user.avatar,
+                            contentDescription = "Avatar ${user.username}",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = user.username.firstOrNull()?.uppercase() ?: "?",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                    }
                 }
             }
             
@@ -811,44 +891,120 @@ private fun DiscoverUserCard(
                 }
             }
             
-            // Action button
-            if (requestSent) {
-                Surface(
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text(
-                        text = "Đã gửi",
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+            // Action button - Priority: Friend > Received Request > Sent Request > Add
+            when {
+                isFriend -> {
+                    // Already friends - show disabled "Friends" indicator
+                    OutlinedButton(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, SocialColors.Secondary.copy(alpha = 0.5f))
+                    ) {
+                        Icon(
+                            Icons.Filled.People,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = SocialColors.Secondary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Bạn bè",
+                            color = SocialColors.Secondary,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
-            } else {
-                FilledTonalButton(
-                    onClick = {
-                        onSendRequest()
-                        requestSent = true
-                    },
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(20.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Icon(
-                        Icons.Filled.PersonAdd,
-                        contentDescription = "Thêm bạn",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        "Thêm",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 13.sp
-                    )
+                hasReceivedRequest -> {
+                    // They sent us a request - show Accept button
+                    FilledTonalButton(
+                        onClick = onAcceptRequest,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = SocialColors.Secondary.copy(alpha = 0.15f),
+                            contentColor = SocialColors.Secondary
+                        ),
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = "Chấp nhận",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Chấp nhận",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                isBlocked -> {
+                    // User is blocked - show "Blocked" indicator
+                    OutlinedButton(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, TempusDesignSystem.Error.copy(alpha = 0.5f))
+                    ) {
+                        Icon(
+                            Icons.Filled.Block,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = TempusDesignSystem.Error
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Đã chặn",
+                            color = TempusDesignSystem.Error,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                hasSentRequest -> {
+                    // We sent them a request - show "Sent" / "View"
+                    OutlinedButton(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    ) {
+                        Text(
+                            "Đã gửi",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                else -> {
+                    // No relationship - show Add button
+                    FilledTonalButton(
+                        onClick = {
+                            onSendRequest()
+                            localRequestSent = true
+                        },
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.PersonAdd,
+                            contentDescription = "Thêm bạn",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Thêm",
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         }

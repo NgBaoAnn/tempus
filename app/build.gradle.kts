@@ -70,6 +70,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.1.3")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.3")
     implementation("io.github.jan-tennert.supabase:storage-kt:2.1.3")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.1.3")
     implementation("io.ktor:ktor-client-android:2.3.12")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
@@ -147,4 +148,9 @@ dependencies {
 
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Google Sign-In with Credential Manager (Modern approach)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

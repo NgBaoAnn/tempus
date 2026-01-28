@@ -16,11 +16,11 @@ data class FriendRequestSimpleDto(
     val senderId: String,
     @SerialName("receiver_id")
     val receiverId: String,
-    val status: String,
+    val status: String? = null,
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String? = null,
     @SerialName("updated_at")
-    val updatedAt: String
+    val updatedAt: String? = null  // Nullable vì có thể chưa được set
 ) {
     fun toDomain(): FriendRequest {
         return FriendRequest(
@@ -31,14 +31,14 @@ data class FriendRequestSimpleDto(
             receiverId = receiverId,
             receiverUsername = "User", // Placeholder
             receiverAvatar = null,
-            status = FriendRequestStatus.fromString(status),
+            status = FriendRequestStatus.fromString(status ?: "pending"),
             createdAt = try {
-                Instant.parse(createdAt)
+                createdAt?.let { Instant.parse(it) } ?: Instant.now()
             } catch (e: Exception) {
                 Instant.now()
             },
             updatedAt = try {
-                Instant.parse(updatedAt)
+                updatedAt?.let { Instant.parse(it) } ?: Instant.now()
             } catch (e: Exception) {
                 Instant.now()
             }
@@ -57,7 +57,7 @@ data class FriendshipSimpleDto(
     @SerialName("user2_id")
     val user2Id: String,
     @SerialName("created_at")
-    val createdAt: String
+    val createdAt: String? = null  // Nullable để tương thích với database
 )
 
 /**
@@ -71,5 +71,23 @@ data class BlockedUserSimpleDto(
     @SerialName("blocked_id")
     val blockedId: String,
     @SerialName("created_at")
-    val createdAt: String
+    val createdAt: String? = null  // Nullable để tương thích với database
+)
+
+/**
+ * Helper DTO for decoding blocked_id only
+ */
+@Serializable
+data class BlockedIdDto(
+    @SerialName("blocked_id")
+    val blockedId: String
+)
+
+/**
+ * Helper DTO for decoding blocker_id only
+ */
+@Serializable
+data class BlockerIdDto(
+    @SerialName("blocker_id")
+    val blockerId: String
 )
