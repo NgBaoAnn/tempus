@@ -20,6 +20,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.lifecycleScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.projectapp.tempus.MainActivity
 import com.projectapp.tempus.R
@@ -93,11 +94,11 @@ class LoginActivity : ComponentActivity() {
                 val credentialManager = CredentialManager.create(this@LoginActivity)
                 
                 // Tạo Google ID Option với Web Client ID
-                val googleIdOption = GetGoogleIdOption.Builder()
-                    .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(getString(R.string.google_web_client_id))
-                    .build()
-                
+                val googleIdOption = GetSignInWithGoogleOption.Builder(
+                    getString(R.string.google_web_client_id)
+                ).build()
+
+
                 // Tạo request để lấy credential
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
@@ -157,7 +158,13 @@ class LoginActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 authService.resetPassword(email)
-                Toast.makeText(this@LoginActivity, "Vui lòng kiểm tra email để đặt lại mật khẩu", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@LoginActivity, "Mã xác nhận đã được gửi tới email", Toast.LENGTH_LONG).show()
+                
+                // Navigate to VerifyOtpActivity
+                val intent = Intent(this@LoginActivity, VerifyOtpActivity::class.java)
+                intent.putExtra("EMAIL", email)
+                startActivity(intent)
+                
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Reset Password Error", e)
                 Toast.makeText(this@LoginActivity, "Lỗi: Không thể gửi email khôi phục", Toast.LENGTH_LONG).show()
