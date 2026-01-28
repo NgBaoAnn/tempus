@@ -252,12 +252,14 @@ fun EditScheduleScreen(
             // ============ CARD 2: Settings ============
             ModernCard {
                 Column {
-                    // Date
+                    // Date - In edit mode, show the date user clicked on timeline and disable picker
+                    val displayDate = if (state.isEditMode) state.selectedDate else state.date
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Ngày",
-                        value = state.date.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
-                        onClick = { showDatePicker = true }
+                        value = displayDate.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
+                        enabled = !state.isEditMode, // Disable date change in edit mode
+                        onClick = { if (!state.isEditMode) showDatePicker = true }
                     )
                     
                     ModernDivider()
