@@ -92,8 +92,28 @@ class AuthService(
 
     /**
      * Đăng xuất và xóa Session trong máy
+     * @param syncBeforeLogout Nếu true, sẽ push pending changes lên server trước khi logout
+     * @param context Context để access SyncManager (cần cho auto-sync)
      */
-    suspend fun logout() {
+    suspend fun logout(
+        syncBeforeLogout: Boolean = true,
+        context: android.content.Context? = null
+    ) {
+        // Auto-sync: Push pending changes before logout
+        if (syncBeforeLogout && context != null) {
+            try {
+                val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(context)
+                val result = syncManager.pushToServer()
+                android.util.Log.d("AuthService", "Auto-sync before logout: ${result.getOrNull()?.summary() ?: "failed"}")
+            } catch (e: Exception) {
+                android.util.Log.e("AuthService", "Auto-sync failed, continuing with logout", e)
+                // Continue with logout even if sync fails
+            }
+        }
+        
+        // Clear local repository cache
+        com.projectapp.tempus.data.RepositoryProvider.clear()
+        
         supabaseClient.auth.signOut()
     }
 }

@@ -309,8 +309,27 @@ class SettingsFragment : Fragment() {
     }
 
     private fun logout() {
-        val intent = Intent(requireContext(), LoginActivity::class.java)
-        startActivity(intent)
-        requireActivity().finish()
+        lifecycleScope.launch {
+            try {
+                Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                
+                // Call AuthService logout with context for auto-sync push
+                val authService = com.projectapp.tempus.data.auth.AuthService(SupabaseClientProvider.client)
+                authService.logout(
+                    syncBeforeLogout = true,
+                    context = requireContext()
+                )
+                
+                Toast.makeText(requireContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                android.util.Log.e("Settings", "Logout error", e)
+                // Continue to login screen even if logout fails
+            }
+            
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 }

@@ -73,6 +73,22 @@ class LoginActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 authService.login(email, password)
+                
+                // Auto-sync: Pull data from Supabase to local Room
+                val userId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                    .auth.currentUserOrNull()?.id
+                if (userId != null) {
+                    try {
+                        Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                        val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
+                        val result = syncManager.pullFromServer(userId)
+                        Log.d("LoginActivity", "Auto-sync after login: ${result.getOrNull()} items synced")
+                    } catch (e: Exception) {
+                        Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
+                        // Continue to main screen even if sync fails
+                    }
+                }
+                
                 Toast.makeText(this@LoginActivity, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
@@ -124,6 +140,20 @@ class LoginActivity : ComponentActivity() {
                     
                     // Đăng nhập với Supabase sử dụng ID Token
                     authService.signInWithGoogle(idToken)
+                    
+                    // Auto-sync: Pull data from Supabase to local Room
+                    val userId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
+                        .auth.currentUserOrNull()?.id
+                    if (userId != null) {
+                        try {
+                            Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                            val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
+                            val syncResult = syncManager.pullFromServer(userId)
+                            Log.d("LoginActivity", "Auto-sync after Google login: ${syncResult.getOrNull()} items synced")
+                        } catch (e: Exception) {
+                            Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
+                        }
+                    }
                     
                     Toast.makeText(this@LoginActivity, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
