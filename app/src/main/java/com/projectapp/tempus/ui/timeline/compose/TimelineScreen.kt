@@ -120,12 +120,14 @@ fun TimelineScreen(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
+                        .scalePressEffect()
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             brush = Brush.linearGradient(TempusDesignSystem.Gradients.Success)
                         )
-                        .clickable { onVoiceClick() }
-                        .scalePressEffect(),
+                        .clickable(
+                            onClick = { onVoiceClick() }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -140,12 +142,14 @@ fun TimelineScreen(
                 Box(
                     modifier = Modifier
                         .size(56.dp)
+                        .scalePressEffect()
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             brush = Brush.linearGradient(TempusDesignSystem.Gradients.Primary)
                         )
-                        .clickable { onAddClick() }
-                        .scalePressEffect(),
+                        .clickable(
+                            onClick = { onAddClick() }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -651,7 +655,10 @@ fun WeekCalendarStrip(
                                     .clip(CircleShape)
                             } else Modifier
                         )
-                        .clickable { onDateSelected(date) },
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onDateSelected(date) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
