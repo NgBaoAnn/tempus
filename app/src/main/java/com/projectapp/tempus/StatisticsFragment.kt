@@ -13,8 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
-import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.domain.usecase.GetStatisticsUseCase
 import com.projectapp.tempus.ui.statistics.compose.StatisticsScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
@@ -26,9 +25,10 @@ class StatisticsFragment : Fragment() {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository()
+                // Use RepositoryProvider for offline-first repositories
+                val repo = RepositoryProvider.getScheduleRepository(requireContext())
                 val useCase = GetStatisticsUseCase()
-                val gamificationRepo = SupabaseGamificationRepository()
+                val gamificationRepo = RepositoryProvider.getGamificationRepository(requireContext())
                 @Suppress("UNCHECKED_CAST")
                 return StatisticsViewModel(myUserId, repo, useCase, gamificationRepo) as T
             }
