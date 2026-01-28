@@ -129,7 +129,7 @@ private fun TreeDetailScreen(
                         scope.launch {
                             isDeleting = true
                             try {
-                                repository.deleteTree(treeId)
+                                repository.killTree(treeId)
                                 Toast.makeText(context, "Đã xóa $initialName", Toast.LENGTH_SHORT).show()
                                 onBack()
                             } catch (e: Exception) {
