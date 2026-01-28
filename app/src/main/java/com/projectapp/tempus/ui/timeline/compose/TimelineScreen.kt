@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Park
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -460,12 +461,13 @@ private fun TimelineTopBar(
         
         // Right icons
         Row {
-            // Garden button
+            // Garden button - dùng icon cây đẹp hơn
             IconButton(onClick = onGardenClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_garden),
                     contentDescription = "Garden",
-                    tint = Color(0xFF10B981) // Green color for garden
+                    tint = Color.Unspecified, // Giữ màu gốc từ drawable
+                    modifier = Modifier.size(28.dp)
                 )
             }
             
