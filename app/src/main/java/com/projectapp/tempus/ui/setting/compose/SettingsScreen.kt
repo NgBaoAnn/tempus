@@ -243,13 +243,14 @@ fun SettingsScreen(
                     imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Đăng xuất",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
             

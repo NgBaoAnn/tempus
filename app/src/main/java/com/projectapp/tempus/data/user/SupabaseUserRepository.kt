@@ -30,7 +30,7 @@ class SupabaseUserRepository(
         
         // Cache profile data for offline use
         val email = supabase.auth.currentUserOrNull()?.email ?: ""
-        UserProfileCache.saveProfile(user.username, email, user.avatar)
+        UserProfileCache.saveProfile(user.username, email, user.avatar, user.themeColor)
         
         return user
     }
@@ -75,5 +75,22 @@ class SupabaseUserRepository(
         UserProfileCache.saveProfile(user.username, email, publicUrl)
 
         return publicUrl
+    }
+    
+    /**
+     * Update only the theme_color for current user
+     */
+    override suspend fun updateThemeColor(themeColor: String) {
+        val userId = supabase.auth.currentUserOrNull()?.id
+            ?: return // Silently fail if not logged in
+        
+        supabase.from("users")
+            .update(
+                mapOf("theme_color" to themeColor)
+            ) {
+                filter {
+                    eq("id", userId)
+                }
+            }
     }
 }

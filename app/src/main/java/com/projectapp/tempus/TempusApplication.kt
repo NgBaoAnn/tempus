@@ -18,6 +18,8 @@ class TempusApplication : Application(), ImageLoaderFactory {
         super.onCreate()
         // Initialize UserProfileCache
         UserProfileCache.init(this)
+        // Initialize ThemeManager (loads saved theme preference)
+        com.projectapp.tempus.ui.theme.ThemeManager.init(this)
     }
     
     /**

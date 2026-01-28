@@ -9,12 +9,13 @@ import android.content.SharedPreferences
 data class CachedProfile(
     val username: String,
     val email: String,
-    val avatarUrl: String?
+    val avatarUrl: String?,
+    val themeMode: String? = null // "light", "dark", "system"
 )
 
 /**
  * Singleton cache for user profile data using SharedPreferences
- * Stores name, email, and avatar URL offline for use across Settings and Personal screens
+ * Stores name, email, avatar URL, and theme preference offline
  */
 object UserProfileCache {
     
@@ -22,6 +23,12 @@ object UserProfileCache {
     private const val KEY_USERNAME = "username"
     private const val KEY_EMAIL = "email"
     private const val KEY_AVATAR_URL = "avatar_url"
+    private const val KEY_THEME_MODE = "theme_mode"
+    
+    // Default theme mode
+    const val THEME_SYSTEM = "system"
+    const val THEME_LIGHT = "light"
+    const val THEME_DARK = "dark"
     
     private var prefs: SharedPreferences? = null
     
@@ -38,13 +45,31 @@ object UserProfileCache {
     /**
      * Save profile data to cache
      */
-    fun saveProfile(username: String, email: String, avatarUrl: String?) {
+    fun saveProfile(username: String, email: String, avatarUrl: String?, themeMode: String? = null) {
         prefs?.edit()?.apply {
             putString(KEY_USERNAME, username)
             putString(KEY_EMAIL, email)
             putString(KEY_AVATAR_URL, avatarUrl)
+            if (themeMode != null) {
+                putString(KEY_THEME_MODE, themeMode)
+            }
             apply()
         }
+    }
+    
+    /**
+     * Save theme mode to cache
+     */
+    fun saveThemeMode(themeMode: String) {
+        prefs?.edit()?.putString(KEY_THEME_MODE, themeMode)?.apply()
+    }
+    
+    /**
+     * Get cached theme mode
+     * Returns "system" as default if not set
+     */
+    fun getThemeMode(): String {
+        return prefs?.getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
     }
     
     /**
@@ -57,8 +82,9 @@ object UserProfileCache {
         val username = prefs.getString(KEY_USERNAME, null) ?: return null
         val email = prefs.getString(KEY_EMAIL, null) ?: return null
         val avatarUrl = prefs.getString(KEY_AVATAR_URL, null)
+        val themeMode = prefs.getString(KEY_THEME_MODE, THEME_SYSTEM)
         
-        return CachedProfile(username, email, avatarUrl)
+        return CachedProfile(username, email, avatarUrl, themeMode)
     }
     
     /**

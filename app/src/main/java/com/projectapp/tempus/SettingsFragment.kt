@@ -26,6 +26,7 @@ import com.projectapp.tempus.ui.setting.LegalDocumentActivity
 import com.projectapp.tempus.ui.setting.PersonalizationActivity
 import com.projectapp.tempus.ui.setting.ProfileActivity
 import com.projectapp.tempus.ui.setting.SettingsViewModel
+import com.projectapp.tempus.ui.setting.ThemeSettingsActivity
 import com.projectapp.tempus.ui.setting.compose.SettingsScreen
 import com.projectapp.tempus.ui.setting.compose.UserInfo
 import com.projectapp.tempus.ui.theme.TempusTheme
@@ -129,7 +130,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun onThemeClick() {
-        Toast.makeText(requireContext(), "Cài đặt giao diện", Toast.LENGTH_SHORT).show()
+        val intent = Intent(requireContext(), ThemeSettingsActivity::class.java)
+        startActivity(intent)
     }
     
     private fun navigateToPrivacyPolicy() {

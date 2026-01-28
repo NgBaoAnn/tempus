@@ -33,7 +33,14 @@ class SettingsViewModel : ViewModel() {
                 
                 // Then try to fetch fresh data from network
                 // This will update the cache and refresh the UI if successful
-                _user.value = userUseCases.getCurrentUser()
+                val fetchedUser = userUseCases.getCurrentUser()
+                _user.value = fetchedUser
+                
+                // Update theme from fetched user data
+                fetchedUser.themeColor?.takeIf { it.isNotEmpty() }?.let { themeColor ->
+                    val mode = com.projectapp.tempus.ui.theme.ThemeMode.fromValue(themeColor)
+                    com.projectapp.tempus.ui.theme.ThemeManager.updateThemeLocally(mode)
+                }
             } catch (e: Exception) {
                 // If network fetch fails, keep showing cached data (already set above)
                 // Only log error, don't crash
