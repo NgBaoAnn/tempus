@@ -9,7 +9,7 @@ import com.projectapp.tempus.data.personalization.CustomTimePeriod
 import com.projectapp.tempus.data.personalization.LifestylePreset
 import com.projectapp.tempus.data.personalization.PersonalizationSettings
 import com.projectapp.tempus.data.personalization.SharedPrefsPersonalizationRepository
-import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.schedule.dto.RepeatType
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.data.schedule.dto.SourceType
@@ -63,7 +63,8 @@ enum class TimePickerTarget {
 class PersonalizationViewModel(application: Application) : AndroidViewModel(application) {
 
     private val personalizationRepo = SharedPrefsPersonalizationRepository(application)
-    private val scheduleRepo = SupabaseScheduleRepository()
+    // Use OfflineFirstScheduleRepository for offline-first functionality
+    private val scheduleRepo = RepositoryProvider.getScheduleRepository(application)
 
     private val _uiState = MutableStateFlow(PersonalizationUiState())
     val uiState = _uiState.asStateFlow()
