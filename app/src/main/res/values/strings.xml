@@ -30,4 +30,7 @@
 
     <!-- Widget -->
     <string name="widget_description">Hiển thị công việc hôm nay</string>
+
+    <!-- Google Sign-In -->
+    <string name="google_web_client_id">1033092420951-61vs9de72uhs85rqfc3dgop9uv0getu3.apps.googleusercontent.com</string>
 </resources>
