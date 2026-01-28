@@ -130,9 +130,22 @@ class AuthService(
             
             // 4. Clear local Room data để đảm bảo data isolation giữa các users
             try {
+                // Clear Schedule data
                 val localRepo = com.projectapp.tempus.data.RepositoryProvider.getLocalRepository(context)
                 localRepo.clearAllLocalData()
-                android.util.Log.d("AuthService", "Cleared local Room data after logout")
+                android.util.Log.d("AuthService", "Cleared Schedule data")
+                
+                // Clear Gamification data
+                val gamificationDb = com.projectapp.tempus.data.gamification.GamificationDatabase.getDatabase(context)
+                gamificationDb.clearAllTables()
+                android.util.Log.d("AuthService", "Cleared Gamification data")
+                
+                // Clear Notes data
+                val notesRepo = com.projectapp.tempus.data.RepositoryProvider.getNotesRepository(context)
+                notesRepo.clearAllNotes()
+                android.util.Log.d("AuthService", "Cleared Notes data")
+                
+                android.util.Log.d("AuthService", "Cleared ALL local Room data after logout")
             } catch (e: Exception) {
                 android.util.Log.e("AuthService", "Failed to clear local data", e)
             }

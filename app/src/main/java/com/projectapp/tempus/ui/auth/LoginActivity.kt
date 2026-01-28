@@ -80,9 +80,22 @@ class LoginActivity : ComponentActivity() {
                 if (userId != null) {
                     try {
                         Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                        
+                        // 1. Pull Schedule data
                         val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
-                        val result = syncManager.pullFromServer(userId)
-                        Log.d("LoginActivity", "Auto-sync after login: ${result.getOrNull()} items synced")
+                        val scheduleResult = syncManager.pullFromServer(userId)
+                        Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
+                        
+                        // 2. Pull Gamification data
+                        val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
+                        val gamificationResult = gamificationSyncManager.pullFromServer()
+                        Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
+                        
+                        // 3. Pull Notes data
+                        val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
+                        val notesResult = notesSyncManager.pullFromServer(userId)
+                        Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
+                        
                     } catch (e: Exception) {
                         Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
                         // Continue to main screen even if sync fails
@@ -146,9 +159,22 @@ class LoginActivity : ComponentActivity() {
                     if (userId != null) {
                         try {
                             Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                            
+                            // 1. Pull Schedule data
                             val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
-                            val syncResult = syncManager.pullFromServer(userId)
-                            Log.d("LoginActivity", "Auto-sync after Google login: ${syncResult.getOrNull()} items synced")
+                            val scheduleResult = syncManager.pullFromServer(userId)
+                            Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
+                            
+                            // 2. Pull Gamification data
+                            val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
+                            val gamificationResult = gamificationSyncManager.pullFromServer()
+                            Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
+                            
+                            // 3. Pull Notes data
+                            val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
+                            val notesResult = notesSyncManager.pullFromServer(userId)
+                            Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
+                            
                         } catch (e: Exception) {
                             Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
                         }
