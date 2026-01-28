@@ -1,6 +1,9 @@
 package com.projectapp.tempus.ui.setting.profile
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -9,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -16,6 +20,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +35,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,103 +85,89 @@ fun ProfileScreen(
         }
     }
     
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Hồ sơ cá nhân") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        }
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         if (uiState.isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Avatar
-                ProfileAvatar(
+                // Modern Header with Gradient
+                ProfileHeader(
                     avatarUrl = uiState.avatarUrl,
-                    onAvatarClick = { 
-                        avatarPicker.launch("image/*")
-                    }
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Name with edit button
-                ProfileName(
                     name = uiState.fullName,
-                    onEditClick = { showEditDialog = true }
+                    email = uiState.email,
+                    memberSince = uiState.memberSince,
+                    onBackClick = onBack,
+                    onAvatarClick = { avatarPicker.launch("image/*") },
+                    onEditNameClick = { showEditDialog = true }
                 )
                 
-                // Email
-                Text(
-                    text = uiState.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                // Stats Section
-                Text(
-                    text = "📊 Thống kê",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                StatsRow(
-                    points = uiState.totalPoints,
-                    streak = uiState.currentStreak,
-                    trees = uiState.treeCount
-                )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Garden Link
-                GardenLinkCard(onClick = onNavigateToGarden)
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Member since
-                if (uiState.memberSince.isNotEmpty()) {
+                // Content Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Stats Section Title
                     Text(
-                        text = "📅 Thành viên từ: ${uiState.memberSince}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        text = "Thống kê",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Modern Stats Grid
+                    ModernStatsGrid(
+                        points = uiState.totalPoints,
+                        streak = uiState.currentStreak,
+                        trees = uiState.treeCount
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Quick Actions Section
+                    Text(
+                        text = "Truy cập nhanh",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Garden Link Card - Modern Style
+                    ModernActionCard(
+                        emoji = "🌳",
+                        title = "Vườn cây của tôi",
+                        subtitle = "Xem bộ sưu tập cây",
+                        onClick = onNavigateToGarden
+                    )
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
-                
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
     
     // Edit Name Dialog
     if (showEditDialog) {
-        EditNameDialog(
+        ModernEditNameDialog(
             currentName = uiState.fullName,
             isSaving = uiState.isSaving,
             onDismiss = { showEditDialog = false },
@@ -184,21 +179,141 @@ fun ProfileScreen(
     }
 }
 
+// ======================== MODERN HEADER ========================
+
 @Composable
-private fun ProfileAvatar(
+private fun ProfileHeader(
     avatarUrl: String?,
-    onAvatarClick: () -> Unit
+    name: String,
+    email: String,
+    memberSince: String,
+    onBackClick: () -> Unit,
+    onAvatarClick: () -> Unit,
+    onEditNameClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(100.dp)
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 48.dp, bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Back button row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Quay lại",
+                        tint = Color.White
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Avatar with glow effect
+            ModernAvatar(
+                avatarUrl = avatarUrl,
+                onAvatarClick = onAvatarClick
+            )
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Name with edit
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = name.ifEmpty { "Chưa đặt tên" },
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                
+                IconButton(
+                    onClick = onEditNameClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Chỉnh sửa",
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.White.copy(alpha = 0.9f)
+                    )
+                }
+            }
+            
+            // Email
+            Text(
+                text = email,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.85f)
+            )
+            
+            // Member since badge
+            if (memberSince.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.White.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = "📅 Thành viên từ $memberSince",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernAvatar(
+    avatarUrl: String?,
+    onAvatarClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(),
+        label = "avatarScale"
+    )
+    
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .scale(scale)
+            .shadow(12.dp, CircleShape)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onAvatarClick),
+            .border(4.dp, Color.White.copy(alpha = 0.3f), CircleShape)
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onAvatarClick
+            ),
         contentAlignment = Alignment.Center
     ) {
-        // Use AsyncImage for everything to maintain stable node structure
-        // If avatarUrl is null, it acts as if loading model=null, triggering fallback/error
         AsyncImage(
             model = coil.request.ImageRequest.Builder(LocalContext.current)
                 .data(avatarUrl)
@@ -207,63 +322,35 @@ private fun ProfileAvatar(
             contentDescription = "Avatar",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            // Use fallback/error painter to show the icon if no image
-            error = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
-            fallback = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),
-            placeholder = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person)
+            error = rememberVectorPainter(Icons.Default.Person),
+            fallback = rememberVectorPainter(Icons.Default.Person),
+            placeholder = rememberVectorPainter(Icons.Default.Person)
         )
         
-        // Edit icon overlay
+        // Camera overlay
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .background(MaterialTheme.colorScheme.primary, CircleShape)
-                .padding(4.dp)
+                .offset(x = (-4).dp, y = (-4).dp)
+                .size(36.dp)
+                .shadow(4.dp, CircleShape)
+                .background(MaterialTheme.colorScheme.primary, CircleShape),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Change Avatar",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onPrimary
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = "Đổi ảnh",
+                modifier = Modifier.size(18.dp),
+                tint = Color.White
             )
         }
     }
 }
 
-@Composable
-private fun ProfileName(
-    name: String,
-    onEditClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        // Invisible spacer to balance the IconButton on the right, ensuring Text is centered
-        Spacer(modifier = Modifier.width(48.dp))
-        
-        Text(
-            text = name.ifEmpty { "Chưa đặt tên" },
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        
-        IconButton(onClick = onEditClick) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Chỉnh sửa tên",
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
+// ======================== MODERN STATS ========================
 
 @Composable
-private fun StatsRow(
+private fun ModernStatsGrid(
     points: Int,
     streak: Int,
     trees: Int
@@ -272,32 +359,36 @@ private fun StatsRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard(
+        ModernStatCard(
             emoji = "🎯",
             value = points.toString(),
-            label = "Điểm",
+            label = "Điểm tích lũy",
+            accentColor = Color(0xFF3B82F6),
             modifier = Modifier.weight(1f)
         )
-        StatCard(
+        ModernStatCard(
             emoji = "🔥",
             value = streak.toString(),
-            label = "Streak",
+            label = "Ngày streak",
+            accentColor = Color(0xFFF59E0B),
             modifier = Modifier.weight(1f)
         )
-        StatCard(
+        ModernStatCard(
             emoji = "🌳",
             value = trees.toString(),
-            label = "Cây",
+            label = "Cây đã trồng",
+            accentColor = Color(0xFF10B981),
             modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun StatCard(
+private fun ModernStatCard(
     emoji: String,
     value: String,
     label: String,
+    accentColor: Color,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -311,65 +402,128 @@ private fun StatCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(vertical = 20.dp, horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = emoji,
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            // Emoji with background
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(
+                        accentColor.copy(alpha = 0.12f),
+                        RoundedCornerShape(12.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = emoji,
+                    fontSize = 22.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                maxLines = 1
             )
         }
     }
 }
 
+// ======================== ACTION CARD ========================
+
 @Composable
-private fun GardenLinkCard(onClick: () -> Unit) {
+private fun ModernActionCard(
+    emoji: String,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(),
+        label = "cardScale"
+    )
+    
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🌳", fontSize = 24.sp)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Vườn cây của tôi",
-                    style = MaterialTheme.typography.titleMedium
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Emoji container
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            Color(0xFF10B981).copy(alpha = 0.12f),
+                            RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = emoji, fontSize = 24.sp)
+                }
+                
+                Column {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+            
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
+// ======================== EDIT DIALOG ========================
+
 @Composable
-private fun EditNameDialog(
+private fun ModernEditNameDialog(
     currentName: String,
     isSaving: Boolean,
     onDismiss: () -> Unit,
@@ -379,25 +533,39 @@ private fun EditNameDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Chỉnh sửa tên") },
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = { 
+            Text(
+                "Chỉnh sửa tên",
+                fontWeight = FontWeight.Bold
+            ) 
+        },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Tên của bạn") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                )
             )
         },
         confirmButton = {
             Button(
                 onClick = { onSave(name) },
-                enabled = !isSaving && name.isNotBlank()
+                enabled = !isSaving && name.isNotBlank(),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White
                     )
                 } else {
                     Text("Lưu")
@@ -405,7 +573,10 @@ private fun EditNameDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
                 Text("Hủy")
             }
         }

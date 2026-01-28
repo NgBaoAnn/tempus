@@ -21,7 +21,7 @@ class ProfileActivity : ComponentActivity() {
                     onNavigateToGarden = {
                         // Navigate to MainActivity with Garden tab selected
                         val intent = Intent(this, MainActivity::class.java).apply {
-                            putExtra("navigate_to", "garden")
+                            putExtra("NAVIGATE_TO", "garden")
                             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         }
                         startActivity(intent)
