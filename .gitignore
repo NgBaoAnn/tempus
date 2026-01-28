@@ -21,3 +21,4 @@ local.properties
 # Build outputs
 app/build/
 build_output.txt
+.shared/

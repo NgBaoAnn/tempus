@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.projectapp.tempus.ui.social.friends.compose.SocialColors
-import com.projectapp.tempus.ui.social.messages.ConversationWithUser
+import com.projectapp.tempus.domain.social.model.ConversationWithUser
 import com.projectapp.tempus.ui.social.messages.MessagesViewModel
 import java.time.Instant
 import java.time.ZoneId

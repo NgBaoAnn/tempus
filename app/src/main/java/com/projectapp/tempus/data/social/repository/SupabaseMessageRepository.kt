@@ -1,214 +1,322 @@
 package com.projectapp.tempus.data.social.repository
 
+import android.util.Log
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.social.dto.*
-import io.github.jan.supabase.SupabaseClient
+import com.projectapp.tempus.domain.social.model.ConversationWithUser
+import com.projectapp.tempus.domain.social.model.UserBasicInfo
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.realtime.PostgresAction
-import io.github.jan.supabase.realtime.channel
-import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.realtime.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.time.Instant
 
 /**
- * Implementation của MessageRepository sử dụng Supabase
+ * Implementation của MessageRepository sử dụng Supabase Realtime
  */
-class SupabaseMessageRepository(
-    private val supabase: SupabaseClient = SupabaseClientProvider.client
-) : MessageRepository {
-
+class SupabaseMessageRepository : MessageRepository {
+    
+    private val supabase = SupabaseClientProvider.client
+    private var currentChannel: RealtimeChannel? = null
+    
+    companion object {
+        private const val TAG = "SupabaseMessageRepo"
+    }
+    
     private fun getCurrentUserId(): String {
         return supabase.auth.currentUserOrNull()?.id 
             ?: throw IllegalStateException("User not authenticated")
     }
-
-    override suspend fun getConversations(): Result<List<ConversationDto>> {
-        return runCatching {
-            val currentUserId = getCurrentUserId()
-            
-            supabase.from("conversations")
-                .select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at")) {
-                    filter {
-                        or {
-                            eq("participant1_id", currentUserId)
-                            eq("participant2_id", currentUserId)
-                        }
-                    }
-                    order("last_message_at", Order.DESCENDING)
-                }
-                .decodeList<ConversationDto>()
-        }
-    }
-
-    override suspend fun getMessages(conversationId: String): Result<List<MessageDto>> {
-        return runCatching {
-            supabase.from("messages")
-                .select(Columns.raw("id, conversation_id, sender_id, content, message_type, is_read, created_at")) {
-                    filter {
-                        eq("conversation_id", conversationId)
-                    }
-                    order("created_at", Order.ASCENDING)
-                    limit(100)
-                }
-                .decodeList<MessageDto>()
-        }
-    }
-
-    override suspend fun sendMessage(conversationId: String, content: String): Result<MessageDto> {
-        return runCatching {
-            val currentUserId = getCurrentUserId()
-            val now = Instant.now().toString()
-            
-            // 1. Insert message
-            val messageDto = CreateMessageDto(
-                conversationId = conversationId,
-                senderId = currentUserId,
-                content = content
-            )
-            
-            val result = supabase.from("messages")
-                .insert(messageDto) {
-                    select(Columns.raw("id, conversation_id, sender_id, content, message_type, is_read, created_at"))
-                }
-                .decodeSingle<MessageDto>()
-            
-            // 2. Update conversation with last message info
-            val updateDto = UpdateConversationDto(
-                lastMessageAt = now,
-                lastMessagePreview = content.take(100)
-            )
-            
-            supabase.from("conversations")
-                .update(updateDto) {
-                    filter {
-                        eq("id", conversationId)
+    
+    // ============================================
+    // CONVERSATIONS
+    // ============================================
+    
+    override suspend fun getConversations(): Result<List<ConversationWithUser>> = runCatching {
+        val currentUserId = getCurrentUserId()
+        
+        // Lấy danh sách blocked users để filter
+        val blockedUserIds = getBlockedUserIds()
+        
+        // Lấy tất cả conversations của user
+        val conversations = supabase.from("conversations")
+            .select {
+                filter {
+                    or {
+                        eq("participant1_id", currentUserId)
+                        eq("participant2_id", currentUserId)
                     }
                 }
-            
-            result
-        }
-    }
-
-    override suspend fun getOrCreateConversation(otherUserId: String): Result<ConversationDto> {
-        return runCatching {
-            val currentUserId = getCurrentUserId()
-            
-            // 1. Try to find existing first
-            val existing = supabase.from("conversations")
-                .select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at")) {
-                    filter {
-                        or {
-                            and {
-                                eq("participant1_id", currentUserId)
-                                eq("participant2_id", otherUserId)
-                            }
-                            and {
-                                eq("participant1_id", otherUserId)
-                                eq("participant2_id", currentUserId)
-                            }
-                        }
-                    }
-                    limit(1)
-                }
-                .decodeList<ConversationDto>()
-            
-            if (existing.isNotEmpty()) {
-                return@runCatching existing.first()
+                order("last_message_at", Order.DESCENDING)
+            }
+            .decodeList<ConversationDto>()
+        
+        // Lấy thông tin user cho mỗi conversation
+        val result = conversations.mapNotNull { conv ->
+            val otherUserId = if (conv.participant1Id == currentUserId) {
+                conv.participant2Id
+            } else {
+                conv.participant1Id
             }
             
-            // 2. If not found, try to create new
-            // IMPORTANT: Database has check constraint requiring participant1_id < participant2_id
-            // So we must sort the IDs before inserting
-            try {
-                val (p1, p2) = if (currentUserId < otherUserId) {
-                    currentUserId to otherUserId
-                } else {
-                    otherUserId to currentUserId
-                }
-                
-                val createDto = CreateConversationDto(
-                    participant1Id = p1,
-                    participant2Id = p2
+            // Skip blocked users
+            if (otherUserId in blockedUserIds) {
+                return@mapNotNull null
+            }
+            
+            // Fetch user info
+            val userInfo = fetchUserBasicInfo(otherUserId)
+            if (userInfo != null) {
+                ConversationWithUser(
+                    conversation = conv,
+                    otherUser = userInfo
                 )
-                
-                supabase.from("conversations")
-                    .insert(createDto) {
-                        select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at"))
-                    }
-                    .decodeSingle<ConversationDto>()
-                    
-            } catch (e: Exception) {
-                // 3. Fallback: If insert failed (likely Unique Constraint violation due to Race Condition),
-                // try to fetch one last time.
-                val retryExisting = supabase.from("conversations")
-                    .select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at")) {
-                        filter {
-                            or {
-                                and {
-                                    eq("participant1_id", currentUserId)
-                                    eq("participant2_id", otherUserId)
-                                }
-                                and {
-                                    eq("participant1_id", otherUserId)
-                                    eq("participant2_id", currentUserId)
-                                }
-                            }
-                        }
-                        limit(1)
-                    }
-                    .decodeList<ConversationDto>()
-                    
-                if (retryExisting.isNotEmpty()) {
-                    retryExisting.first()
-                } else {
-                    // Actual failure
-                    throw e
-                }
+            } else {
+                null
             }
         }
+        
+        result
     }
-
-    override suspend fun markMessagesAsRead(conversationId: String): Result<Unit> {
-        return runCatching {
-            val currentUserId = getCurrentUserId()
-            
-            supabase.from("messages")
-                .update(mapOf("is_read" to true)) {
-                    filter {
-                        eq("conversation_id", conversationId)
-                        neq("sender_id", currentUserId)
-                        eq("is_read", false)
-                    }
-                }
+    
+    override suspend fun getOrCreateConversation(otherUserId: String): Result<ConversationDto> = runCatching {
+        val currentUserId = getCurrentUserId()
+        
+        // Order IDs for unique constraint
+        val (p1, p2) = if (currentUserId < otherUserId) {
+            currentUserId to otherUserId
+        } else {
+            otherUserId to currentUserId
         }
+        
+        // Try to find existing conversation
+        val existing = supabase.from("conversations")
+            .select {
+                filter {
+                    eq("participant1_id", p1)
+                    eq("participant2_id", p2)
+                }
+            }
+            .decodeSingleOrNull<ConversationDto>()
+        
+        if (existing != null) {
+            return@runCatching existing
+        }
+        
+        // Create new conversation
+        val newConversation = CreateConversationDto(
+            participant1Id = p1,
+            participant2Id = p2
+        )
+        
+        supabase.from("conversations")
+            .insert(newConversation) {
+                select()
+            }
+            .decodeSingle<ConversationDto>()
     }
-
-    override fun getMessagesFlow(conversationId: String): kotlinx.coroutines.flow.Flow<List<MessageDto>> = kotlinx.coroutines.flow.flow {
-        // 1. Emit initial data
-        val initialData = getMessages(conversationId).getOrDefault(emptyList())
-        emit(initialData)
-
-        // 2. Setup Realtime
+    
+    // ============================================
+    // MESSAGES
+    // ============================================
+    
+    override suspend fun getMessages(conversationId: String): Result<List<MessageDto>> = runCatching {
+        supabase.from("messages")
+            .select {
+                filter {
+                    eq("conversation_id", conversationId)
+                }
+                order("created_at", Order.ASCENDING)
+            }
+            .decodeList<MessageDto>()
+    }
+    
+    override suspend fun sendMessage(conversationId: String, content: String): Result<MessageDto> = runCatching {
+        val currentUserId = getCurrentUserId()
+        val now = Instant.now().toString()
+        
+        // Create message
+        val createMessage = CreateMessageDto(
+            conversationId = conversationId,
+            senderId = currentUserId,
+            content = content
+        )
+        
+        val message = supabase.from("messages")
+            .insert(createMessage) {
+                select()
+            }
+            .decodeSingle<MessageDto>()
+        
+        // Update conversation preview
+        val updateConversation = UpdateConversationDto(
+            lastMessageAt = now,
+            lastMessagePreview = content.take(100)
+        )
+        
+        supabase.from("conversations")
+            .update(updateConversation) {
+                filter {
+                    eq("id", conversationId)
+                }
+            }
+        
+        message
+    }
+    
+    // ============================================
+    // REALTIME
+    // ============================================
+    
+    override fun subscribeToMessages(conversationId: String): Flow<MessageDto> = callbackFlow {
         try {
-            val channel = supabase.channel("messages_$conversationId")
+            // Unsubscribe from previous channel if exists
+            currentChannel?.let {
+                supabase.realtime.removeChannel(it)
+            }
             
-            val messageFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
+            // Create new channel for this conversation
+            val channel = supabase.realtime.channel("messages:$conversationId")
+            
+            // Subscribe to INSERT events on messages table
+            val changeFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
                 table = "messages"
                 filter = "conversation_id=eq.$conversationId"
             }
             
-            channel.subscribe()
+            // Collect changes and emit to flow
+            val job = launch {
+                changeFlow.collect { change ->
+                    try {
+                        val record = change.record
+                        val message = MessageDto(
+                            id = record["id"]?.toString()?.removeSurrounding("\"") ?: "",
+                            conversationId = record["conversation_id"]?.toString()?.removeSurrounding("\"") ?: "",
+                            senderId = record["sender_id"]?.toString()?.removeSurrounding("\"") ?: "",
+                            content = record["content"]?.toString()?.removeSurrounding("\"") ?: "",
+                            messageType = record["message_type"]?.toString()?.removeSurrounding("\"") ?: "text",
+                            isRead = record["is_read"]?.toString() == "true",
+                            createdAt = record["created_at"]?.toString()?.removeSurrounding("\"") ?: ""
+                        )
+                        
+                        Log.d(TAG, "Realtime message received: ${message.content}")
+                        trySend(message)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing realtime message", e)
+                    }
+                }
+            }
             
-            // 3. Listen to new messages
-            messageFlow.collect { action ->
-                // Re-fetch to get updated list
-                val updatedList = getMessages(conversationId).getOrDefault(emptyList())
-                emit(updatedList)
+            // Subscribe to channel
+            channel.subscribe()
+            currentChannel = channel
+            
+            Log.d(TAG, "Subscribed to realtime for conversation: $conversationId")
+            
+            awaitClose {
+                job.cancel()
+                Log.d(TAG, "Closing realtime subscription")
             }
         } catch (e: Exception) {
-            android.util.Log.e("SupabaseRepo", "Realtime error: ${e.message}")
+            Log.e(TAG, "Error setting up realtime subscription", e)
+            close(e)
+        }
+    }
+    
+    override suspend fun unsubscribeFromMessages() {
+        currentChannel?.let {
+            try {
+                supabase.realtime.removeChannel(it)
+                currentChannel = null
+                Log.d(TAG, "Unsubscribed from realtime")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error unsubscribing from realtime", e)
+            }
+        }
+    }
+    
+    // ============================================
+    // HELPERS
+    // ============================================
+    
+    private suspend fun fetchUserBasicInfo(userId: String): UserBasicInfo? {
+        return try {
+            val user = supabase.from("users")
+                .select(columns = Columns.list("id", "username", "avatar")) {
+                    filter {
+                        eq("id", userId)
+                    }
+                }
+                .decodeSingleOrNull<UserDto>()
+            
+            user?.let {
+                UserBasicInfo(
+                    id = it.id,
+                    username = it.username,
+                    avatar = it.avatar
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching user info for $userId", e)
+            null
+        }
+    }
+    
+    private suspend fun getBlockedUserIds(): Set<String> {
+        return try {
+            val currentUserId = getCurrentUserId()
+            
+            // Users I blocked
+            val iBlocked = supabase.from("blocked_users")
+                .select(columns = Columns.list("blocked_id")) {
+                    filter {
+                        eq("blocker_id", currentUserId)
+                    }
+                }
+                .decodeList<BlockedIdOnly>()
+                .map { it.blockedId }
+            
+            // Users who blocked me
+            val blockedMe = supabase.from("blocked_users")
+                .select(columns = Columns.list("blocker_id")) {
+                    filter {
+                        eq("blocked_id", currentUserId)
+                    }
+                }
+                .decodeList<BlockerIdOnly>()
+                .map { it.blockerId }
+            
+            (iBlocked + blockedMe).toSet()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching blocked users", e)
+            emptySet()
         }
     }
 }
+
+// Helper DTOs for blocked users query
+@kotlinx.serialization.Serializable
+private data class BlockedIdOnly(
+    @kotlinx.serialization.SerialName("blocked_id")
+    val blockedId: String
+)
+
+@kotlinx.serialization.Serializable
+private data class BlockerIdOnly(
+    @kotlinx.serialization.SerialName("blocker_id")
+    val blockerId: String
+)
+
+// User DTO for basic info
+@kotlinx.serialization.Serializable
+private data class UserDto(
+    val id: String,
+    val username: String,
+    val avatar: String? = null
+)
