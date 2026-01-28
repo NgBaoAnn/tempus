@@ -8,10 +8,11 @@ import com.projectapp.tempus.data.notes.entity.NoteEntity
 
 /**
  * Room Database cho hệ thống Notes
+ * Version 2: Added userId, syncStatus, UUID primary key for Supabase sync
  */
 @Database(
     entities = [NoteEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class NotesDatabase : RoomDatabase() {
@@ -28,10 +29,13 @@ abstract class NotesDatabase : RoomDatabase() {
                     context.applicationContext,
                     NotesDatabase::class.java,
                     "notes_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // Cho phép xóa data cũ khi upgrade
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
+

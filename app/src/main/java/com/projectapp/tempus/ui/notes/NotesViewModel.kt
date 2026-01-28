@@ -16,7 +16,7 @@ data class NotesUiState(
     val notes: List<NoteEntity> = emptyList(),
     val searchQuery: String = "",
     val isLoading: Boolean = false,
-    val selectedNoteId: Long? = null,
+    val selectedNoteId: String? = null,
     val error: String? = null
 )
 
@@ -24,7 +24,7 @@ data class NotesUiState(
  * UI State cho Note Editor
  */
 data class NoteEditorState(
-    val noteId: Long? = null,
+    val noteId: String? = null,
     val title: String = "",
     val content: String = "",
     val isNew: Boolean = true,
@@ -98,7 +98,7 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Bắt đầu chỉnh sửa ghi chú
      */
-    fun startEditNote(noteId: Long) {
+    fun startEditNote(noteId: String) {
         viewModelScope.launch {
             val note = repository.getNoteById(noteId)
             if (note != null) {
@@ -160,7 +160,7 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Xóa ghi chú
      */
-    fun deleteNote(noteId: Long) {
+    fun deleteNote(noteId: String) {
         viewModelScope.launch {
             repository.deleteNote(noteId)
         }
@@ -169,7 +169,7 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Toggle pin ghi chú
      */
-    fun togglePin(noteId: Long) {
+    fun togglePin(noteId: String) {
         viewModelScope.launch {
             repository.togglePin(noteId)
         }
