@@ -47,7 +47,9 @@ data class TimelineUiState(
     val isFilterActive: Boolean = false,
     // Points earned event (set to null after consuming)
     val earnedPoints: Int? = null,
-    val earnedReason: String? = null
+    val earnedReason: String? = null,
+    // Streak
+    val currentStreak: Int = 0
 )
 
 class TimelineViewModel(
@@ -66,8 +68,25 @@ class TimelineViewModel(
     
     init {
         loadDailyQuote()
+        loadStreak()
         // Load tasks for today when ViewModel initializes
         load(LocalDate.now())
+    }
+    
+    private fun loadStreak() {
+        if (pointsManager != null) {
+            viewModelScope.launch {
+                try {
+                    pointsManager.getUserPoints().collect { userPoints ->
+                        _ui.value = _ui.value.copy(
+                            currentStreak = userPoints?.currentStreak ?: 0
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e("Timeline", "Failed to load streak: ${e.message}")
+                }
+            }
+        }
     }
     
     private fun loadDailyQuote() {

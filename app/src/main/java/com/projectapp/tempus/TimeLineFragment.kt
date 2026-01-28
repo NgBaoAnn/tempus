@@ -218,7 +218,8 @@ class TimelineFragment : Fragment() {
                     },
                     onGardenClick = {
                         findNavController().navigate(R.id.action_timelineFragment_to_gardenFragment)
-                    }
+                    },
+                    currentStreak = uiState.currentStreak
                 )
                 
                 // Points earned notification overlay

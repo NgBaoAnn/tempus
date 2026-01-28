@@ -54,16 +54,23 @@ enum class LeafAttachment {
     BRANCH_2,
     BRANCH_3,
     BRANCH_4,
-    BRANCH_5
+    BRANCH_5,
+    BRANCH_6,
+    BRANCH_7,
+    BRANCH_8,
+    BRANCH_9
 }
 
 enum class LeafShape {
-    ROUND,      // Tròn (default, OAK, APPLE)
+    ROUND,      // Tròn (default, APPLE)
     NEEDLE,     // Kim (PINE cũ)
-    LONG,       // Dài (BAMBOO, PALM)
+    LONG,       // Dài đơn giản (deprecated, kept for compatibility)
     PETAL,      // Cánh hoa (SAKURA)
     FROND,      // Tàu lá dừa (COCONUT)
-    CONIFER     // Tán thông hình tam giác với viền nhọn (PINE mới)
+    CONIFER,    // Tán thông hình tam giác với viền nhọn (PINE)
+    BAMBOO,     // Lá tre dài, mảnh (BAMBOO)
+    FAN_PALM,   // Lá cọ quạt (PALM)
+    OAK_CLOUD   // Tán lá sồi nhiều lớp dạng mây (OAK)
 }
 
 /**
