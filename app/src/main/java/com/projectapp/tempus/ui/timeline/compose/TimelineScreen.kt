@@ -106,6 +106,7 @@ fun TimelineScreen(
     onClearAllFilters: () -> Unit = {},
     onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> },
     onGardenClick: () -> Unit = {},
+    currentStreak: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -116,17 +117,16 @@ fun TimelineScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Voice Command (Small FAB style)
-                FloatingActionButton(
-                    onClick = onVoiceClick,
-                    containerColor = Color.Transparent, // We'll apply gradient background
-                    elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                Box(
                     modifier = Modifier
                         .size(48.dp)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(
-                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Success),
-                            shape = RoundedCornerShape(16.dp)
+                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Success)
                         )
-                        .scalePressEffect()
+                        .clickable { onVoiceClick() }
+                        .scalePressEffect(),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_mic),
@@ -137,17 +137,16 @@ fun TimelineScreen(
                 }
                 
                 // Add Task FAB (Main)
-                FloatingActionButton(
-                    onClick = onAddClick,
-                    containerColor = Color.Transparent,
-                    elevation = FloatingActionButtonDefaults.elevation(6.dp),
+                Box(
                     modifier = Modifier
                         .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(
-                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Primary),
-                            shape = RoundedCornerShape(16.dp)
+                            brush = Brush.linearGradient(TempusDesignSystem.Gradients.Primary)
                         )
-                        .scalePressEffect()
+                        .clickable { onAddClick() }
+                        .scalePressEffect(),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Default.Add, 
@@ -170,7 +169,8 @@ fun TimelineScreen(
                 TimelineTopBar(
                     monthYear = monthYear,
                     onMonthPickerClick = onMonthPickerClick,
-                    onGardenClick = onGardenClick
+                    onGardenClick = onGardenClick,
+                    currentStreak = currentStreak
                 )
             }
             
@@ -507,7 +507,8 @@ fun SwipeableWeekCalendarStrip(
 private fun TimelineTopBar(
     monthYear: String,
     onMonthPickerClick: () -> Unit,
-    onGardenClick: () -> Unit = {}
+    onGardenClick: () -> Unit = {},
+    currentStreak: Int = 0
 ) {
     Row(
         modifier = Modifier
@@ -542,14 +543,42 @@ private fun TimelineTopBar(
         }
         
         // Right icons
-        Row {
-            // Garden button - dùng icon cây đẹp hơn
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // Streak badge (chỉ hiện khi có streak > 0)
+            if (currentStreak > 0) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFF5722).copy(alpha = 0.15f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🔥",
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = currentStreak.toString(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF5722)
+                        )
+                    }
+                }
+            }
+            
+            // Garden button - dùng icon từ drawable
             IconButton(onClick = onGardenClick) {
                 Icon(
-                    imageVector = Icons.Outlined.LocalFlorist,
+                    painter = painterResource(id = R.drawable.ic_garden),
                     contentDescription = "Garden",
                     tint = Color.Unspecified, // Giữ màu gốc từ drawable
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(34.dp)
                 )
             }
         }
