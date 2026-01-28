@@ -5,16 +5,51 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.sin
+
+// Modular renderers - drawing utilities
+import com.projectapp.tempus.ui.garden.compose.drawing.lighten
+import com.projectapp.tempus.ui.garden.compose.drawing.darken
+import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
+import com.projectapp.tempus.ui.garden.compose.drawing.stableRandom
+import com.projectapp.tempus.ui.garden.compose.drawing.stablePhaseOffset
+import com.projectapp.tempus.ui.garden.compose.drawing.drawOrganicBranch
+import com.projectapp.tempus.ui.garden.compose.drawing.drawOrganicTrunk
+import com.projectapp.tempus.ui.garden.compose.drawing.drawPalmTrunk
+import com.projectapp.tempus.ui.garden.compose.drawing.drawGroundShadow
+import com.projectapp.tempus.ui.garden.compose.drawing.drawCanopyBase
+import com.projectapp.tempus.ui.garden.compose.drawing.drawLeafShadow
+import com.projectapp.tempus.ui.garden.compose.drawing.generateTightLeafPositions
+import com.projectapp.tempus.ui.garden.compose.drawing.drawIllustrationPot
+import com.projectapp.tempus.ui.garden.compose.drawing.drawSoilMound
+import com.projectapp.tempus.ui.garden.compose.drawing.drawIllustrationLeaf
+import com.projectapp.tempus.ui.garden.compose.drawing.drawIllustrationFruit
+import com.projectapp.tempus.ui.garden.compose.drawing.darken
+import com.projectapp.tempus.ui.garden.compose.drawing.lighten
+
+// Modular renderers - tree-specific
+import com.projectapp.tempus.ui.garden.compose.trees.drawSakuraBlossomCluster
+import com.projectapp.tempus.ui.garden.compose.trees.drawFallenPetal
+import com.projectapp.tempus.ui.garden.compose.trees.drawConiferTree
+import com.projectapp.tempus.ui.garden.compose.trees.drawCoconutFrond
+import com.projectapp.tempus.ui.garden.compose.trees.drawFanPalmLeaf
+import com.projectapp.tempus.ui.garden.compose.trees.drawOakCanopy
+import com.projectapp.tempus.ui.garden.compose.trees.drawApples
+import com.projectapp.tempus.ui.garden.compose.trees.drawBambooCulms
+import com.projectapp.tempus.ui.garden.compose.trees.drawBambooTopLeaves
+import com.projectapp.tempus.ui.garden.compose.trees.drawBambooSingleStalk
 
 /**
  * ProceduralTree - Illustration-style tree renderer với hierarchical per-part motion
@@ -24,6 +59,16 @@ import kotlin.math.*
  * - Many small leaf clusters (teardrop/organic shapes)
  * - Shadow under pot/tree
  * - Soft palette, no hard outlines
+ * 
+ * This file contains only the main composable.
+ * Rendering functions are organized in:
+ * - drawing/BaseRenderer.kt - Ground shadows, canopy base, leaf positioning
+ * - drawing/PotRenderer.kt - Pot and soil rendering
+ * - drawing/LeafRenderer.kt - All leaf shape rendering
+ * - drawing/FruitRenderer.kt - Fruit rendering
+ * - drawing/TrunkRenderer.kt - Trunk drawing
+ * - drawing/BranchRenderer.kt - Branch drawing
+ * - trees/ folder - Tree-specific renderers (Oak, Sakura, Pine, etc.)
  */
 @Composable
 fun ProceduralTree(
@@ -173,16 +218,42 @@ fun ProceduralTree(
         }
         
         // 5. Draw TRUNK (in front of branches, covers branch attachment points)
-        drawOrganicTrunk(
-            trunk = parts.trunk,
-            centerX = centerX,
-            baseY = trunkBaseY,
-            canvasHeight = canvasHeight,
-            rotation = trunkRotation,
-            growthFactor = animState.trunkGrowth,
-            scale = scale,
-            seed = seed
-        )
+        // Check if this is a bamboo tree (stalks will be drawn later with leaves)
+        val hasBambooLeaves = parts.leafClusters.any { it.shape == LeafShape.BAMBOO }
+        
+        if (!hasBambooLeaves) {
+            // Check for Palm tree
+            val hasPalmLeaves = parts.leafClusters.any { it.shape == LeafShape.FAN_PALM }
+            
+            if (hasPalmLeaves) {
+                 // Special trunk for Palm with rings - capture returned trunkTop
+                 val palmTrunkTop = drawPalmTrunk(
+                    trunk = parts.trunk,
+                    centerX = centerX,
+                    baseY = trunkBaseY,
+                    canvasHeight = canvasHeight,
+                    rotation = trunkRotation,
+                    growthFactor = animState.trunkGrowth,
+                    scale = scale,
+                    seed = seed
+                )
+                // Update trunkTop to follow trunk rotation
+                branchEnds[LeafAttachment.TRUNK] = palmTrunkTop
+            } else {
+                // Normal organic trunk for other trees
+                drawOrganicTrunk(
+                    trunk = parts.trunk,
+                    centerX = centerX,
+                    baseY = trunkBaseY,
+                    canvasHeight = canvasHeight,
+                    rotation = trunkRotation,
+                    growthFactor = animState.trunkGrowth,
+                    scale = scale,
+                    seed = seed
+                )
+            }
+        }
+        // For bamboo, stalks are drawn together with leaves in the special BAMBOO section below
         
         // 6. Soil mound (on top of pot, around trunk base)
         if (config.showSoil) {
@@ -204,7 +275,25 @@ fun ProceduralTree(
             val hasConiferLeaves = parts.leafClusters.any { it.shape == LeafShape.CONIFER }
             
             if (hasFrondLeaves) {
-                // ===== SPECIAL: Vẽ tàu lá dừa từ đỉnh trunk =====
+                // ===== SPECIAL: Cây dừa - Vẽ QUẢ TRƯỚC để lá phủ lên =====
+                // Draw fruits FIRST so leaves cover them (natural look)
+                parts.fruits.forEach { fruit ->
+                    if (animState.fruitOpacity > 0f) {
+                        val attachPoint = branchEnds[fruit.attachTo] ?: trunkTop
+                        val fruitSway = windState.getRotation("branch", fruit.phaseOffset, 0.4f) * 0.5f
+                        
+                        drawIllustrationFruit(
+                            fruit = fruit,
+                            attachPoint = attachPoint,
+                            canvasHeight = canvasHeight,
+                            sway = fruitSway,
+                            opacity = animState.fruitOpacity,
+                            scale = scale
+                        )
+                    }
+                }
+                
+                // ===== Vẽ tàu lá dừa từ đỉnh trunk (SAU quả) =====
                 parts.leafClusters.forEach { cluster ->
                     val spreadAngle = cluster.phaseOffset
                     val frondSize = canvasHeight * cluster.size * scale * animState.leafScale
@@ -233,10 +322,9 @@ fun ProceduralTree(
                     TreeState.DEAD -> 0
                 }
                 
-                // Dùng "branch" để có amplitude lớn hơn, nhân 3 để đung đưa rõ
-                val windSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
-                    windState.getRotation("branch", stablePhaseOffset(seed, 0), 0.6f) * (1f - parts.stiffness) * 3f
-                } else 0f
+                // Sử dụng trunkRotation để tán và thân đồng bộ chuyển động
+                // Nhân với 2 để tán có amplitude lớn hơn thân một chút
+                val coniferSway = trunkRotation * 2f
                 
                 drawConiferTree(
                     trunkTop = trunkTop,
@@ -245,7 +333,155 @@ fun ProceduralTree(
                     baseColor = parts.baseColor,
                     opacity = animState.leafOpacity,
                     scale = scale * animState.leafScale,
+                    sway = coniferSway,
+                    seed = seed
+                )
+            } else if (parts.leafClusters.any { it.shape == LeafShape.PETAL }) {
+                // ===== SPECIAL: SAKURA - Vẽ cụm hoa anh đào tại mỗi branch endpoint =====
+                // Tạo hiệu ứng cloud-like với nhiều cụm nhỏ rời rạc
+                
+                // Vẽ các blossom clusters tại mỗi branch end
+                parts.leafClusters.forEach { cluster ->
+                    val attachPoint = branchEnds[cluster.attachTo] ?: trunkTop
+                    val clusterSize = canvasHeight * cluster.size * scale * animState.leafScale
+                    
+                    val windSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
+                        windState.getRotation("leaf", cluster.phaseOffset, 0.6f) * (1f - parts.stiffness * 0.5f)
+                    } else 0f
+                    
+                    // Draw sakura blossom cloud cluster
+                    drawSakuraBlossomCluster(
+                        center = Offset(attachPoint.x, attachPoint.y - clusterSize * 0.3f),
+                        radius = clusterSize,
+                        color = cluster.color,
+                        opacity = animState.leafOpacity,
+                        sway = windSway,
+                        seed = seed + cluster.density
+                    )
+                }
+                
+                // Thêm một số cánh hoa rơi ở phía dưới (optional decoration)
+                if (growthStage == TreeState.TREE) {
+                    for (i in 0 until 5) {
+                        val petalX = trunkTop.x + (stableRandom(seed, i + 100) - 0.5f) * canvasHeight * 0.4f
+                        val petalY = trunkBaseY - canvasHeight * 0.05f - stableRandom(seed, i + 200) * canvasHeight * 0.1f
+                        val petalSway = windState.getRotation("leaf", stablePhaseOffset(seed, i + 50), 0.8f)
+                        
+                        drawFallenPetal(
+                            center = Offset(petalX, petalY),
+                            size = canvasHeight * 0.02f * scale,
+                            rotation = petalSway * 30f + stableRandom(seed, i + 300) * 360f,
+                            color = parts.baseColor.lighten(0.2f),
+                            opacity = animState.leafOpacity * 0.6f
+                        )
+                    }
+                }
+            } else if (parts.leafClusters.any { it.shape == LeafShape.OAK_CLOUD }) {
+                // ===== SPECIAL: OAK - Vẽ tán lá sồi nhiều lớp như mây =====
+                // Tạo hiệu ứng cloud-like với nhiều cụm tròn chồng lên nhau
+                
+                val canopyRadius = canvasHeight * when (growthStage) {
+                    TreeState.SEED -> 0.10f
+                    TreeState.SPROUT -> 0.15f
+                    TreeState.SAPLING -> 0.20f
+                    TreeState.TREE -> 0.28f
+                    TreeState.DEAD -> 0f
+                } * scale * animState.leafScale
+                
+                val windSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
+                    windState.getRotation("leaf", stablePhaseOffset(seed, 0), 0.5f) * (1f - parts.stiffness * 0.5f)
+                } else 0f
+                
+                // Draw unified oak cloud canopy centered above trunk
+                // Offset +0.1f để hạ thấp tán lá, bao phủ phần trên của thân
+                drawOakCanopy(
+                    center = Offset(trunkTop.x, trunkTop.y + canopyRadius * 0.1f),
+                    radiusX = canopyRadius * 1.2f,
+                    radiusY = canopyRadius * 0.95f,
+                    baseColor = parts.baseColor,
+                    opacity = animState.leafOpacity,
                     sway = windSway,
+                    seed = seed
+                )
+            } else if (parts.leafClusters.any { it.shape == LeafShape.BAMBOO }) {
+                // ===== SPECIAL: BAMBOO - Vẽ 3 thân tre với lá xòe ở đỉnh =====
+                // Draw 3 bamboo stalks at different positions and heights
+                val stalkConfigs = listOf(
+                    Triple(-0.08f, 1.0f, 0),    // Left stalk: offsetX, heightRatio, seedOffset
+                    Triple(0f, 1.15f, 1),       // Center stalk (tallest)
+                    Triple(0.08f, 0.85f, 2)     // Right stalk (shorter)
+                )
+                
+                val baseHeight = canvasHeight * parts.trunk.height * animState.trunkGrowth * scale
+                val baseWidth = canvasHeight * parts.trunk.width * scale * 1.2f
+                
+                // Use same phase for all stalks so they sway together in same direction
+                val sharedPhase = stablePhaseOffset(seed, 0)
+                val baseSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
+                    windState.getRotation("branch", sharedPhase, 0.7f) * (1f - parts.stiffness) * 1.5f
+                } else 0f
+                
+                stalkConfigs.forEach { (offsetRatio, heightRatio, seedOffset) ->
+                    val stalkX = centerX + canvasWidth * offsetRatio
+                    val stalkHeight = baseHeight * heightRatio
+                    val stalkWidth = baseWidth * (0.9f + stableRandom(seed, seedOffset) * 0.2f)
+                    
+                    // Slight variation in sway amount but same direction
+                    val stalkSway = baseSway * (0.9f + seedOffset * 0.05f)
+                    
+                    // Draw bamboo stalk with segments
+                    val stalkTop = drawBambooSingleStalk(
+                        centerX = stalkX,
+                        baseY = trunkBaseY,
+                        width = stalkWidth,
+                        height = stalkHeight,
+                        segmentCount = parts.trunk.segments,
+                        baseColor = parts.trunk.color,
+                        opacity = 1f,
+                        sway = stalkSway,
+                        seed = seed + seedOffset
+                    )
+                    
+                    // Draw fan-shaped leaves at top - balanced size with trunk
+                    val leafSize = canvasHeight * 0.15f * scale * animState.leafScale * (0.7f + heightRatio * 0.3f)
+                    
+                    // Use different green shades for each stalk
+                    val leafColor = when (seedOffset) {
+                        0 -> parts.baseColor.darken(0.1f)    // Darker green
+                        1 -> parts.baseColor                  // Base green
+                        else -> parts.baseColor.lighten(0.15f) // Lighter green
+                    }
+                    
+                    drawBambooTopLeaves(
+                        origin = stalkTop,
+                        size = leafSize,
+                        baseColor = leafColor,
+                        opacity = animState.leafOpacity,
+                        sway = stalkSway,
+                        seed = seed + seedOffset * 100
+                    )
+                }
+            } else if (parts.leafClusters.any { it.shape == LeafShape.FAN_PALM }) {
+                // ===== SPECIAL: PALM - Chỉ vẽ 1 tán lá duy nhất tại đỉnh thân =====
+                val cluster = parts.leafClusters.first { it.shape == LeafShape.FAN_PALM }
+                val crownSize = canvasHeight * cluster.size * scale * animState.leafScale
+                
+                val windSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
+                    windState.getRotation("leaf", cluster.phaseOffset, 0.5f) * (1f - parts.stiffness * 0.5f)
+                } else 0f
+                
+                // Sử dụng palmTrunkTop từ branchEnds (đã lưu từ drawPalmTrunk)
+                // để lá gắn liền với đỉnh thân khi thân sway
+                val palmLeafCenter = branchEnds[LeafAttachment.TRUNK] ?: trunkTop
+                
+                // Vẽ 1 tán FAN_PALM duy nhất tại đỉnh trunk
+                drawIllustrationLeaf(
+                    center = palmLeafCenter,
+                    size = crownSize,
+                    rotation = windSway,
+                    baseColor = cluster.color,
+                    opacity = animState.leafOpacity,
+                    shape = LeafShape.FAN_PALM,
                     seed = seed
                 )
             } else {
@@ -258,9 +494,13 @@ fun ProceduralTree(
                     TreeState.DEAD -> 0f
                 } * scale * animState.leafScale
                 
+                // Canopy offset: positive = lower, negative = higher
+                // Thay đổi từ -0.3f thành +0.15f để hạ thấp tán lá
+                val canopyYOffset = canopyRadius * 0.15f
+                
                 // Draw canopy base (solid green mass) first for cohesion
                 drawCanopyBase(
-                    center = Offset(trunkTop.x, trunkTop.y - canopyRadius * 0.3f),
+                    center = Offset(trunkTop.x, trunkTop.y + canopyYOffset),
                     radiusX = canopyRadius * 1.1f,
                     radiusY = canopyRadius * 0.9f,
                     color = parts.baseColor.darken(0.1f),
@@ -269,7 +509,7 @@ fun ProceduralTree(
                 
                 // Generate tightly clustered leaf positions
                 val leafPositions = generateTightLeafPositions(
-                    center = Offset(trunkTop.x, trunkTop.y - canopyRadius * 0.35f),
+                    center = Offset(trunkTop.x, trunkTop.y + canopyYOffset),
                     radiusX = canopyRadius,
                     radiusY = canopyRadius * 0.75f,
                     count = leafClusterCount,
@@ -301,159 +541,68 @@ fun ProceduralTree(
             }
         }
         
-        // 7. Draw fruits
-        parts.fruits.forEach { fruit ->
-            if (animState.fruitOpacity > 0f) {
-                val attachPoint = branchEnds[fruit.attachTo] ?: trunkTop
-                val fruitSway = windState.getRotation("branch", fruit.phaseOffset, 0.4f) * 0.5f
-                
-                drawIllustrationFruit(
-                    fruit = fruit,
-                    attachPoint = attachPoint,
-                    canvasHeight = canvasHeight,
-                    sway = fruitSway,
-                    opacity = animState.fruitOpacity,
-                    scale = scale
-                )
+        // 7. Draw fruits (skip for FROND trees - already drawn before leaves)
+        val hasFrondLeaves = parts.leafClusters.any { it.shape == LeafShape.FROND }
+        if (!hasFrondLeaves) {
+            // Tính toán canopy area để đặt táo trong tán lá
+            val canopyRadius = canvasHeight * when (growthStage) {
+                TreeState.SEED -> 0.08f
+                TreeState.SPROUT -> 0.12f
+                TreeState.SAPLING -> 0.18f
+                TreeState.TREE -> 0.25f
+                TreeState.DEAD -> 0f
+            } * scale * animState.leafScale
+            
+            // Canopy center (same as Oak canopy - offset +0.1f)
+            val canopyYOffset = canopyRadius * 0.1f
+            val canopyCenter = Offset(trunkTop.x, trunkTop.y + canopyYOffset)
+            
+            // Tính canopy sway để táo di chuyển cùng tán lá
+            val canopySway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
+                windState.getRotation("leaf", stablePhaseOffset(seed, 0), 0.5f) * (1f - parts.stiffness * 0.5f)
+            } else 0f
+            
+            parts.fruits.forEach { fruit ->
+                if (animState.fruitOpacity > 0f) {
+                    // Tính attachPoint trong khu vực tán lá
+                    val attachPoint = if (fruit.attachTo == LeafAttachment.TRUNK) {
+                        // Đặt táo trong vùng canopy
+                        // fruit.position 0.0-1.0 maps to bottom-to-top of canopy
+                        val fruitYOffset = (fruit.position - 0.5f) * canopyRadius * 1.2f
+                        val fruitY = canopyCenter.y + fruitYOffset
+                        
+                        // Thêm offset ngang dựa trên phaseOffset để trải táo sang hai bên
+                        val spreadX = sin(fruit.phaseOffset * 1.5f) * canopyRadius * 0.6f
+                        
+                        // Thêm canopy sway để táo di chuyển cùng tán lá
+                        val swayX = sin(Math.toRadians(canopySway.toDouble())).toFloat() * canopyRadius * 0.3f
+                        
+                        Offset(centerX + spreadX + swayX, fruitY)
+                    } else {
+                        branchEnds[fruit.attachTo] ?: trunkTop
+                    }
+                    
+                    val fruitSway = windState.getRotation("branch", fruit.phaseOffset, 0.4f) * 0.5f
+                    
+                    drawIllustrationFruit(
+                        fruit = fruit,
+                        attachPoint = attachPoint,
+                        canvasHeight = canvasHeight,
+                        sway = fruitSway,
+                        opacity = animState.fruitOpacity,
+                        scale = scale
+                    )
+                }
             }
         }
     }
 }
 
-// ========== Illustration Drawing Functions ==========
-
-/**
- * Ground shadow ellipse dưới cây
- */
-private fun DrawScope.drawGroundShadow(
-    centerX: Float,
-    baseY: Float,
-    radius: Float
-) {
-    drawOval(
-        brush = Brush.radialGradient(
-            colors = listOf(
-                Color.Black.copy(alpha = 0.15f),
-                Color.Transparent
-            ),
-            center = Offset(centerX, baseY + radius * 0.1f),
-            radius = radius
-        ),
-        topLeft = Offset(centerX - radius, baseY - radius * 0.15f),
-        size = Size(radius * 2, radius * 0.35f)
-    )
-}
-
-/**
- * Pot với gradient và depth - SOLID không xuyên thấu
- */
-private fun DrawScope.drawIllustrationPot(
-    pot: PotConfig,
-    centerX: Float,
-    baseY: Float,
-    canvasWidth: Float,
-    canvasHeight: Float
-) {
-    val potWidth = canvasWidth * pot.width
-    val potHeight = canvasHeight * pot.height
-    
-    // Pot shadow (behind pot)
-    drawOval(
-        color = Color.Black.copy(alpha = 0.12f),
-        topLeft = Offset(centerX - potWidth * 0.4f, baseY - potHeight * 0.08f),
-        size = Size(potWidth * 0.8f, potHeight * 0.16f)
-    )
-    
-    // Pot body path
-    val potPath = Path().apply {
-        val topWidth = potWidth * 0.9f
-        val bottomWidth = potWidth * 0.72f
-        
-        moveTo(centerX - topWidth / 2, baseY - potHeight)
-        cubicTo(
-            centerX - topWidth / 2 - potWidth * 0.02f, baseY - potHeight * 0.5f,
-            centerX - bottomWidth / 2 - potWidth * 0.01f, baseY - potHeight * 0.2f,
-            centerX - bottomWidth / 2, baseY
-        )
-        lineTo(centerX + bottomWidth / 2, baseY)
-        cubicTo(
-            centerX + bottomWidth / 2 + potWidth * 0.01f, baseY - potHeight * 0.2f,
-            centerX + topWidth / 2 + potWidth * 0.02f, baseY - potHeight * 0.5f,
-            centerX + topWidth / 2, baseY - potHeight
-        )
-        close()
-    }
-    
-    // SOLID base fill first (no transparency)
-    drawPath(path = potPath, color = pot.color)
-    
-    // Gradient overlay for 3D effect
-    drawPath(
-        path = potPath,
-        brush = Brush.horizontalGradient(
-            colors = listOf(
-                Color.Black.copy(alpha = 0.15f),  // Shadow on left
-                Color.Transparent,                 // Center clear
-                Color.Black.copy(alpha = 0.2f)    // Shadow on right
-            ),
-            startX = centerX - potWidth / 2,
-            endX = centerX + potWidth / 2
-        )
-    )
-    
-    // Pot rim - SOLID
-    val rimHeight = potHeight * 0.12f
-    drawRoundRect(
-        color = pot.color,  // Solid base
-        topLeft = Offset(centerX - potWidth * 0.48f, baseY - potHeight - rimHeight * 0.5f),
-        size = Size(potWidth * 0.96f, rimHeight),
-        cornerRadius = CornerRadius(rimHeight / 2)
-    )
-    
-    // Rim highlight
-    drawRoundRect(
-        brush = Brush.verticalGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.2f),
-                Color.Transparent
-            )
-        ),
-        topLeft = Offset(centerX - potWidth * 0.48f, baseY - potHeight - rimHeight * 0.5f),
-        size = Size(potWidth * 0.96f, rimHeight * 0.5f),
-        cornerRadius = CornerRadius(rimHeight / 2)
-    )
-    
-    // Inner soil visible in pot (dark circle at top)
-    drawOval(
-        color = Color(0xFF3D2817),
-        topLeft = Offset(centerX - potWidth * 0.38f, baseY - potHeight - rimHeight * 0.15f),
-        size = Size(potWidth * 0.76f, potHeight * 0.08f)
-    )
-}
-
-/**
- * Soil mound với gradient
- */
-private fun DrawScope.drawSoilMound(
-    color: Color,
-    centerX: Float,
-    y: Float,
-    radiusX: Float,
-    radiusY: Float
-) {
-    drawOval(
-        brush = Brush.verticalGradient(
-            colors = listOf(color.lighten(0.1f), color.darken(0.1f)),
-            startY = y - radiusY,
-            endY = y + radiusY
-        ),
-        topLeft = Offset(centerX - radiusX, y - radiusY),
-        size = Size(radiusX * 2, radiusY * 2.2f)
-    )
-}
+// ========== Local drawing functions that stay in this file ==========
 
 /**
  * Organic trunk với bezier curves và gradient
+ * This function stays here because it's core to the tree and modifies local state
  */
 private fun DrawScope.drawOrganicTrunk(
     trunk: TrunkConfig,
@@ -464,118 +613,60 @@ private fun DrawScope.drawOrganicTrunk(
     growthFactor: Float,
     scale: Float,
     seed: Int
-): Offset {
-    val trunkHeight = canvasHeight * trunk.height * growthFactor * scale
-    val baseWidth = canvasHeight * trunk.width * scale
-    val topWidth = baseWidth * trunk.taperRatio
-    
-    rotate(rotation, pivot = Offset(centerX, baseY)) {
-        if (trunk.segments > 1) {
-            // Segmented trunk (bamboo style)
-            drawBambooTrunk(trunk, centerX, baseY, canvasHeight, growthFactor, scale)
-        } else {
-            // Organic bezier trunk
-            val trunkPath = Path().apply {
-                // Left edge - slight curve outward then inward
-                moveTo(centerX - baseWidth / 2, baseY)
-                val curveAmount = baseWidth * 0.08f * (stableRandom(seed, 0) - 0.5f)
-                cubicTo(
-                    centerX - baseWidth / 2 + curveAmount, baseY - trunkHeight * 0.3f,
-                    centerX - topWidth / 2 - curveAmount * 0.5f, baseY - trunkHeight * 0.7f,
-                    centerX - topWidth / 2, baseY - trunkHeight
-                )
-                
-                // Top edge
-                lineTo(centerX + topWidth / 2, baseY - trunkHeight)
-                
-                // Right edge - mirror curve
-                cubicTo(
-                    centerX + topWidth / 2 + curveAmount * 0.5f, baseY - trunkHeight * 0.7f,
-                    centerX + baseWidth / 2 - curveAmount, baseY - trunkHeight * 0.3f,
-                    centerX + baseWidth / 2, baseY
-                )
-                close()
-            }
-            
-            // Trunk gradient (3D effect)
-            drawPath(
-                path = trunkPath,
-                brush = Brush.horizontalGradient(
-                    colors = listOf(
-                        trunk.color.darken(0.15f),
-                        trunk.color.lighten(0.05f),
-                        trunk.color,
-                        trunk.color.darken(0.2f)
-                    ),
-                    startX = centerX - baseWidth / 2,
-                    endX = centerX + baseWidth / 2
-                )
-            )
-            
-            // Subtle bark texture lines
-            for (i in 1..3) {
-                val lineY = baseY - trunkHeight * (0.2f + i * 0.2f)
-                val lineWidth = baseWidth - (baseWidth - topWidth) * (0.2f + i * 0.2f)
-                drawLine(
-                    color = trunk.color.darken(0.1f).copy(alpha = 0.3f),
-                    start = Offset(centerX - lineWidth * 0.3f, lineY),
-                    end = Offset(centerX + lineWidth * 0.2f, lineY + trunkHeight * 0.03f),
-                    strokeWidth = baseWidth * 0.03f,
-                    cap = StrokeCap.Round
-                )
-            }
-        }
-    }
-    
-    val topY = baseY - trunkHeight
-    val rotRad = Math.toRadians(rotation.toDouble()).toFloat()
-    return Offset(
-        centerX + sin(rotRad) * trunkHeight * 0.1f,
-        topY
-    )
-}
-
-/**
- * Bamboo-style segmented trunk
- */
-private fun DrawScope.drawBambooTrunk(
-    trunk: TrunkConfig,
-    centerX: Float,
-    baseY: Float,
-    canvasHeight: Float,
-    growthFactor: Float,
-    scale: Float
 ) {
     val trunkHeight = canvasHeight * trunk.height * growthFactor * scale
     val baseWidth = canvasHeight * trunk.width * scale
-    val topWidth = baseWidth * trunk.taperRatio
-    val segmentCount = trunk.segments
-    val segmentHeight = trunkHeight / segmentCount
+    val topWidth = canvasHeight * trunk.width * trunk.taperRatio * scale
     
-    for (i in 0 until segmentCount) {
-        val segY = baseY - segmentHeight * (i + 1)
-        val segWidth = baseWidth - (baseWidth - topWidth) * (i.toFloat() / segmentCount)
+    val color = trunk.color
+    val highlightColor = color.lighten(0.15f)
+    val shadowColor = color.darken(0.2f)
+    
+    // Apply rotation from root
+    rotate(rotation, pivot = Offset(centerX, baseY)) {
+        // Trunk path với organic curves
+        val trunkPath = Path().apply {
+            // Left side with subtle curve
+            moveTo(centerX - baseWidth / 2, baseY)
+            cubicTo(
+                centerX - baseWidth / 2 + baseWidth * 0.05f, baseY - trunkHeight * 0.3f,
+                centerX - topWidth / 2 - topWidth * 0.1f, baseY - trunkHeight * 0.7f,
+                centerX - topWidth / 2, baseY - trunkHeight
+            )
+            
+            // Top
+            lineTo(centerX + topWidth / 2, baseY - trunkHeight)
+            
+            // Right side
+            cubicTo(
+                centerX + topWidth / 2 + topWidth * 0.1f, baseY - trunkHeight * 0.7f,
+                centerX + baseWidth / 2 - baseWidth * 0.05f, baseY - trunkHeight * 0.3f,
+                centerX + baseWidth / 2, baseY
+            )
+            close()
+        }
         
-        // Segment body với gradient
-        drawRoundRect(
+        // 3D gradient fill
+        drawPath(
+            path = trunkPath,
             brush = Brush.horizontalGradient(
-                colors = listOf(
-                    trunk.color.darken(0.1f),
-                    trunk.color.lighten(0.1f),
-                    trunk.color.darken(0.05f)
-                )
-            ),
-            topLeft = Offset(centerX - segWidth / 2, segY),
-            size = Size(segWidth, segmentHeight * 0.88f),
-            cornerRadius = CornerRadius(segWidth / 3)
+                colors = listOf(shadowColor, color, highlightColor, color, shadowColor),
+                startX = centerX - baseWidth / 2,
+                endX = centerX + baseWidth / 2
+            )
         )
         
-        // Joint ring
-        if (i < segmentCount - 1) {
-            drawOval(
-                color = trunk.color.darken(0.15f),
-                topLeft = Offset(centerX - segWidth * 0.55f / 2, segY - segmentHeight * 0.04f),
-                size = Size(segWidth * 0.55f, segmentHeight * 0.08f)
+        // Texture lines
+        val textureCount = 3
+        for (i in 0 until textureCount) {
+            val yPos = baseY - trunkHeight * (0.2f + i * 0.25f)
+            val widthAtY = baseWidth - (baseWidth - topWidth) * (1f - (yPos - (baseY - trunkHeight)) / trunkHeight)
+            
+            drawLine(
+                color = shadowColor.copy(alpha = 0.2f),
+                start = Offset(centerX - widthAtY * 0.35f, yPos),
+                end = Offset(centerX + widthAtY * 0.25f, yPos - trunkHeight * 0.02f),
+                strokeWidth = canvasHeight * 0.003f
             )
         }
     }
@@ -583,6 +674,7 @@ private fun DrawScope.drawBambooTrunk(
 
 /**
  * Organic branch với bezier curve
+ * This function stays here because it returns branchEnd position
  */
 private fun DrawScope.drawOrganicBranch(
     branch: BranchConfig,
@@ -594,720 +686,38 @@ private fun DrawScope.drawOrganicBranch(
     growthFactor: Float,
     scale: Float
 ): Offset {
-    val trunkHeight = trunkBaseY - trunkTop.y
-    val attachY = trunkTop.y + trunkHeight * (1 - branch.attachHeight)
-    val attachPoint = Offset(trunkTop.x, attachY)
-    
     val branchLength = canvasHeight * branch.length * growthFactor * scale
     val branchWidth = canvasHeight * branch.width * scale
     
-    val totalAngle = branch.angle + parentRotation + selfRotation
-    val angleRad = Math.toRadians(totalAngle.toDouble()).toFloat()
+    // Calculate branch start point (at configured height on trunk)
+    val branchStartY = trunkBaseY - (trunkBaseY - trunkTop.y) * branch.attachHeight
+    val branchStart = Offset(trunkTop.x, branchStartY)
     
-    val endX = attachPoint.x + sin(angleRad) * branchLength
-    val endY = attachPoint.y - cos(angleRad) * branchLength
+    // Combined rotation
+    val totalRotation = branch.angle + parentRotation + selfRotation
+    val rotationRad = Math.toRadians(totalRotation.toDouble()).toFloat()
     
-    // Control point for curve (slight droop)
-    val ctrlX = attachPoint.x + sin(angleRad) * branchLength * 0.6f
-    val ctrlY = attachPoint.y - cos(angleRad) * branchLength * 0.4f + branchLength * 0.05f
+    // Branch endpoint
+    val endX = branchStart.x + sin(rotationRad) * branchLength
+    val endY = branchStart.y - cos(rotationRad) * branchLength
+    
+    // Control point for organic curve
+    val ctrlX = branchStart.x + sin(rotationRad) * branchLength * 0.5f + branchLength * 0.1f
+    val ctrlY = branchStart.y - cos(rotationRad) * branchLength * 0.5f
     
     val branchPath = Path().apply {
-        moveTo(attachPoint.x, attachPoint.y)
+        moveTo(branchStart.x, branchStart.y)
         quadraticBezierTo(ctrlX, ctrlY, endX, endY)
     }
     
-    // Branch với gradient stroke
     drawPath(
         path = branchPath,
-        brush = Brush.linearGradient(
-            colors = listOf(branch.color, branch.color.darken(0.1f)),
-            start = attachPoint,
-            end = Offset(endX, endY)
-        ),
+        color = branch.color,
         style = Stroke(
             width = branchWidth,
-            cap = StrokeCap.Round,
-            pathEffect = null
+            cap = StrokeCap.Round
         )
     )
     
     return Offset(endX, endY)
-}
-
-/**
- * Draw canopy base - solid mass creating cohesive look
- */
-private fun DrawScope.drawCanopyBase(
-    center: Offset,
-    radiusX: Float,
-    radiusY: Float,
-    color: Color,
-    opacity: Float
-) {
-    // Multiple overlapping ovals for organic canopy shape
-    val baseColor = color.copy(alpha = opacity)
-    
-    // Main canopy mass
-    drawOval(
-        brush = Brush.radialGradient(
-            colors = listOf(
-                baseColor,
-                baseColor.copy(alpha = opacity * 0.8f),
-                Color.Transparent
-            ),
-            center = center,
-            radius = radiusX
-        ),
-        topLeft = Offset(center.x - radiusX, center.y - radiusY),
-        size = Size(radiusX * 2, radiusY * 2)
-    )
-    
-    // Left bulge
-    drawOval(
-        color = baseColor.copy(alpha = opacity * 0.6f),
-        topLeft = Offset(center.x - radiusX * 1.1f, center.y - radiusY * 0.6f),
-        size = Size(radiusX * 0.8f, radiusY * 0.9f)
-    )
-    
-    // Right bulge
-    drawOval(
-        color = baseColor.copy(alpha = opacity * 0.6f),
-        topLeft = Offset(center.x + radiusX * 0.3f, center.y - radiusY * 0.5f),
-        size = Size(radiusX * 0.8f, radiusY * 0.85f)
-    )
-    
-    // Top highlight
-    drawOval(
-        color = color.lighten(0.15f).copy(alpha = opacity * 0.4f),
-        topLeft = Offset(center.x - radiusX * 0.5f, center.y - radiusY * 0.9f),
-        size = Size(radiusX * 0.7f, radiusY * 0.4f)
-    )
-}
-
-/**
- * Generate tightly clustered leaf positions within canopy bounds
- */
-private fun generateTightLeafPositions(
-    center: Offset,
-    radiusX: Float,
-    radiusY: Float,
-    count: Int,
-    seed: Int
-): List<Offset> {
-    val positions = mutableListOf<Offset>()
-    
-    for (i in 0 until count) {
-        // Distribute in concentric rings for tight clustering
-        val ring = i / 6  // 6 leaves per ring
-        val indexInRing = i % 6
-        
-        val ringRadius = 0.3f + ring * 0.25f  // Start from center, expand outward
-        val angleOffset = ring * 30f  // Offset each ring
-        val angle = (indexInRing * 60f + angleOffset + stableRandom(seed, i) * 25f)
-        
-        val angleRad = Math.toRadians(angle.toDouble()).toFloat()
-        val distX = radiusX * ringRadius * (0.7f + stableRandom(seed, i + 100) * 0.3f)
-        val distY = radiusY * ringRadius * (0.6f + stableRandom(seed, i + 200) * 0.4f)
-        
-        positions.add(
-            Offset(
-                center.x + cos(angleRad) * distX,
-                center.y + sin(angleRad) * distY * 0.8f - radiusY * 0.1f
-            )
-        )
-    }
-    
-    return positions
-}
-
-/**
- * Leaf shadow
- */
-private fun DrawScope.drawLeafShadow(center: Offset, size: Float) {
-    drawOval(
-        color = Color.Black.copy(alpha = 0.05f),
-        topLeft = Offset(center.x - size * 0.8f, center.y + size * 0.1f),
-        size = Size(size * 1.6f, size * 0.4f)
-    )
-}
-
-/**
- * Illustration-style leaf cluster (teardrop/organic shape)
- */
-private fun DrawScope.drawIllustrationLeaf(
-    center: Offset,
-    size: Float,
-    rotation: Float,
-    baseColor: Color,
-    opacity: Float,
-    shape: LeafShape,
-    seed: Int
-) {
-    rotate(rotation, pivot = center) {
-        val color = baseColor.copy(alpha = opacity)
-        val highlightColor = baseColor.lighten(0.2f).copy(alpha = opacity * 0.6f)
-        val shadowColor = baseColor.darken(0.15f).copy(alpha = opacity)
-        
-        when (shape) {
-            LeafShape.ROUND -> {
-                // Teardrop/organic cluster shape
-                val leafPath = Path().apply {
-                    // Main teardrop
-                    moveTo(center.x, center.y - size * 0.8f) // Top point
-                    cubicTo(
-                        center.x + size * 0.7f, center.y - size * 0.5f,
-                        center.x + size * 0.6f, center.y + size * 0.3f,
-                        center.x, center.y + size * 0.4f
-                    )
-                    cubicTo(
-                        center.x - size * 0.6f, center.y + size * 0.3f,
-                        center.x - size * 0.7f, center.y - size * 0.5f,
-                        center.x, center.y - size * 0.8f
-                    )
-                    close()
-                }
-                
-                // Shadow layer
-                translate(left = size * 0.05f, top = size * 0.05f) {
-                    drawPath(leafPath, shadowColor)
-                }
-                
-                // Main leaf với gradient
-                drawPath(
-                    path = leafPath,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(highlightColor, color, shadowColor),
-                        startY = center.y - size,
-                        endY = center.y + size * 0.5f
-                    )
-                )
-                
-                // Small highlight spot
-                drawCircle(
-                    color = Color.White.copy(alpha = opacity * 0.15f),
-                    radius = size * 0.15f,
-                    center = Offset(center.x - size * 0.2f, center.y - size * 0.4f)
-                )
-            }
-            
-            LeafShape.NEEDLE -> {
-                // Clustered needles
-                val needleCount = 5
-                for (i in 0 until needleCount) {
-                    val angle = -25f + (50f / (needleCount - 1)) * i
-                    val needleAngleRad = Math.toRadians(angle.toDouble()).toFloat()
-                    val needleLength = size * (0.9f + stableRandom(seed, i) * 0.2f)
-                    
-                    val endX = center.x + sin(needleAngleRad) * needleLength
-                    val endY = center.y - cos(needleAngleRad) * needleLength
-                    
-                    drawLine(
-                        brush = Brush.linearGradient(
-                            colors = listOf(color, shadowColor),
-                            start = center,
-                            end = Offset(endX, endY)
-                        ),
-                        start = center,
-                        end = Offset(endX, endY),
-                        strokeWidth = size * 0.12f,
-                        cap = StrokeCap.Round
-                    )
-                }
-            }
-            
-            LeafShape.LONG -> {
-                // Long drooping leaf với bezier
-                val leafPath = Path().apply {
-                    moveTo(center.x, center.y)
-                    val droopAngle = stableRandom(seed, 0) * 30f - 15f
-                    val droopRad = Math.toRadians(droopAngle.toDouble()).toFloat()
-                    val endX = center.x + sin(droopRad) * size * 1.5f
-                    val endY = center.y + size * 0.8f
-                    quadraticBezierTo(
-                        center.x + sin(droopRad) * size * 0.7f,
-                        center.y - size * 0.1f,
-                        endX, endY
-                    )
-                }
-                
-                drawPath(
-                    path = leafPath,
-                    brush = Brush.linearGradient(
-                        colors = listOf(color, shadowColor),
-                        start = center,
-                        end = Offset(center.x, center.y + size)
-                    ),
-                    style = Stroke(width = size * 0.25f, cap = StrokeCap.Round)
-                )
-            }
-            
-            LeafShape.PETAL -> {
-                // Cherry blossom petal cluster
-                val petalCount = 5
-                for (i in 0 until petalCount) {
-                    val angle = 360f / petalCount * i + stableRandom(seed, i) * 15f
-                    val angleRad = Math.toRadians(angle.toDouble()).toFloat()
-                    val petalDist = size * 0.35f
-                    val petalCenterX = center.x + cos(angleRad) * petalDist
-                    val petalCenterY = center.y + sin(angleRad) * petalDist - size * 0.2f
-                    
-                    // Petal shape
-                    val petalPath = Path().apply {
-                        val petalSize = size * 0.4f
-                        moveTo(petalCenterX, petalCenterY - petalSize * 0.6f)
-                        cubicTo(
-                            petalCenterX + petalSize * 0.5f, petalCenterY - petalSize * 0.3f,
-                            petalCenterX + petalSize * 0.4f, petalCenterY + petalSize * 0.4f,
-                            petalCenterX, petalCenterY + petalSize * 0.5f
-                        )
-                        cubicTo(
-                            petalCenterX - petalSize * 0.4f, petalCenterY + petalSize * 0.4f,
-                            petalCenterX - petalSize * 0.5f, petalCenterY - petalSize * 0.3f,
-                            petalCenterX, petalCenterY - petalSize * 0.6f
-                        )
-                        close()
-                    }
-                    
-                    drawPath(
-                        path = petalPath,
-                        brush = Brush.radialGradient(
-                            colors = listOf(highlightColor, color),
-                            center = Offset(petalCenterX, petalCenterY),
-                            radius = size * 0.4f
-                        )
-                    )
-                }
-                
-                // Yellow center
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFFFFEB3B), Color(0xFFFFC107)),
-                        center = Offset(center.x, center.y - size * 0.2f),
-                        radius = size * 0.15f
-                    ),
-                    radius = size * 0.12f,
-                    center = Offset(center.x, center.y - size * 0.2f)
-                )
-            }
-            
-            LeafShape.FROND -> {
-                // Tàu lá dừa kiểu lá chuối - rộng, cong, có răng cưa
-                val frondLength = size * 2.2f
-                val frondWidth = size * 0.6f
-                
-                // Cuống chính - cong rủ xuống
-                val curveDirection = if (stableRandom(seed, 0) > 0.5f) 1f else -1f
-                val curveAmount = size * 0.4f * curveDirection
-                
-                // Vẽ tàu lá như hình lá chuối
-                val frondPath = Path().apply {
-                    // Bắt đầu từ gốc
-                    moveTo(center.x, center.y)
-                    
-                    // Cạnh trái của lá - cong ra ngoài rồi vào
-                    val midX = center.x + curveAmount * 0.5f
-                    val midY = center.y + frondLength * 0.5f
-                    val endX = center.x + curveAmount
-                    val endY = center.y + frondLength
-                    
-                    // Left edge với răng cưa
-                    cubicTo(
-                        center.x - frondWidth * 0.3f, center.y + frondLength * 0.2f,
-                        midX - frondWidth * 0.5f, midY,
-                        endX - frondWidth * 0.15f, endY - frondLength * 0.1f
-                    )
-                    
-                    // Đầu lá nhọn
-                    lineTo(endX, endY)
-                    
-                    // Right edge
-                    cubicTo(
-                        midX + frondWidth * 0.5f, midY,
-                        center.x + frondWidth * 0.3f, center.y + frondLength * 0.2f,
-                        center.x, center.y
-                    )
-                    close()
-                }
-                
-                // Fill lá với gradient
-                drawPath(
-                    path = frondPath,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            color.darken(0.1f),
-                            color,
-                            highlightColor
-                        ),
-                        start = center,
-                        end = Offset(center.x + curveAmount, center.y + frondLength)
-                    )
-                )
-                
-                // Gân giữa lá (cuống)
-                val stemPath = Path().apply {
-                    moveTo(center.x, center.y)
-                    quadraticBezierTo(
-                        center.x + curveAmount * 0.5f, center.y + frondLength * 0.5f,
-                        center.x + curveAmount, center.y + frondLength
-                    )
-                }
-                drawPath(
-                    path = stemPath,
-                    color = color.darken(0.2f),
-                    style = Stroke(width = size * 0.06f, cap = StrokeCap.Round)
-                )
-                
-                // Vẽ các đường gân lá (các nét nhỏ 2 bên cuống)
-                val veinCount = 6
-                for (i in 1..veinCount) {
-                    val t = i.toFloat() / (veinCount + 1)
-                    val stemX = center.x + curveAmount * t
-                    val stemY = center.y + frondLength * t
-                    
-                    // Gân bên trái
-                    val leftEndX = stemX - frondWidth * 0.4f * (1f - t * 0.5f)
-                    val leftEndY = stemY + frondLength * 0.08f
-                    drawLine(
-                        color = color.darken(0.15f).copy(alpha = opacity * 0.6f),
-                        start = Offset(stemX, stemY),
-                        end = Offset(leftEndX, leftEndY),
-                        strokeWidth = size * 0.02f
-                    )
-                    
-                    // Gân bên phải
-                    val rightEndX = stemX + frondWidth * 0.4f * (1f - t * 0.5f)
-                    val rightEndY = stemY + frondLength * 0.08f
-                    drawLine(
-                        color = color.darken(0.15f).copy(alpha = opacity * 0.6f),
-                        start = Offset(stemX, stemY),
-                        end = Offset(rightEndX, rightEndY),
-                        strokeWidth = size * 0.02f
-                    )
-                }
-            }
-            
-            LeafShape.CONIFER -> {
-                // CONIFER được xử lý riêng bởi drawConiferTree
-                // Không làm gì ở đây
-            }
-        }
-    }
-}
-
-/**
- * Illustration-style fruit
- */
-private fun DrawScope.drawIllustrationFruit(
-    fruit: FruitConfig,
-    attachPoint: Offset,
-    canvasHeight: Float,
-    sway: Float,
-    opacity: Float,
-    scale: Float
-) {
-    val fruitSize = canvasHeight * fruit.size * scale
-    val swayOffset = sin(Math.toRadians(sway.toDouble())).toFloat() * fruitSize * 0.3f
-    
-    // Dùng phaseOffset để tách các quả ra theo chiều ngang
-    val spreadOffset = sin(fruit.phaseOffset) * fruitSize * 1.5f
-    
-    val fruitCenter = Offset(
-        attachPoint.x + swayOffset + spreadOffset,
-        attachPoint.y + fruitSize * 0.6f + abs(cos(fruit.phaseOffset)) * fruitSize * 0.3f
-    )
-    
-    // Fruit shadow
-    drawOval(
-        color = Color.Black.copy(alpha = 0.1f),
-        topLeft = Offset(fruitCenter.x - fruitSize * 0.8f, fruitCenter.y + fruitSize * 0.8f),
-        size = Size(fruitSize * 1.6f, fruitSize * 0.3f)
-    )
-    
-    // Fruit body với gradient
-    drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(
-                fruit.color.lighten(0.15f).copy(alpha = opacity),
-                fruit.color.copy(alpha = opacity),
-                fruit.color.darken(0.2f).copy(alpha = opacity)
-            ),
-            center = Offset(fruitCenter.x - fruitSize * 0.2f, fruitCenter.y - fruitSize * 0.2f),
-            radius = fruitSize * 1.2f
-        ),
-        radius = fruitSize,
-        center = fruitCenter
-    )
-    
-    // Highlight
-    drawCircle(
-        color = Color.White.copy(alpha = opacity * 0.35f),
-        radius = fruitSize * 0.25f,
-        center = Offset(fruitCenter.x - fruitSize * 0.35f, fruitCenter.y - fruitSize * 0.35f)
-    )
-    
-    // Stem
-    val stemPath = Path().apply {
-        moveTo(fruitCenter.x, fruitCenter.y - fruitSize)
-        quadraticBezierTo(
-            fruitCenter.x + fruitSize * 0.15f, fruitCenter.y - fruitSize * 1.15f,
-            fruitCenter.x + fruitSize * 0.25f, fruitCenter.y - fruitSize * 1.35f
-        )
-    }
-    drawPath(
-        path = stemPath,
-        color = Color(0xFF5D4037).copy(alpha = opacity),
-        style = Stroke(width = fruitSize * 0.12f, cap = StrokeCap.Round)
-    )
-    
-    // Small leaf on stem
-    val leafX = fruitCenter.x + fruitSize * 0.15f
-    val leafY = fruitCenter.y - fruitSize * 1.1f
-    drawOval(
-        color = Color(0xFF4CAF50).copy(alpha = opacity),
-        topLeft = Offset(leafX, leafY - fruitSize * 0.12f),
-        size = Size(fruitSize * 0.25f, fruitSize * 0.15f)
-    )
-}
-
-/**
- * Vẽ tàu lá dừa - gốc tại origin, xoè ra theo spreadAngle rồi rủ xuống
- */
-private fun DrawScope.drawCoconutFrond(
-    origin: Offset,
-    spreadAngle: Float,  // Góc xoè (độ), 0 = thẳng lên, -70 = trái, +70 = phải
-    frondLength: Float,
-    frondWidth: Float,
-    baseColor: Color,
-    opacity: Float,
-    seed: Int
-) {
-    val color = baseColor.copy(alpha = opacity)
-    val highlightColor = baseColor.lighten(0.15f).copy(alpha = opacity)
-    val shadowColor = baseColor.darken(0.2f).copy(alpha = opacity)
-    
-    // Convert góc từ degree sang radian
-    val angleRad = Math.toRadians(spreadAngle.toDouble()).toFloat()
-    
-    // Tính điểm cuối của tàu lá (VỂNH LÊN trước rồi mới rủ xuống)
-    val upwardDist = frondLength * 0.5f   // Đoạn đầu vểnh lên + xoè ra
-    val droopDist = frondLength * 0.5f    // Đoạn rủ xuống
-    
-    // Control point 1: Vểnh LÊN TRÊN + xoè ra (lên cao hơn)
-    val cp1X = origin.x + sin(angleRad) * upwardDist * 0.8f
-    val cp1Y = origin.y - cos(angleRad) * upwardDist * 0.6f - upwardDist * 0.3f  // Lên nhiều hơn
-    
-    // Control point 2: Bắt đầu cong rủ xuống
-    val cp2X = origin.x + sin(angleRad) * upwardDist * 1.2f
-    val cp2Y = origin.y - upwardDist * 0.1f + droopDist * 0.2f
-    
-    // End point: Rủ xuống (nhưng vẫn xa hơn)
-    val endX = origin.x + sin(angleRad) * upwardDist * 1.1f
-    val endY = origin.y + droopDist * 0.6f
-    
-    // Vẽ hình dạng tàu lá (rộng ở giữa, nhọn 2 đầu)
-    val frondPath = Path().apply {
-        moveTo(origin.x, origin.y)
-        
-        // Cạnh ngoài (xa thân cây)
-        val outerOffset = frondWidth * 0.5f
-        cubicTo(
-            cp1X + cos(angleRad) * outerOffset, cp1Y - sin(angleRad) * outerOffset,
-            cp2X + outerOffset * 0.6f, cp2Y,
-            endX + outerOffset * 0.2f, endY
-        )
-        
-        // Đầu lá nhọn
-        lineTo(endX - outerOffset * 0.1f, endY + frondWidth * 0.15f)
-        
-        // Cạnh trong (gần thân cây)
-        cubicTo(
-            cp2X - outerOffset * 0.4f, cp2Y + outerOffset * 0.2f,
-            cp1X - cos(angleRad) * outerOffset * 0.3f, cp1Y + sin(angleRad) * outerOffset * 0.3f,
-            origin.x, origin.y
-        )
-        close()
-    }
-    
-    // Fill tàu lá with gradient
-    drawPath(
-        path = frondPath,
-        brush = Brush.linearGradient(
-            colors = listOf(shadowColor, color, highlightColor),
-            start = origin,
-            end = Offset(endX, endY)
-        )
-    )
-    
-    // Gân giữa (cuống lá)
-    val midRibPath = Path().apply {
-        moveTo(origin.x, origin.y)
-        cubicTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY)
-    }
-    drawPath(
-        path = midRibPath,
-        color = baseColor.darken(0.25f).copy(alpha = opacity * 0.8f),
-        style = Stroke(width = frondWidth * 0.08f, cap = StrokeCap.Round)
-    )
-    
-    // Các gân phụ (6 gân mỗi bên)
-    for (i in 1..6) {
-        val t = i * 0.12f + 0.1f  // 0.22 to 0.82 along the frond
-        
-        // Điểm trên cuống tại t
-        val ribT = t * t  // Ease out
-        val ribX = origin.x + (cp1X - origin.x) * ribT * 0.5f + (cp2X - cp1X) * ribT + (endX - cp2X) * ribT * 0.5f
-        val ribY = origin.y + (cp1Y - origin.y) * ribT * 0.5f + (cp2Y - cp1Y) * ribT + (endY - cp2Y) * ribT * 0.5f
-        
-        val ribLen = frondWidth * (0.5f - t * 0.3f)
-        val ribAngle = angleRad + (if (i % 2 == 0) 0.5f else -0.5f)  // Xen kẽ 2 bên
-        
-        drawLine(
-            color = baseColor.darken(0.15f).copy(alpha = opacity * 0.5f),
-            start = Offset(ribX, ribY),
-            end = Offset(
-                ribX + cos(ribAngle) * ribLen,
-                ribY + sin(ribAngle) * ribLen * 0.5f + ribLen * 0.3f
-            ),
-            strokeWidth = frondWidth * 0.025f,
-            cap = StrokeCap.Round
-        )
-    }
-}
-
-/**
- * Vẽ cây thông với các tầng tam giác và viền nhọn
- */
-private fun DrawScope.drawConiferTree(
-    trunkTop: Offset,
-    canvasHeight: Float,
-    tierCount: Int,
-    baseColor: Color,
-    opacity: Float,
-    scale: Float,
-    sway: Float,
-    seed: Int
-) {
-    if (tierCount <= 0) return
-    
-    val totalHeight = canvasHeight * 0.50f * scale  // Cao hơn
-    val baseWidth = canvasHeight * 0.40f * scale    // Rộng hơn
-    
-    // Màu sắc
-    val darkGreen = baseColor.darken(0.15f).copy(alpha = opacity)
-    val midGreen = baseColor.copy(alpha = opacity)
-    val lightGreen = baseColor.lighten(0.1f).copy(alpha = opacity)
-    
-    // Vẽ từ dưới lên trên (tầng dưới trước để bị che bởi tầng trên)
-    for (tier in 0 until tierCount) {
-        val tierProgress = tier.toFloat() / tierCount.coerceAtLeast(1)
-        
-        // Mỗi tầng nhỏ dần khi lên cao
-        val tierWidth = baseWidth * (1f - tierProgress * 0.5f)
-        val tierHeight = totalHeight / tierCount * 1.4f  // Overlap nhiều hơn
-        
-        // Vị trí Y của tầng - bắt đầu từ dưới trunk top
-        val tierBottom = trunkTop.y + canvasHeight * 0.02f - totalHeight * tierProgress * 0.80f
-        val tierTop = tierBottom - tierHeight
-        
-        // Sway offset - tầng cao đung đưa nhiều hơn
-        val swayOffset = sin(Math.toRadians(sway.toDouble())).toFloat() * tierWidth * 0.15f * (tier + 1)
-        val tierCenterX = trunkTop.x + swayOffset
-        
-        // Vẽ hình tam giác với viền nhọn (spiky)
-        val spikeCount = 5 + tier  // Ít spike hơn, dễ nhìn
-        
-        val tierPath = Path().apply {
-            // Bắt đầu từ đỉnh
-            moveTo(tierCenterX, tierTop)
-            
-            // Vẽ cạnh phải với các spike
-            val rightEdgeX = tierCenterX + tierWidth / 2
-            for (i in 0 until spikeCount) {
-                val t = (i + 1).toFloat() / (spikeCount + 1)
-                val y = tierTop + tierHeight * t
-                val baseX = tierCenterX + tierWidth / 2 * t
-                
-                // Spike ra ngoài
-                val spikeOutX = baseX + tierWidth * 0.08f
-                val spikeOutY = y - tierHeight * 0.03f
-                lineTo(spikeOutX, spikeOutY)
-                
-                // Spike vào trong
-                val spikeInX = baseX - tierWidth * 0.02f
-                val spikeInY = y + tierHeight * 0.02f
-                lineTo(spikeInX, spikeInY)
-            }
-            
-            // Góc dưới phải
-            lineTo(rightEdgeX, tierBottom)
-            
-            // Đáy
-            lineTo(tierCenterX - tierWidth / 2, tierBottom)
-            
-            // Vẽ cạnh trái với các spike
-            for (i in spikeCount - 1 downTo 0) {
-                val t = (i + 1).toFloat() / (spikeCount + 1)
-                val y = tierTop + tierHeight * t
-                val baseX = tierCenterX - tierWidth / 2 * t
-                
-                // Spike vào trong trước
-                val spikeInX = baseX + tierWidth * 0.02f
-                val spikeInY = y + tierHeight * 0.02f
-                lineTo(spikeInX, spikeInY)
-                
-                // Spike ra ngoài
-                val spikeOutX = baseX - tierWidth * 0.08f
-                val spikeOutY = y - tierHeight * 0.03f
-                lineTo(spikeOutX, spikeOutY)
-            }
-            
-            close()
-        }
-        
-        // Fill với gradient
-        drawPath(
-            path = tierPath,
-            brush = Brush.verticalGradient(
-                colors = listOf(lightGreen, midGreen, darkGreen),
-                startY = tierTop,
-                endY = tierBottom
-            )
-        )
-        
-        // Viền nhẹ
-        drawPath(
-            path = tierPath,
-            color = darkGreen.copy(alpha = opacity * 0.3f),
-            style = Stroke(width = 1.5f)
-        )
-    }
-}
-
-// ========== Color Extension Functions ==========
-
-private fun Color.lighten(factor: Float): Color {
-    return Color(
-        red = (red + (1f - red) * factor).coerceIn(0f, 1f),
-        green = (green + (1f - green) * factor).coerceIn(0f, 1f),
-        blue = (blue + (1f - blue) * factor).coerceIn(0f, 1f),
-        alpha = alpha
-    )
-}
-
-private fun Color.darken(factor: Float): Color {
-    return Color(
-        red = (red * (1f - factor)).coerceIn(0f, 1f),
-        green = (green * (1f - factor)).coerceIn(0f, 1f),
-        blue = (blue * (1f - factor)).coerceIn(0f, 1f),
-        alpha = alpha
-    )
-}
-
-// ========== Size enum ==========
-
-enum class ProceduralTreeSize(val dp: Dp) {
-    SMALL(60.dp),
-    MEDIUM(100.dp),
-    LARGE(150.dp),
-    XLARGE(200.dp)
 }
