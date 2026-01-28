@@ -1,5 +1,6 @@
 package com.projectapp.tempus.data.gamification
 
+import android.util.Log
 import com.projectapp.tempus.data.gamification.entity.PointHistoryEntity
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
@@ -17,11 +18,18 @@ class LocalGamificationRepository(
     
     suspend fun getUserPointsOnce(): UserPointsEntity? = dao.getUserPointsOnce()
     
-    suspend fun updateUserPoints(points: UserPointsEntity) = dao.updateUserPoints(points)
+    suspend fun updateUserPoints(points: UserPointsEntity) {
+        Log.d("LocalGamRepo", "updateUserPoints: id=${points.id}, totalPoints=${points.totalPoints}")
+        dao.updateUserPoints(points)
+        Log.d("LocalGamRepo", "updateUserPoints: DONE")
+    }
     
     // ==================== Point History ====================
     
-    suspend fun addPointHistory(history: PointHistoryEntity) = dao.addPointHistory(history)
+    suspend fun addPointHistory(history: PointHistoryEntity) {
+        Log.d("LocalGamRepo", "addPointHistory: points=${history.points}, reason=${history.reason}")
+        dao.addPointHistory(history)
+    }
     
     fun getPointHistory(): Flow<List<PointHistoryEntity>> = dao.getPointHistory()
     
