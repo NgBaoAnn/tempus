@@ -794,7 +794,13 @@ private fun DurationPickerSheet(
         "01:00:00" to "1 giờ",
         "01:30:00" to "1 giờ 30 phút",
         "02:00:00" to "2 giờ",
-        "03:00:00" to "3 giờ"
+        "02:30:00" to "2 giờ 30 phút",
+        "03:00:00" to "3 giờ",
+        "04:00:00" to "4 giờ",
+        "05:00:00" to "5 giờ",
+        "06:00:00" to "6 giờ",
+        "07:00:00" to "7 giờ",
+        "08:00:00" to "8 giờ"
     )
     
     ModalBottomSheet(

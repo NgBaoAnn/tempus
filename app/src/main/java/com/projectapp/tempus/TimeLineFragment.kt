@@ -232,15 +232,16 @@ class TimelineFragment : Fragment() {
                             partialText = voicePartialText,
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
-                            onConfirmTask = { task ->
-                                // Create task directly in database
-                                voiceViewModel.createTask(task)
+                            onConfirmProposal = {
+                                // Confirm proposal via AI Agent
+                                voiceViewModel.confirmProposal()
                                 
                                 // Close sheet and refresh timeline
                                 scope.launch {
                                     sheetState.hide()
                                     showVoiceSheet = false
-                                    // Refresh timeline to show new task
+                                    // Refresh timeline to show changes
+                                    // Note: Ideally we should wait for confirmation, but for now we follow existing pattern
                                     viewModel.onRefresh()
                                 }
                             },

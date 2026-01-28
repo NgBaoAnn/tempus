@@ -47,7 +47,25 @@ class SupabaseFriendRepository(
                 }
                 .decodeSingle<FriendRequestSimpleDto>()
             
-            result.toDomain()
+            // Fix: Fetch receiver details to return full object for UI
+            val receiverProfile = fetchUsersDetails(listOf(receiverId))[receiverId]
+            
+            FriendRequest(
+                id = result.id,
+                senderId = result.senderId,
+                senderUsername = "Me",
+                senderAvatar = null,
+                receiverId = result.receiverId,
+                receiverUsername = receiverProfile?.username ?: "User",
+                receiverAvatar = receiverProfile?.avatar,
+                status = FriendRequestStatus.fromString(result.status ?: "pending"),
+                createdAt = try {
+                    result.createdAt?.let { Instant.parse(it) } ?: Instant.now()
+                } catch (e: Exception) { Instant.now() },
+                updatedAt = try {
+                    result.updatedAt?.let { Instant.parse(it) } ?: Instant.now()
+                } catch (e: Exception) { Instant.now() }
+            )
         }.fold(
             onSuccess = { Result.success(it) },
             onFailure = { e ->

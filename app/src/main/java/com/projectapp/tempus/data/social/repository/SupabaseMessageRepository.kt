@@ -95,7 +95,7 @@ class SupabaseMessageRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Check if conversation exists (in either direction)
+            // 1. Try to find existing first
             val existing = supabase.from("conversations")
                 .select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at")) {
                     filter {
@@ -118,17 +118,55 @@ class SupabaseMessageRepository(
                 return@runCatching existing.first()
             }
             
-            // Create new conversation
-            val createDto = CreateConversationDto(
-                participant1Id = currentUserId,
-                participant2Id = otherUserId
-            )
-            
-            supabase.from("conversations")
-                .insert(createDto) {
-                    select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at"))
+            // 2. If not found, try to create new
+            // IMPORTANT: Database has check constraint requiring participant1_id < participant2_id
+            // So we must sort the IDs before inserting
+            try {
+                val (p1, p2) = if (currentUserId < otherUserId) {
+                    currentUserId to otherUserId
+                } else {
+                    otherUserId to currentUserId
                 }
-                .decodeSingle<ConversationDto>()
+                
+                val createDto = CreateConversationDto(
+                    participant1Id = p1,
+                    participant2Id = p2
+                )
+                
+                supabase.from("conversations")
+                    .insert(createDto) {
+                        select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at"))
+                    }
+                    .decodeSingle<ConversationDto>()
+                    
+            } catch (e: Exception) {
+                // 3. Fallback: If insert failed (likely Unique Constraint violation due to Race Condition),
+                // try to fetch one last time.
+                val retryExisting = supabase.from("conversations")
+                    .select(Columns.raw("id, participant1_id, participant2_id, last_message_at, last_message_preview, created_at")) {
+                        filter {
+                            or {
+                                and {
+                                    eq("participant1_id", currentUserId)
+                                    eq("participant2_id", otherUserId)
+                                }
+                                and {
+                                    eq("participant1_id", otherUserId)
+                                    eq("participant2_id", currentUserId)
+                                }
+                            }
+                        }
+                        limit(1)
+                    }
+                    .decodeList<ConversationDto>()
+                    
+                if (retryExisting.isNotEmpty()) {
+                    retryExisting.first()
+                } else {
+                    // Actual failure
+                    throw e
+                }
+            }
         }
     }
 

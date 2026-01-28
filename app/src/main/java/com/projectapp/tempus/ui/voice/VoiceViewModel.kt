@@ -31,7 +31,8 @@ class VoiceViewModel(
     // Reuse existing AI infrastructure
     private val aiRepository = AIRepository(scheduleRepository, userId)
     private val speechManager = SpeechRecognitionManager(application)
-    private val taskParser = TaskParserService(aiRepository)
+    // Legacy parser no longer needed for new flow, but keeping if we need fallback logic later
+    // private val taskParser = TaskParserService(aiRepository) 
     
     private val _state = MutableStateFlow<VoiceInputState>(VoiceInputState.Idle)
     val state: StateFlow<VoiceInputState> = _state.asStateFlow()
@@ -39,7 +40,7 @@ class VoiceViewModel(
     private val _partialText = MutableStateFlow("")
     val partialText: StateFlow<String> = _partialText.asStateFlow()
     
-    private var currentParsedTask: ParsedTask? = null
+    private var currentProposal: com.projectapp.tempus.domain.model.AgentProposal? = null
     
     /**
      * Check if speech recognition is available
@@ -81,65 +82,68 @@ class VoiceViewModel(
     }
     
     /**
-     * Process voice input text using AI
+     * Process voice input text using AI Agent
      */
     private fun processVoiceInput(text: String) {
         viewModelScope.launch {
             _state.value = VoiceInputState.Processing
             
-            // Use AI to parse the voice text
-            val parsed = taskParser.parse(text)
-            currentParsedTask = parsed
+            // Use AI Repository to get a full proposal (Add/Edit/Delete supported)
+            val result = aiRepository.requestProposal(text)
             
-            _state.value = VoiceInputState.Parsed(parsed)
-        }
-    }
-    
-
-    /**
-     * Create task in database
-     */
-    fun createTask(task: ParsedTask) {
-        if (!task.isValid) return
-        
-        viewModelScope.launch {
-            try {
-                _state.value = VoiceInputState.Processing
-                
-                // Build schedule data
-                val dateStr = task.date?.format(DateTimeFormatter.ISO_LOCAL_DATE) 
-                    ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                val timeStr = task.time?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "09:00"
-                val startTimeDate = "${dateStr}T${timeStr}:00+07:00"
-                
-                val durationMinutes = task.duration?.toMinutes()?.toInt() ?: 60
-                val hours = durationMinutes / 60
-                val minutes = durationMinutes % 60
-                val implementationTime = String.format("%02d:%02d:00", hours, minutes)
-                
-                val row = mapOf(
-                    "user_id" to userId,
-                    "name_schedule" to (task.taskName ?: "Công việc mới"),
-                    "start_time_date" to startTimeDate,
-                    "implementation_time" to implementationTime,
-                    "repeat" to "once"
-                )
-                
-                scheduleRepository.insertSchedule(row)
-                
-                // Success - reset state
-                reset()
-                
-            } catch (e: Exception) {
-                _state.value = VoiceInputState.Error("Không thể tạo task: ${e.message}")
+            result.onSuccess { response ->
+                when (response) {
+                    is AIRepository.AgentResponse.Proposal -> {
+                        currentProposal = response.proposal
+                        _state.value = VoiceInputState.ProposalReady(response.proposal)
+                    }
+                    is AIRepository.AgentResponse.TextOnly -> {
+                        // For voice, if it's text only, we treat it as an error/info
+                        _state.value = VoiceInputState.Error("AI: ${response.text}")
+                    }
+                }
+            }.onFailure { e ->
+                _state.value = VoiceInputState.Error("Lỗi kết nối AI: ${e.message}")
             }
         }
     }
     
     /**
-     * Get final task for creation
+     * Confirm and execute the current proposal
      */
-    fun getFinalTask(): ParsedTask? = currentParsedTask
+    fun confirmProposal() {
+        val proposal = currentProposal ?: return
+        
+        viewModelScope.launch {
+            try {
+                _state.value = VoiceInputState.Processing
+                
+                val result = aiRepository.executeProposal(proposal)
+                
+                result.onSuccess {
+                    // Success - reset state
+                    reset()
+                }.onFailure { e ->
+                    _state.value = VoiceInputState.Error("Không thể thực hiện: ${e.message}")
+                }
+                
+            } catch (e: Exception) {
+                _state.value = VoiceInputState.Error("Lỗi thực thi: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Legacy support method - not used in new flow but kept for interface compatibility if needed
+     */
+    fun createTask(task: ParsedTask) {
+        // Redirect to new flow if possible, or just ignore
+    }
+    
+    /**
+     * Get final task for creation - Legacy
+     */
+    fun getFinalTask(): ParsedTask? = null // Deprecated
     
     /**
      * Reset state
@@ -147,7 +151,7 @@ class VoiceViewModel(
     fun reset() {
         _state.value = VoiceInputState.Idle
         _partialText.value = ""
-        currentParsedTask = null
+        currentProposal = null
     }
     
     override fun onCleared() {

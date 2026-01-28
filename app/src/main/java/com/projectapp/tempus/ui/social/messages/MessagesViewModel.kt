@@ -152,22 +152,32 @@ class MessagesViewModel(
     /**
      * Mở chat với bạn bè
      */
+    /**
+     * Mở chat với bạn bè
+     */
     fun openChat(friendId: String, friendUsername: String, friendAvatar: String?) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            // Optimistically set the chat partner so we have context even if conversation fails to load initially
+            val partner = UserBasicDto(
+                id = friendId,
+                username = friendUsername,
+                avatar = friendAvatar
+            )
+            
+            _uiState.update { 
+                it.copy(
+                    isLoading = true, 
+                    error = null,
+                    currentChatPartner = partner, // Set immediately
+                    currentConversation = null // Clear old one
+                ) 
+            }
             
             messageRepository.getOrCreateConversation(friendId)
                 .onSuccess { conversation ->
-                    val partner = UserBasicDto(
-                        id = friendId,
-                        username = friendUsername,
-                        avatar = friendAvatar
-                    )
-                    
                     _uiState.update { 
                         it.copy(
                             currentConversation = conversation,
-                            currentChatPartner = partner,
                             isLoading = false
                         ) 
                     }
@@ -176,9 +186,11 @@ class MessagesViewModel(
                     loadMessages(conversation.id)
                 }
                 .onFailure { e ->
+                    // Even if loading fails, we still have the partner info allowing user to TRY sending
                     _uiState.update { 
                         it.copy(
-                            error = "Không thể mở cuộc trò chuyện",
+                            // Keep error internal mostly, or show small toast
+                            // error = "Không thể tải cuộc trò chuyện", 
                             isLoading = false
                         ) 
                     }
@@ -186,9 +198,6 @@ class MessagesViewModel(
         }
     }
 
-    /**
-     * Load messages của conversation hiện tại
-     */
     /**
      * Load messages của conversation hiện tại (Realtime)
      */
@@ -220,29 +229,53 @@ class MessagesViewModel(
      * Gửi tin nhắn
      */
     fun sendMessage(content: String) {
-        val conversationId = _uiState.value.currentConversation?.id ?: return
         if (content.isBlank()) return
         
         viewModelScope.launch {
             _uiState.update { it.copy(isSending = true) }
             
-            messageRepository.sendMessage(conversationId, content.trim())
-                .onSuccess { message ->
-                    _uiState.update { state ->
-                        state.copy(
-                            currentMessages = state.currentMessages + message,
-                            isSending = false
-                        )
+            var conversationId = _uiState.value.currentConversation?.id
+            
+            // If we don't have a conversation ID yet (e.g. initial load failed/race cond), try to get it now
+            if (conversationId == null) {
+                val partnerId = _uiState.value.currentChatPartner?.id
+                if (partnerId != null) {
+                    val result = messageRepository.getOrCreateConversation(partnerId)
+                    result.onSuccess { conv ->
+                        conversationId = conv.id
+                        _uiState.update { it.copy(currentConversation = conv) }
+                        // Start listening to this new conversation
+                        loadMessages(conv.id)
+                    }.onFailure { ex ->
+                        _uiState.update { it.copy(isSending = false, error = "Lỗi kết nối: ${ex.message}") }
+                        return@launch
                     }
+                } else {
+                    _uiState.update { it.copy(isSending = false, error = "Không xác định người nhận") }
+                    return@launch
                 }
-                .onFailure { e ->
-                    _uiState.update { 
-                        it.copy(
-                            error = "Không thể gửi tin nhắn",
-                            isSending = false
-                        ) 
+            }
+            
+            // Now proceed with sending if we have an ID
+            if (conversationId != null) {
+                messageRepository.sendMessage(conversationId!!, content.trim())
+                    .onSuccess { message ->
+                        _uiState.update { state ->
+                            state.copy(
+                                currentMessages = state.currentMessages + message,
+                                isSending = false
+                            )
+                        }
                     }
-                }
+                    .onFailure { e ->
+                        _uiState.update { 
+                            it.copy(
+                                error = "Không thể gửi tin nhắn: ${e.message}",
+                                isSending = false
+                            ) 
+                        }
+                    }
+            }
         }
     }
 
