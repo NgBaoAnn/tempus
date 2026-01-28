@@ -78,6 +78,11 @@ class MessagesViewModel(
             
             val currentUserId = getCurrentUserId()
             
+            // 0. Get Blocked User IDs first (both directions)
+            val blockedUserIds = friendRepository.getAllBlockedUserIds()
+                .getOrDefault(emptyList())
+                .toSet()
+            
             // 1. Get Active Conversations
             val conversationsResult = messageRepository.getConversations()
             val activeConversations = conversationsResult.getOrDefault(emptyList())
@@ -86,7 +91,7 @@ class MessagesViewModel(
             val friendsResult = friendRepository.getFriends()
             val friends = friendsResult.getOrDefault(emptyList())
             
-            // 3. Process Active Conversations
+            // 3. Process Active Conversations (filter out blocked users)
             val loadedConversations = activeConversations.mapNotNull { conv ->
                 val otherUserId = if (conv.participant1Id == currentUserId) {
                     conv.participant2Id
@@ -94,13 +99,24 @@ class MessagesViewModel(
                     conv.participant1Id
                 }
                 
+                // Skip if blocked
+                if (otherUserId in blockedUserIds) {
+                    return@mapNotNull null
+                }
+                
                 val user = loadUserInfo(otherUserId)
                 user?.let { ConversationWithUser(conv, it) }
             }.toMutableList()
             
-            // 4. Add Empty Conversations for Friends who are not in list
+            // 4. Add Empty Conversations for Friends who are not in list (and not blocked)
             friends.forEach { friend ->
                 val friendId = friend.friendId
+                
+                // Skip if blocked
+                if (friendId in blockedUserIds) {
+                    return@forEach
+                }
+                
                 val isAlreadyInList = loadedConversations.any { it.otherUser.id == friendId }
                 
                 if (!isAlreadyInList) {
@@ -234,11 +250,40 @@ class MessagesViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSending = true) }
             
+            val currentUserId = getCurrentUserId()
+            
+            // Get partner ID from currentChatPartner OR from conversation participants
+            var partnerId = _uiState.value.currentChatPartner?.id
+            if (partnerId == null) {
+                // Try to get from conversation
+                val conv = _uiState.value.currentConversation
+                if (conv != null) {
+                    partnerId = if (conv.participant1Id == currentUserId) {
+                        conv.participant2Id
+                    } else {
+                        conv.participant1Id
+                    }
+                }
+            }
+            
+            // Check if user is blocked before sending
+            if (partnerId != null) {
+                val isBlockedResult = friendRepository.isUserBlocked(partnerId)
+                if (isBlockedResult.getOrDefault(false)) {
+                    _uiState.update { 
+                        it.copy(
+                            isSending = false, 
+                            error = "Người này đã bị chặn. Không thể gửi tin nhắn."
+                        ) 
+                    }
+                    return@launch
+                }
+            }
+            
             var conversationId = _uiState.value.currentConversation?.id
             
             // If we don't have a conversation ID yet (e.g. initial load failed/race cond), try to get it now
             if (conversationId == null) {
-                val partnerId = _uiState.value.currentChatPartner?.id
                 if (partnerId != null) {
                     val result = messageRepository.getOrCreateConversation(partnerId)
                     result.onSuccess { conv ->
