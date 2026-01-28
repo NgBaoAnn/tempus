@@ -28,6 +28,7 @@ import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.auth.AuthService
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import io.github.jan.supabase.gotrue.auth
 
 /**
  * Login Activity using Jetpack Compose
@@ -75,8 +76,7 @@ class LoginActivity : ComponentActivity() {
                 authService.login(email, password)
                 
                 // Auto-sync: Pull data from Supabase to local Room
-                val userId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
-                    .auth.currentUserOrNull()?.id
+                val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     try {
                         Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
@@ -142,8 +142,7 @@ class LoginActivity : ComponentActivity() {
                     authService.signInWithGoogle(idToken)
                     
                     // Auto-sync: Pull data from Supabase to local Room
-                    val userId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
-                        .auth.currentUserOrNull()?.id
+                    val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
                         try {
                             Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
