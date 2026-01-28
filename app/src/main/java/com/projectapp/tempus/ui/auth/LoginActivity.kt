@@ -164,7 +164,6 @@ class LoginActivity : ComponentActivity() {
                     // Đăng nhập với Supabase sử dụng ID Token
                     authService.signInWithGoogle(idToken)
                     
-<<<<<<< HEAD
                     // Auto-sync: Pull data from Supabase to local Room
                     val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
@@ -189,8 +188,9 @@ class LoginActivity : ComponentActivity() {
                         } catch (e: Exception) {
                             Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
                         }
-=======
-                    // Fetch user profile to update cache and theme
+                    }
+                    
+                    // Fetch user profile to update cache and theme (from master)
                     val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
                     try {
                         val user = userRepo.getCurrentUser()
@@ -201,7 +201,6 @@ class LoginActivity : ComponentActivity() {
                     } catch (e: Exception) {
                         Log.e("LoginActivity", "Failed to fetch user profile after Google login", e)
                         // Continue anyway, just theme might be wrong initially
->>>>>>> origin/master
                     }
                     
                     Toast.makeText(this@LoginActivity, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
