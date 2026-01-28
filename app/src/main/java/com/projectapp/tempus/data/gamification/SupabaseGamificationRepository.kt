@@ -330,11 +330,17 @@ class SupabaseGamificationRepository(
         val userId = getCurrentUserId() ?: return
         
         try {
-            supabase.from("trees")
-                .upsert(tree.toDto(userId)) {
-                    onConflict = "id"
-                }
-            android.util.Log.d("GamificationRepo", "Upserted tree: ${tree.id}")
+            // Check if tree exists
+            val existing = getTreeById(tree.id)
+            if (existing != null) {
+                // Update existing tree
+                updateTree(tree)
+                android.util.Log.d("GamificationRepo", "Upserted (updated) tree: ${tree.id}")
+            } else {
+                // Insert new tree
+                plantTree(tree)
+                android.util.Log.d("GamificationRepo", "Upserted (inserted) tree: ${tree.id}")
+            }
         } catch (e: Exception) {
             android.util.Log.e("GamificationRepo", "Error upserting tree: ${e.message}")
         }
