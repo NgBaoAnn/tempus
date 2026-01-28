@@ -28,7 +28,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.gamification.SupabaseGamificationRepository
 import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.data.voice.SpeechRecognitionManager
