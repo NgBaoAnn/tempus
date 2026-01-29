@@ -109,7 +109,8 @@ fun CircularCountdown(
             // Time display
             Text(
                 text = timeText,
-                style = TimerTypography.TimeDisplay
+                style = TimerTypography.TimeDisplay,
+                color = timerColor
             )
             
             Spacer(modifier = Modifier.height(8.dp))

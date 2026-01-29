@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.projectapp.tempus.ui.notes.compose.NoteEditorScreen
 import com.projectapp.tempus.ui.notes.compose.NotesScreen
+import com.projectapp.tempus.ui.theme.TempusTheme
 
 /**
  * Fragment cho Quick Notes feature
@@ -36,55 +37,57 @@ class NotesFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             
             setContent {
-                val uiState by viewModel.uiState.collectAsState()
-                val editorState by viewModel.editorState.collectAsState()
-                
-                if (isEditing) {
-                    NoteEditorScreen(
-                        title = editorState.title,
-                        content = editorState.content,
-                        isNew = editorState.isNew,
-                        isSaving = editorState.isSaving,
-                        onTitleChange = viewModel::onTitleChange,
-                        onContentChange = viewModel::onContentChange,
-                        onSaveClick = {
-                            viewModel.saveNote {
+                TempusTheme {
+                    val uiState by viewModel.uiState.collectAsState()
+                    val editorState by viewModel.editorState.collectAsState()
+                    
+                    if (isEditing) {
+                        NoteEditorScreen(
+                            title = editorState.title,
+                            content = editorState.content,
+                            isNew = editorState.isNew,
+                            isSaving = editorState.isSaving,
+                            onTitleChange = viewModel::onTitleChange,
+                            onContentChange = viewModel::onContentChange,
+                            onSaveClick = {
+                                viewModel.saveNote {
+                                    isEditing = false
+                                }
+                            },
+                            onDeleteClick = {
+                                editorState.noteId?.let { viewModel.deleteNote(it) }
+                                isEditing = false
+                            },
+                            onBackClick = {
                                 isEditing = false
                             }
-                        },
-                        onDeleteClick = {
-                            editorState.noteId?.let { viewModel.deleteNote(it) }
-                            isEditing = false
-                        },
-                        onBackClick = {
-                            isEditing = false
-                        }
-                    )
-                } else {
-                    NotesScreen(
-                        notes = uiState.notes,
-                        searchQuery = uiState.searchQuery,
-                        isLoading = uiState.isLoading,
-                        onSearchQueryChange = viewModel::onSearchQueryChange,
-                        onClearSearch = viewModel::clearSearch,
-                        onNoteClick = { note ->
-                            viewModel.startEditNote(note.id)
-                            isEditing = true
-                        },
-                        onAddClick = {
-                            viewModel.startNewNote()
-                            isEditing = true
-                        },
-                        onPinClick = { note ->
-                            viewModel.togglePin(note.id)
-                        },
-                        onDeleteClick = { note ->
-                            viewModel.deleteNote(note.id)
-                        },
-                        onBackClick = {
-                            findNavController().popBackStack()
-                        }
-                    )
+                        )
+                    } else {
+                        NotesScreen(
+                            notes = uiState.notes,
+                            searchQuery = uiState.searchQuery,
+                            isLoading = uiState.isLoading,
+                            onSearchQueryChange = viewModel::onSearchQueryChange,
+                            onClearSearch = viewModel::clearSearch,
+                            onNoteClick = { note ->
+                                viewModel.startEditNote(note.id)
+                                isEditing = true
+                            },
+                            onAddClick = {
+                                viewModel.startNewNote()
+                                isEditing = true
+                            },
+                            onPinClick = { note ->
+                                viewModel.togglePin(note.id)
+                            },
+                            onDeleteClick = { note ->
+                                viewModel.deleteNote(note.id)
+                            },
+                            onBackClick = {
+                                findNavController().popBackStack()
+                            }
+                        )
+                    }
                 }
             }
         }

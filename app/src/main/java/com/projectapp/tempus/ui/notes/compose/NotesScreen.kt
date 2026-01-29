@@ -100,7 +100,7 @@ fun NotesScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = modifier.background(NotesDesignSystem.Background),
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
         topBar = {
             ModernTopBar(
                 title = "Ghi chú",
@@ -110,7 +110,7 @@ fun NotesScreen(
         floatingActionButton = {
             ModernFAB(onClick = onAddClick)
         },
-        containerColor = NotesDesignSystem.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -169,7 +169,7 @@ private fun ModernTopBar(
                 text = title,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = NotesDesignSystem.TextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         navigationIcon = {
@@ -179,12 +179,12 @@ private fun ModernTopBar(
                     .padding(8.dp)
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(NotesDesignSystem.SurfaceElevated)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = NotesDesignSystem.TextPrimary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         },
@@ -202,12 +202,12 @@ private fun ModernFAB(onClick: () -> Unit) {
             .shadow(
                 elevation = 12.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = NotesDesignSystem.Primary.copy(alpha = 0.3f),
-                spotColor = NotesDesignSystem.Primary.copy(alpha = 0.3f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             ),
         shape = RoundedCornerShape(16.dp),
-        containerColor = NotesDesignSystem.Primary,
-        contentColor = Color.White
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
         Icon(
             Icons.Default.Add,
@@ -238,12 +238,12 @@ private fun AnimatedSearchBar(
             .shadow(
                 elevation = animatedElevation,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = NotesDesignSystem.TextMuted.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             ),
         placeholder = {
             Text(
                 "Tìm kiếm ghi chú...",
-                color = NotesDesignSystem.TextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 fontSize = 15.sp
             )
         },
@@ -251,7 +251,7 @@ private fun AnimatedSearchBar(
             Icon(
                 Icons.Default.Search,
                 contentDescription = null,
-                tint = if (query.isNotBlank()) NotesDesignSystem.Primary else NotesDesignSystem.TextMuted,
+                tint = if (query.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp)
             )
         },
@@ -265,7 +265,7 @@ private fun AnimatedSearchBar(
                     Icon(
                         Icons.Default.Clear,
                         contentDescription = "Xóa",
-                        tint = NotesDesignSystem.TextMuted,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -273,16 +273,18 @@ private fun AnimatedSearchBar(
         },
         shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = NotesDesignSystem.Primary,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = NotesDesignSystem.Surface,
-            unfocusedContainerColor = NotesDesignSystem.SurfaceElevated,
-            cursorColor = NotesDesignSystem.Primary
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
         ),
         singleLine = true,
         textStyle = LocalTextStyle.current.copy(
             fontSize = 15.sp,
-            color = NotesDesignSystem.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
     )
 }
@@ -321,15 +323,37 @@ private fun ModernNoteCard(
     onClick: () -> Unit,
     onPinClick: () -> Unit
 ) {
+    // Determine card background color
+    // We can keep the pastel colors but ensure they work in dark mode or tone them down
+    // For now, let's map them to somewhat safe colors, or just ensure text is legible.
+    // Ideally, "yellow" etc. should perhaps map to surfaceContainerHigh + a tint in Dark Mode.
+    // For simplicity and "sync theme" goal, let's use surface colors but maybe tinted if feasible.
+    // Or, keep the specific colors but ensure text contrast.
+    
+    // For now, I will map "default" to surface, and others I'll leave as custom but careful.
+    // However, if the user wants FULL theme, maybe colored notes are part of the feature?
+    // Let's keep the colored cards as they are likely a feature (color coding), 
+    // BUT we must ensure the text color is readable.
+    // In Dark Mode, these pastel colors might be too bright.
+    
+    // Strategy: Use the same colors but maybe alpha-blended with primaryContainer if dark?
+    // Or simply use them. Let's assume they are "sticky note" colors and intended to be light.
+    // BUT we must ensure the Text color on top is black/dark grey, NOT white (if app is dark theme).
+    // So for the CARD content, we unfortunately need dark text even in dark mode if the background is light pastel.
+    
     val backgroundColor = when (note.color) {
-        "yellow" -> NotesDesignSystem.CardYellow
-        "blue" -> NotesDesignSystem.CardBlue
-        "green" -> NotesDesignSystem.CardGreen
-        "pink" -> NotesDesignSystem.CardPink
-        "purple" -> NotesDesignSystem.CardPurple
-        "orange" -> NotesDesignSystem.CardOrange
-        else -> NotesDesignSystem.CardDefault
+        "yellow" -> Color(0xFFFEF3C7)
+        "blue" -> Color(0xFFDBEAFE)
+        "green" -> Color(0xFFD1FAE5)
+        "pink" -> Color(0xFFFCE7F3)
+        "purple" -> Color(0xFFEDE9FE)
+        "orange" -> Color(0xFFFFEDD5)
+        else -> MaterialTheme.colorScheme.surface
     }
+    
+    // If background is specific color (not surface), force dark text
+    val contentColor = if (note.color != "default" && note.color != null) Color(0xFF0F172A) else MaterialTheme.colorScheme.onSurface
+    val mutedColor = if (note.color != "default" && note.color != null) Color(0xFF64748B) else MaterialTheme.colorScheme.onSurfaceVariant
     
     val dateFormatter = remember { SimpleDateFormat("dd MMM", Locale("vi")) }
     
@@ -339,11 +363,11 @@ private fun ModernNoteCard(
             .shadow(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = NotesDesignSystem.TextMuted.copy(alpha = 0.08f)
+                ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(color = NotesDesignSystem.Primary.copy(alpha = 0.1f))
+                indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             ) { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
@@ -363,7 +387,7 @@ private fun ModernNoteCard(
                         text = note.title,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = NotesDesignSystem.TextPrimary,
+                        color = contentColor,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         lineHeight = 22.sp,
@@ -376,14 +400,14 @@ private fun ModernNoteCard(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)
-                            .background(NotesDesignSystem.Warning.copy(alpha = 0.15f))
+                            .background(Color(0xFFF59E0B).copy(alpha = 0.15f))
                             .clickable { onPinClick() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_pin),
                             contentDescription = "Đã ghim",
-                            tint = NotesDesignSystem.Warning,
+                            tint = Color(0xFFF59E0B),
                             modifier = Modifier.size(14.dp)
                         )
                     }
@@ -399,7 +423,7 @@ private fun ModernNoteCard(
                 Text(
                     text = note.content,
                     fontSize = 14.sp,
-                    color = NotesDesignSystem.TextSecondary,
+                    color = convertToDarker(contentColor, 0.8f), // Slightly lighter than pure black
                     maxLines = 8,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 21.sp
@@ -417,18 +441,23 @@ private fun ModernNoteCard(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(NotesDesignSystem.Primary.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = dateFormatter.format(Date(note.updatedAt)),
                     fontSize = 12.sp,
-                    color = NotesDesignSystem.TextMuted,
+                    color = mutedColor,
                     fontWeight = FontWeight.Medium
                 )
             }
         }
     }
+}
+
+// Helper to avoid heavy dependencies, just returning color as is for now or logic
+private fun convertToDarker(color: Color, alpha: Float): Color {
+    return color.copy(alpha = alpha)
 }
 
 @Composable
@@ -438,7 +467,7 @@ private fun LoadingState() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            color = NotesDesignSystem.Primary,
+            color = MaterialTheme.colorScheme.primary,
             strokeWidth = 3.dp,
             modifier = Modifier.size(40.dp)
         )
@@ -465,8 +494,8 @@ private fun ModernEmptyState(
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            NotesDesignSystem.Primary.copy(alpha = 0.1f),
-                            NotesDesignSystem.Accent.copy(alpha = 0.05f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.05f)
                         )
                     )
                 ),
@@ -475,7 +504,7 @@ private fun ModernEmptyState(
             Icon(
                 painter = painterResource(id = R.drawable.ic_note),
                 contentDescription = null,
-                tint = NotesDesignSystem.Primary.copy(alpha = 0.4f),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                 modifier = Modifier.size(56.dp)
             )
         }
@@ -486,7 +515,7 @@ private fun ModernEmptyState(
             text = if (isSearching) "Không tìm thấy kết quả" else "Bắt đầu ghi chú",
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
-            color = NotesDesignSystem.TextPrimary
+            color = MaterialTheme.colorScheme.onBackground
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -494,7 +523,7 @@ private fun ModernEmptyState(
         Text(
             text = if (isSearching) "Thử từ khóa khác" else "Ghi lại ý tưởng của bạn ngay bây giờ",
             fontSize = 15.sp,
-            color = NotesDesignSystem.TextMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         if (!isSearching) {
@@ -507,11 +536,11 @@ private fun ModernEmptyState(
                     .shadow(
                         elevation = 8.dp,
                         shape = RoundedCornerShape(14.dp),
-                        ambientColor = NotesDesignSystem.Primary.copy(alpha = 0.2f)
+                        ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                     ),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = NotesDesignSystem.Primary
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 contentPadding = PaddingValues(horizontal = 28.dp)
             ) {

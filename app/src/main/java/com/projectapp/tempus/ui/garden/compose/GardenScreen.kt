@@ -38,16 +38,6 @@ import com.projectapp.tempus.ui.garden.GardenViewModel
 import com.projectapp.tempus.ui.garden.TreeDetailActivity
 import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 
-// ======================== DESIGN SYSTEM ========================
-
-private object GardenDesign {
-    val Primary = Color(0xFF4CAF50)
-    val Background = Color(0xFFF1F8E9)
-    val CardBg = Color(0xFFFFFFFF)
-    val StreakFire = Color(0xFFFF5722)
-    val PointsGold = Color(0xFFFFB300)
-}
-
 // ======================== SKELETON LOADING ========================
 
 /**
@@ -71,9 +61,9 @@ private fun GardenLoadingSkeleton(modifier: Modifier = Modifier) {
     
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFE2E8F0),
-            Color(0xFFF1F5F9),
-            Color(0xFFE2E8F0)
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
         ),
         start = Offset(shimmerTranslateAnim - 500f, 0f),
         end = Offset(shimmerTranslateAnim, 0f)
@@ -104,7 +94,7 @@ private fun SkeletonTreeCard(brush: Brush) {
             .fillMaxWidth()
             .shadow(4.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        color = GardenDesign.CardBg
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -233,8 +223,8 @@ fun GardenScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showPlantDialog = true },
-                containerColor = GardenDesign.Primary,
-                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Trồng cây mới")
@@ -375,7 +365,7 @@ private fun TreeCard(
             .clickable { onClick() }
             .shadow(4.dp, RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        color = GardenDesign.CardBg
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -412,7 +402,7 @@ private fun TreeCard(
                 Text(
                     text = "⚠️ Sắp héo!",
                     fontSize = 10.sp,
-                    color = GardenDesign.StreakFire,
+                    color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
                 )
             } else {
@@ -439,8 +429,8 @@ private fun TreeCard(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = GardenDesign.Primary,
-                trackColor = GardenDesign.Background
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }
@@ -462,7 +452,7 @@ private fun EmptyGardenState(onPlantClick: () -> Unit) {
             text = "Khu vườn trống trơn",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -473,7 +463,7 @@ private fun EmptyGardenState(onPlantClick: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         Button(
             onClick = onPlantClick,
-            colors = ButtonDefaults.buttonColors(containerColor = GardenDesign.Primary)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text("Trồng cây ngay")
         }
