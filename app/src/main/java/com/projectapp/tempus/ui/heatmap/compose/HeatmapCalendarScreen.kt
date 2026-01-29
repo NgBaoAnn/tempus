@@ -24,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,6 @@ import com.projectapp.tempus.domain.usecase.DayHeatmapData
 import com.projectapp.tempus.domain.usecase.HeatLevel
 import com.projectapp.tempus.domain.usecase.MonthHeatmapData
 import com.projectapp.tempus.domain.usecase.MonthStats
-import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -126,7 +126,7 @@ private fun HeatmapTopBar(
                     Icon(
                         Icons.Default.KeyboardArrowLeft,
                         contentDescription = "Tháng trước",
-                        tint = TempusDesignSystem.Primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 
@@ -141,7 +141,7 @@ private fun HeatmapTopBar(
                     Icon(
                         Icons.Default.KeyboardArrowRight,
                         contentDescription = "Tháng sau",
-                        tint = TempusDesignSystem.Primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -197,9 +197,9 @@ private fun MonthStatsCard(stats: MonthStats) {
                     value = "$completionPercent%",
                     label = "Hoàn thành",
                     color = when {
-                        completionPercent >= 80 -> TempusDesignSystem.Success
-                        completionPercent >= 50 -> TempusDesignSystem.Warning
-                        else -> TempusDesignSystem.Error
+                        completionPercent >= 80 -> Color(0xFF4CAF50)
+                        completionPercent >= 50 -> Color(0xFFFFC107)
+                        else -> MaterialTheme.colorScheme.error
                     }
                 )
                 
@@ -207,14 +207,14 @@ private fun MonthStatsCard(stats: MonthStats) {
                 StatItem(
                     value = "${stats.completedTasks}/${stats.totalTasks}",
                     label = "Tasks",
-                    color = TempusDesignSystem.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
                 
                 // Days with Tasks
                 StatItem(
                     value = "${stats.daysWithTasks}",
                     label = "Ngày hoạt động",
-                    color = TempusDesignSystem.Secondary
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
             
@@ -233,7 +233,7 @@ private fun MonthStatsCard(stats: MonthStats) {
                         Text(
                             text = " Ngày tốt nhất: ${best.format(dayFormatter)}",
                             fontSize = 13.sp,
-                            color = TempusDesignSystem.Success
+                            color = Color(0xFF4CAF50)
                         )
                     }
                     
@@ -242,7 +242,7 @@ private fun MonthStatsCard(stats: MonthStats) {
                         Text(
                             text = " Cần cải thiện: ${worst.format(dayFormatter)}",
                             fontSize = 13.sp,
-                            color = TempusDesignSystem.Warning
+                            color = Color(0xFFFFC107)
                         )
                     }
                 }

@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,8 +67,8 @@ fun DailyQuoteCard(
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = Color(0xFF3B82F6).copy(alpha = 0.15f),
-                spotColor = Color(0xFF3B82F6).copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             )
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(16.dp),
@@ -80,9 +81,9 @@ fun DailyQuoteCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF1E3A8A),
-                            Color(0xFF3B82F6),
-                            Color(0xFF60A5FA)
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.tertiary
                         )
                     )
                 )

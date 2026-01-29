@@ -61,7 +61,7 @@ fun ScheduleSuggestionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = ChatColors.Surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) {
         Column(
@@ -80,13 +80,13 @@ fun ScheduleSuggestionSheet(
                     text = "Lịch trình đề xuất",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = ChatColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
                     text = "${selectedItems.size}/${suggestions.size} đã chọn",
                     style = MaterialTheme.typography.bodySmall,
-                    color = ChatColors.TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -129,7 +129,7 @@ fun ScheduleSuggestionSheet(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = ChatColors.TextSecondary
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Text("Hủy")
@@ -144,7 +144,7 @@ fun ScheduleSuggestionSheet(
                     modifier = Modifier.weight(1f),
                     enabled = selectedItems.isNotEmpty(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ChatColors.Accent
+                        containerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
                     Text("Thêm vào lịch")
@@ -165,8 +165,8 @@ private fun SuggestionItem(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) ChatColors.AccentLight.copy(alpha = 0.1f)
-                     else ChatColors.SurfaceVariant,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+                     else MaterialTheme.colorScheme.surfaceVariant,
         label = "bgColor"
     )
     
@@ -194,8 +194,8 @@ private fun SuggestionItem(
                 checked = isSelected,
                 onCheckedChange = { onToggle() },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = ChatColors.Accent,
-                    uncheckedColor = ChatColors.TextMuted
+                    checkedColor = MaterialTheme.colorScheme.secondary,
+                    uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
             
@@ -210,18 +210,18 @@ private fun SuggestionItem(
                     text = suggestion.startTime,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = ChatColors.Accent
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 Box(
                     modifier = Modifier
                         .width(2.dp)
                         .height(12.dp)
-                        .background(ChatColors.TextMuted.copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
                 )
                 Text(
                     text = suggestion.calculateEndTime(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = ChatColors.TextMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -233,7 +233,7 @@ private fun SuggestionItem(
                     text = suggestion.name,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    color = ChatColors.TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -241,7 +241,7 @@ private fun SuggestionItem(
                 Text(
                     text = "${suggestion.durationMinutes} phút",
                     style = MaterialTheme.typography.bodySmall,
-                    color = ChatColors.TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -252,9 +252,9 @@ private fun SuggestionItem(
                     .clip(CircleShape)
                     .background(
                         when (suggestion.priority) {
-                            ScheduleSuggestion.Priority.HIGH -> ChatColors.Error
-                            ScheduleSuggestion.Priority.MEDIUM -> ChatColors.Typing
-                            ScheduleSuggestion.Priority.LOW -> ChatColors.Online
+                            ScheduleSuggestion.Priority.HIGH -> MaterialTheme.colorScheme.error
+                            ScheduleSuggestion.Priority.MEDIUM -> MaterialTheme.colorScheme.tertiary
+                            ScheduleSuggestion.Priority.LOW -> MaterialTheme.colorScheme.primary
                         }
                     )
             )

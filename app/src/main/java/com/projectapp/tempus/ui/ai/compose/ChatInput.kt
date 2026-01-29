@@ -62,7 +62,7 @@ fun ChatInput(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(ChatColors.Surface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
@@ -114,9 +114,9 @@ private fun ChatTextField(
 ) {
     val borderColor by animateColorAsState(
         targetValue = if (value.isNotEmpty()) 
-            ChatColors.Primary.copy(alpha = 0.5f) 
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) 
         else 
-            ChatColors.InputBorder,
+            MaterialTheme.colorScheme.outlineVariant,
         animationSpec = tween(200),
         label = "borderColor"
     )
@@ -126,9 +126,9 @@ private fun ChatTextField(
         onValueChange = onValueChange,
         enabled = enabled,
         textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = ChatColors.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         ),
-        cursorBrush = SolidColor(ChatColors.Primary),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Send
@@ -146,14 +146,14 @@ private fun ChatTextField(
                         color = borderColor,
                         shape = RoundedCornerShape(ChatDimens.InputCornerRadius)
                     )
-                    .background(ChatColors.InputBackground)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     .padding(horizontal = 20.dp, vertical = 14.dp)
             ) {
                 if (value.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = ChatColors.InputPlaceholder
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
                 innerTextField()
@@ -177,15 +177,15 @@ private fun PremiumSendButton(
     val backgroundBrush = if (enabled) {
         Brush.linearGradient(
             colors = listOf(
-                ChatColors.Primary,
-                ChatColors.PrimaryLight
+                MaterialTheme.colorScheme.primary,
+                MaterialTheme.colorScheme.primaryContainer
             )
         )
     } else {
         Brush.linearGradient(
             colors = listOf(
-                ChatColors.TextDim,
-                ChatColors.TextMuted
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
             )
         )
     }
@@ -198,7 +198,7 @@ private fun PremiumSendButton(
                     .size(ChatDimens.SendButtonSize + 8.dp)
                     .blur(12.dp)
                     .clip(CircleShape)
-                    .background(ChatColors.GlowPurple)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             )
         }
         
@@ -219,7 +219,7 @@ private fun PremiumSendButton(
             Icon(
                 painter = painterResource(id = R.drawable.ic_send_message),
                 contentDescription = "Gửi tin nhắn",
-                tint = ChatColors.OnAccent,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(22.dp)
             )
         }

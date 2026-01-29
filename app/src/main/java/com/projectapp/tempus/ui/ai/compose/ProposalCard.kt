@@ -47,7 +47,7 @@ fun ProposalCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = ChatColors.Surface,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 4.dp,
         modifier = modifier
             .fillMaxWidth()
@@ -69,12 +69,12 @@ fun ProposalCard(
                     text = "Đề xuất hành động",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = ChatColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
             Spacer(modifier = Modifier.height(12.dp))
-            HorizontalDivider(color = ChatColors.SurfaceVariant)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(12.dp))
             
             // Intent
@@ -82,7 +82,7 @@ fun ProposalCard(
             Text(
                 text = proposal.intent,
                 style = MaterialTheme.typography.bodyMedium,
-                color = ChatColors.TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 24.dp, top = 4.dp)
             )
             
@@ -103,7 +103,7 @@ fun ProposalCard(
             SectionHeader(title = "Ảnh hưởng", icon = "⚡")
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = ChatColors.AccentLight.copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 24.dp, top = 4.dp)
@@ -111,14 +111,14 @@ fun ProposalCard(
                 Text(
                     text = proposal.impact,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ChatColors.Accent,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(12.dp)
                 )
             }
             
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(color = ChatColors.SurfaceVariant)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(16.dp))
             
             // Action buttons
@@ -131,7 +131,7 @@ fun ProposalCard(
                     enabled = !isExecuting,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = ChatColors.TextSecondary
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Text("Cancel")
@@ -142,7 +142,7 @@ fun ProposalCard(
                     enabled = !isExecuting,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ChatColors.Online
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     if (isExecuting) {
@@ -175,7 +175,7 @@ private fun SectionHeader(
             text = title,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
-            color = ChatColors.TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -198,7 +198,7 @@ private fun ActionPreviewItem(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(ChatColors.Accent)
+                .background(MaterialTheme.colorScheme.secondary)
         )
         
         Spacer(modifier = Modifier.width(12.dp))
@@ -209,34 +209,34 @@ private fun ActionPreviewItem(
                 text = scheduleData.startTime,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = ChatColors.Accent
+                color = MaterialTheme.colorScheme.secondary
             )
             
             if (scheduleData.endTime != null) {
                 Text(
                     text = " - ${scheduleData.endTime}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = ChatColors.TextMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
             Text(
                 text = " • ${scheduleData.name}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = ChatColors.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
                 text = " (${scheduleData.durationMinutes}p)",
                 style = MaterialTheme.typography.bodySmall,
-                color = ChatColors.TextMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             // Generic action
             Text(
                 text = action.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = ChatColors.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

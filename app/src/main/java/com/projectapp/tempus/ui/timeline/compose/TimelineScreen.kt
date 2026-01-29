@@ -291,7 +291,7 @@ private fun SkeletonTaskItemInline() {
     )
     
     val shimmerBrush = Brush.linearGradient(
-        colors = listOf(Color(0xFFE2E8F0), Color(0xFFF1F5F9), Color(0xFFE2E8F0)),
+        colors = listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.colorScheme.surfaceContainerHigh),
         start = Offset(shimmerTranslateAnim - 500f, 0f),
         end = Offset(shimmerTranslateAnim, 0f)
     )
@@ -320,9 +320,9 @@ private fun TimelineLoadingSkeleton() {
     
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFE2E8F0),
-            Color(0xFFF1F5F9),
-            Color(0xFFE2E8F0)
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            MaterialTheme.colorScheme.surfaceContainer,
+            MaterialTheme.colorScheme.surfaceContainerHigh
         ),
         start = Offset(shimmerTranslateAnim - 500f, 0f),
         end = Offset(shimmerTranslateAnim, 0f)
@@ -360,7 +360,7 @@ private fun SkeletonTaskItem(brush: Brush) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .background(Color.White, RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -427,7 +427,7 @@ fun SwipeableWeekCalendarStrip(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // Ensure white background
+            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
             .padding(bottom = 8.dp)
     ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
@@ -440,7 +440,7 @@ fun SwipeableWeekCalendarStrip(
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
                 Text(
                     text = day,
-                    color = TempusDesignSystem.TextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -475,7 +475,7 @@ fun SwipeableWeekCalendarStrip(
                             .clip(CircleShape)
                             .background(
                                 when {
-                                    isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
+                                    isSelected -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
                                     else -> Color.Transparent
                                 }
                             )
@@ -493,8 +493,8 @@ fun SwipeableWeekCalendarStrip(
                             text = date.dayOfMonth.toString(),
                             color = when {
                                 isSelected -> Color.White
-                                isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
-                                else -> TempusDesignSystem.TextPrimary
+                                isToday -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
+                                else -> MaterialTheme.colorScheme.onSurface
                             },
                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                             fontSize = 16.sp
@@ -517,7 +517,7 @@ private fun TimelineTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // Ensure white background
+            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -526,14 +526,14 @@ private fun TimelineTopBar(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(TempusDesignSystem.Primary.copy(alpha = 0.1f)) // Explicit primary tint
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)) // Explicit primary tint
                 .clickable { onMonthPickerClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = monthYear,
-                color = TempusDesignSystem.Primary, // Explicit Primary Blue
+                color = MaterialTheme.colorScheme.primary, // Explicit Primary Blue
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -602,7 +602,7 @@ fun WeekCalendarStrip(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // Ensure white background
+            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
             .padding(bottom = 8.dp)
     ) {
         // Day labels (T2, T3, T4, T5, T6, T7, CN)
@@ -615,7 +615,7 @@ fun WeekCalendarStrip(
             listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
                 Text(
                     text = day,
-                    color = TempusDesignSystem.TextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -665,8 +665,8 @@ fun WeekCalendarStrip(
                         text = date.dayOfMonth.toString(),
                         color = when {
                             isSelected -> Color.White
-                            isToday -> TempusDesignSystem.Primary // Explicit Primary Blue
-                            else -> TempusDesignSystem.TextPrimary
+                            isToday -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
+                            else -> MaterialTheme.colorScheme.onSurface
                         },
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 16.sp
@@ -782,7 +782,7 @@ fun TimelineItem(
             Text(
                 text = "↓",
                 fontSize = 12.sp,
-                color = TempusDesignSystem.TextMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = endTime,

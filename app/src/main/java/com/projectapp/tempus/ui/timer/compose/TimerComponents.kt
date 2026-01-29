@@ -160,7 +160,7 @@ fun QuickSelectButtons(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = TimerColors.SurfaceVariant
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = Modifier
@@ -171,7 +171,7 @@ fun QuickSelectButtons(
             options.forEachIndexed { index, label ->
                 val isSelected = selectedIndex == index
                 val bgColor by animateColorAsState(
-                    targetValue = if (isSelected) TimerColors.Surface else Color.Transparent,
+                    targetValue = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent,
                     animationSpec = tween(200),
                     label = "bgColor"
                 )
@@ -191,7 +191,7 @@ fun QuickSelectButtons(
                     Text(
                         text = label,
                         style = TimerTypography.ButtonText,
-                        color = if (isSelected) TimerColors.TextPrimary else TimerColors.TextMuted,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -279,7 +279,7 @@ private fun WheelPicker(
             modifier = Modifier
                 .height(100.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(TimerColors.SurfaceVariant.copy(alpha = 0.5f)),
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             // Selection indicator
@@ -287,7 +287,7 @@ private fun WheelPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp)
-                    .background(TimerColors.SurfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             
             LazyColumn(
@@ -314,9 +314,9 @@ private fun WheelPicker(
                                 fontSize = if (isSelected) 32.sp else 20.sp
                             ),
                             color = if (isSelected) 
-                                TimerColors.TextPrimary 
+                                MaterialTheme.colorScheme.onSurface 
                             else 
-                                TimerColors.TextMuted.copy(alpha = 0.5f)
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
                 }
@@ -328,7 +328,7 @@ private fun WheelPicker(
         Text(
             text = label,
             style = TimerTypography.LabelSmall,
-            color = TimerColors.TextMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

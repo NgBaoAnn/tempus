@@ -74,17 +74,6 @@ val navItems = listOf(
 /**
  * Modern Bottom Navigation Colors
  */
-object BottomNavColors {
-    val Background = Color(0xFFFFFFFF)
-    val ActivePrimary = Color(0xFF3B82F6)  // Blue 500
-    val ActiveGradientStart = Color(0xFF3B82F6)
-    val ActiveGradientEnd = Color(0xFF60A5FA)  // Blue 400 (was Violet)
-    val ActiveBackground = Color(0xFFEFF6FF)  // Blue 50
-    val InactiveIcon = Color(0xFF94A3B8)  // Slate 400
-    val InactiveText = Color(0xFF64748B)  // Slate 500
-    val Divider = Color(0xFFE2E8F0)  // Slate 200
-}
-
 /**
  * Modern Premium Bottom Navigation Bar
  * - Floating design with rounded corners
@@ -105,10 +94,10 @@ fun BottomNavBar(
             .shadow(
                 elevation = 12.dp,
                 shape = RoundedCornerShape(28.dp),
-                ambientColor = Color.Black.copy(alpha = 0.08f),
-                spotColor = Color.Black.copy(alpha = 0.12f)
+                ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             ),
-        color = BottomNavColors.Background,
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(28.dp)
     ) {
         Row(
@@ -147,14 +136,18 @@ private fun RowScope.ModernNavItem(
         label = "scale"
     )
     
+    // Use Primary color for active icon
+    val activeColor = MaterialTheme.colorScheme.primary
+    val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
+    
     val iconColor by animateColorAsState(
-        targetValue = if (isSelected) BottomNavColors.ActivePrimary else BottomNavColors.InactiveIcon,
+        targetValue = if (isSelected) activeColor else inactiveColor,
         animationSpec = tween(200),
         label = "iconColor"
     )
     
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) BottomNavColors.ActivePrimary else BottomNavColors.InactiveText,
+        targetValue = if (isSelected) activeColor else inactiveColor,
         animationSpec = tween(200),
         label = "textColor"
     )
@@ -190,8 +183,8 @@ private fun RowScope.ModernNavItem(
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
-                                        BottomNavColors.ActiveGradientStart.copy(alpha = 0.15f),
-                                        BottomNavColors.ActiveGradientEnd.copy(alpha = 0.15f)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
                                     )
                                 )
                             )

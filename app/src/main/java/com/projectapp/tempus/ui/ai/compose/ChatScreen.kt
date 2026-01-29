@@ -336,8 +336,8 @@ private fun PremiumChatHeader(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        ChatColors.Surface,
-                        ChatColors.Surface.copy(alpha = 0.95f)
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                     )
                 )
             )
@@ -379,10 +379,10 @@ private fun PremiumChatHeader(
                             brush = Brush.linearGradient(
                                 colors = if (isLoading) listOf(
                                     MaterialTheme.colorScheme.secondary,
-                                    TempusDesignSystem.SecondaryLight
+                                    MaterialTheme.colorScheme.secondaryContainer
                                 ) else listOf(
                                     MaterialTheme.colorScheme.tertiary,
-                                    TempusDesignSystem.AccentLight
+                                    MaterialTheme.colorScheme.tertiaryContainer
                                 )
                             ),
                             shape = CircleShape
@@ -460,7 +460,7 @@ private fun PremiumChatHeader(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
                     contentDescription = "Xóa cuộc trò chuyện",
-                    tint = TempusDesignSystem.TextMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -590,7 +590,7 @@ private fun PremiumEmptyState(
                 ChatMode.LIFE_PLANNER -> "Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc."
             },
             style = MaterialTheme.typography.bodyMedium,
-            color = TempusDesignSystem.TextMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
         )
@@ -605,7 +605,7 @@ private fun PremiumEmptyState(
             Text(
                 text = "THỬ HỎI",
                 style = MaterialTheme.typography.labelSmall,
-                color = TempusDesignSystem.TextMuted,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 1.5.sp
             )
             

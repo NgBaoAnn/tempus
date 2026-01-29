@@ -1,0 +1,2 @@
+﻿
+[Incubating] Problems report is available at: file:///C:/Workspace/Dev%20For%20Mobile/Tempus/tempus/build/reports/problems/problems-report.html

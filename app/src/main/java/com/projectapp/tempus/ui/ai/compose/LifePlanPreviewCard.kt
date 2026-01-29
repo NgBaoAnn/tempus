@@ -62,7 +62,7 @@ fun LifePlanPreviewCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ChatColors.Surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -78,7 +78,7 @@ fun LifePlanPreviewCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = ChatColors.Accent.copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
@@ -93,12 +93,12 @@ fun LifePlanPreviewCard(
                         text = plan.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = ChatColors.TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "${plan.milestones.size} milestones • ${plan.estimatedHoursPerWeek}h/tuần",
                         style = MaterialTheme.typography.bodySmall,
-                        color = ChatColors.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -109,7 +109,7 @@ fun LifePlanPreviewCard(
             Text(
                 text = plan.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = ChatColors.TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -121,7 +121,7 @@ fun LifePlanPreviewCard(
                 text = "📅 Milestones",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = ChatColors.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -139,7 +139,7 @@ fun LifePlanPreviewCard(
                     Text(
                         text = "+${plan.milestones.size - 3} milestones khác...",
                         style = MaterialTheme.typography.bodySmall,
-                        color = ChatColors.TextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.padding(start = 24.dp, top = 8.dp)
                     )
                 }
@@ -217,7 +217,7 @@ fun LifePlanPreviewCard(
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = ChatColors.TextSecondary
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Icon(
@@ -234,7 +234,7 @@ fun LifePlanPreviewCard(
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ChatColors.Accent
+                        containerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
                     Icon(
@@ -268,14 +268,14 @@ private fun MilestoneItem(
                 modifier = Modifier
                     .size(12.dp)
                     .clip(CircleShape)
-                    .background(ChatColors.Accent)
+                    .background(MaterialTheme.colorScheme.secondary)
             )
             if (!isLast) {
                 Box(
                     modifier = Modifier
                         .width(2.dp)
                         .height(32.dp)
-                        .background(ChatColors.Accent.copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f))
                 )
             }
         }
@@ -287,12 +287,12 @@ private fun MilestoneItem(
                 text = milestone.title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = ChatColors.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "Tuần ${milestone.weekNumber} • ${milestone.scheduledTasks.size} tasks",
                 style = MaterialTheme.typography.bodySmall,
-                color = ChatColors.TextMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
     }
@@ -310,12 +310,12 @@ private fun StatItem(
             text = value,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = ChatColors.Accent
+            color = MaterialTheme.colorScheme.secondary
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = ChatColors.TextMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }

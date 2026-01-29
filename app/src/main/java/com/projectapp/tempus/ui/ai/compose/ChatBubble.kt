@@ -70,7 +70,7 @@ fun UserMessageBubble(
                         bottomStart = ChatDimens.BubbleCornerRadius,
                         bottomEnd = ChatDimens.BubbleSmallCorner
                     ))
-                    .background(ChatColors.GlowPurple)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             )
             
             // Gradient bubble
@@ -86,8 +86,8 @@ fun UserMessageBubble(
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                ChatColors.UserBubble,
-                                ChatColors.UserBubbleEnd
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
                             )
                         )
                     )
@@ -99,7 +99,7 @@ fun UserMessageBubble(
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = ChatColors.UserBubbleText
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -108,7 +108,7 @@ fun UserMessageBubble(
         Text(
             text = formatTimestamp(message.timestamp),
             style = MaterialTheme.typography.labelSmall,
-            color = ChatColors.TextDim,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp, end = 4.dp)
         )
     }
@@ -141,7 +141,7 @@ fun AIMessageBubble(
                     .offset(x = (-2).dp, y = (-2).dp)
                     .blur(8.dp)
                     .clip(CircleShape)
-                    .background(ChatColors.GlowCyan.copy(alpha = 0.4f))
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
             )
             
             // Avatar
@@ -153,8 +153,8 @@ fun AIMessageBubble(
                         width = 2.dp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                ChatColors.Accent,
-                                ChatColors.AccentLight
+                                MaterialTheme.colorScheme.secondary,
+                                MaterialTheme.colorScheme.secondaryContainer
                             )
                         ),
                         shape = CircleShape
@@ -186,7 +186,7 @@ fun AIMessageBubble(
                     ))
                     .border(
                         width = 1.dp,
-                        color = ChatColors.AIBubbleBorder,
+                        color = MaterialTheme.colorScheme.outlineVariant,
                         shape = RoundedCornerShape(
                             topStart = ChatDimens.BubbleSmallCorner,
                             topEnd = ChatDimens.BubbleCornerRadius,
@@ -197,8 +197,8 @@ fun AIMessageBubble(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                ChatColors.AIBubbleLight,
-                                ChatColors.AIBubble
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
                             )
                         )
                     )
@@ -210,7 +210,7 @@ fun AIMessageBubble(
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = ChatColors.AIBubbleText,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
                 )
             }
@@ -219,7 +219,7 @@ fun AIMessageBubble(
             Text(
                 text = formatTimestamp(message.timestamp),
                 style = MaterialTheme.typography.labelSmall,
-                color = ChatColors.TextDim,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp)
             )
         }

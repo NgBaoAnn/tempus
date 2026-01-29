@@ -84,14 +84,15 @@ fun TimerScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .padding(20.dp)
     ) {
         // Header
         Text(
             text = if (timerState == TimerState.SETUP) "Hẹn giờ" else "Đếm ngược",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -221,7 +222,7 @@ private fun SetupContent(
                         .fillMaxWidth()
                         .clickable { onNotesClick() },
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF0F9FF) // Light blue background
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Row(
                         modifier = Modifier
@@ -252,7 +253,7 @@ private fun SetupContent(
                         Text(
                             text = "→",
                             fontSize = 20.sp,
-                            color = Color(0xFF3B82F6)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -284,7 +285,8 @@ private fun SetupContent(
                                 Text(
                                     text = "Focus Mode",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.Black
                                 )
                                 Text(
                                     text = if (focusModeEnabled) "Đang bật - Chặn app phân tâm" else "Chặn app phân tâm khi tập trung",
