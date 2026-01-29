@@ -35,47 +35,13 @@ import com.projectapp.tempus.domain.usecase.InsightsData
 import com.projectapp.tempus.domain.usecase.TrendType
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-// ======================== MODERN DESIGN SYSTEM ========================
-// Using TempusDesignSystem for consistent colors across the app
-
-private object StatsDesign {
-    // Primary Palette - from TempusDesignSystem
-    val Primary = TempusDesignSystem.Primary
-    val PrimaryLight = TempusDesignSystem.PrimaryLight
-    val PrimaryDark = TempusDesignSystem.PrimaryDark
-    
-    // Accent Colors - from TempusDesignSystem
-    val Accent = TempusDesignSystem.Accent
-    val Success = TempusDesignSystem.Success
-    val Warning = TempusDesignSystem.Warning
-    val Error = TempusDesignSystem.Error
-    
-    // Backgrounds - from TempusDesignSystem
-    val Background = TempusDesignSystem.BackgroundLight
-    val Surface = TempusDesignSystem.SurfaceLight
-    val SurfaceElevated = TempusDesignSystem.Slate100
-    
-    // Text Colors - from TempusDesignSystem
-    val TextPrimary = TempusDesignSystem.TextPrimary
-    val TextSecondary = TempusDesignSystem.TextSecondary
-    val TextMuted = TempusDesignSystem.TextMuted
-    
-    // Chart Colors
-    val ChartBar = TempusDesignSystem.Primary
-    val ChartBarLight = TempusDesignSystem.PrimaryLight
-    val GridLine = TempusDesignSystem.Slate200
-    
-    // Gradients
-    val PrimaryGradient = Brush.linearGradient(
-        colors = listOf(TempusDesignSystem.Primary, TempusDesignSystem.PrimaryLight)
-    )
-    val SuccessGradient = Brush.linearGradient(
-        colors = listOf(TempusDesignSystem.Success, Color(0xFF34D399))
-    )
-    val PomodoroGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
-    )
-}
+// StatsDesign object removed. Using MaterialTheme.colorScheme directly.
+private val PomodoroGradient = Brush.linearGradient(
+    colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
+)
+private val SuccessGradient = Brush.linearGradient(
+    colors = listOf(Color(0xFF00C853), Color(0xFF69F0AE))
+)
 
 // ======================== DATA CLASSES ========================
 
@@ -106,7 +72,7 @@ fun StatisticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(StatsDesign.Background)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
@@ -184,7 +150,7 @@ private fun HeaderSection() {
         Icon(
             imageVector = Icons.Outlined.Analytics,
             contentDescription = null,
-            tint = StatsDesign.Primary,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(32.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -192,7 +158,7 @@ private fun HeaderSection() {
             text = "Thống kê",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = StatsDesign.TextPrimary
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -207,7 +173,7 @@ private fun ModeToggle(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = StatsDesign.SurfaceElevated
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(
             modifier = Modifier
@@ -246,8 +212,8 @@ private fun ToggleChip(
         modifier = modifier.height(44.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) StatsDesign.Primary else Color.Transparent,
-            contentColor = if (selected) Color.White else StatsDesign.TextSecondary
+            containerColor = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
         ),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = if (selected) 4.dp else 0.dp
@@ -287,7 +253,7 @@ private fun StatsOverviewRow(
             subtitle = "$pomodoroMinutes phút",
             icon = Icons.Filled.Timer,
             iconTint = Color(0xFFFF6B6B),
-            gradient = StatsDesign.PomodoroGradient,
+            gradient = PomodoroGradient,
             modifier = Modifier.weight(1f)
         )
         
@@ -297,8 +263,8 @@ private fun StatsOverviewRow(
             value = "$completedTasks",
             subtitle = "/ $totalTasks tác vụ",
             icon = Icons.Filled.CheckCircle,
-            iconTint = StatsDesign.Success,
-            gradient = StatsDesign.SuccessGradient,
+            iconTint = Color(0xFF4CAF50),
+            gradient = SuccessGradient,
             modifier = Modifier.weight(1f)
         )
     }
@@ -323,7 +289,7 @@ private fun StatCard(
                 spotColor = iconTint.copy(alpha = 0.15f)
             ),
         shape = RoundedCornerShape(20.dp),
-        color = StatsDesign.Surface
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -350,7 +316,7 @@ private fun StatCard(
                     text = title,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = StatsDesign.TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -360,13 +326,13 @@ private fun StatCard(
                 text = value,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = StatsDesign.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
                 text = subtitle,
                 fontSize = 13.sp,
-                color = StatsDesign.TextMuted
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }
@@ -393,10 +359,10 @@ private fun ProgressCard(
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(20.dp),
-                ambientColor = StatsDesign.Primary.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             ),
         shape = RoundedCornerShape(20.dp),
-        color = StatsDesign.Surface
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -410,7 +376,7 @@ private fun ProgressCard(
                     Icon(
                         imageVector = Icons.Outlined.TrendingUp,
                         contentDescription = null,
-                        tint = StatsDesign.Primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -418,18 +384,18 @@ private fun ProgressCard(
                         text = "Tiến độ",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = StatsDesign.TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = StatsDesign.SurfaceElevated
+                    color = MaterialTheme.colorScheme.surfaceContainerLow
                 ) {
                     Text(
                         text = rangeLabel,
                         fontSize = 12.sp,
-                        color = StatsDesign.TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
@@ -451,20 +417,20 @@ private fun ProgressCard(
                         progress = { animatedProgress },
                         modifier = Modifier.fillMaxSize(),
                         strokeWidth = 10.dp,
-                        color = StatsDesign.Primary,
-                        trackColor = StatsDesign.GridLine
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outlineVariant
                     )
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "${(animatedProgress * 100).toInt()}%",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            color = StatsDesign.TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Hoàn thành",
                             fontSize = 11.sp,
-                            color = StatsDesign.TextMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -476,21 +442,21 @@ private fun ProgressCard(
                         icon = Icons.Filled.Task,
                         label = "Tổng cộng",
                         value = "$totalTasks",
-                        color = StatsDesign.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ProgressStatRow(
                         icon = Icons.Filled.CheckCircle,
                         label = "Đã hoàn thành",
                         value = "$completedTasks",
-                        color = StatsDesign.Success
+                        color = Color(0xFF4CAF50)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ProgressStatRow(
                         icon = Icons.Outlined.RadioButtonUnchecked,
                         label = "Còn lại",
                         value = "${totalTasks - completedTasks}",
-                        color = StatsDesign.Warning
+                        color = Color(0xFFFFC107)
                     )
                 }
             }
@@ -516,14 +482,14 @@ private fun ProgressStatRow(
         Text(
             text = label,
             fontSize = 13.sp,
-            color = StatsDesign.TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = StatsDesign.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -544,10 +510,10 @@ private fun ChartCard(
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(20.dp),
-                ambientColor = StatsDesign.Primary.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             ),
         shape = RoundedCornerShape(20.dp),
-        color = StatsDesign.Surface
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -556,7 +522,7 @@ private fun ChartCard(
                 Icon(
                     imageVector = Icons.Outlined.BarChart,
                     contentDescription = null,
-                    tint = StatsDesign.Primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -564,7 +530,7 @@ private fun ChartCard(
                     text = "Biểu đồ",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = StatsDesign.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -591,19 +557,19 @@ private fun ChartCard(
                     Icon(
                         imageVector = Icons.Filled.ChevronLeft,
                         contentDescription = "Trước",
-                        tint = StatsDesign.Primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = StatsDesign.SurfaceElevated
+                    color = MaterialTheme.colorScheme.surfaceContainerLow
                 ) {
                     Text(
                         text = rangeLabel,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = StatsDesign.TextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -612,7 +578,7 @@ private fun ChartCard(
                     Icon(
                         imageVector = Icons.Filled.ChevronRight,
                         contentDescription = "Sau",
-                        tint = StatsDesign.Primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -635,13 +601,13 @@ private fun BarChart(
                 Icon(
                     imageVector = Icons.Outlined.InsertChart,
                     contentDescription = null,
-                    tint = StatsDesign.TextMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.5f),
                     modifier = Modifier.size(48.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Chưa có dữ liệu",
-                    color = StatsDesign.TextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.5f),
                     fontSize = 14.sp
                 )
             }
@@ -666,11 +632,15 @@ private fun BarChart(
                     Text(
                         text = label,
                         fontSize = 10.sp,
-                        color = StatsDesign.TextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }
             }
+            
+            // Colors for Canvas (captured outside)
+            val gridLineColor = MaterialTheme.colorScheme.outlineVariant
+            val barColor = MaterialTheme.colorScheme.primary
             
             // Bar chart canvas
             Canvas(
@@ -686,7 +656,7 @@ private fun BarChart(
                 for (i in 0..gridLines) {
                     val y = (chartHeight / gridLines) * i
                     drawLine(
-                        color = StatsDesign.GridLine,
+                        color = gridLineColor,
                         start = Offset(0f, y),
                         end = Offset(chartWidth, y),
                         strokeWidth = 1.dp.toPx(),
@@ -706,7 +676,7 @@ private fun BarChart(
                     
                     if (barHeight > 0) {
                         drawRoundRect(
-                            color = StatsDesign.ChartBar,
+                            color = barColor,
                             topLeft = Offset(x, y),
                             size = Size(barWidth, barHeight),
                             cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
@@ -739,7 +709,7 @@ private fun BarChart(
                     Text(
                         text = label,
                         fontSize = 12.sp,
-                        color = StatsDesign.TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
                     )
@@ -759,7 +729,7 @@ private fun BarChart(
                     Text(
                         text = day.toString(),
                         fontSize = 11.sp,
-                        color = StatsDesign.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -777,10 +747,10 @@ private fun InsightsCard(insights: InsightsData) {
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(20.dp),
-                ambientColor = StatsDesign.Accent.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
             ),
         shape = RoundedCornerShape(20.dp),
-        color = StatsDesign.Surface
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -789,7 +759,7 @@ private fun InsightsCard(insights: InsightsData) {
                 Icon(
                     imageVector = Icons.Outlined.Lightbulb,
                     contentDescription = null,
-                    tint = StatsDesign.Warning,
+                    tint = Color(0xFFFFC107),
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -797,7 +767,7 @@ private fun InsightsCard(insights: InsightsData) {
                     text = "Phân tích",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = StatsDesign.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -808,7 +778,7 @@ private fun InsightsCard(insights: InsightsData) {
                 icon = Icons.Outlined.Speed,
                 label = "Tỷ lệ hoàn thành TB",
                 value = String.format("%.1f%%", insights.avgCompletionRate),
-                iconTint = StatsDesign.Primary
+                iconTint = MaterialTheme.colorScheme.primary
             )
             
             // Best Day
@@ -817,7 +787,7 @@ private fun InsightsCard(insights: InsightsData) {
                     icon = Icons.Filled.TrendingUp,
                     label = "Ngày tốt nhất",
                     value = "$day (${rate.toInt()}%)",
-                    iconTint = StatsDesign.Success
+                    iconTint = Color(0xFF4CAF50)
                 )
             }
             
@@ -827,15 +797,15 @@ private fun InsightsCard(insights: InsightsData) {
                     icon = Icons.Filled.TrendingDown,
                     label = "Cần cải thiện",
                     value = "$day (${rate.toInt()}%)",
-                    iconTint = StatsDesign.Error
+                    iconTint = MaterialTheme.colorScheme.error
                 )
             }
             
             // Trend
             val (trendIcon, trendText, trendColor) = when (insights.trend) {
-                TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", StatsDesign.Success)
-                TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", StatsDesign.Error)
-                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, "Ổn định", StatsDesign.TextSecondary)
+                TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", Color(0xFF4CAF50))
+                TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", MaterialTheme.colorScheme.error)
+                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, "Ổn định", MaterialTheme.colorScheme.onSurfaceVariant)
             }
             InsightItem(
                 icon = trendIcon,
@@ -850,7 +820,7 @@ private fun InsightsCard(insights: InsightsData) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = StatsDesign.Primary.copy(alpha = 0.08f)
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
@@ -859,14 +829,14 @@ private fun InsightsCard(insights: InsightsData) {
                     Icon(
                         imageVector = Icons.Outlined.TipsAndUpdates,
                         contentDescription = null,
-                        tint = StatsDesign.Primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = insights.suggestion,
                         fontSize = 14.sp,
-                        color = StatsDesign.TextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         lineHeight = 20.sp
                     )
                 }
@@ -900,14 +870,14 @@ private fun InsightItem(
             Text(
                 text = label,
                 fontSize = 14.sp,
-                color = StatsDesign.TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Text(
             text = value,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = StatsDesign.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -951,10 +921,10 @@ private fun CategoriesCard(categories: List<CategoryStats>) {
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(20.dp),
-                ambientColor = StatsDesign.Accent.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
             ),
         shape = RoundedCornerShape(20.dp),
-        color = StatsDesign.Surface
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
@@ -963,7 +933,7 @@ private fun CategoriesCard(categories: List<CategoryStats>) {
                 Icon(
                     imageVector = Icons.Outlined.Category,
                     contentDescription = null,
-                    tint = StatsDesign.Accent,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -971,7 +941,7 @@ private fun CategoriesCard(categories: List<CategoryStats>) {
                     text = "Theo danh mục",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = StatsDesign.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -1004,7 +974,7 @@ private fun CategoryItem(category: CategoryStats) {
                 Icon(
                     imageVector = getCategoryIcon(category.label),
                     contentDescription = null,
-                    tint = StatsDesign.Primary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
@@ -1012,13 +982,13 @@ private fun CategoryItem(category: CategoryStats) {
                     text = getCategoryName(category.label),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = StatsDesign.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             Text(
                 text = "${category.completedCount}/${category.totalCount} (${category.percentage}%)",
                 fontSize = 13.sp,
-                color = StatsDesign.TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
@@ -1030,7 +1000,7 @@ private fun CategoryItem(category: CategoryStats) {
                 .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(StatsDesign.GridLine)
+                .background(MaterialTheme.colorScheme.outlineVariant)
         ) {
             Box(
                 modifier = Modifier
@@ -1039,7 +1009,7 @@ private fun CategoryItem(category: CategoryStats) {
                     .clip(RoundedCornerShape(4.dp))
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(StatsDesign.Primary, StatsDesign.Accent)
+                            colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
                         )
                     )
             )
@@ -1059,10 +1029,10 @@ private fun HeatmapPreviewCard(
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = StatsDesign.Success.copy(alpha = 0.15f)
+                ambientColor = Color(0xFF4CAF50).copy(alpha = 0.15f)
             ),
         shape = RoundedCornerShape(16.dp),
-        color = StatsDesign.Surface,
+        color = MaterialTheme.colorScheme.surface,
         onClick = onClick
     ) {
         Row(
@@ -1080,8 +1050,8 @@ private fun HeatmapPreviewCard(
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    StatsDesign.Success.copy(alpha = 0.2f),
-                                    StatsDesign.Primary.copy(alpha = 0.2f)
+                                    Color(0xFF4CAF50).copy(alpha = 0.2f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                                 )
                             )
                         ),
@@ -1100,12 +1070,12 @@ private fun HeatmapPreviewCard(
                         text = "Heatmap Năng suất",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
-                        color = StatsDesign.TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Xem bức tranh tổng quan theo tháng",
                         fontSize = 12.sp,
-                        color = StatsDesign.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -1113,7 +1083,7 @@ private fun HeatmapPreviewCard(
             Icon(
                 imageVector = Icons.Filled.ChevronRight,
                 contentDescription = "Mở Heatmap",
-                tint = StatsDesign.Primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
         }

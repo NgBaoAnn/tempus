@@ -55,7 +55,7 @@ fun SearchUserDialog(
                 .fillMaxWidth(0.95f)
                 .fillMaxHeight(0.8f),
             shape = RoundedCornerShape(24.dp),
-            color = SocialColors.CardBackground,
+            color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp
         ) {
             Column(
@@ -71,13 +71,13 @@ fun SearchUserDialog(
                         text = "Tìm bạn bè",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = SocialColors.TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = "Đóng",
-                            tint = SocialColors.TextSecondary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -118,8 +118,8 @@ fun SearchUserDialog(
                     ),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = SocialColors.Primary,
-                        cursorColor = SocialColors.Primary
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        cursorColor = MaterialTheme.colorScheme.primary
                     )
                 )
                 
@@ -134,7 +134,7 @@ fun SearchUserDialog(
                                 .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = SocialColors.Primary)
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
                     }
                     searchQuery.isEmpty() -> {
@@ -149,12 +149,12 @@ fun SearchUserDialog(
                                     Icons.Default.Search,
                                     contentDescription = null,
                                     modifier = Modifier.size(48.dp),
-                                    tint = SocialColors.TextSecondary.copy(alpha = 0.5f)
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = "Tìm kiếm theo username",
-                                    color = SocialColors.TextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 14.sp
                                 )
                             }
@@ -169,7 +169,7 @@ fun SearchUserDialog(
                         ) {
                             Text(
                                 text = "Không tìm thấy người dùng nào",
-                                color = SocialColors.TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -201,7 +201,7 @@ private fun SearchResultItem(
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SocialColors.PrimaryLight.copy(alpha = 0.3f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -215,12 +215,12 @@ private fun SearchResultItem(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(SocialColors.PrimaryLight),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = user.username.firstOrNull()?.uppercase() ?: "?",
-                    color = SocialColors.Primary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -233,13 +233,13 @@ private fun SearchResultItem(
                 Text(
                     text = user.username,
                     fontWeight = FontWeight.SemiBold,
-                    color = SocialColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 user.email?.let {
                     Text(
                         text = it,
                         fontSize = 13.sp,
-                        color = SocialColors.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -248,7 +248,7 @@ private fun SearchResultItem(
             if (requestSent) {
                 Text(
                     text = "Đã gửi",
-                    color = SocialColors.Secondary,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
@@ -262,7 +262,7 @@ private fun SearchResultItem(
                     Icon(
                         Icons.Default.PersonAdd,
                         contentDescription = "Gửi lời mời",
-                        tint = SocialColors.Primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

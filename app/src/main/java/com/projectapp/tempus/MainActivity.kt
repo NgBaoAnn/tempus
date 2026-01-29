@@ -9,6 +9,10 @@ import androidx.navigation.NavOptions
 import com.projectapp.tempus.databinding.ActivityMainComposeBinding
 import com.projectapp.tempus.ui.navigation.BottomNavBar
 import com.projectapp.tempus.ui.navigation.NavItem
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import com.projectapp.tempus.ui.navigation.navItems
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +44,20 @@ class MainActivity : AppCompatActivity() {
         updateBottomNav()
         
         handleNavigationIntent(intent)
+        
+        // Sync Activity Theme with App Theme (affects Window background and XML layouts)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                com.projectapp.tempus.ui.theme.ThemeManager.themeMode.collect { mode ->
+                    val nightMode = when (mode) {
+                        com.projectapp.tempus.ui.theme.ThemeMode.LIGHT -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                        com.projectapp.tempus.ui.theme.ThemeMode.DARK -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                        com.projectapp.tempus.ui.theme.ThemeMode.SYSTEM -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    }
+                    androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(nightMode)
+                }
+            }
+        }
     }
     
     override fun onNewIntent(intent: android.content.Intent) {
@@ -113,15 +131,17 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateBottomNav() {
         binding.composeBottomNav.setContent {
-            BottomNavBar(
-                currentRoute = currentRoute,
-                onItemClick = { item ->
-                    if (currentRoute != item.route) {
-                        currentRoute = item.route
-                        navigate(item.fragmentId)
+            com.projectapp.tempus.ui.theme.TempusTheme {
+                BottomNavBar(
+                    currentRoute = currentRoute,
+                    onItemClick = { item ->
+                        if (currentRoute != item.route) {
+                            currentRoute = item.route
+                            navigate(item.fragmentId)
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }

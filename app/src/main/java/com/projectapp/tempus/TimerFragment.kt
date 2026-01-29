@@ -31,6 +31,7 @@ import com.projectapp.tempus.ui.components.PointsNotification
 import com.projectapp.tempus.ui.components.PointsNotificationState
 import com.projectapp.tempus.ui.focus.FocusLockActivity
 import com.projectapp.tempus.ui.focus.FocusSettingsActivity
+import com.projectapp.tempus.ui.theme.TempusTheme
 import com.projectapp.tempus.ui.timer.compose.TimerColors
 import com.projectapp.tempus.ui.timer.compose.TimerScreen
 import com.projectapp.tempus.ui.timer.compose.TimerState
@@ -117,8 +118,9 @@ class TimerFragment : Fragment() {
             setContent {
                 val focusModeEnabled by focusModePreferences.focusModeEnabled.collectAsState(initial = false)
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    TimerScreen(
+                TempusTheme {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        TimerScreen(
                         timerState = timerState,
                         hours = hours,
                         minutes = minutes,
@@ -166,6 +168,7 @@ class TimerFragment : Fragment() {
                                 pointsNotification = PointsNotificationState()
                             }
                         )
+                    }
                     }
                 }
             }

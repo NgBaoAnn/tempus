@@ -119,7 +119,8 @@ class TimelineFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             
             setContent {
-                val uiState by viewModel.ui.collectAsState()
+                com.projectapp.tempus.ui.theme.TempusTheme {
+                    val uiState by viewModel.ui.collectAsState()
                 val weeks = buildWeeksAround(uiState.date)
                 val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
                 
@@ -271,6 +272,7 @@ class TimelineFragment : Fragment() {
                             }
                         )
                     }
+                }
                 }
             }
         }

@@ -53,20 +53,7 @@ import java.util.Locale
 // ============================================
 // COLORS - Modern iOS Style
 // ============================================
-private object EditColors {
-    val Background = Color(0xFFF2F2F7)
-    val Surface = Color(0xFFFFFFFF)
-    val Primary = Color(0xFF007AFF)  // iOS Blue
-    val PrimaryLight = Color(0xFFE3F2FF)
-    val Divider = Color(0xFFE5E5EA)
-    val TextPrimary = Color(0xFF000000)
-    val TextSecondary = Color(0xFF8E8E93)
-    val TextHint = Color(0xFFC7C7CC)
-    val Delete = Color(0xFFFF3B30)
-    val Success = Color(0xFF34C759)
-    val Warning = Color(0xFFFF9500)
-    val SheetBackground = Color(0xFFF2F2F7)
-}
+// EditColors object removed - using MaterialTheme directly
 
 // ============================================
 // MAIN SCREEN
@@ -121,12 +108,12 @@ fun EditScheduleScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EditColors.Background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // ============ TOP BAR ============
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = EditColors.Surface,
+            color = MaterialTheme.colorScheme.surface,
             shadowElevation = 1.dp
         ) {
             Row(
@@ -137,14 +124,14 @@ fun EditScheduleScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onClose) {
-                    Text("Hủy", color = EditColors.Primary, fontSize = 17.sp)
+                    Text("Hủy", color = MaterialTheme.colorScheme.primary, fontSize = 17.sp)
                 }
                 
                 Text(
                     text = if (state.isEditMode) "Sửa tác vụ" else "Thêm tác vụ",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = EditColors.TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 TextButton(
@@ -157,7 +144,7 @@ fun EditScheduleScreen(
                 ) {
                     Text(
                         "Lưu",
-                        color = if (titleText.isNotBlank()) EditColors.Primary else EditColors.TextHint,
+                        color = if (titleText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -180,7 +167,7 @@ fun EditScheduleScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         val iconColor = try {
                             Color(android.graphics.Color.parseColor(state.color))
-                        } catch (e: Exception) { EditColors.Primary }
+                        } catch (e: Exception) { MaterialTheme.colorScheme.primary }
                         
                         // Clickable Icon
                         Box(
@@ -207,14 +194,14 @@ fun EditScheduleScreen(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !state.isEditMode, // Disable title editing in edit mode
                             textStyle = TextStyle(
-                                color = if (state.isEditMode) EditColors.TextSecondary else EditColors.TextPrimary,
+                                color = if (state.isEditMode) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.SemiBold
                             ),
-                            cursorBrush = SolidColor(EditColors.Primary),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             decorationBox = { innerTextField ->
                                 if (titleText.isEmpty()) {
-                                    Text("Tên tác vụ", color = EditColors.TextHint, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                                    Text("Tên tác vụ", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                                 }
                                 innerTextField()
                             }
@@ -230,17 +217,17 @@ fun EditScheduleScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 60.dp),
-                        textStyle = TextStyle(color = EditColors.TextSecondary, fontSize = 15.sp),
-                        cursorBrush = SolidColor(EditColors.Primary),
+                        textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         decorationBox = { innerTextField ->
                             if (descriptionText.isEmpty()) {
-                                Text("Thêm mô tả...", color = EditColors.TextHint, fontSize = 15.sp)
+                                Text("Thêm mô tả...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), fontSize = 15.sp)
                             }
                             innerTextField()
                         }
                     )
                     
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = EditColors.Divider)
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     
                     // Color Palette
                     ModernColorRow(
@@ -317,13 +304,13 @@ fun EditScheduleScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Chỉ áp dụng hôm nay", fontSize = 16.sp, color = EditColors.TextPrimary)
+                            Text("Chỉ áp dụng hôm nay", fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
                             Switch(
                                 checked = state.applyTodayOnly,
                                 onCheckedChange = { viewModel.setApplyTodayOnly(it) },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = Color.White,
-                                    checkedTrackColor = EditColors.Primary
+                                    checkedTrackColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
@@ -338,7 +325,7 @@ fun EditScheduleScreen(
                         "Nhiệm vụ con",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = EditColors.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -361,7 +348,7 @@ fun EditScheduleScreen(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
-                                .border(2.dp, EditColors.Primary, CircleShape)
+                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                                 .clickable {
                                     if (newSubtaskText.isNotBlank()) {
                                         subtasks = subtasks + newSubtaskText.trim()
@@ -373,7 +360,7 @@ fun EditScheduleScreen(
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Thêm nhiệm vụ con",
-                                tint = EditColors.Primary,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -384,8 +371,8 @@ fun EditScheduleScreen(
                             value = newSubtaskText,
                             onValueChange = { newSubtaskText = it },
                             modifier = Modifier.weight(1f),
-                            textStyle = TextStyle(color = EditColors.TextPrimary, fontSize = 16.sp),
-                            cursorBrush = SolidColor(EditColors.Primary),
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(
                                 onDone = {
@@ -397,7 +384,7 @@ fun EditScheduleScreen(
                             ),
                             decorationBox = { innerTextField ->
                                 if (newSubtaskText.isEmpty()) {
-                                    Text("Thêm nhiệm vụ con...", color = EditColors.TextHint, fontSize = 16.sp)
+                                    Text("Thêm nhiệm vụ con...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), fontSize = 16.sp)
                                 }
                                 innerTextField()
                             },
@@ -417,7 +404,7 @@ fun EditScheduleScreen(
                                 Icon(
                                     Icons.Default.Check,
                                     contentDescription = "Thêm",
-                                    tint = EditColors.Primary,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -443,7 +430,7 @@ fun EditScheduleScreen(
                                 }
                             }
                             .padding(16.dp),
-                        color = EditColors.Delete,
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Medium
@@ -541,7 +528,7 @@ private fun ModernCard(content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = EditColors.Surface,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 0.dp
     ) {
         content()
@@ -553,7 +540,7 @@ private fun ModernDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 16.dp),
         thickness = 0.5.dp,
-        color = EditColors.Divider
+        color = MaterialTheme.colorScheme.outlineVariant
     )
 }
 
@@ -565,7 +552,7 @@ private fun ModernSettingRow(
     icon: Int,
     label: String,
     value: String,
-    valueColor: Color = EditColors.TextSecondary,
+    valueColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -581,20 +568,20 @@ private fun ModernSettingRow(
         Text(
             text = label,
             fontSize = 16.sp,
-            color = if (enabled) EditColors.TextPrimary else EditColors.TextHint
+            color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
         
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = value,
                 fontSize = 16.sp,
-                color = if (enabled) valueColor else EditColors.TextHint
+                color = if (enabled) valueColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_down),
                 contentDescription = null,
-                tint = EditColors.TextHint,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -620,7 +607,7 @@ private fun ModernColorRow(
         items(colors) { colorHex ->
             val color = try {
                 Color(android.graphics.Color.parseColor(colorHex))
-            } catch (e: Exception) { EditColors.Primary }
+            } catch (e: Exception) { MaterialTheme.colorScheme.primary }
             val isSelected = colorHex.equals(selectedColor, ignoreCase = true)
             
             Box(
@@ -666,7 +653,7 @@ private fun SubtaskItem(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .border(2.dp, EditColors.TextHint, CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), CircleShape)
         )
         
         Spacer(modifier = Modifier.width(12.dp))
@@ -675,7 +662,7 @@ private fun SubtaskItem(
             text = text,
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
-            color = EditColors.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
         
         IconButton(
@@ -685,7 +672,7 @@ private fun SubtaskItem(
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Delete",
-                tint = EditColors.TextHint,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -719,7 +706,7 @@ private fun IconPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = EditColors.SheetBackground,
+        containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -727,7 +714,7 @@ private fun IconPickerSheet(
                 "Chọn biểu tượng",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = EditColors.TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             
@@ -740,7 +727,7 @@ private fun IconPickerSheet(
                 items(labels) { (label, name) ->
                     val isSelected = label == currentLabel
                     val bgColor by animateColorAsState(
-                        targetValue = if (isSelected) EditColors.Primary.copy(alpha = 0.15f) else Color.Transparent,
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
                         animationSpec = tween(200)
                     )
                     
@@ -750,7 +737,7 @@ private fun IconPickerSheet(
                             .background(bgColor)
                             .border(
                                 width = if (isSelected) 2.dp else 0.dp,
-                                color = if (isSelected) EditColors.Primary else Color.Transparent,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clickable { onLabelSelected(label) }
@@ -760,14 +747,14 @@ private fun IconPickerSheet(
                         Icon(
                             painter = painterResource(id = getLabelIconResId(label.name)),
                             contentDescription = name,
-                            tint = if (isSelected) EditColors.Primary else EditColors.TextSecondary,
+                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(32.dp)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = name,
                             fontSize = 11.sp,
-                            color = if (isSelected) EditColors.Primary else EditColors.TextSecondary,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )
                     }
@@ -809,7 +796,7 @@ private fun DurationPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
-        containerColor = EditColors.SheetBackground
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -860,7 +847,7 @@ private fun RepeatPickerSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
-        containerColor = EditColors.SheetBackground
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -886,7 +873,7 @@ private fun RepeatPickerSheet(
                     "Chọn các thứ lặp lại:",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = EditColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Row(
@@ -900,7 +887,7 @@ private fun RepeatPickerSheet(
                                 .size(40.dp)
                                 .clip(CircleShape)
                                 .clickable { onRepeatDayToggle(dayValue) },
-                            color = if (isActive) EditColors.Primary else Color.Transparent,
+                            color = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent,
                             shape = CircleShape
                         ) {
                             Box(
@@ -909,7 +896,7 @@ private fun RepeatPickerSheet(
                                     .fillMaxSize()
                                     .border(
                                         width = 1.dp,
-                                        color = if (isActive) EditColors.Primary else EditColors.Divider,
+                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
                                         shape = CircleShape
                                     )
                             ) {
@@ -917,7 +904,7 @@ private fun RepeatPickerSheet(
                                     text = dayLabel,
                                     fontSize = 12.sp,
                                     fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isActive) Color.White else EditColors.TextSecondary
+                                    color = if (isActive) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -941,15 +928,15 @@ private fun PriorityPickerSheet(
     onDismiss: () -> Unit
 ) {
     val priorities = listOf(
-        PriorityType.high to ("Cao" to EditColors.Delete),
-        PriorityType.medium to ("Trung bình" to EditColors.Warning),
-        PriorityType.low to ("Thấp" to EditColors.Success)
+        PriorityType.high to ("Cao" to MaterialTheme.colorScheme.error),
+        PriorityType.medium to ("Trung bình" to MaterialTheme.colorScheme.tertiary),
+        PriorityType.low to ("Thấp" to MaterialTheme.colorScheme.secondary)
     )
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(),
-        containerColor = EditColors.SheetBackground
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -981,7 +968,7 @@ private fun PriorityPickerSheet(
                                 .background(color)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(label, fontSize = 16.sp, color = EditColors.TextPrimary)
+                        Text(label, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
                     }
                     
                     if (isSelected) {
@@ -1008,7 +995,7 @@ private fun SheetOption(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) EditColors.PrimaryLight else Color.Transparent)
+            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .clickable { onClick() }
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1017,12 +1004,12 @@ private fun SheetOption(
         Text(
             label,
             fontSize = 16.sp,
-            color = if (isSelected) EditColors.Primary else EditColors.TextPrimary,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
         )
         
         if (isSelected) {
-            Icon(Icons.Default.Check, null, tint = EditColors.Primary)
+            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
         }
     }
 }
@@ -1050,12 +1037,12 @@ private fun ModernDatePicker(
                     onDateSelected(selected)
                 }
             }) {
-                Text("OK", color = EditColors.Primary)
+                Text("OK", color = MaterialTheme.colorScheme.primary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy", color = EditColors.TextSecondary)
+                Text("Hủy", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     ) {
@@ -1089,12 +1076,12 @@ private fun ModernTimePicker(
             TextButton(onClick = {
                 onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
             }) {
-                Text("OK", color = EditColors.Primary)
+                Text("OK", color = MaterialTheme.colorScheme.primary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy", color = EditColors.TextSecondary)
+                Text("Hủy", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     )
@@ -1145,13 +1132,13 @@ private fun DeleteOptionsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = EditColors.Surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 text = "Xóa tác vụ lặp lại",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = EditColors.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
@@ -1159,7 +1146,7 @@ private fun DeleteOptionsDialog(
                 Text(
                     text = "Đây là tác vụ lặp lại. Bạn muốn xóa như thế nào?",
                     fontSize = 14.sp,
-                    color = EditColors.TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -1178,7 +1165,7 @@ private fun DeleteOptionsDialog(
                         Icon(
                             Icons.Default.DateRange,
                             contentDescription = null,
-                            tint = EditColors.Primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -1187,18 +1174,18 @@ private fun DeleteOptionsDialog(
                                 text = "Chỉ xóa hôm nay",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = EditColors.TextPrimary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Tác vụ vẫn còn ở các ngày khác",
                                 fontSize = 13.sp,
-                                color = EditColors.TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
                 
-                HorizontalDivider(color = EditColors.Divider)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
                 // Option 2: Delete from today onwards
                 Surface(
@@ -1214,7 +1201,7 @@ private fun DeleteOptionsDialog(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = null,
-                            tint = EditColors.Warning,
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -1223,18 +1210,18 @@ private fun DeleteOptionsDialog(
                                 text = "Xóa từ hôm nay trở đi",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = EditColors.TextPrimary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Không còn lặp lại ở các ngày sau",
                                 fontSize = 13.sp,
-                                color = EditColors.TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
                 
-                HorizontalDivider(color = EditColors.Divider)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
                 // Option 3: Delete completely
                 Surface(
@@ -1250,7 +1237,7 @@ private fun DeleteOptionsDialog(
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = null,
-                            tint = EditColors.Delete,
+                            tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -1259,12 +1246,12 @@ private fun DeleteOptionsDialog(
                                 text = "Xóa hoàn toàn",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = EditColors.Delete
+                                color = MaterialTheme.colorScheme.error
                             )
                             Text(
                                 text = "Xóa tác vụ và tất cả lịch sử",
                                 fontSize = 13.sp,
-                                color = EditColors.TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -1274,7 +1261,7 @@ private fun DeleteOptionsDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy", color = EditColors.Primary)
+                Text("Hủy", color = MaterialTheme.colorScheme.primary)
             }
         }
     )

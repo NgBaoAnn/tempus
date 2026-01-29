@@ -37,16 +37,18 @@ class EditScheduleFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             
             setContent {
-                EditScheduleScreen(
-                    viewModel = viewModel,
-                    onClose = { findNavController().popBackStack() },
-                    onSaveSuccess = { 
-                        Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
-                        // Refresh widget to show new/updated task
-                        com.projectapp.tempus.widget.TasksWidgetProvider.refreshAllWidgets(requireContext())
-                        findNavController().popBackStack() 
-                    }
-                )
+                com.projectapp.tempus.ui.theme.TempusTheme {
+                    EditScheduleScreen(
+                        viewModel = viewModel,
+                        onClose = { findNavController().popBackStack() },
+                        onSaveSuccess = { 
+                            Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
+                            // Refresh widget to show new/updated task
+                            com.projectapp.tempus.widget.TasksWidgetProvider.refreshAllWidgets(requireContext())
+                            findNavController().popBackStack() 
+                        }
+                    )
+                }
             }
         }
     }

@@ -33,20 +33,7 @@ import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.timeline.SortOption
 
 // Color definitions for filter UI - aligned with TempusDesignSystem
-private object FilterColors {
-    val Background = TempusDesignSystem.Slate100
-    val Surface = TempusDesignSystem.White
-    val Primary = TempusDesignSystem.Primary
-    val TextPrimary = TempusDesignSystem.TextPrimary
-    val TextSecondary = TempusDesignSystem.TextSecondary
-    val ChipSelected = TempusDesignSystem.Primary
-    val ChipUnselected = TempusDesignSystem.Slate200
-    val PriorityHigh = TempusDesignSystem.Error
-    val PriorityMedium = TempusDesignSystem.Warning
-    val PriorityLow = TempusDesignSystem.Success
-    val StatusPlanned = TempusDesignSystem.Primary
-    val StatusDone = TempusDesignSystem.Success
-}
+// FilterColors object removed - using MaterialTheme directly
 
 /**
  * Filter and Sort Bar for Timeline
@@ -73,7 +60,7 @@ fun FilterSortBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(FilterColors.Surface)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         // Search Bar Row
         Row(
@@ -87,7 +74,7 @@ fun FilterSortBar(
                 modifier = Modifier
                     .weight(1f)
                     .height(40.dp)
-                    .background(FilterColors.Background, RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(20.dp))
                     .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -98,7 +85,7 @@ fun FilterSortBar(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = FilterColors.TextSecondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -107,7 +94,7 @@ fun FilterSortBar(
                         if (searchQuery.isEmpty()) {
                             Text(
                                 text = "Tìm kiếm...",
-                                color = FilterColors.TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp
                             )
                         }
@@ -116,10 +103,10 @@ fun FilterSortBar(
                             onValueChange = onSearchQueryChanged,
                             singleLine = true,
                             textStyle = TextStyle(
-                                color = FilterColors.TextPrimary,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 14.sp
                             ),
-                            cursorBrush = SolidColor(FilterColors.Primary),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -128,7 +115,7 @@ fun FilterSortBar(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Clear",
-                            tint = FilterColors.TextSecondary,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
                                 .size(18.dp)
                                 .clickable { onSearchQueryChanged("") }
@@ -145,12 +132,12 @@ fun FilterSortBar(
                     onClick = { showSortMenu = true },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(FilterColors.Background, CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Sort",
-                        tint = if (sortBy != SortOption.START_TIME) FilterColors.Primary else FilterColors.TextSecondary,
+                        tint = if (sortBy != SortOption.START_TIME) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -168,7 +155,7 @@ fun FilterSortBar(
                                         SortOption.PRIORITY -> "Theo mức ưu tiên"
                                         SortOption.CREATED_AT -> "Theo ngày tạo"
                                     },
-                                    color = if (sortBy == option) FilterColors.Primary else FilterColors.TextPrimary
+                                    color = if (sortBy == option) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             },
                             onClick = {
@@ -188,14 +175,14 @@ fun FilterSortBar(
                 modifier = Modifier
                     .size(40.dp)
                     .background(
-                        if (isFilterActive) FilterColors.Primary.copy(alpha = 0.1f) else FilterColors.Background,
+                        if (isFilterActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerHigh,
                         CircleShape
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.List,
                     contentDescription = "Filter",
-                    tint = if (isFilterActive) FilterColors.Primary else FilterColors.TextSecondary,
+                    tint = if (isFilterActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -218,7 +205,7 @@ fun FilterSortBar(
                     text = "Mức ưu tiên",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = FilterColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
                 Row(
@@ -243,9 +230,9 @@ fun FilterSortBar(
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = when (priority) {
-                                    PriorityType.high -> FilterColors.PriorityHigh.copy(alpha = 0.15f)
-                                    PriorityType.medium -> FilterColors.PriorityMedium.copy(alpha = 0.15f)
-                                    PriorityType.low -> FilterColors.PriorityLow.copy(alpha = 0.15f)
+                                    PriorityType.high -> MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+                                    PriorityType.medium -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                                    PriorityType.low -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                 }
                             )
                         )
@@ -259,7 +246,7 @@ fun FilterSortBar(
                     text = "Danh mục",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = FilterColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
                 Row(
@@ -284,7 +271,7 @@ fun FilterSortBar(
                             onClick = { onFilterLabelToggle(label) },
                             label = { Text(displayName, fontSize = 13.sp) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = FilterColors.Primary.copy(alpha = 0.15f)
+                                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                             )
                         )
                     }
@@ -297,7 +284,7 @@ fun FilterSortBar(
                     text = "Trạng thái",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = FilterColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
                 Row(
@@ -312,7 +299,7 @@ fun FilterSortBar(
                         },
                         label = { Text("📋 Chưa xong", fontSize = 13.sp) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = FilterColors.StatusPlanned.copy(alpha = 0.15f)
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                         )
                     )
                     FilterChip(
@@ -324,7 +311,7 @@ fun FilterSortBar(
                         },
                         label = { Text("✅ Hoàn thành", fontSize = 13.sp) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = FilterColors.StatusDone.copy(alpha = 0.15f)
+                            selectedContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
                         )
                     )
                 }
@@ -350,7 +337,7 @@ fun FilterSortBar(
         
         // Divider
         HorizontalDivider(
-            color = FilterColors.Background,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
             thickness = 1.dp
         )
     }

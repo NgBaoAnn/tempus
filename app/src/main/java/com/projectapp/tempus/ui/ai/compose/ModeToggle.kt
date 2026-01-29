@@ -34,7 +34,7 @@ fun ModeToggle(
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = ChatColors.SurfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier
     ) {
         Row(
@@ -79,8 +79,8 @@ private fun ModeButton(
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isSelected -> ChatColors.Accent
-            else -> ChatColors.SurfaceVariant
+            isSelected -> MaterialTheme.colorScheme.secondary
+            else -> MaterialTheme.colorScheme.surfaceVariant
         },
         animationSpec = tween(200),
         label = "bgColor"
@@ -88,9 +88,9 @@ private fun ModeButton(
     
     val textColor by animateColorAsState(
         targetValue = when {
-            isSelected -> ChatColors.OnAccent
-            !enabled -> ChatColors.TextMuted
-            else -> ChatColors.TextSecondary
+            isSelected -> MaterialTheme.colorScheme.onSecondary
+            !enabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(200),
         label = "textColor"
@@ -137,9 +137,9 @@ fun ModeIndicator(
     modifier: Modifier = Modifier
 ) {
     val (icon, text, color) = when (mode) {
-        ChatMode.ASK -> Triple("💬", "Ask", ChatColors.TextSecondary)
-        ChatMode.AGENT -> Triple("🤖", "Agent", ChatColors.Accent)
-        ChatMode.LIFE_PLANNER -> Triple("🎯", "Planner", ChatColors.Primary)
+        ChatMode.ASK -> Triple("💬", "Ask", MaterialTheme.colorScheme.onSurfaceVariant)
+        ChatMode.AGENT -> Triple("🤖", "Agent", MaterialTheme.colorScheme.secondary)
+        ChatMode.LIFE_PLANNER -> Triple("🎯", "Planner", MaterialTheme.colorScheme.primary)
     }
     
     Surface(

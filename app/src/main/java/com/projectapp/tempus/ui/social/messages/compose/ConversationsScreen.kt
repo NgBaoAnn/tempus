@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.projectapp.tempus.ui.social.friends.compose.SocialColors
 import com.projectapp.tempus.domain.social.model.ConversationWithUser
 import com.projectapp.tempus.ui.social.messages.MessagesViewModel
 import java.time.Instant
@@ -71,11 +70,11 @@ fun ConversationsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SocialColors.CardBackground
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        containerColor = SocialColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(
             modifier = Modifier
@@ -85,7 +84,7 @@ fun ConversationsScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = SocialColors.Primary
+                    color = MaterialTheme.colorScheme.primary
                 )
             } else if (uiState.conversations.isEmpty()) {
                 EmptyConversationsState()
@@ -125,20 +124,20 @@ private fun EmptyConversationsState() {
             imageVector = Icons.Filled.Chat,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = SocialColors.TextSecondary.copy(alpha = 0.5f)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Chưa có tin nhắn",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
-            color = SocialColors.TextPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "Nhấn vào bạn bè để bắt đầu trò chuyện",
             fontSize = 14.sp,
-            color = SocialColors.TextSecondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -153,7 +152,7 @@ private fun ConversationCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = SocialColors.CardBackground
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
@@ -171,9 +170,9 @@ private fun ConversationCard(
                     .background(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                SocialColors.GradientStart,
-                                SocialColors.GradientMid,
-                                SocialColors.GradientEnd
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.secondary
                             )
                         ),
                         shape = CircleShape
@@ -184,12 +183,12 @@ private fun ConversationCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(SocialColors.PrimaryLight),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = conversation.otherUser.username.firstOrNull()?.uppercase() ?: "?",
-                        color = SocialColors.Primary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -208,14 +207,14 @@ private fun ConversationCard(
                         text = conversation.otherUser.username,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
-                        color = SocialColors.TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     
                     conversation.conversation.lastMessageAt?.let { time ->
                         Text(
                             text = formatTime(time),
                             fontSize = 12.sp,
-                            color = SocialColors.TextMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -225,7 +224,7 @@ private fun ConversationCard(
                 Text(
                     text = conversation.conversation.lastMessagePreview ?: "Bắt đầu cuộc trò chuyện",
                     fontSize = 14.sp,
-                    color = SocialColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.ui.ai.compose.ChatScreen
+import com.projectapp.tempus.ui.theme.TempusTheme
 import io.github.jan.supabase.gotrue.auth
 
 /**
@@ -46,7 +47,9 @@ class AIFragment : Fragment() {
             )
             
             setContent {
-                ChatScreen(viewModel = viewModel)
+                TempusTheme {
+                    ChatScreen(viewModel = viewModel)
+                }
             }
         }
     }

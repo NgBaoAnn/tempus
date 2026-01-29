@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.domain.usecase.DayHeatmapData
 import com.projectapp.tempus.domain.usecase.HeatLevel
-import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import java.time.LocalDate
 
 /**
@@ -63,12 +62,12 @@ fun HeatmapDayCell(
     val borderModifier = when {
         isSelected -> Modifier.border(
             width = 2.dp,
-            color = TempusDesignSystem.Primary,
+            color = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(8.dp)
         )
         isToday -> Modifier.border(
             width = 2.dp,
-            color = TempusDesignSystem.Primary.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
             shape = RoundedCornerShape(8.dp)
         )
         else -> Modifier
@@ -159,6 +158,6 @@ fun SkeletonDayCell(
             .aspectRatio(1f)
             .padding(2.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(TempusDesignSystem.Slate200)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     )
 }
