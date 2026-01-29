@@ -240,8 +240,16 @@ fun TimelineScreen(
                         key = { _, block -> block.taskId }
                     ) { index, block ->
                         val nextBlock = blocks.getOrNull(index + 1)
+                        val blockEndTime = block.startTime.plus(block.duration)
+                        
+                        // Check for overlap: current block ends AFTER next block starts
+                        val hasOverlap = nextBlock != null && 
+                            !blockEndTime.isBefore(nextBlock.startTime) &&
+                            !blockEndTime.isEqual(nextBlock.startTime)
+                        
+                        // Check for free time: current block ends BEFORE next block starts
                         val showFreeTime = nextBlock != null && 
-                            block.startTime.plus(block.duration).isBefore(nextBlock.startTime)
+                            blockEndTime.isBefore(nextBlock.startTime)
                         
                         TimelineItem(
                             block = block,
@@ -251,8 +259,14 @@ fun TimelineScreen(
                             onSubtaskToggle = onSubtaskToggle
                         )
                         
+                        // Show overlap warning between overlapping tasks
+                        if (hasOverlap && nextBlock != null) {
+                            OverlapWarning()
+                        }
+                        
+                        // Show free time between tasks with gap
                         if (showFreeTime && nextBlock != null) {
-                            val freeStart = block.startTime.plus(block.duration)
+                            val freeStart = blockEndTime
                             val freeEnd = nextBlock.startTime
                             val freeMinutes = java.time.Duration.between(freeStart, freeEnd).toMinutes()
                             
@@ -998,6 +1012,69 @@ fun TimelineItem(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Warning indicator for overlapping tasks - matches TimelineItem layout
+ */
+@Composable
+fun OverlapWarning() {
+    val warningColor = Color(0xFFFF9800) // Orange/Amber
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Time Column placeholder (same width as TimelineItem)
+        Spacer(modifier = Modifier.width(50.dp))
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // Vertical Line area (same as TimelineItem)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(24.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(28.dp)
+                    .background(warningColor.copy(alpha = 0.5f))
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        // Warning Card (same position as task card)
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .background(
+                    color = warningColor.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_warning),
+                contentDescription = "Overlap Warning",
+                tint = warningColor,
+                modifier = Modifier.size(14.dp)
+            )
+            
+            Spacer(modifier = Modifier.width(6.dp))
+            
+            Text(
+                text = "Các tác vụ đang chồng chéo",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = warningColor
+            )
         }
     }
 }
