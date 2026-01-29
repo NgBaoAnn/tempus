@@ -211,7 +211,7 @@ object RepositoryProvider {
     
     private fun createScheduleRepository(context: Context): OfflineFirstScheduleRepository {
         val localRepo = getLocalRepository(context)
-        return OfflineFirstScheduleRepository(localRepo)
+        return OfflineFirstScheduleRepository(context.applicationContext, localRepo)
     }
     
     private fun createLocalRepository(context: Context): LocalScheduleRepository {

@@ -8,44 +8,55 @@
     android:padding="12dp"
     android:gravity="center_vertical">
 
-    <!-- Status Indicator -->
+    <!-- Task Icon (from label) -->
     <ImageView
-        android:id="@+id/widget_task_status"
-        android:layout_width="4dp"
-        android:layout_height="match_parent"
-        android:background="#9E9E9E"
-        android:src="@android:color/transparent"
-        android:layout_marginEnd="12dp"
+        android:id="@+id/widget_task_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/book"
+        android:contentDescription="Task icon" />
+
+    <!-- Priority Indicator (Circle Dot) -->
+    <ImageView
+        android:id="@+id/widget_task_priority_dot"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/shape_circle_solid"
         android:contentDescription="Priority indicator" />
 
-    <!-- Task Info -->
-    <LinearLayout
+    <!-- Task Name -->
+    <TextView
+        android:id="@+id/widget_task_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_marginStart="10dp"
+        android:text="Task Name"
+        android:textColor="#000000"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/widget_task_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Task Name"
-            android:textColor="#000000"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end" />
+    <!-- Task Time (aligned to right) -->
+    <TextView
+        android:id="@+id/widget_task_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="09:00"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:layout_marginStart="8dp" />
 
-        <TextView
-            android:id="@+id/widget_task_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="09:00"
-            android:textColor="#757575"
-            android:textSize="12sp"
-            android:layout_marginStart="8dp" />
-    </LinearLayout>
+    <!-- Complete Button - Circle outline like timeline checkbox -->
+    <ImageView
+        android:id="@+id/widget_task_complete_btn"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/shape_circle_outline_gray"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Complete task" />
 
 </LinearLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Circle outline for incomplete task status button on widget -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <stroke android:width="2dp" android:color="#9E9E9E"/>
+    <solid android:color="@android:color/transparent"/>
+</shape>

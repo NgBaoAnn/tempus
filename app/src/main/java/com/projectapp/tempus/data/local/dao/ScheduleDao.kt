@@ -21,6 +21,20 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedules WHERE userId = :userId AND syncStatus != 'PENDING_DELETE'")
     suspend fun getActiveSchedules(userId: String): List<ScheduleEntity>
     
+    /**
+     * Get today's tasks for widget display
+     * Filters by date, excludes deleted, sorts by start time, limits to 5
+     */
+    @Query("""
+        SELECT * FROM schedules 
+        WHERE userId = :userId 
+        AND syncStatus != 'PENDING_DELETE' 
+        AND substr(startTimeDate, 1, 10) = :date
+        ORDER BY startTimeDate ASC 
+        LIMIT 5
+    """)
+    suspend fun getTodayTasksForWidget(userId: String, date: String): List<ScheduleEntity>
+    
     @Query("SELECT * FROM schedules WHERE id = :id")
     suspend fun getScheduleById(id: String): ScheduleEntity?
     

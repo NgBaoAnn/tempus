@@ -1,9 +1,11 @@
 package com.projectapp.tempus.data.schedule
 
+import android.content.Context
 import com.projectapp.tempus.data.local.LocalScheduleRepository
 import com.projectapp.tempus.data.local.entity.*
 import com.projectapp.tempus.data.schedule.dto.*
 import com.projectapp.tempus.data.sync.toRow
+import com.projectapp.tempus.widget.WidgetRefreshHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
@@ -17,6 +19,7 @@ import java.util.UUID
  * Thay thế SupabaseScheduleRepository cho các UI operations.
  */
 class OfflineFirstScheduleRepository(
+    private val context: Context,
     private val localRepo: LocalScheduleRepository
 ) : ScheduleRepository {
     
@@ -117,6 +120,10 @@ class OfflineFirstScheduleRepository(
         )
         
         val inserted = localRepo.insertSchedule(entity)
+        
+        // Refresh widget khi có schedule mới
+        WidgetRefreshHelper.refreshTasksWidget(context)
+        
         return inserted.toRow()
     }
     
@@ -145,6 +152,10 @@ class OfflineFirstScheduleRepository(
         )
         
         localRepo.updateSchedule(updated)
+        
+        // Refresh widget khi schedule được cập nhật
+        WidgetRefreshHelper.refreshTasksWidget(context)
+        
         return updated.toRow()
     }
     
@@ -154,6 +165,10 @@ class OfflineFirstScheduleRepository(
         status: StatusType
     ): ScheduleItemRow {
         val entity = localRepo.upsertScheduleItem(taskId, date, status.name)
+        
+        // Refresh widget khi trạng thái task thay đổi
+        WidgetRefreshHelper.refreshTasksWidget(context)
+        
         return ScheduleItemRow(
             id = entity.id,
             taskId = entity.taskId,
@@ -227,6 +242,9 @@ class OfflineFirstScheduleRepository(
     
     override suspend fun deleteSchedule(id: String) {
         localRepo.deleteSchedule(id)
+        
+        // Refresh widget khi schedule bị xóa
+        WidgetRefreshHelper.refreshTasksWidget(context)
     }
     
     override suspend fun deleteSchedulesFromDate(userId: String, fromDate: String): Int {
@@ -310,6 +328,9 @@ class OfflineFirstScheduleRepository(
     
     override suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean) {
         localRepo.updateSubTaskStatus(subTaskId, isDone)
+        
+        // Refresh widget khi subtask status thay đổi
+        WidgetRefreshHelper.refreshTasksWidget(context)
     }
     
     // ==================== SYNC HELPERS ====================
