@@ -22,6 +22,18 @@ interface ScheduleDao {
     suspend fun getActiveSchedules(userId: String): List<ScheduleEntity>
     
     /**
+     * Get all schedules for alarm scheduling
+     * Excludes deleted, orders by start time for scheduling
+     */
+    @Query("""
+        SELECT * FROM schedules 
+        WHERE userId = :userId 
+        AND syncStatus != 'PENDING_DELETE'
+        ORDER BY startTimeDate ASC
+    """)
+    suspend fun getSchedulesForAlarm(userId: String): List<ScheduleEntity>
+    
+    /**
      * Get today's tasks for widget display
      * Filters by date, excludes deleted, sorts by start time, limits to 5
      */

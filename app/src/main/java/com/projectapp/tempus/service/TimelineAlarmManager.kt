@@ -3,95 +3,85 @@ package com.projectapp.tempus.service
 import android.content.Context
 import android.util.Log
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.schedule.dto.ScheduleRow
+import com.projectapp.tempus.data.local.TempusDatabase
+import com.projectapp.tempus.util.NotificationPreferences
 import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 /**
  * Manages batch synchronization of Timeline alarms
+ * Uses LOCAL Room database for data (offline-first)
  */
 object TimelineAlarmManager {
 
     /**
      * Sync all timeline tasks for the current user
-     * Cancels all existing alarms and schedules new ones for future tasks
+     * Reads from LOCAL database, schedules alarms for future tasks only
      */
     fun syncAllAlarms(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d("TimelineAlarmManager", "🔄 Starting alarm sync...")
+                Log.d("TimelineAlarmManager", "🔄 Starting alarm sync (LOCAL data)...")
                 
+                // Clear old notification records (older than 7 days)
+                NotificationPreferences.clearOldNotifications(context)
+                
+                // Get current user ID from auth
                 val supabase = SupabaseClientProvider.client
-                val user = supabase.auth.currentUserOrNull()
+                val userId = supabase.auth.currentUserOrNull()?.id
                 
-                if (user == null) {
+                if (userId.isNullOrEmpty()) {
                     Log.d("TimelineAlarmManager", "No user logged in, skipping sync")
                     return@launch
                 }
 
-                // Fetch all schedules for the current user
-                val schedules = supabase.from("schedule")
-                    .select { 
-                        filter { 
-                            eq("user_id", user.id) 
-                        } 
-                    }
-                    .decodeList<ScheduleRow>()
+                // Get schedules from LOCAL Room database
+                val database = TempusDatabase.getDatabase(context)
+                val schedules = database.scheduleDao().getSchedulesForAlarm(userId)
 
-                Log.d("TimelineAlarmManager", "📋 Found ${schedules.size} tasks")
+                Log.d("TimelineAlarmManager", "📋 Found ${schedules.size} tasks from local DB")
 
                 val reminderScheduler = ReminderScheduler(context)
                 var scheduledCount = 0
-                var ongoingCount = 0
                 var skippedCount = 0
+                val today = LocalDate.now()
 
-                // Schedule alarms for future tasks or notify for ongoing tasks
+                // Schedule alarms for future tasks only
                 schedules.forEach { schedule ->
                     try {
                         val startTime = OffsetDateTime.parse(schedule.startTimeDate, DateTimeFormatter.ISO_DATE_TIME)
-                        val endDateTime = calculateEndTime(schedule.startTimeDate, schedule.implementationTime)
-                        val endTime = OffsetDateTime.parse(endDateTime, DateTimeFormatter.ISO_DATE_TIME)
                         val now = OffsetDateTime.now()
                         
-                        when {
-                            // Task is in the future - schedule alarm
-                            startTime.isAfter(now) -> {
-                                reminderScheduler.scheduleReminder(
-                                    taskId = schedule.id,
-                                    title = schedule.name,
-                                    startDateTime = schedule.startTimeDate,
-                                    endDateTime = endDateTime
-                                )
-                                scheduledCount++
-                            }
-                            // Task is currently ongoing - show notification immediately
-                            now.isAfter(startTime) && now.isBefore(endTime) -> {
-                                Log.d("TimelineAlarmManager", "Task '${schedule.name}' is ongoing, showing notification now")
-                                com.projectapp.tempus.util.TimelineNotificationHelper.showTaskNotification(
-                                    context,
-                                    schedule.id,
-                                    schedule.name,
-                                    formatTime(schedule.startTimeDate),
-                                    formatTime(endDateTime)
-                                )
-                                ongoingCount++
-                            }
-                            // Task has ended - skip
-                            else -> {
-                                skippedCount++
-                            }
+                        // Only schedule if task is in the future
+                        if (startTime.isAfter(now)) {
+                            val endDateTime = calculateEndTime(schedule.startTimeDate, schedule.implementationTime)
+                            
+                            // Use new method with task details for enhanced notification
+                            reminderScheduler.scheduleReminderWithDetails(
+                                taskId = schedule.id,
+                                title = schedule.name,
+                                startDateTime = schedule.startTimeDate,
+                                endDateTime = endDateTime,
+                                priority = schedule.priority,
+                                categoryLabel = schedule.label ?: "",
+                                color = schedule.color ?: "#2196F3"
+                            )
+                            scheduledCount++
+                        } else {
+                            // Task in past or ongoing - skip
+                            skippedCount++
                         }
                     } catch (e: Exception) {
                         Log.e("TimelineAlarmManager", "Failed to process alarm for ${schedule.name}", e)
                     }
                 }
 
-                Log.d("TimelineAlarmManager", "✅ Sync complete: $scheduledCount scheduled, $ongoingCount ongoing (notified), $skippedCount skipped (ended)")
+                Log.d("TimelineAlarmManager", "✅ Sync complete: $scheduledCount scheduled, $skippedCount skipped")
             } catch (e: Exception) {
                 Log.e("TimelineAlarmManager", "❌ Alarm sync failed", e)
             }
@@ -110,16 +100,6 @@ object TimelineAlarmManager {
             end.format(DateTimeFormatter.ISO_DATE_TIME)
         } catch (e: Exception) {
             startIso
-        }
-    }
-    
-    private fun formatTime(dateTimeStr: String): String {
-        return try {
-            val offsetDateTime = OffsetDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_DATE_TIME)
-            val localDateTime = offsetDateTime.atZoneSameInstant(java.time.ZoneId.systemDefault()).toLocalDateTime()
-            localDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-        } catch (e: Exception) {
-            dateTimeStr
         }
     }
 }
