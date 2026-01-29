@@ -181,7 +181,7 @@ class AIRepository(
                 |      "title": "Tên milestone",
                 |      "week": số_tuần,
                 |      "tasks": [
-                |        {"title": "Tên task", "dayOfWeek": "monday", "time": "09:00", "duration": 60}
+                |        {"title": "Tên task", "dayOfWeek": "monday", "time": "09:00", "duration": 60, "label": "book"}
                 |      ]
                 |    }
                 |  ],
@@ -189,44 +189,58 @@ class AIRepository(
                 |  "warnings": ["Cảnh báo nếu lịch quá nặng"]
                 |}
                 |
+                |LABELS HỢP LỆ - CHỈ ĐƯỢC DÙNG CÁC LABEL SAU:
+                |  - "wakeup": Thức dậy, báo thức, morning routine
+                |  - "eat": Ăn uống, bữa ăn, ăn sáng, ăn trưa, ăn tối
+                |  - "exercise": Tập thể dục, gym, chạy bộ, yoga, workout
+                |  - "rest": Nghỉ ngơi, thư giãn, relaxation
+                |  - "water": Uống nước, hydration
+                |  - "book": Học tập, đọc sách, nghiên cứu, ôn bài, lập trình, coding, học ngôn ngữ
+                |  - "sleep": Ngủ, đi ngủ, nghỉ trưa
+                |  - "clean": Dọn dẹp, vệ sinh, làm sạch
+                |  - "cook": Nấu ăn, chuẩn bị bữa ăn
+                |  - "garden": Làm vườn, chăm sóc cây
+                |
                 |QUY TẮC QUAN TRỌNG:
                 |1. Chia goal thành 3-5 milestones rõ ràng, có thể đo lường
                 |2. Phân bổ tasks đều trong tuần, KHÔNG quá 3 tasks/ngày
-                |3. Đề xuất thời điểm phù hợp:
+                |3. PHẢI chọn đúng label phù hợp với nội dung task từ danh sách trên
+                |4. Đề xuất thời điểm phù hợp:
                 |   - Sáng (8-11h): Việc khó, học bài mới
                 |   - Chiều (14-17h): Luyện tập, làm bài
                 |   - Tối (19-21h): Review, ôn lại
-                |4. Luôn có ít nhất 1 ngày nghỉ/tuần
-                |5. Cảnh báo nếu target không realistic
-                |6. dayOfWeek phải là: monday, tuesday, wednesday, thursday, friday, saturday, sunday
-                |7. CHỈ trả về JSON, không thêm text
+                |5. Luôn có ít nhất 1 ngày nghỉ/tuần
+                |6. Cảnh báo nếu target không realistic
+                |7. dayOfWeek phải là: monday, tuesday, wednesday, thursday, friday, saturday, sunday
+                |8. NẾU người dùng KHÔNG nói ngày bắt đầu, mặc định bắt đầu từ HÔM NAY
+                |9. CHỈ trả về JSON, không thêm text
                 |
                 |VÍ DỤ:
-                |Input: "Học IELTS 7.0 trong 3 tháng, 2 tiếng mỗi ngày"
+                |Input: "Học React trong 4 tuần"
                 |Output:
                 |{
-                |  "planTitle": "Chinh phục IELTS 7.0",
-                |  "description": "Kế hoạch học IELTS 7.0 trong 12 tuần với 14h/tuần",
-                |  "durationWeeks": 12,
-                |  "hoursPerWeek": 14,
+                |  "planTitle": "Học React",
+                |  "description": "Kế hoạch học React từ cơ bản đến nâng cao trong 4 tuần",
+                |  "durationWeeks": 4,
+                |  "hoursPerWeek": 10,
                 |  "milestones": [
                 |    {
-                |      "title": "Nền tảng - Vocabulary & Grammar",
-                |      "week": 3,
+                |      "title": "React Fundamentals",
+                |      "week": 1,
                 |      "tasks": [
-                |        {"title": "Học từ vựng IELTS", "dayOfWeek": "monday", "time": "09:00", "duration": 60},
-                |        {"title": "Luyện Grammar", "dayOfWeek": "wednesday", "time": "09:00", "duration": 60}
+                |        {"title": "Học Components & JSX", "dayOfWeek": "monday", "time": "09:00", "duration": 60, "label": "book"},
+                |        {"title": "Học State & Props", "dayOfWeek": "wednesday", "time": "09:00", "duration": 60, "label": "book"}
                 |      ]
                 |    },
                 |    {
-                |      "title": "Listening & Reading Skills",
-                |      "week": 6,
+                |      "title": "React Hooks",
+                |      "week": 2,
                 |      "tasks": [
-                |        {"title": "Practice Listening", "dayOfWeek": "tuesday", "time": "14:00", "duration": 90}
+                |        {"title": "Học useState & useEffect", "dayOfWeek": "tuesday", "time": "14:00", "duration": 90, "label": "book"}
                 |      ]
                 |    }
                 |  ],
-                |  "tips": ["Học đều đặn mỗi ngày sẽ hiệu quả hơn học dồn"],
+                |  "tips": ["Code nhiều hơn đọc", "Làm dự án thực hành"],
                 |  "warnings": []
                 |}
                 """.trimMargin()
@@ -840,6 +854,7 @@ ${scheduleLines.joinToString("\n")}"""
                     val dayOfWeekStr = taskJson.optString("dayOfWeek", "monday").uppercase()
                     val time = taskJson.optString("time", "09:00")
                     val duration = taskJson.optInt("duration", 60)
+                    val taskLabel = taskJson.optString("label", "star") // Get label from AI
                     
                     val dayOfWeek = try {
                         DayOfWeek.valueOf(dayOfWeekStr)
@@ -851,7 +866,8 @@ ${scheduleLines.joinToString("\n")}"""
                         title = taskTitle,
                         dayOfWeek = dayOfWeek,
                         preferredTime = time,
-                        durationMinutes = duration
+                        durationMinutes = duration,
+                        label = taskLabel
                     ))
                     totalTasks++
                 }
@@ -914,19 +930,43 @@ ${scheduleLines.joinToString("\n")}"""
             val today = LocalDate.now()
             
             for (milestone in plan.milestones) {
+                // Track which day in the first week we're scheduling to distribute tasks
+                var firstWeekDayOffset = 0
+                
                 for (task in milestone.scheduledTasks) {
                     // Calculate weeks until milestone
                     val weeksUntilMilestone = milestone.weekNumber - 1
                     
-                    // Create recurring task for each week until milestone
+                    // Create task for each week until milestone
                     for (weekOffset in 0..weeksUntilMilestone) {
-                        // Find the next occurrence of this day of week
-                        var taskDate = today.plusWeeks(weekOffset.toLong())
-                        while (taskDate.dayOfWeek != task.dayOfWeek) {
-                            taskDate = taskDate.plusDays(1)
+                        var taskDate: LocalDate
+                        
+                        if (weekOffset == 0) {
+                            // FIRST WEEK: Start from TODAY, distribute tasks across days starting from today
+                            // Don't wait for specific dayOfWeek - user wants plan to start TODAY
+                            taskDate = today.plusDays(firstWeekDayOffset.toLong())
+                            
+                            // Increment offset for next task in first week (distribute across days)
+                            // Skip to next day for variety, max 7 days
+                            firstWeekDayOffset = (firstWeekDayOffset + 1) % 7
+                        } else {
+                            // SUBSEQUENT WEEKS: Use the AI-specified dayOfWeek
+                            // Calculate the base date for this week (relative to today's week)
+                            val weekStartDate = today.plusWeeks(weekOffset.toLong())
+                            
+                            // Find the specified day of week in this week
+                            taskDate = weekStartDate
+                            // Go back to the start of the week (Monday) first
+                            while (taskDate.dayOfWeek != java.time.DayOfWeek.MONDAY) {
+                                taskDate = taskDate.minusDays(1)
+                            }
+                            // Then find the task's day of week
+                            while (taskDate.dayOfWeek != task.dayOfWeek) {
+                                taskDate = taskDate.plusDays(1)
+                            }
                         }
                         
-                        // Skip if date is in the past
+                        // Skip if date is in the past (safety check)
                         if (taskDate.isBefore(today)) continue
                         
                         val startTimeDate = "${taskDate}T${task.preferredTime}:00+07:00"
@@ -934,13 +974,21 @@ ${scheduleLines.joinToString("\n")}"""
                         val minutes = task.durationMinutes % 60
                         val implementationTime = String.format("%02d:%02d:00", hours, minutes)
                         
+                        // Use label from AI, fallback to infer if empty
+                        val label = if (task.label.isNotBlank() && task.label != "star") 
+                            task.label 
+                        else 
+                            inferLabelFromTitle(task.title)
+                        
                         val row = mapOf(
                             "user_id" to userId,
                             "name_schedule" to "${task.title} [${plan.title}]",
                             "start_time_date" to startTimeDate,
                             "implementation_time" to implementationTime,
                             "repeat" to "once",
-                            "source" to "ai"
+                            "source" to "ai",
+                            "label" to label,
+                            "color" to inferColorFromLabel(label)
                         )
                         
                         scheduleRepository.insertSchedule(row)
@@ -953,6 +1001,88 @@ ${scheduleLines.joinToString("\n")}"""
         } catch (e: Exception) {
             android.util.Log.e("AIRepository", "Error executing life plan", e)
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Infer schedule label from task title using keyword matching
+     * Uses project's ScheduleLabel enum values: wakeup, eat, exercise, rest, water, book, sleep, clean, cook, garden
+     */
+    private fun inferLabelFromTitle(title: String): String {
+        val lowerTitle = title.lowercase()
+        return when {
+            // Wakeup - morning routine
+            lowerTitle.contains("thức dậy") || lowerTitle.contains("wake") ||
+            lowerTitle.contains("dậy") || lowerTitle.contains("morning") ||
+            lowerTitle.contains("báo thức") -> "wakeup"
+            
+            // Eat - meals
+            lowerTitle.contains("ăn") || lowerTitle.contains("eat") ||
+            lowerTitle.contains("bữa") || lowerTitle.contains("meal") ||
+            lowerTitle.contains("sáng") || lowerTitle.contains("trưa") ||
+            lowerTitle.contains("tối") || lowerTitle.contains("breakfast") ||
+            lowerTitle.contains("lunch") || lowerTitle.contains("dinner") -> "eat"
+            
+            // Exercise - physical activity
+            lowerTitle.contains("tập") || lowerTitle.contains("gym") ||
+            lowerTitle.contains("chạy") || lowerTitle.contains("run") ||
+            lowerTitle.contains("yoga") || lowerTitle.contains("thể dục") ||
+            lowerTitle.contains("exercise") || lowerTitle.contains("workout") -> "exercise"
+            
+            // Rest - relaxation
+            lowerTitle.contains("nghỉ") || lowerTitle.contains("rest") ||
+            lowerTitle.contains("thư giãn") || lowerTitle.contains("relax") -> "rest"
+            
+            // Water - hydration
+            lowerTitle.contains("uống nước") || lowerTitle.contains("water") ||
+            lowerTitle.contains("hydrat") -> "water"
+            
+            // Sleep - sleeping
+            lowerTitle.contains("ngủ") || lowerTitle.contains("sleep") ||
+            lowerTitle.contains("đi ngủ") -> "sleep"
+            
+            // Clean - cleaning
+            lowerTitle.contains("dọn") || lowerTitle.contains("clean") ||
+            lowerTitle.contains("vệ sinh") || lowerTitle.contains("lau") -> "clean"
+            
+            // Cook - cooking
+            lowerTitle.contains("nấu") || lowerTitle.contains("cook") ||
+            lowerTitle.contains("chuẩn bị") -> "cook"
+            
+            // Garden - gardening
+            lowerTitle.contains("vườn") || lowerTitle.contains("garden") ||
+            lowerTitle.contains("cây") || lowerTitle.contains("plant") -> "garden"
+            
+            // Book - study/reading/work/coding (default for learning activities)
+            lowerTitle.contains("học") || lowerTitle.contains("study") || 
+            lowerTitle.contains("ôn") || lowerTitle.contains("đọc") ||
+            lowerTitle.contains("nghiên cứu") || lowerTitle.contains("research") ||
+            lowerTitle.contains("luyện") || lowerTitle.contains("practice") ||
+            lowerTitle.contains("code") || lowerTitle.contains("lập trình") ||
+            lowerTitle.contains("làm") || lowerTitle.contains("work") ||
+            lowerTitle.contains("tiếng") || lowerTitle.contains("english") -> "book"
+            
+            // Default - use book for any learning/study task
+            else -> "book"
+        }
+    }
+    
+    /**
+     * Get color for a label based on ScheduleLabel enum
+     */
+    private fun inferColorFromLabel(label: String): String {
+        return when (label) {
+            "wakeup" -> "#FF9800"    // Orange
+            "eat" -> "#FFC107"       // Amber
+            "exercise" -> "#4CAF50"  // Green
+            "rest" -> "#9C27B0"      // Purple
+            "water" -> "#2196F3"     // Blue
+            "book" -> "#3F51B5"      // Indigo
+            "sleep" -> "#607D8B"     // Blue Grey
+            "clean" -> "#00BCD4"     // Cyan
+            "cook" -> "#E91E63"      // Pink
+            "garden" -> "#8BC34A"    // Light Green
+            else -> "#3F51B5"        // Indigo fallback
         }
     }
 }

@@ -144,7 +144,12 @@ data class ScheduledTask(
     /**
      * Duration in minutes
      */
-    val durationMinutes: Int
+    val durationMinutes: Int,
+    
+    /**
+     * Label/category for the task (e.g., "book", "fitness", "code")
+     */
+    val label: String = "star"
 )
 
 /**

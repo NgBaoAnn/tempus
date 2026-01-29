@@ -271,22 +271,20 @@ class SettingsFragment : Fragment() {
 
     private fun showDeleteConfirmationStep2() {
         val editText = EditText(requireContext()).apply {
-            hint = "Nhập XÓA để xác nhận"
+            hint = "Nhập XÁC NHẬN để xác nhận"
             inputType = InputType.TYPE_CLASS_TEXT
             setPadding(50, 30, 50, 30)
         }
 
         AlertDialog.Builder(requireContext())
             .setTitle("🗑️ Xác nhận lần cuối")
-            .setMessage("Nhập \"XÓA\" để xác nhận xóa tất cả dữ liệu:")
+            .setMessage("Nhập \"XÁC NHẬN\" để xác nhận xóa tất cả dữ liệu:")
             .setView(editText)
             .setPositiveButton("Xóa vĩnh viễn") { _, _ ->
                 val input = editText.text.toString().trim()
-                if (input.equals("XÓA", ignoreCase = true) || input.equals(
-                        "XOA",
-                        ignoreCase = true
-                    )
-                ) {
+                if (input.equals("XÁC NHẬN", ignoreCase = true) || 
+                    input.equals("XAC NHAN", ignoreCase = true) ||
+                    input.equals("XACNHAN", ignoreCase = true)) {
                     performDelete()
                 } else {
                     Toast.makeText(

@@ -89,31 +89,67 @@ class DataExportRepository(private val context: Context) {
     }
     
     suspend fun deleteAllData(): Boolean {
-        val userId = getCurrentUserId() ?: return false
+        val userId = getCurrentUserId()
+        if (userId == null) {
+            android.util.Log.e("DataExport", "deleteAllData failed: No user logged in")
+            return false
+        }
         
         try {
-            // 1. Get all schedule IDs
+            android.util.Log.d("DataExport", "Starting data deletion for user: $userId")
+            
+            // ========== 1. DELETE FROM SUPABASE (CLOUD) ==========
+            
+            // 1.1 Get all schedule IDs
             val schedules = supabase.from("schedule")
                 .select { filter { eq("user_id", userId) } }
                 .decodeList<ScheduleRow>()
             
+            android.util.Log.d("DataExport", "Found ${schedules.size} schedules to delete from Supabase")
+            
             val taskIds = schedules.map { it.id }
             
-            // 2. Delete schedule_items first (foreign key)
+            // 1.2 Delete schedule_items first (foreign key)
             if (taskIds.isNotEmpty()) {
+                android.util.Log.d("DataExport", "Deleting schedule_items for ${taskIds.size} tasks")
                 supabase.from("schedule_items")
                     .delete { filter { isIn("task_id", taskIds) } }
             }
             
-            // 3. Delete schedules
+            // 1.3 Delete edited_version (if exists, may have foreign key to schedule)
+            try {
+                android.util.Log.d("DataExport", "Deleting edited_version for ${taskIds.size} tasks")
+                if (taskIds.isNotEmpty()) {
+                    supabase.from("edited_version")
+                        .delete { filter { isIn("schedule_id", taskIds) } }
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("DataExport", "edited_version delete failed (table may not exist): ${e.message}")
+            }
+            
+            // 1.4 Delete schedules from Supabase
+            android.util.Log.d("DataExport", "Deleting schedules for user: $userId")
             supabase.from("schedule")
                 .delete { filter { eq("user_id", userId) } }
             
-            // 4. Save deletion log
+            // ========== 2. DELETE FROM LOCAL ROOM DATABASE ==========
+            android.util.Log.d("DataExport", "Clearing local Room database...")
+            
+            try {
+                val db = com.projectapp.tempus.data.local.TempusDatabase.getDatabase(context)
+                db.scheduleDao().clearAllLocalData()
+                android.util.Log.d("DataExport", "Local Room database cleared successfully")
+            } catch (e: Exception) {
+                android.util.Log.e("DataExport", "Error clearing local Room DB: ${e.message}")
+            }
+            
+            // ========== 3. SAVE DELETION LOG ==========
             saveDeletionLog("User requested data deletion")
             
+            android.util.Log.d("DataExport", "Data deletion completed successfully (Cloud + Local)")
             return true
         } catch (e: Exception) {
+            android.util.Log.e("DataExport", "Error deleting data", e)
             e.printStackTrace()
             return false
         }
