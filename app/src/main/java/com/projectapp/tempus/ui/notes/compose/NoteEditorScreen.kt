@@ -63,7 +63,7 @@ fun NoteEditorScreen(
                 onSaveClick = onSaveClick
             )
         },
-        containerColor = NotesDesignSystem.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -79,9 +79,9 @@ fun NoteEditorScreen(
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                NotesDesignSystem.Primary,
-                                NotesDesignSystem.Accent,
-                                NotesDesignSystem.Primary.copy(alpha = 0.3f)
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                             )
                         )
                     )
@@ -102,10 +102,10 @@ fun NoteEditorScreen(
                     textStyle = TextStyle(
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = NotesDesignSystem.TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         lineHeight = 36.sp
                     ),
-                    cursorBrush = SolidColor(NotesDesignSystem.Primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { innerTextField ->
                         Box {
                             if (title.isEmpty()) {
@@ -113,7 +113,7 @@ fun NoteEditorScreen(
                                     text = "Tiêu đề",
                                     fontSize = 28.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = NotesDesignSystem.TextMuted.copy(alpha = 0.5f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
                             }
                             innerTextField()
@@ -135,13 +135,13 @@ fun NoteEditorScreen(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(NotesDesignSystem.Primary.copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     thickness = 1.dp,
-                    color = NotesDesignSystem.TextMuted.copy(alpha = 0.15f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
                 )
             }
             
@@ -160,17 +160,17 @@ fun NoteEditorScreen(
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = TextStyle(
                         fontSize = 16.sp,
-                        color = NotesDesignSystem.TextPrimary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         lineHeight = 26.sp
                     ),
-                    cursorBrush = SolidColor(NotesDesignSystem.Primary),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { innerTextField ->
                         Box {
                             if (content.isEmpty()) {
                                 Text(
                                     text = "Bắt đầu viết ghi chú...",
                                     fontSize = 16.sp,
-                                    color = NotesDesignSystem.TextMuted.copy(alpha = 0.5f),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                     lineHeight = 26.sp
                                 )
                             }
@@ -220,7 +220,7 @@ private fun EditorTopBar(
                     text = if (isNewNote) "Ghi chú mới" else "Chỉnh sửa",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = NotesDesignSystem.TextPrimary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         },
@@ -231,12 +231,12 @@ private fun EditorTopBar(
                     .padding(8.dp)
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(NotesDesignSystem.SurfaceElevated)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Quay lại",
-                    tint = NotesDesignSystem.TextPrimary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         },
@@ -252,12 +252,12 @@ private fun EditorTopBar(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFFEE2E2))
+                        .background(MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Xóa",
-                        tint = Color(0xFFDC2626),
+                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -272,7 +272,7 @@ private fun EditorTopBar(
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(12.dp),
-                        ambientColor = NotesDesignSystem.Primary.copy(alpha = 0.2f)
+                        ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                     )
             ) {
                 Button(
@@ -283,8 +283,8 @@ private fun EditorTopBar(
                         .animateContentSize(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = NotesDesignSystem.Primary,
-                        disabledContainerColor = NotesDesignSystem.Primary.copy(alpha = 0.7f)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     ),
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
@@ -298,7 +298,7 @@ private fun EditorTopBar(
                         if (saving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(18.dp),
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -334,19 +334,19 @@ private fun ModernDeleteDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(24.dp),
-        containerColor = NotesDesignSystem.Surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         icon = {
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFEE2E2)),
+                    .background(MaterialTheme.colorScheme.errorContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = null,
-                    tint = Color(0xFFDC2626),
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -356,14 +356,14 @@ private fun ModernDeleteDialog(
                 "Xóa ghi chú?",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = NotesDesignSystem.TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
             Text(
                 "Ghi chú này sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác hành động này.",
                 fontSize = 15.sp,
-                color = NotesDesignSystem.TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 22.sp
             )
         },
@@ -372,7 +372,7 @@ private fun ModernDeleteDialog(
                 onClick = onConfirm,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFDC2626)
+                    containerColor = MaterialTheme.colorScheme.error
                 ),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
             ) {
@@ -389,7 +389,7 @@ private fun ModernDeleteDialog(
             ) {
                 Text(
                     "Hủy",
-                    color = NotesDesignSystem.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
                 )
             }

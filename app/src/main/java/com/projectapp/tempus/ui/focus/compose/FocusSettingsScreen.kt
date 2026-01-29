@@ -32,50 +32,7 @@ import com.projectapp.tempus.ui.focus.FocusUiState
 import com.projectapp.tempus.ui.focus.InstalledApp
 
 // ===== DESIGN TOKENS =====
-private object SettingsDesignTokens {
-    // Colors - Light Mode
-    val backgroundDark = Color(0xFFF8FAFC)          // Light gray
-    val backgroundGradientStart = Color(0xFFFFFFFF)  // White
-    val backgroundGradientEnd = Color(0xFFF1F5F9)    // Slate 100
-    
-    val surfaceGlass = Color(0xFF0F172A).copy(alpha = 0.03f)
-    val surfaceGlassElevated = Color(0xFF0F172A).copy(alpha = 0.05f)
-    val borderGlass = Color(0xFF0F172A).copy(alpha = 0.08f)
-    
-    val primaryBlue = Color(0xFF3B82F6)
-    val primaryBlueGlow = Color(0xFF60A5FA)
-    val accentGreen = Color(0xFF10B981)
-    val accentOrange = Color(0xFFF97316)
-    val accentRed = Color(0xFFEF4444)
-    
-    val textPrimary = Color(0xFF0F172A)              // Slate 900
-    val textSecondary = Color(0xFF475569)            // Slate 600
-    val textMuted = Color(0xFF94A3B8)                // Slate 400
-    
-    // Typography
-    val headlineLarge = TextStyle(
-        fontSize = 28.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = (-0.5).sp
-    )
-    val headlineMedium = TextStyle(
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold
-    )
-    val bodyLarge = TextStyle(
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium
-    )
-    val bodyMedium = TextStyle(
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Normal
-    )
-    val labelSmall = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 0.5.sp
-    )
-}
+// SettingsDesignTokens removed in favor of MaterialTheme.colorScheme
 
 /**
  * Premium Focus Mode Settings Screen
@@ -100,9 +57,9 @@ fun FocusSettingsScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        SettingsDesignTokens.backgroundGradientStart,
-                        SettingsDesignTokens.backgroundGradientEnd,
-                        SettingsDesignTokens.backgroundDark
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surfaceContainer
                     )
                 )
             )
@@ -169,8 +126,10 @@ fun FocusSettingsScreen(
                     SectionTitle(text = "Ứng dụng bị chặn")
                     Text(
                         text = "${uiState.blockedApps.size} ứng dụng",
-                        style = SettingsDesignTokens.labelSmall,
-                        color = SettingsDesignTokens.textMuted
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -212,12 +171,12 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(SettingsDesignTokens.surfaceGlass)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Quay lại",
-                tint = SettingsDesignTokens.textPrimary
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
         
@@ -226,13 +185,16 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
         Column {
             Text(
                 text = "Chế độ Tập trung",
-                style = SettingsDesignTokens.headlineLarge,
-                color = SettingsDesignTokens.textPrimary
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Chặn phân tâm, tăng hiệu suất",
-                style = SettingsDesignTokens.bodyMedium,
-                color = SettingsDesignTokens.textMuted
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -268,35 +230,35 @@ private fun StatsCard(
                 value = formatFocusTime(totalMinutes),
                 label = "Thời gian",
                 icon = Icons.Outlined.Timer,
-                color = SettingsDesignTokens.primaryBlue
+                color = MaterialTheme.colorScheme.primary
             )
             
             Box(
                 modifier = Modifier
                     .width(1.dp)
                     .height(48.dp)
-                    .background(SettingsDesignTokens.borderGlass)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             )
             
             StatItem(
                 value = blockedAttempts.toString(),
                 label = "Đã chặn",
                 icon = Icons.Outlined.Block,
-                color = SettingsDesignTokens.accentRed
+                color = MaterialTheme.colorScheme.error
             )
             
             Box(
                 modifier = Modifier
                     .width(1.dp)
                     .height(48.dp)
-                    .background(SettingsDesignTokens.borderGlass)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             )
             
             StatItem(
                 value = if (isEnabled) "BẬT" else "TẮT",
                 label = "Trạng thái",
                 icon = Icons.Outlined.PowerSettingsNew,
-                color = if (isEnabled) SettingsDesignTokens.accentGreen else SettingsDesignTokens.textMuted,
+                color = if (isEnabled) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant, // Green still makes sense as status
                 showPulse = isEnabled,
                 pulseAlpha = glowAlpha
             )
@@ -336,14 +298,17 @@ private fun StatItem(
         
         Text(
             text = value,
-            style = SettingsDesignTokens.headlineMedium,
-            color = SettingsDesignTokens.textPrimary
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         
         Text(
             text = label,
-            style = SettingsDesignTokens.labelSmall,
-            color = SettingsDesignTokens.textMuted
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.5.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -357,7 +322,7 @@ private fun PermissionsCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = SettingsDesignTokens.accentOrange.copy(alpha = 0.3f)
+        borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) // Changed from warning orange to secondary for cleaner look, or maybe warning if critical
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -365,13 +330,13 @@ private fun PermissionsCard(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(SettingsDesignTokens.accentOrange.copy(alpha = 0.2f)),
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Outlined.Warning,
                         contentDescription = null,
-                        tint = SettingsDesignTokens.accentOrange,
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -380,8 +345,9 @@ private fun PermissionsCard(
                 
                 Text(
                     text = "Cần cấp quyền",
-                    style = SettingsDesignTokens.bodyLarge,
-                    color = SettingsDesignTokens.accentOrange
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
             
@@ -420,7 +386,7 @@ private fun PermissionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(SettingsDesignTokens.surfaceGlass)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -428,7 +394,7 @@ private fun PermissionRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = SettingsDesignTokens.textSecondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
         
@@ -437,20 +403,23 @@ private fun PermissionRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = SettingsDesignTokens.bodyMedium,
-                color = SettingsDesignTokens.textPrimary
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = description,
-                style = SettingsDesignTokens.labelSmall,
-                color = SettingsDesignTokens.textMuted
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
         Icon(
             Icons.Outlined.OpenInNew,
             contentDescription = "Mở",
-            tint = SettingsDesignTokens.primaryBlue,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -473,7 +442,7 @@ private fun SettingsCard(
                 description = "Chặn ứng dụng gây phân tâm",
                 checked = focusModeEnabled,
                 onCheckedChange = onToggleFocusMode,
-                accentColor = SettingsDesignTokens.accentGreen
+                accentColor = Color(0xFF10B981) // Keep Green for ON state
             )
             
             SettingsDivider()
@@ -485,7 +454,7 @@ private fun SettingsCard(
                 checked = autoStartWithTimer,
                 onCheckedChange = onToggleAutoStart,
                 enabled = focusModeEnabled,
-                accentColor = SettingsDesignTokens.primaryBlue
+                accentColor = MaterialTheme.colorScheme.primary
             )
             
             SettingsDivider()
@@ -497,7 +466,7 @@ private fun SettingsCard(
                 checked = showOverlay,
                 onCheckedChange = onToggleShowOverlay,
                 enabled = focusModeEnabled,
-                accentColor = SettingsDesignTokens.primaryBlue
+                accentColor = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -526,14 +495,14 @@ private fun SettingToggleRow(
                 .clip(RoundedCornerShape(10.dp))
                 .background(
                     if (checked && enabled) accentColor.copy(alpha = 0.2f)
-                    else SettingsDesignTokens.surfaceGlass
+                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (checked && enabled) accentColor else SettingsDesignTokens.textMuted,
+                tint = if (checked && enabled) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -543,13 +512,16 @@ private fun SettingToggleRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = SettingsDesignTokens.bodyLarge,
-                color = SettingsDesignTokens.textPrimary
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = description,
-                style = SettingsDesignTokens.labelSmall,
-                color = SettingsDesignTokens.textMuted
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
@@ -560,8 +532,8 @@ private fun SettingToggleRow(
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
                 checkedTrackColor = accentColor,
-                uncheckedThumbColor = SettingsDesignTokens.textMuted,
-                uncheckedTrackColor = SettingsDesignTokens.surfaceGlass
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         )
     }
@@ -572,7 +544,7 @@ private fun SettingsDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = 16.dp),
         thickness = 1.dp,
-        color = SettingsDesignTokens.borderGlass
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     )
 }
 
@@ -580,8 +552,9 @@ private fun SettingsDivider() {
 private fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = SettingsDesignTokens.headlineMedium,
-        color = SettingsDesignTokens.textPrimary,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(vertical = 8.dp)
     )
 }
@@ -594,10 +567,10 @@ private fun AddAppButton(onClick: () -> Unit) {
             .clip(RoundedCornerShape(16.dp))
             .border(
                 width = 1.dp,
-                color = SettingsDesignTokens.primaryBlue.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(16.dp)
             )
-            .background(SettingsDesignTokens.primaryBlue.copy(alpha = 0.1f))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             .clickable(onClick = onClick)
             .padding(16.dp),
         horizontalArrangement = Arrangement.Center,
@@ -606,13 +579,14 @@ private fun AddAppButton(onClick: () -> Unit) {
         Icon(
             Icons.Outlined.Add,
             contentDescription = null,
-            tint = SettingsDesignTokens.primaryBlue
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "Thêm ứng dụng cần chặn",
-            style = SettingsDesignTokens.bodyLarge,
-            color = SettingsDesignTokens.primaryBlue
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -630,13 +604,13 @@ private fun EmptyAppsCard() {
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(SettingsDesignTokens.surfaceGlassElevated),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.AppBlocking,
                     contentDescription = null,
-                    tint = SettingsDesignTokens.textMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -645,14 +619,17 @@ private fun EmptyAppsCard() {
             
             Text(
                 text = "Chưa có ứng dụng bị chặn",
-                style = SettingsDesignTokens.bodyLarge,
-                color = SettingsDesignTokens.textSecondary
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Text(
                 text = "Thêm ứng dụng gây phân tâm để tập trung",
-                style = SettingsDesignTokens.labelSmall,
-                color = SettingsDesignTokens.textMuted
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.5.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }
@@ -674,13 +651,13 @@ private fun BlockedAppCard(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(SettingsDesignTokens.accentRed.copy(alpha = 0.15f)),
+                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.Block,
                     contentDescription = null,
-                    tint = SettingsDesignTokens.accentRed,
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -690,15 +667,18 @@ private fun BlockedAppCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = app.appName,
-                    style = SettingsDesignTokens.bodyLarge,
-                    color = SettingsDesignTokens.textPrimary,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = app.packageName.split(".").lastOrNull() ?: "",
-                    style = SettingsDesignTokens.labelSmall,
-                    color = SettingsDesignTokens.textMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 0.5.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -709,12 +689,12 @@ private fun BlockedAppCard(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(SettingsDesignTokens.surfaceGlass)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             ) {
                 Icon(
                     Icons.Outlined.Close,
                     contentDescription = "Xoá",
-                    tint = SettingsDesignTokens.textMuted,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -727,7 +707,7 @@ private fun BlockedAppCard(
 @Composable
 private fun GlassCard(
     modifier: Modifier = Modifier,
-    borderColor: Color = SettingsDesignTokens.borderGlass,
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -738,7 +718,7 @@ private fun GlassCard(
                 color = borderColor,
                 shape = RoundedCornerShape(20.dp)
             ),
-        color = SettingsDesignTokens.surfaceGlass,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), // Semi-transparent surface
         shape = RoundedCornerShape(20.dp)
     ) {
         content()

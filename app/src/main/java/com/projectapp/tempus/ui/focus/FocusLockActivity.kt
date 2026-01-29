@@ -45,62 +45,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 // ===== DESIGN TOKENS =====
-private object FocusDesignTokens {
-    // Colors - Light Mode
-    val backgroundDark = Color(0xFFF8FAFC)          // Light gray
-    val backgroundGradientStart = Color(0xFFFFFFFF)  // White
-    val backgroundGradientEnd = Color(0xFFF1F5F9)    // Slate 100
-    
-    val surfaceGlass = Color(0xFF0F172A).copy(alpha = 0.03f)
-    val surfaceGlassElevated = Color(0xFF0F172A).copy(alpha = 0.05f)
-    val borderGlass = Color(0xFF0F172A).copy(alpha = 0.08f)
-    
-    val primaryBlue = Color(0xFF3B82F6)
-    val primaryBlueGlow = Color(0xFF60A5FA)
-    val accentOrange = Color(0xFFF97316)
-    val accentGreen = Color(0xFF10B981)
-    val accentRed = Color(0xFFEF4444)
-    
-    val textPrimary = Color(0xFF0F172A)              // Slate 900
-    val textSecondary = Color(0xFF475569)            // Slate 600
-    val textMuted = Color(0xFF94A3B8)                // Slate 400
-    
-    // Typography
-    val displayLarge = TextStyle(
-        fontSize = 64.sp,
-        fontWeight = FontWeight.Light,
-        letterSpacing = (-2).sp
-    )
-    val headlineMedium = TextStyle(
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 1.sp
-    )
-    val bodyMedium = TextStyle(
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Normal,
-        letterSpacing = 0.sp
-    )
-    val labelSmall = TextStyle(
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Medium,
-        letterSpacing = 2.sp
-    )
-    
-    // Spacing
-    val spacingXs = 4.dp
-    val spacingSm = 8.dp
-    val spacingMd = 16.dp
-    val spacingLg = 24.dp
-    val spacingXl = 32.dp
-    val spacing2Xl = 48.dp
-    val spacing3Xl = 64.dp
-    
-    // Animation
-    const val animDurationFast = 150
-    const val animDurationMedium = 300
-    const val animDurationSlow = 600
-}
+// FocusDesignTokens removed in favor of MaterialTheme.colorScheme
 
 /**
  * Premium Focus Lock Activity with modern design
@@ -136,7 +81,7 @@ class FocusLockActivity : ComponentActivity() {
     
     private var remainingSeconds by mutableLongStateOf(0L)
     private var totalSeconds by mutableLongStateOf(0L)
-    private var timerColor by mutableStateOf(FocusDesignTokens.primaryBlue)
+    private var timerColor by mutableStateOf(Color(0xFF3B82F6)) // Default Blue
     private var showUnlockDialog by mutableStateOf(false)
     
     private var countDownTimer: CountDownTimer? = null
@@ -225,9 +170,9 @@ fun PremiumFocusLockScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        FocusDesignTokens.backgroundGradientStart,
-                        FocusDesignTokens.backgroundGradientEnd,
-                        FocusDesignTokens.backgroundDark
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surfaceContainer
                     )
                 )
             ),
@@ -242,12 +187,12 @@ fun PremiumFocusLockScreen(
         // Main content
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(FocusDesignTokens.spacingXl)
+            modifier = Modifier.padding(32.dp)
         ) {
             // Status badge
             StatusBadge()
             
-            Spacer(modifier = Modifier.height(FocusDesignTokens.spacing2Xl))
+            Spacer(modifier = Modifier.height(48.dp))
             
             // Timer display
             AnimatedTimerRing(
@@ -255,18 +200,20 @@ fun PremiumFocusLockScreen(
                 remainingSeconds = remainingSeconds
             )
             
-            Spacer(modifier = Modifier.height(FocusDesignTokens.spacing2Xl))
+            Spacer(modifier = Modifier.height(48.dp))
             
             // Motivational message
             MotivationalSection(progress = progress)
             
-            Spacer(modifier = Modifier.height(FocusDesignTokens.spacing3Xl))
+            Spacer(modifier = Modifier.height(64.dp))
             
             // Unlock hint
             Text(
                 text = "NHẤN BACK ĐỂ MỞ KHOÁ",
-                style = FocusDesignTokens.labelSmall,
-                color = FocusDesignTokens.textMuted
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 2.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
         
@@ -299,10 +246,10 @@ private fun StatusBadge() {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(FocusDesignTokens.surfaceGlass)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             .border(
                 width = 1.dp,
-                color = FocusDesignTokens.borderGlass,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(24.dp)
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -312,7 +259,7 @@ private fun StatusBadge() {
             modifier = Modifier
                 .size(8.dp)
                 .alpha(pulseAlpha)
-                .background(FocusDesignTokens.accentGreen, CircleShape)
+                .background(Color(0xFF10B981), CircleShape)
         )
         
         Spacer(modifier = Modifier.width(12.dp))
@@ -320,7 +267,7 @@ private fun StatusBadge() {
         Icon(
             imageVector = Icons.Outlined.Lock,
             contentDescription = null,
-            tint = FocusDesignTokens.textPrimary,
+            tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(16.dp)
         )
         
@@ -328,8 +275,10 @@ private fun StatusBadge() {
         
         Text(
             text = "FOCUS MODE",
-            style = FocusDesignTokens.labelSmall,
-            color = FocusDesignTokens.textPrimary
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 2.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -361,6 +310,10 @@ private fun AnimatedTimerRing(
         label = "rotation"
     )
     
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val mutedColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(300.dp)
@@ -372,7 +325,7 @@ private fun AnimatedTimerRing(
                 .blur(40.dp)
         ) {
             drawCircle(
-                color = FocusDesignTokens.primaryBlue.copy(alpha = glowIntensity * 0.5f),
+                color = primaryColor.copy(alpha = glowIntensity * 0.5f),
                 radius = size.minDimension / 2.5f
             )
         }
@@ -390,9 +343,9 @@ private fun AnimatedTimerRing(
                 
                 drawCircle(
                     color = if (dotProgress <= progress)
-                        FocusDesignTokens.primaryBlue.copy(alpha = 0.6f)
+                        primaryColor.copy(alpha = 0.6f)
                     else
-                        FocusDesignTokens.textMuted.copy(alpha = 0.2f),
+                        mutedColor.copy(alpha = 0.2f),
                     radius = 2f,
                     center = Offset(x, y)
                 )
@@ -406,7 +359,7 @@ private fun AnimatedTimerRing(
             
             // Track
             drawCircle(
-                color = FocusDesignTokens.surfaceGlass,
+                color = surfaceColor.copy(alpha = 0.1f),
                 radius = radius,
                 style = Stroke(width = strokeWidth)
             )
@@ -415,9 +368,9 @@ private fun AnimatedTimerRing(
             drawArc(
                 brush = Brush.sweepGradient(
                     colors = listOf(
-                        FocusDesignTokens.primaryBlue,
-                        FocusDesignTokens.primaryBlueGlow,
-                        FocusDesignTokens.primaryBlue
+                        primaryColor,
+                        primaryColor.copy(alpha = 0.8f),
+                        primaryColor
                     )
                 ),
                 startAngle = -90f,
@@ -440,10 +393,10 @@ private fun AnimatedTimerRing(
             modifier = Modifier
                 .size(200.dp)
                 .clip(CircleShape)
-                .background(FocusDesignTokens.surfaceGlassElevated)
+                .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.5f))
                 .border(
                     width = 1.dp,
-                    color = FocusDesignTokens.borderGlass,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                     shape = CircleShape
                 ),
             contentAlignment = Alignment.Center
@@ -451,14 +404,18 @@ private fun AnimatedTimerRing(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = formatTime(remainingSeconds),
-                    style = FocusDesignTokens.displayLarge,
-                    color = FocusDesignTokens.textPrimary
+                    fontSize = 64.sp,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = (-2).sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
                     text = "remaining",
-                    style = FocusDesignTokens.bodyMedium,
-                    color = FocusDesignTokens.textMuted
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -472,17 +429,21 @@ private fun MotivationalSection(progress: Float) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = message,
-            style = FocusDesignTokens.headlineMedium,
-            color = FocusDesignTokens.textPrimary,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.sp,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
         
-        Spacer(modifier = Modifier.height(FocusDesignTokens.spacingSm))
+        Spacer(modifier = Modifier.height(8.dp))
         
         Text(
             text = subMessage,
-            style = FocusDesignTokens.bodyMedium,
-            color = FocusDesignTokens.textSecondary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }
@@ -502,12 +463,15 @@ private fun AmbientGlowBackground() {
         label = "offset1"
     )
     
+    val color1 = MaterialTheme.colorScheme.primary
+    val color2 = MaterialTheme.colorScheme.tertiary
+    
     Canvas(modifier = Modifier.fillMaxSize()) {
         // Top-left glow
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    FocusDesignTokens.primaryBlue.copy(alpha = 0.15f),
+                    color1.copy(alpha = 0.15f),
                     Color.Transparent
                 ),
                 center = Offset(size.width * 0.2f, size.height * 0.2f + offset1),
@@ -521,7 +485,7 @@ private fun AmbientGlowBackground() {
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    FocusDesignTokens.accentGreen.copy(alpha = 0.1f),
+                    color2.copy(alpha = 0.1f),
                     Color.Transparent
                 ),
                 center = Offset(size.width * 0.8f, size.height * 0.7f - offset1 * 0.5f),
@@ -559,13 +523,15 @@ private fun FloatingParticles() {
         label = "time"
     )
     
+    val particleColor = MaterialTheme.colorScheme.primary
+    
     Canvas(modifier = Modifier.fillMaxSize()) {
         particles.forEach { p ->
             val y = (p.y + time * p.speed) % size.height
             val x = (p.x + sin(time * 0.01f + p.y * 0.01f) * 20) % size.width
             
             drawCircle(
-                color = Color(0xFF3B82F6).copy(alpha = p.opacity * 0.5f),
+                color = particleColor.copy(alpha = p.opacity * 0.5f),
                 radius = p.size,
                 center = Offset(x, y)
             )
@@ -580,20 +546,20 @@ private fun PremiumUnlockDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = FocusDesignTokens.backgroundGradientEnd,
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(24.dp),
         icon = {
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(FocusDesignTokens.accentOrange.copy(alpha = 0.2f)),
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.Warning,
                     contentDescription = null,
-                    tint = FocusDesignTokens.accentOrange,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -601,8 +567,10 @@ private fun PremiumUnlockDialog(
         title = {
             Text(
                 "Kết thúc phiên tập trung?",
-                color = FocusDesignTokens.textPrimary,
-                style = FocusDesignTokens.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -610,8 +578,9 @@ private fun PremiumUnlockDialog(
         text = {
             Text(
                 "Bạn đang làm rất tốt! Bạn có chắc muốn mở khoá ngay bây giờ?",
-                color = FocusDesignTokens.textSecondary,
-                style = FocusDesignTokens.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center
             )
         },
@@ -619,7 +588,7 @@ private fun PremiumUnlockDialog(
             TextButton(onClick = onConfirm) {
                 Text(
                     "Kết thúc",
-                    color = FocusDesignTokens.accentRed,
+                    color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -628,7 +597,7 @@ private fun PremiumUnlockDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = FocusDesignTokens.primaryBlue
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
