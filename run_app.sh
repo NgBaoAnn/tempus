@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Uninstall old app if exists
+echo "Removing old app installation..."
+adb uninstall com.projectapp.tempus
+
 # Build and install the Debug APK
 echo "Building and installing Debug APK..."
 ./gradlew installDebug
