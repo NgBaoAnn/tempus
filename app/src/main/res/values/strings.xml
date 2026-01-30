@@ -130,8 +130,10 @@
     <string name="ai_ready">Sẵn sàng hỗ trợ</string>
     <string name="ai_name">Tiramisu AI</string>
     <string name="ai_clear_chat">Xóa cuộc trò chuyện</string>
-    <string name="ai_mode_ask">Chế độ Ask</string>
-    <string name="ai_mode_agent">Chế độ Agent</string>
+    <string name="ai_new_chat">Cuộc trò chuyện mới</string>
+    <string name="ai_history">Lịch sử trò chuyện</string>
+    <string name="ai_mode_ask">Ask</string>
+    <string name="ai_mode_agent">Agent</string>
     <string name="ai_mode_planner">Life Planner</string>
     <string name="ai_desc_ask">Hỏi đáp, tư vấn về quản lý thời gian.\nKhông thực hiện hành động.</string>
     <string name="ai_desc_agent">Yêu cầu tạo, sửa, xóa lịch.\nXem trước và xác nhận trước khi thực hiện.</string>
@@ -146,6 +148,18 @@
     <string name="ai_analyzing_plan">Đang phân tích mục tiêu và tạo kế hoạch...</string>
     <string name="ai_creating_schedule">Đang tạo lịch từ kế hoạch...</string>
     <string name="ai_avatar_description">AI Avatar</string>
+    
+    <!-- AI History -->
+    <string name="ai_history_title">Lịch sử chat</string>
+    <string name="ai_history_clear_all">Xóa tất cả</string>
+    <string name="ai_history_empty">Chưa có lịch sử chat</string>
+    <string name="ai_history_empty_hint">Bắt đầu trò chuyện với Tiramisu AI!</string>
+    <string name="ai_history_messages">tin nhắn</string>
+    <string name="ai_history_continue">Tiếp tục</string>
+    <string name="ai_history_delete_title">Xóa cuộc hội thoại?</string>
+    <string name="ai_history_delete_message">Bạn có chắc muốn xóa cuộc hội thoại này?</string>
+    <string name="ai_history_today">Hôm nay</string>
+    <string name="ai_history_yesterday">Hôm qua</string>
 
     <!-- Garden -->
     <string name="garden_title">Khu vườn của tôi</string>
@@ -391,6 +405,8 @@
     <string name="profile_name_label">Tên của bạn</string>
     <string name="action_save">Lưu</string>
     <string name="action_cancel">Hủy</string>
+    <string name="action_close">Đóng</string>
+    <string name="action_delete">Xóa</string>
     <string name="profile_change_avatar">Đổi ảnh</string>
     <string name="action_edit">Chỉnh sửa</string>
     <string name="action_back">Quay lại</string>
