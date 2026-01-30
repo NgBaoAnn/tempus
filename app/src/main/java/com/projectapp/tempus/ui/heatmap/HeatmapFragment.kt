@@ -24,7 +24,7 @@ import androidx.navigation.navOptions
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.projectapp.tempus.R
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
-import com.projectapp.tempus.data.schedule.SupabaseScheduleRepository
+import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.ui.heatmap.compose.DayDetailSheet
 import com.projectapp.tempus.ui.heatmap.compose.HeatmapCalendarScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
@@ -42,7 +42,7 @@ class HeatmapFragment : Fragment() {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id ?: ""
-                val repo = SupabaseScheduleRepository()
+                val repo = RepositoryProvider.getScheduleRepository(requireContext())
                 @Suppress("UNCHECKED_CAST")
                 return HeatmapViewModel(userId, repo) as T
             }
