@@ -3,7 +3,7 @@ package com.projectapp.tempus.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-//import android.content.Intent
+
 import android.util.Log
 import com.projectapp.tempus.util.TimerEventBus
 
@@ -15,7 +15,7 @@ class TimerActionReceiver : BroadcastReceiver() {
         const val ACTION_RESUME = "com.projectapp.tempus.TIMER_RESUME"
         const val ACTION_STOP = "com.projectapp.tempus.TIMER_STOP"
         
-        // Broadcasts to send to TimerFragment
+        
         const val BROADCAST_PAUSE_TIMER = "com.projectapp.tempus.BROADCAST_PAUSE_TIMER"
         const val BROADCAST_RESUME_TIMER = "com.projectapp.tempus.BROADCAST_RESUME_TIMER"
         const val BROADCAST_STOP_TIMER = "com.projectapp.tempus.BROADCAST_STOP_TIMER"

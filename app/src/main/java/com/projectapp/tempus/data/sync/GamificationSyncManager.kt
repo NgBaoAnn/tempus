@@ -8,10 +8,7 @@ import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 import kotlinx.coroutines.flow.first
 
-/**
- * Sync Manager cho Gamification data (points, trees, history)
- * Push local Room data lên Supabase khi logout
- */
+
 class GamificationSyncManager(
     private val localRepo: LocalGamificationRepository,
     private val remoteRepo: SupabaseGamificationRepository
@@ -20,17 +17,14 @@ class GamificationSyncManager(
         private const val TAG = "GamificationSync"
     }
     
-    /**
-     * Push tất cả gamification data từ Room lên Supabase
-     * Gọi trước khi logout
-     */
+    
     suspend fun pushToServer(): Result<GamificationSyncResult> {
         return try {
             var pointsSynced = false
             var treesSynced = 0
             var historySynced = 0
             
-            // 1. Sync User Points
+            
             val localPoints = localRepo.getUserPointsOnce()
             if (localPoints != null) {
                 try {
@@ -42,7 +36,7 @@ class GamificationSyncManager(
                 }
             }
             
-            // 2. Sync Trees using upsert to avoid duplicate key errors
+            
             val localTrees = localRepo.getAliveTrees().first()
             for (tree in localTrees) {
                 try {
@@ -54,14 +48,14 @@ class GamificationSyncManager(
                 }
             }
             
-            // 3. Sync Point History (last 50 records)
+            
             val localHistory = localRepo.getPointHistory().first()
             for (history in localHistory.take(50)) {
                 try {
                     remoteRepo.addPointHistory(history)
                     historySynced++
                 } catch (e: Exception) {
-                    // Ignore duplicate errors
+                    
                     Log.d(TAG, "Point history may already exist: ${history.id}")
                 }
             }
@@ -81,10 +75,7 @@ class GamificationSyncManager(
         }
     }
     
-    /**
-     * Pull gamification data từ Supabase về Room
-     * Gọi sau khi login
-     */
+    
     suspend fun pullFromServer(): Result<GamificationSyncResult> {
         return try {
             var pointsSynced = false
@@ -92,7 +83,7 @@ class GamificationSyncManager(
             
             Log.d(TAG, "=== GAMIFICATION PULL START ===")
             
-            // 1. Pull User Points
+            
             Log.d(TAG, "Fetching user points from Supabase...")
             val serverPoints = remoteRepo.getUserPointsOnce()
             Log.d(TAG, "Server points: ${serverPoints?.totalPoints ?: "null"}")
@@ -103,14 +94,14 @@ class GamificationSyncManager(
                 pointsSynced = true
                 Log.d(TAG, "Pulled user points: ${serverPoints.totalPoints}")
                 
-                // Verify saved
+                
                 val savedPoints = localRepo.getUserPointsOnce()
                 Log.d(TAG, "Verification - Room now has: ${savedPoints?.totalPoints ?: "null"}")
             } else {
                 Log.d(TAG, "No user points found on server")
             }
             
-            // 2. Pull Trees
+            
             Log.d(TAG, "Fetching trees from Supabase...")
             val serverTrees = remoteRepo.getAliveTreesOnce()
             Log.d(TAG, "Found ${serverTrees.size} trees on server")
@@ -131,10 +122,37 @@ class GamificationSyncManager(
                 }
             }
             
+            
+            Log.d(TAG, "Fetching point history from Supabase...")
+            var historySynced = 0
+            try {
+                val serverHistory = remoteRepo.getPointHistoryOnce()
+                Log.d(TAG, "Found ${serverHistory.size} history records on server")
+                
+                if (serverHistory.isNotEmpty()) {
+                    
+                    localRepo.clearPointHistory()
+                    Log.d(TAG, "Cleared local point history")
+                    
+                    
+                    for (history in serverHistory) {
+                        try {
+                            localRepo.insertPointHistoryWithReplace(history)
+                            historySynced++
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to insert history ${history.id}", e)
+                        }
+                    }
+                    Log.d(TAG, "Inserted $historySynced history records")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to pull point history", e)
+            }
+            
             val result = GamificationSyncResult(
                 pointsSynced = pointsSynced,
                 treesSynced = treesSynced,
-                historySynced = 0
+                historySynced = historySynced
             )
             
             Log.d(TAG, "=== GAMIFICATION PULL COMPLETED: $result ===")
@@ -147,9 +165,7 @@ class GamificationSyncManager(
     }
 }
 
-/**
- * Kết quả sync gamification
- */
+
 data class GamificationSyncResult(
     val pointsSynced: Boolean,
     val treesSynced: Int,

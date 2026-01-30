@@ -27,7 +27,7 @@ class SyncScheduleWorker(
                 return Result.success()
             }
 
-            // Fetch schedules for the user
+            
             val schedules = supabase.from("schedule")
                 .select { 
                     filter { 
@@ -38,7 +38,7 @@ class SyncScheduleWorker(
 
             Log.d("SyncScheduleWorker", "Fetched ${schedules.size} schedules")
 
-            // Schedule alarms for each item
+            
             schedules.forEach { schedule ->
                 val endDateTime = calculateEndTime(schedule.startTimeDate, schedule.implementationTime)
                 reminderScheduler.scheduleReminder(
@@ -59,7 +59,7 @@ class SyncScheduleWorker(
     private fun calculateEndTime(startIso: String, durationStr: String): String {
         return try {
             val start = java.time.LocalDateTime.parse(startIso, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
-            // durationStr format "HH:mm:ss"
+            
             val parts = durationStr.split(":")
             val h = parts.getOrNull(0)?.toLongOrNull() ?: 0
             val m = parts.getOrNull(1)?.toLongOrNull() ?: 0

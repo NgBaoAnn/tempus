@@ -21,10 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.data.sync.SyncState
 
-/**
- * Sync Status Button Component
- * Hiển thị trạng thái sync và số lượng pending changes
- */
+
 @Composable
 fun SyncButton(
     syncState: SyncState,
@@ -36,7 +33,7 @@ fun SyncButton(
     val hasError = syncState.error != null
     
     Box(modifier = modifier) {
-        // Main button
+        
         FloatingActionButton(
             onClick = { if (!isSyncing) onSyncClick() },
             containerColor = when {
@@ -69,7 +66,7 @@ fun SyncButton(
             }
         }
         
-        // Badge for pending count
+        
         AnimatedVisibility(
             visible = pendingCount > 0 && !isSyncing,
             enter = scaleIn() + fadeIn(),
@@ -91,9 +88,7 @@ fun SyncButton(
     }
 }
 
-/**
- * Sync Status Bar - hiển thị progress khi đang sync
- */
+
 @Composable
 fun SyncProgressBar(
     syncState: SyncState,
@@ -145,9 +140,7 @@ fun SyncProgressBar(
     }
 }
 
-/**
- * Sync Error Snackbar Content
- */
+
 @Composable
 fun SyncErrorMessage(
     error: String?,
@@ -176,9 +169,7 @@ fun SyncErrorMessage(
     }
 }
 
-/**
- * Last Sync Time Indicator
- */
+
 @Composable
 fun LastSyncIndicator(
     lastSyncTime: Long?,

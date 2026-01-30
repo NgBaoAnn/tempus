@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.Locale
 
-/**
- * Manager for Android Speech-to-Text recognition
- */
+
 class SpeechRecognitionManager(private val context: Context) {
     
     companion object {
@@ -23,18 +21,14 @@ class SpeechRecognitionManager(private val context: Context) {
     
     private var speechRecognizer: SpeechRecognizer? = null
     
-    /**
-     * Check if speech recognition is available
-     */
+    
     fun isAvailable(): Boolean {
         val available = SpeechRecognizer.isRecognitionAvailable(context)
         Log.d(TAG, "isAvailable: $available")
         return available
     }
     
-    /**
-     * Start listening and return results as Flow
-     */
+    
     fun startListening(): Flow<SpeechResult> = callbackFlow {
         Log.d(TAG, "startListening called")
         
@@ -50,7 +44,7 @@ class SpeechRecognitionManager(private val context: Context) {
         
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN") // Vietnamese
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN") 
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "vi-VN")
             putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "vi-VN")
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
@@ -70,7 +64,7 @@ class SpeechRecognitionManager(private val context: Context) {
             }
             
             override fun onRmsChanged(rmsdB: Float) {
-                // Don't log this - it fires too frequently
+                
                 trySend(SpeechResult.RmsChanged(rmsdB))
             }
             
@@ -132,9 +126,7 @@ class SpeechRecognitionManager(private val context: Context) {
         }
     }
     
-    /**
-     * Stop listening
-     */
+    
     fun stopListening() {
         speechRecognizer?.stopListening()
         speechRecognizer?.destroy()
@@ -142,9 +134,7 @@ class SpeechRecognitionManager(private val context: Context) {
     }
 }
 
-/**
- * Speech recognition result states
- */
+
 sealed class SpeechResult {
     object Listening : SpeechResult()
     object Speaking : SpeechResult()

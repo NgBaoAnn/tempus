@@ -706,4 +706,165 @@
 | Settings | UC48-UC55 |
 | Voice | UC56 |
 | Statistics | UC57 |
+| Heatmap | UC64-UC65 |
+| Sync & Background | UC66-UC69 |
+| Notification | UC70-UC71 |
+| System (Auto) | UC58-UC63 |
+
+---
+
+## 📈 HEATMAP (Bổ sung mới)
+
+### UC64: Xem Heatmap năng suất
+- **Mô tả:** Xem heatmap hiển thị mức độ năng suất theo ngày trong tháng
+- **Pre-condition:** Đăng nhập
+- **Main flow:**
+  1. User mở Statistics → nhấn Heatmap
+  2. Hiển thị lưới ngày theo tháng
+  3. Màu sắc thể hiện mức độ năng suất (xanh nhạt → xanh đậm)
+  4. User có thể vuốt để xem các tháng khác
+- **Post-condition:** Heatmap hiển thị
+
+### UC65: Xem chi tiết ngày từ Heatmap
+- **Mô tả:** Nhấn vào ngày trên heatmap để xem chi tiết
+- **Pre-condition:** Đang xem Heatmap
+- **Main flow:**
+  1. User tap vào một ngày trên heatmap
+  2. Chuyển đến EditScheduleFragment với ngày đó
+  3. Hiển thị các task trong ngày
+- **Post-condition:** Chi tiết ngày hiển thị
+
+---
+
+## 🔄 SYNC & BACKGROUND (Bổ sung mới)
+
+### UC66: Đồng bộ dữ liệu khi đăng nhập
+- **Mô tả:** Pull dữ liệu từ Supabase về Room sau khi login
+- **Pre-condition:** Đăng nhập thành công
+- **Main flow:**
+  1. User đăng nhập thành công
+  2. System pull schedules từ Supabase
+  3. System pull user_points từ Supabase
+  4. System pull trees từ Supabase
+  5. System pull point_history từ Supabase
+  6. System pull notes từ Supabase
+  7. Dữ liệu được lưu vào Room database
+- **Post-condition:** Dữ liệu local được đồng bộ với server
+
+### UC67: Đồng bộ dữ liệu khi đăng xuất
+- **Mô tả:** Push dữ liệu từ Room lên Supabase trước khi logout
+- **Pre-condition:** User thực hiện đăng xuất
+- **Main flow:**
+  1. User nhấn Đăng xuất
+  2. System push schedules lên Supabase
+  3. System push gamification data lên Supabase
+  4. System xóa session local
+  5. Chuyển về LoginActivity
+- **Post-condition:** Dữ liệu được backup lên server
+
+### UC68: Đồng bộ thủ công
+- **Mô tả:** User kích hoạt sync thủ công từ Settings
+- **Pre-condition:** Đăng nhập, có kết nối mạng
+- **Main flow:**
+  1. User mở Settings → Data & Sync
+  2. Nhấn "Sync Now"
+  3. Hiển thị progress indicator
+  4. Pull và Push dữ liệu
+  5. Hiển thị kết quả sync
+- **Post-condition:** Dữ liệu được đồng bộ 2 chiều
+
+### UC69: Đồng bộ nền tự động (WorkManager)
+- **Mô tả:** System tự động sync dữ liệu định kỳ
+- **Pre-condition:** App được cài đặt, có kết nối mạng
+- **Main flow:**
+  1. WorkManager trigger SyncScheduleWorker
+  2. Kiểm tra kết nối mạng
+  3. Sync schedules với Supabase
+  4. Ghi log kết quả
+- **Post-condition:** Dữ liệu được đồng bộ tự động
+
+---
+
+## 🔔 NOTIFICATION (Bổ sung mới)
+
+### UC70: Thông báo hoàn thành Pomodoro
+- **Mô tả:** Gửi notification khi phiên Pomodoro kết thúc
+- **Pre-condition:** Timer về 0
+- **Main flow:**
+  1. Timer đếm ngược về 0
+  2. System tạo notification với âm thanh/rung
+  3. Hiển thị thông báo "Phiên tập trung hoàn thành!"
+  4. User có thể tap để mở app
+- **Post-condition:** Notification hiển thị
+
+### UC71: Thông báo nhắc nhở công việc
+- **Mô tả:** Gửi notification nhắc nhở trước khi task bắt đầu
+- **Pre-condition:** Task có reminder được bật
+- **Main flow:**
+  1. AlarmManager trigger ReminderReceiver
+  2. System tạo notification với thông tin task
+  3. Hiển thị thông báo nhắc nhở
+  4. User có thể tap để xem chi tiết task
+- **Post-condition:** Reminder notification hiển thị
+
+---
+
+## 🔐 AUTHENTICATION (Bổ sung)
+
+### UC72: Đăng nhập Google
+- **Mô tả:** Đăng nhập bằng tài khoản Google OAuth
+- **Pre-condition:** Có tài khoản Google
+- **Main flow:**
+  1. Guest nhấn "Đăng nhập với Google"
+  2. Mở Google Sign-In flow
+  3. User chọn tài khoản Google
+  4. System xác thực với Supabase qua OAuth
+  5. Đăng nhập thành công, sync dữ liệu
+- **Alternative flow:**
+  - 3a. User hủy → Quay về màn hình Login
+  - 4a. OAuth thất bại → Hiển thị lỗi
+- **Post-condition:** User đăng nhập, dữ liệu được sync
+
+### UC73: Xác thực OTP reset password
+- **Mô tả:** Nhập mã OTP để xác thực reset password
+- **Pre-condition:** Đã gửi email reset password
+- **Main flow:**
+  1. User nhận email chứa OTP
+  2. Mở VerifyOtpActivity
+  3. Nhập mã OTP 6 số
+  4. System xác thực OTP với Supabase
+  5. Chuyển sang màn hình đặt mật khẩu mới
+- **Alternative flow:**
+  - 4a. OTP sai → Hiển thị lỗi, cho phép nhập lại
+  - 4b. OTP hết hạn → Yêu cầu gửi lại
+- **Post-condition:** OTP xác thực thành công
+
+---
+
+## 📊 Tóm Tắt
+
+| Actor | Số Use Cases |
+|-------|--------------|
+| Guest | 6 |
+| User | 60 |
+| System | 7 |
+| **Tổng** | **73** |
+
+### Phân loại theo Module
+
+| Module | Use Cases |
+|--------|-----------|
+| Authentication | UC01-UC05, UC72-UC73 |
+| Timer & Focus | UC06-UC12 |
+| Timeline & Schedule | UC13-UC21 |
+| Gamification | UC22-UC27 |
+| AI Chat | UC28-UC32 |
+| Notes | UC33-UC38 |
+| Social | UC39-UC47 |
+| Settings | UC48-UC55 |
+| Voice | UC56 |
+| Statistics | UC57 |
+| Heatmap | UC64-UC65 |
+| Sync & Background | UC66-UC69 |
+| Notification | UC70-UC71 |
 | System (Auto) | UC58-UC63 |

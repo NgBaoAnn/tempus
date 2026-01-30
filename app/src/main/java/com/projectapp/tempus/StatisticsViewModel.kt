@@ -34,7 +34,7 @@ class StatisticsViewModel(
     private val _uiState = MutableStateFlow<StatisticsUiState>(StatisticsUiState.Loading)
     val uiState: StateFlow<StatisticsUiState> = _uiState
 
-    // Compose UI data
+    
     private val _composeUiData = MutableStateFlow(StatisticsUiData())
     val composeUiData: StateFlow<StatisticsUiData> = _composeUiData
 
@@ -49,12 +49,12 @@ class StatisticsViewModel(
         isWeekMode = isWeek
         val today = LocalDate.now()
         if (isWeek) {
-            // Bắt đầu từ Thứ 2 của tuần này
+            
             val start = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
             val end = start.plusDays(6)
             loadStatistics(start, end)
         } else {
-            // Bắt đầu từ ngày 1 của tháng này
+            
             val start = today.withDayOfMonth(1)
             val end = today.withDayOfMonth(today.lengthOfMonth())
             loadStatistics(start, end)
@@ -73,7 +73,7 @@ class StatisticsViewModel(
                 val schedules = repository.getAllSchedules(userId)
                 val taskIds = schedules.map { it.id }
                 
-                // Lấy các item trong khoảng thời gian
+                
                 val items = if (taskIds.isNotEmpty()) {
                     repository.getScheduleItemsByRange(
                         startDate.toString(),
@@ -85,10 +85,10 @@ class StatisticsViewModel(
                 val result = getStatisticsUseCase.execute(startDate, endDate, schedules, items)
                 _uiState.value = StatisticsUiState.Success(result, startDate, endDate)
                 
-                // Update Compose UI data
+                
                 val rangeLabel = formatRangeLabel(startDate, endDate, isWeekMode)
                 
-                // Get Pomodoro stats
+                
                 val (pomodoroCount, pomodoroMinutes) = getPomodoroStats(startDate, endDate)
                 
                 _composeUiData.value = StatisticsUiData(
@@ -125,14 +125,14 @@ class StatisticsViewModel(
             Log.d("StatisticsVM", "Total point history entries: ${history.size}")
             Log.d("StatisticsVM", "All reasons: ${history.map { it.reason }.distinct()}")
             
-            // Use system timezone instead of UTC for correct local time comparison
+            
             val zone = java.time.ZoneId.systemDefault()
             val startMillis = startDate.atStartOfDay(zone).toInstant().toEpochMilli()
             val endMillis = endDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
             
             Log.d("StatisticsVM", "Time range: startMillis=$startMillis, endMillis=$endMillis")
             
-            // Filter Pomodoro entries - saved as "POMODORO_25m" format
+            
             val pomodoroHistory = history.filter { entry ->
                 val isPomodoro = entry.reason.startsWith("POMODORO_")
                 val inRange = entry.timestamp >= startMillis && entry.timestamp < endMillis
@@ -144,10 +144,10 @@ class StatisticsViewModel(
             
             val count = pomodoroHistory.size
             
-            // Extract actual minutes from each entry (e.g., "POMODORO_25m" -> 25)
+            
             val minutes = pomodoroHistory.sumOf { entry ->
                 val minutesStr = entry.reason.removePrefix("POMODORO_").removeSuffix("m")
-                minutesStr.toIntOrNull() ?: 0 // Default to 0 if parsing fails (not 25)
+                minutesStr.toIntOrNull() ?: 0 
             }
             
             Log.d("StatisticsVM", "Pomodoro stats: count=$count, minutes=$minutes (range: $startDate to $endDate)")

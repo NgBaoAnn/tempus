@@ -4,9 +4,7 @@ import com.projectapp.tempus.data.social.repository.RelationshipStatus
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * DTO đại diện cho User Profile đầy đủ
- */
+
 @Serializable
 data class UserProfileDto(
     val id: String,
@@ -16,7 +14,7 @@ data class UserProfileDto(
     @SerialName("created_at")
     val createdAt: String,
     
-    // Stats (được tính toán hoặc join từ table khác)
+    
     @SerialName("friends_count")
     val friendsCount: Int = 0,
     
@@ -24,9 +22,7 @@ data class UserProfileDto(
     val treesCount: Int = 0
 )
 
-/**
- * Model Domain cho UI (bao gồm cả relationship status được fetch riêng)
- */
+
 data class UserProfile(
     val id: String,
     val username: String,

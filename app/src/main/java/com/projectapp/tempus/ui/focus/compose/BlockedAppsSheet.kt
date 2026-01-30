@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.ui.focus.InstalledApp
 
-// ===== DESIGN TOKENS =====
+
 private object SheetDesignTokens {
-    // Colors - Dark OLED + Glassmorphism
+    
     val backgroundDark = Color(0xFF0A0E1A)
     val surfaceGlass = Color.White.copy(alpha = 0.05f)
     val surfaceGlassElevated = Color.White.copy(alpha = 0.08f)
@@ -43,7 +43,7 @@ private object SheetDesignTokens {
     val textSecondary = Color.White.copy(alpha = 0.7f)
     val textMuted = Color.White.copy(alpha = 0.4f)
     
-    // Typography
+    
     val headlineMedium = TextStyle(
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold
@@ -63,9 +63,7 @@ private object SheetDesignTokens {
     )
 }
 
-/**
- * Premium Bottom Sheet for selecting apps to block
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BlockedAppsSheet(
@@ -91,7 +89,7 @@ fun BlockedAppsSheet(
         onDismissRequest = onDismiss,
         containerColor = SheetDesignTokens.backgroundDark,
         dragHandle = {
-            // Custom drag handle
+            
             Box(
                 modifier = Modifier
                     .padding(vertical = 12.dp)
@@ -109,7 +107,7 @@ fun BlockedAppsSheet(
                 .fillMaxHeight(0.9f)
                 .padding(horizontal = 20.dp)
         ) {
-            // Header
+            
             SheetHeader(
                 appCount = installedApps.size,
                 blockedCount = installedApps.count { it.isBlocked },
@@ -118,7 +116,7 @@ fun BlockedAppsSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Search bar
+            
             SearchBar(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it }
@@ -126,7 +124,7 @@ fun BlockedAppsSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Content
+            
             if (isLoading) {
                 LoadingContent()
             } else if (filteredApps.isEmpty()) {
@@ -142,7 +140,6 @@ fun BlockedAppsSheet(
     }
 }
 
-// ===== COMPONENTS =====
 
 @Composable
 private fun SheetHeader(
@@ -333,7 +330,7 @@ private fun AppList(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
-        // Blocked apps first
+        
         val blockedApps = apps.filter { it.isBlocked }
         val unblockedApps = apps.filter { !it.isBlocked }
         
@@ -399,7 +396,7 @@ private fun AppRow(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // App icon placeholder
+        
         Box(
             modifier = Modifier
                 .size(44.dp)
@@ -444,7 +441,7 @@ private fun AppRow(
             )
         }
         
-        // Toggle button
+        
         Box(
             modifier = Modifier
                 .size(36.dp)

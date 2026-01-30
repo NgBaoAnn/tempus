@@ -16,10 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 
-/**
- * Simplified Tree Card với AnimatedTree
- * Sử dụng Card onClick thay vì Modifier.clickable để tránh Indication crash
- */
+
 @Composable
 fun TreeCard(
     tree: TreeUiModel,
@@ -49,7 +46,7 @@ fun TreeCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Procedural Tree với Wind Animation
+            
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -70,7 +67,7 @@ fun TreeCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Tree Name
+            
             Text(
                 text = tree.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -80,20 +77,20 @@ fun TreeCard(
                 overflow = TextOverflow.Ellipsis
             )
             
-            // State + Progress
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // State badge
+                
                 Text(
                     text = "${tree.state.emoji} ${tree.state.displayName}",
                     style = MaterialTheme.typography.labelSmall,
                     color = getTreeBackgroundColor(tree.state)
                 )
                 
-                // Progress
+                
                 Text(
                     text = "${tree.progressPercent.toInt()}%",
                     style = MaterialTheme.typography.labelSmall,
@@ -102,7 +99,7 @@ fun TreeCard(
                 )
             }
             
-            // Warning nếu cây sắp chết
+            
             if (tree.isAlive && tree.daysUntilDeath <= 2 && tree.state != TreeState.TREE) {
                 Text(
                     text = if (tree.daysUntilDeath == 0) "⚠️ Tưới ngay!" else "⚠️ ${tree.daysUntilDeath} ngày",

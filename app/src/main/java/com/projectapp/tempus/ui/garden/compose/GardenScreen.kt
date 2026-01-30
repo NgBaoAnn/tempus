@@ -40,11 +40,7 @@ import com.projectapp.tempus.ui.garden.GardenViewModel
 import com.projectapp.tempus.ui.garden.TreeDetailActivity
 import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
 
-// ======================== SKELETON LOADING ========================
 
-/**
- * Shimmer Loading Skeleton for Garden - displays grid of skeleton tree cards
- */
 @Composable
 private fun GardenLoadingSkeleton(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -102,7 +98,7 @@ private fun SkeletonTreeCard(brush: Brush) {
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Tree placeholder
+            
             Box(
                 modifier = Modifier
                     .height(100.dp)
@@ -113,7 +109,7 @@ private fun SkeletonTreeCard(brush: Brush) {
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Name placeholder
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
@@ -124,7 +120,7 @@ private fun SkeletonTreeCard(brush: Brush) {
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // State badge placeholder
+            
             Box(
                 modifier = Modifier
                     .width(50.dp)
@@ -135,7 +131,7 @@ private fun SkeletonTreeCard(brush: Brush) {
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Progress bar placeholder
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,7 +143,6 @@ private fun SkeletonTreeCard(brush: Brush) {
     }
 }
 
-// ======================== MAIN SCREEN ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,10 +153,10 @@ fun GardenScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     
-    // Local state for dialog
+    
     var showPlantDialog by remember { mutableStateOf(false) }
     
-    // Plant tree dialog
+    
     if (showPlantDialog) {
         PlantTreeDialog(
             currentPoints = uiState.userPoints?.totalPoints ?: 0,
@@ -200,7 +195,7 @@ fun GardenScreen(
                     }
                 },
                 actions = {
-                    // Compact inline stats
+                    
                     CompactStats(
                         totalTrees = uiState.totalTrees,
                         matureTrees = uiState.matureTrees,
@@ -210,7 +205,7 @@ fun GardenScreen(
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    // Refresh button
+                    
                     IconButton(
                         onClick = { viewModel.refresh() }
                     ) {
@@ -288,7 +283,6 @@ fun GardenScreen(
     }
 }
 
-// ======================== COMPONENTS ========================
 
 @Composable
 private fun CompactStats(
@@ -302,12 +296,12 @@ private fun CompactStats(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(end = 4.dp)
     ) {
-        // Chỉ hiển thị điểm và streak để tránh bị wrap
+        
         StatChip(emoji = "💰", value = totalPoints)
         if (streak > 0) {
             StatChip(emoji = "🔥", value = streak)
         }
-        // Hiển thị số cây trưởng thành / tổng cây
+        
         Surface(
             shape = RoundedCornerShape(8.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -373,7 +367,7 @@ private fun TreeCard(
             modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Tree with ProceduralTree (same as TreeDetailActivity)
+            
             Box(
                 modifier = Modifier.height(100.dp),
                 contentAlignment = Alignment.Center
@@ -388,7 +382,7 @@ private fun TreeCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Name
+            
             Text(
                 text = tree.name,
                 fontWeight = FontWeight.SemiBold,
@@ -399,7 +393,7 @@ private fun TreeCard(
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            // Warning if dying
+            
             if (tree.isAlive && daysUntilDeath <= 2 && state != TreeState.TREE) {
                 Text(
                     text = stringResource(R.string.garden_dying),
@@ -408,7 +402,7 @@ private fun TreeCard(
                     fontWeight = FontWeight.Bold
                 )
             } else {
-                // State Badge
+                
                 Surface(
                     color = getTreeStateColor(state).copy(alpha = 0.2f),
                     shape = RoundedCornerShape(4.dp)
@@ -424,7 +418,7 @@ private fun TreeCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Progress Bar
+            
             LinearProgressIndicator(
                 progress = { progress / 100f },
                 modifier = Modifier
@@ -545,7 +539,7 @@ private fun PlantTreeDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                // Tree emoji/icon
+                                
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
                                     color = if (canAfford)
@@ -560,7 +554,7 @@ private fun PlantTreeDialog(
                                     )
                                 }
                                 
-                                // Tree info
+                                
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = treeType.displayName,
@@ -581,7 +575,7 @@ private fun PlantTreeDialog(
                                     )
                                 }
                                 
-                                // Status icon
+                                
                                 if (canAfford) {
                                     Icon(
                                         Icons.Default.Add,
@@ -604,7 +598,6 @@ private fun PlantTreeDialog(
     )
 }
 
-// ======================== HELPERS ========================
 
 private fun getTreeStateColor(state: TreeState): Color {
     return when (state) {

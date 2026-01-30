@@ -88,13 +88,13 @@ private fun ProfileContent(
     onBlock: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Hero Header with Gradient Mesh
+        
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(280.dp)
         ) {
-            // Background
+            
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -109,7 +109,7 @@ private fun ProfileContent(
                     )
             )
 
-            // Top Bar
+            
             IconButton(
                 onClick = onBack,
                 modifier = Modifier.padding(16.dp).align(Alignment.TopStart)
@@ -117,7 +117,7 @@ private fun ProfileContent(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
             }
 
-            // Avatar & Name
+            
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -165,7 +165,7 @@ private fun ProfileContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 
-                // Status Badge
+                
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(16.dp),
@@ -187,7 +187,7 @@ private fun ProfileContent(
             }
         }
 
-        // Stats Row
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -196,24 +196,24 @@ private fun ProfileContent(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             StatCard("Bạn bè", profile.friendsCount.toString())
-            StatCard("Cây trồng", profile.treesCount.toString()) // Placeholder stat
+            StatCard("Cây trồng", profile.treesCount.toString()) 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Actions
+        
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Main Action Button
+            
             Button(
                 onClick = {
                     when(profile.relationshipStatus) {
                         RelationshipStatus.None -> onSendRequest()
-                        else -> {} // Handle other statuses later (unfriend, etc.)
+                        else -> {} 
                     }
                 },
                 modifier = Modifier
@@ -252,7 +252,7 @@ private fun ProfileContent(
                 }
             }
             
-            // Secondary Action (Block)
+            
             if (profile.relationshipStatus != RelationshipStatus.Blocked) {
                 OutlinedButton(
                     onClick = onBlock,
@@ -272,7 +272,7 @@ private fun ProfileContent(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Info Section
+        
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -290,7 +290,7 @@ private fun ProfileContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 InfoRow(Icons.Default.Email, "Email", profile.email ?: "Ẩn")
-                // Add Joined Date using profile.joinedDate
+                
             }
         }
     }

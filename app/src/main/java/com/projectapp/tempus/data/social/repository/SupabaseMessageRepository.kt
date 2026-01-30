@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.time.Instant
 
-/**
- * Implementation của MessageRepository sử dụng Supabase Realtime
- */
+
 class SupabaseMessageRepository : MessageRepository {
     
     private val supabase = SupabaseClientProvider.client
@@ -35,17 +33,14 @@ class SupabaseMessageRepository : MessageRepository {
             ?: throw IllegalStateException("User not authenticated")
     }
     
-    // ============================================
-    // CONVERSATIONS
-    // ============================================
     
     override suspend fun getConversations(): Result<List<ConversationWithUser>> = runCatching {
         val currentUserId = getCurrentUserId()
         
-        // Lấy danh sách blocked users để filter
+        
         val blockedUserIds = getBlockedUserIds()
         
-        // Lấy tất cả conversations của user
+        
         val conversations = supabase.from("conversations")
             .select {
                 filter {
@@ -58,7 +53,7 @@ class SupabaseMessageRepository : MessageRepository {
             }
             .decodeList<ConversationDto>()
         
-        // Lấy thông tin user cho mỗi conversation
+        
         val result = conversations.mapNotNull { conv ->
             val otherUserId = if (conv.participant1Id == currentUserId) {
                 conv.participant2Id
@@ -66,12 +61,12 @@ class SupabaseMessageRepository : MessageRepository {
                 conv.participant1Id
             }
             
-            // Skip blocked users
+            
             if (otherUserId in blockedUserIds) {
                 return@mapNotNull null
             }
             
-            // Fetch user info
+            
             val userInfo = fetchUserBasicInfo(otherUserId)
             if (userInfo != null) {
                 ConversationWithUser(
@@ -89,14 +84,14 @@ class SupabaseMessageRepository : MessageRepository {
     override suspend fun getOrCreateConversation(otherUserId: String): Result<ConversationDto> = runCatching {
         val currentUserId = getCurrentUserId()
         
-        // Order IDs for unique constraint
+        
         val (p1, p2) = if (currentUserId < otherUserId) {
             currentUserId to otherUserId
         } else {
             otherUserId to currentUserId
         }
         
-        // Try to find existing conversation
+        
         val existing = supabase.from("conversations")
             .select {
                 filter {
@@ -110,7 +105,7 @@ class SupabaseMessageRepository : MessageRepository {
             return@runCatching existing
         }
         
-        // Create new conversation
+        
         val newConversation = CreateConversationDto(
             participant1Id = p1,
             participant2Id = p2
@@ -123,9 +118,6 @@ class SupabaseMessageRepository : MessageRepository {
             .decodeSingle<ConversationDto>()
     }
     
-    // ============================================
-    // MESSAGES
-    // ============================================
     
     override suspend fun getMessages(conversationId: String): Result<List<MessageDto>> = runCatching {
         supabase.from("messages")
@@ -142,7 +134,7 @@ class SupabaseMessageRepository : MessageRepository {
         val currentUserId = getCurrentUserId()
         val now = Instant.now().toString()
         
-        // Create message
+        
         val createMessage = CreateMessageDto(
             conversationId = conversationId,
             senderId = currentUserId,
@@ -155,7 +147,7 @@ class SupabaseMessageRepository : MessageRepository {
             }
             .decodeSingle<MessageDto>()
         
-        // Update conversation preview
+        
         val updateConversation = UpdateConversationDto(
             lastMessageAt = now,
             lastMessagePreview = content.take(100)
@@ -171,33 +163,30 @@ class SupabaseMessageRepository : MessageRepository {
         message
     }
     
-    // ============================================
-    // REALTIME
-    // ============================================
     
     override fun subscribeToMessages(conversationId: String): Flow<MessageDto> = callbackFlow {
         try {
-            // Unsubscribe from previous channel if exists
+            
             currentChannel?.let {
                 supabase.realtime.removeChannel(it)
             }
             
-            // Create new channel for this conversation
+            
             val channel = supabase.realtime.channel("messages:$conversationId")
             
-            // IMPORTANT: Setup postgresChangeFlow BEFORE subscribing
+            
             val changeFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
                 table = "messages"
                 filter = "conversation_id=eq.$conversationId"
             }
             
-            // Subscribe to channel first and wait until subscribed
+            
             channel.subscribe(blockUntilSubscribed = true)
             currentChannel = channel
             
             Log.d(TAG, "Subscribed to realtime for conversation: $conversationId")
             
-            // Now collect changes after subscription is confirmed
+            
             val job = launch {
                 changeFlow.collect { change ->
                     try {
@@ -242,9 +231,6 @@ class SupabaseMessageRepository : MessageRepository {
         }
     }
     
-    // ============================================
-    // IMAGE MESSAGES
-    // ============================================
     
     override suspend fun sendImageMessage(
         conversationId: String, 
@@ -253,19 +239,19 @@ class SupabaseMessageRepository : MessageRepository {
         val currentUserId = getCurrentUserId()
         val now = Instant.now().toString()
         
-        // Generate unique filename
+        
         val fileName = "$conversationId/${currentUserId}_${System.currentTimeMillis()}.jpg"
         
-        // Upload to storage
+        
         val bucket = supabase.storage.from("chat-images")
         bucket.upload(fileName, imageBytes)
         
-        // Get public URL
+        
         val imageUrl = bucket.publicUrl(fileName)
         
         Log.d(TAG, "Image uploaded: $imageUrl")
         
-        // Create message with type = image
+        
         val createMessage = CreateMessageDto(
             conversationId = conversationId,
             senderId = currentUserId,
@@ -279,7 +265,7 @@ class SupabaseMessageRepository : MessageRepository {
             }
             .decodeSingle<MessageDto>()
         
-        // Update conversation preview
+        
         val updateConversation = UpdateConversationDto(
             lastMessageAt = now,
             lastMessagePreview = "📷 Hình ảnh"
@@ -295,9 +281,6 @@ class SupabaseMessageRepository : MessageRepository {
         message
     }
     
-    // ============================================
-    // HELPERS
-    // ============================================
     
     private suspend fun fetchUserBasicInfo(userId: String): UserBasicInfo? {
         return try {
@@ -326,7 +309,7 @@ class SupabaseMessageRepository : MessageRepository {
         return try {
             val currentUserId = getCurrentUserId()
             
-            // Users I blocked
+            
             val iBlocked = supabase.from("blocked_users")
                 .select(columns = Columns.list("blocked_id")) {
                     filter {
@@ -336,7 +319,7 @@ class SupabaseMessageRepository : MessageRepository {
                 .decodeList<BlockedIdOnly>()
                 .map { it.blockedId }
             
-            // Users who blocked me
+            
             val blockedMe = supabase.from("blocked_users")
                 .select(columns = Columns.list("blocker_id")) {
                     filter {
@@ -354,7 +337,7 @@ class SupabaseMessageRepository : MessageRepository {
     }
 }
 
-// Helper DTOs for blocked users query
+
 @kotlinx.serialization.Serializable
 private data class BlockedIdOnly(
     @kotlinx.serialization.SerialName("blocked_id")
@@ -367,7 +350,7 @@ private data class BlockerIdOnly(
     val blockerId: String
 )
 
-// User DTO for basic info
+
 @kotlinx.serialization.Serializable
 private data class UserDto(
     val id: String,

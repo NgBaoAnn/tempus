@@ -11,8 +11,8 @@ import com.projectapp.tempus.R
 import java.time.LocalDate
 
 data class MonthCell(
-    val date: LocalDate?,            // null = ô trống (padding)
-    val labels: List<String> = emptyList() // label string: "eat", "sleep", ...
+    val date: LocalDate?,            
+    val labels: List<String> = emptyList() 
 )
 
 class MonthDayAdapter(
@@ -60,7 +60,7 @@ class MonthDayAdapter(
                 lp.marginEnd = (3 * ctx.resources.displayMetrics.density).toInt()
                 iv.layoutParams = lp
 
-                val resId = ctx.getIconResId(lb) // ✅ dùng chung mapping y như TimelineAdapter
+                val resId = ctx.getIconResId(lb) 
                 iv.setImageResource(resId)
                 iconRow.addView(iv)
             }

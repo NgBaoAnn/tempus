@@ -13,25 +13,19 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-/**
- * Manages batch synchronization of Timeline alarms
- * Uses LOCAL Room database for data (offline-first)
- */
+
 object TimelineAlarmManager {
 
-    /**
-     * Sync all timeline tasks for the current user
-     * Reads from LOCAL database, schedules alarms for future tasks only
-     */
+    
     fun syncAllAlarms(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 Log.d("TimelineAlarmManager", "🔄 Starting alarm sync (LOCAL data)...")
                 
-                // Clear old notification records (older than 7 days)
+                
                 NotificationPreferences.clearOldNotifications(context)
                 
-                // Get current user ID from auth
+                
                 val supabase = SupabaseClientProvider.client
                 val userId = supabase.auth.currentUserOrNull()?.id
                 
@@ -40,7 +34,7 @@ object TimelineAlarmManager {
                     return@launch
                 }
 
-                // Get schedules from LOCAL Room database
+                
                 val database = TempusDatabase.getDatabase(context)
                 val schedules = database.scheduleDao().getSchedulesForAlarm(userId)
 
@@ -51,17 +45,17 @@ object TimelineAlarmManager {
                 var skippedCount = 0
                 val today = LocalDate.now()
 
-                // Schedule alarms for future tasks only
+                
                 schedules.forEach { schedule ->
                     try {
                         val startTime = OffsetDateTime.parse(schedule.startTimeDate, DateTimeFormatter.ISO_DATE_TIME)
                         val now = OffsetDateTime.now()
                         
-                        // Only schedule if task is in the future
+                        
                         if (startTime.isAfter(now)) {
                             val endDateTime = calculateEndTime(schedule.startTimeDate, schedule.implementationTime)
                             
-                            // Use new method with task details for enhanced notification
+                            
                             reminderScheduler.scheduleReminderWithDetails(
                                 taskId = schedule.id,
                                 title = schedule.name,
@@ -73,7 +67,7 @@ object TimelineAlarmManager {
                             )
                             scheduledCount++
                         } else {
-                            // Task in past or ongoing - skip
+                            
                             skippedCount++
                         }
                     } catch (e: Exception) {

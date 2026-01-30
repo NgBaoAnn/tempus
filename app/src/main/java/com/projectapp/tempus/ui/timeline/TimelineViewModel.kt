@@ -24,31 +24,31 @@ import java.time.DayOfWeek
 import java.time.ZoneId
 import io.github.jan.supabase.gotrue.auth
 
-// Sort options for timeline
+
 enum class SortOption {
-    START_TIME,   // Default - by start time
-    PRIORITY,     // By priority level (high -> medium -> low)
-    CREATED_AT    // By creation date (newest first)
+    START_TIME,   
+    PRIORITY,     
+    CREATED_AT    
 }
 
 data class TimelineUiState(
     val date: LocalDate = LocalDate.now(),
     val isLoading: Boolean = false,
     val blocks: List<TimelineBlock> = emptyList(),
-    val filteredBlocks: List<TimelineBlock> = emptyList(), // After applying filters
+    val filteredBlocks: List<TimelineBlock> = emptyList(), 
     val error: String? = null,
     val dailyQuote: QuoteDto? = null,
-    // Search/Sort/Filter state
+    
     val searchQuery: String = "",
     val sortBy: SortOption = SortOption.START_TIME,
     val filterLabels: Set<ScheduleLabel> = emptySet(),
     val filterPriorities: Set<PriorityType> = emptySet(),
-    val filterStatus: StatusType? = null, // null = show all
+    val filterStatus: StatusType? = null, 
     val isFilterActive: Boolean = false,
-    // Points earned event (set to null after consuming)
+    
     val earnedPoints: Int? = null,
     val earnedReason: String? = null,
-    // Streak
+    
     val currentStreak: Int = 0
 )
 
@@ -69,7 +69,7 @@ class TimelineViewModel(
     init {
         loadDailyQuote()
         loadStreak()
-        // Load tasks for today when ViewModel initializes
+        
         load(LocalDate.now())
     }
     
@@ -82,12 +82,12 @@ class TimelineViewModel(
         
         viewModelScope.launch {
             try {
-                // Ensure UserPoints exists before observing
+                
                 val initialPoints = manager.repository.getOrCreateUserPoints()
                 _ui.value = _ui.value.copy(currentStreak = initialPoints.currentStreak)
                 Log.d("Timeline", "Initial streak loaded: ${initialPoints.currentStreak}")
                 
-                // Then observe changes
+                
                 manager.getUserPoints().collect { userPoints ->
                     userPoints?.let {
                         Log.d("Timeline", "Streak updated: ${it.currentStreak}")
@@ -105,12 +105,9 @@ class TimelineViewModel(
         _ui.value = _ui.value.copy(dailyQuote = quote)
     }
     
-    /**
-     * Public function to reload daily quote
-     * Call this when language setting changes to update quote to correct language
-     */
+    
     fun reloadDailyQuote() {
-        // Clear cache and reload to get quote in current language
+        
         quoteRepository.refreshQuote()
         loadDailyQuote()
     }
@@ -171,26 +168,26 @@ class TimelineViewModel(
                 val item = repo.upsertScheduleItem(taskId, dateStr, status)
                 Log.d("Timeline", "upsertScheduleItem ok itemId=${item.id} status=${item.status}")
                 
-                // Handle points based on status change
+                
                 var earnedPoints: Int? = null
                 var earnedReason: String? = null
                 
                 if (pointsManager != null) {
                     when (status) {
                         StatusType.done -> {
-                            // Award points when task is completed
+                            
                             earnedPoints = pointsManager.earnPoints(PointAction.TASK_COMPLETE)
                             earnedReason = "Hoàn thành Task"
                             pointsManager.updateStreak()
                             Log.d("Timeline", "Awarded $earnedPoints points for task completion")
                         }
                         StatusType.planned -> {
-                            // Deduct points when task is uncompleted (prevent abuse)
+                            
                             earnedPoints = pointsManager.earnPoints(PointAction.TASK_UNCOMPLETE)
                             earnedReason = "Huỷ hoàn thành Task"
                             Log.d("Timeline", "Deducted $earnedPoints points for task uncompletion")
                         }
-                        else -> { /* No points change for delete */ }
+                        else -> {  }
                     }
                 }
                 
@@ -251,8 +248,8 @@ class TimelineViewModel(
                 repo.updateSchedule(
                     taskId,
                     mapOf(
-                        "start_time_date" to newStart,          // dạng "YYYY-MM-DDTHH:mm:ss"
-                        "implementation_time" to newDuration    // dạng "HH:mm:ss"
+                        "start_time_date" to newStart,          
+                        "implementation_time" to newDuration    
                     )
                 )
                 Log.d("Timeline", "edit time ok taskId=$taskId start=$newStart dur=$newDuration")
@@ -265,12 +262,7 @@ class TimelineViewModel(
         }
     }
 
-    /**
-     * Kết thúc schedule từ một ngày cụ thể trở đi.
-     * Schedule sẽ không hiển thị từ ngày endDate trở về sau.
-     * @param taskId ID của task cần kết thúc
-     * @param endDate Ngày bắt đầu kết thúc (format: YYYY-MM-DD)
-     */
+    
     fun onEndScheduleFromDate(taskId: String, endDate: String) {
         viewModelScope.launch {
             try {
@@ -278,7 +270,7 @@ class TimelineViewModel(
                 repo.updateSchedule(taskId, mapOf("end_date" to endDate))
                 Log.d("Timeline", "set end_date ok taskId=$taskId endDate=$endDate")
                 _ui.value = _ui.value.copy(isLoading = false)
-                // Clear cached schedules to force reload
+                
                 cachedSchedules = emptyList()
                 load(_ui.value.date)
             } catch (e: Exception) {
@@ -289,20 +281,19 @@ class TimelineViewModel(
     }
 
 
-
     private fun load(date: LocalDate) {
         val dateStr = date.toString()
         viewModelScope.launch {
             try {
                 _ui.value = _ui.value.copy(isLoading = true, error = null)
                 
-                // Get dynamic User ID to handle cold starts where session might not be ready in constructor
+                
                 var currentUserId = userId
                 if (currentUserId.isEmpty()) {
                     val supabase = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
                     currentUserId = supabase.auth.currentUserOrNull()?.id ?: ""
                     
-                    // If still empty, try to load from storage
+                    
                     if (currentUserId.isEmpty()) {
                         try {
                             supabase.auth.loadFromStorage()
@@ -329,7 +320,7 @@ class TimelineViewModel(
                 val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
                 val editedMap = repo.getEditedVersions(editedIds).associateBy { it.id }
 
-                // OPTIMIZED: Batch load subtasks in 1 API call instead of N calls
+                
                 val allSubtasks = repo.getSubTasksBatch(taskIds)
                 val subtasksMap = allSubtasks.groupBy { it.scheduleId }
 
@@ -337,7 +328,7 @@ class TimelineViewModel(
 
                 Log.d("Timeline", "build blocks=${blocks.size}")
 
-                // Apply current filters and sort
+                
                 val filtered = applyFiltersAndSort(blocks)
 
                 _ui.value = _ui.value.copy(
@@ -358,27 +349,19 @@ class TimelineViewModel(
         }
     }
 
-    // ==================== SEARCH / SORT / FILTER ====================
-
-    /**
-     * Handle search query change - filters in real-time
-     */
+    
     fun onSearchQueryChanged(query: String) {
         _ui.value = _ui.value.copy(searchQuery = query)
         reapplyFilters()
     }
 
-    /**
-     * Handle sort option change
-     */
+    
     fun onSortChanged(sortOption: SortOption) {
         _ui.value = _ui.value.copy(sortBy = sortOption)
         reapplyFilters()
     }
 
-    /**
-     * Toggle label filter (OR logic - any matching label shows)
-     */
+    
     fun onFilterLabelToggle(label: ScheduleLabel) {
         val current = _ui.value.filterLabels.toMutableSet()
         if (label in current) {
@@ -390,9 +373,7 @@ class TimelineViewModel(
         reapplyFilters()
     }
 
-    /**
-     * Toggle priority filter (OR logic - any matching priority shows)
-     */
+    
     fun onFilterPriorityToggle(priority: PriorityType) {
         val current = _ui.value.filterPriorities.toMutableSet()
         if (priority in current) {
@@ -404,17 +385,13 @@ class TimelineViewModel(
         reapplyFilters()
     }
 
-    /**
-     * Change status filter (null = show all)
-     */
+    
     fun onFilterStatusChanged(status: StatusType?) {
         _ui.value = _ui.value.copy(filterStatus = status)
         reapplyFilters()
     }
 
-    /**
-     * Clear all filters and search
-     */
+    
     fun clearAllFilters() {
         _ui.value = _ui.value.copy(
             searchQuery = "",
@@ -427,9 +404,7 @@ class TimelineViewModel(
         reapplyFilters()
     }
 
-    /**
-     * Re-apply current filters to the loaded blocks
-     */
+    
     private fun reapplyFilters() {
         val filtered = applyFiltersAndSort(_ui.value.blocks)
         val hasActiveFilter = _ui.value.searchQuery.isNotEmpty() ||
@@ -444,31 +419,29 @@ class TimelineViewModel(
         )
     }
 
-    /**
-     * Apply search, filters, and sort to a list of blocks
-     */
+    
     private fun applyFiltersAndSort(blocks: List<TimelineBlock>): List<TimelineBlock> {
         val state = _ui.value
         
         return blocks
             .filter { block ->
-                // Search filter - case insensitive contains on title
+                
                 val matchesSearch = state.searchQuery.isEmpty() || 
                     block.title.contains(state.searchQuery, ignoreCase = true)
                 
-                // Label filter - OR logic (show if matches ANY selected label)
+                
                 val matchesLabel = state.filterLabels.isEmpty() || 
                     block.labelEnum in state.filterLabels
                 
-                // Priority filter - OR logic
+                
                 val matchesPriority = state.filterPriorities.isEmpty() || 
                     block.priority in state.filterPriorities
                 
-                // Status filter - exact match
+                
                 val matchesStatus = state.filterStatus == null || 
                     block.status == state.filterStatus
 
-                // All filters are AND-ed together
+                
                 matchesSearch && matchesLabel && matchesPriority && matchesStatus
             }
             .let { filtered ->
@@ -499,16 +472,16 @@ class TimelineViewModel(
         val dateStrs = days.map { it.toString() }
         val taskIds = cachedSchedules.map { it.id }
 
-        // 1) load schedule_items của cả tháng cho các task
+        
         val items = repo.getScheduleItemsByDates(dateStrs, taskIds)
 
-        // 2) map (date|taskId) -> item
+        
         val itemByKey = items.associateBy { it.date + "|" + it.taskId }
 
-        // 3) collect edited_version ids -> fetch edited_versions -> map id -> row
+        
         val editedIds = items.mapNotNull { it.editedVersion }.distinct()
         val editedMap = if (editedIds.isNotEmpty()) {
-            repo.getEditedVersions(editedIds).associateBy { it.id }   // ✅ dùng hàm sẵn có của bạn
+            repo.getEditedVersions(editedIds).associateBy { it.id }   
         } else emptyMap()
 
         fun occursOnDate(s: com.projectapp.tempus.data.schedule.dto.ScheduleRow, d: java.time.LocalDate): Boolean {
@@ -516,32 +489,32 @@ class TimelineViewModel(
                 OffsetDateTime.parse(s.startTimeDate.replace(" ", "T"))
                     .atZoneSameInstant(ZoneId.systemDefault())
             } catch (_: Exception) {
-                // fallback: nếu format lạ
+                
                 java.time.LocalDate.parse(s.startTimeDate.split(" ")[0]).atStartOfDay(ZoneId.systemDefault())
             }
             val startDate = startZdt.toLocalDate()
 
-            // Check end_date - if set, schedule doesn't appear after this date
+            
             val endDate = s.endDate?.let { 
                 try { java.time.LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
                 catch (_: Exception) { null } 
             }
             if (endDate != null && !d.isBefore(endDate)) {
-                return false // Schedule has ended
+                return false 
             }
 
-            // Phải sau ngày bắt đầu
+            
             if (d.isBefore(startDate)) return false
 
             return when (s.repeat) {
                 com.projectapp.tempus.data.schedule.dto.RepeatType.once -> d == startDate
-                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> true // Đã check isBefore ở trên
+                com.projectapp.tempus.data.schedule.dto.RepeatType.daily -> true 
                 com.projectapp.tempus.data.schedule.dto.RepeatType.weekly ->
                     d.dayOfWeek == startDate.dayOfWeek
                 com.projectapp.tempus.data.schedule.dto.RepeatType.monthly ->
                     d.dayOfMonth == startDate.dayOfMonth
                 com.projectapp.tempus.data.schedule.dto.RepeatType.custom -> {
-                    // Parse repeat_days: "1,3,5" = Thứ 2, 4, 6 (1=Monday, 7=Sunday)
+                    
                     val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
                     if (repeatDays.isEmpty()) return false
                     repeatDays.contains(d.dayOfWeek.value)
@@ -560,10 +533,10 @@ class TimelineViewModel(
                 val key = d.toString() + "|" + s.id
                 val item = itemByKey[key]
 
-                // delete => ẩn khỏi lịch
+                
                 if (item?.status == StatusType.delete) continue
 
-                // ✅ icon label: edited_version (nếu có) > schedule gốc > book
+                
                 val evLabel = item?.editedVersion?.let { editedMap[it]?.label }
                 val labelStr = (evLabel?.name ?: s.label?.name) ?: "book"
 

@@ -4,12 +4,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-/**
- * Onboarding Color System
- * Aligned with TempusDesignSystem - Focus Blue palette
- */
+
 object OnboardingColors {
-    // ============ BACKGROUND ============
+    
     val BackgroundLight = TempusDesignSystem.Slate50
     val BackgroundGradient = Brush.verticalGradient(
         colors = listOf(
@@ -19,18 +16,18 @@ object OnboardingColors {
         )
     )
     
-    // ============ ACCENT GRADIENTS ============
-    val Page1Gradient = listOf(TempusDesignSystem.PrimaryLight, TempusDesignSystem.Primary)  // Blue
-    val Page2Gradient = listOf(TempusDesignSystem.Secondary, Color(0xFF0D9488))              // Teal
-    val Page3Gradient = listOf(Color(0xFF34D399), TempusDesignSystem.Success)                // Green
-    val Page4Gradient = listOf(Color(0xFFFB923C), Color(0xFFF97316))                         // Orange
     
-    // ============ TEXT ============
+    val Page1Gradient = listOf(TempusDesignSystem.PrimaryLight, TempusDesignSystem.Primary)  
+    val Page2Gradient = listOf(TempusDesignSystem.Secondary, Color(0xFF0D9488))              
+    val Page3Gradient = listOf(Color(0xFF34D399), TempusDesignSystem.Success)                
+    val Page4Gradient = listOf(Color(0xFFFB923C), Color(0xFFF97316))                         
+    
+    
     val TextPrimary = TempusDesignSystem.TextPrimary
     val TextSecondary = TempusDesignSystem.TextSecondary
     val TextMuted = TempusDesignSystem.TextMuted
     
-    // ============ BUTTON ============
+    
     val ButtonGradient = Brush.horizontalGradient(
         colors = listOf(
             TempusDesignSystem.Primary,
@@ -40,11 +37,11 @@ object OnboardingColors {
     val ButtonText = Color.White
     val ButtonSecondary = TempusDesignSystem.Primary
     
-    // ============ INDICATORS ============
+    
     val IndicatorActive = TempusDesignSystem.Primary
     val IndicatorInactive = TempusDesignSystem.Slate300
     
-    // For theme
+    
     val GradientStart = TempusDesignSystem.Primary
     val GradientEnd = TempusDesignSystem.PrimaryLight
     val BackgroundDark = TempusDesignSystem.Slate900

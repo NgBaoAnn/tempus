@@ -26,7 +26,7 @@ class StatisticsFragment : Fragment() {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val myUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id ?: ""
-                // Use RepositoryProvider for offline-first repositories
+                
                 val repo = RepositoryProvider.getScheduleRepository(requireContext())
                 val useCase = GetStatisticsUseCase()
                 val gamificationRepo = RepositoryProvider.getGamificationRepository(requireContext())
@@ -65,7 +65,7 @@ class StatisticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.setMode(true) // Start with week mode
+        viewModel.setMode(true) 
     }
 }
 

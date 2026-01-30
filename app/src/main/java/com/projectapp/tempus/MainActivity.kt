@@ -26,12 +26,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainComposeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup Navigation
+        
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         
-        // Sync route with destination changes
+        
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val newRoute = navItems.find { it.fragmentId == destination.id }?.route
             if (newRoute != null && newRoute != currentRoute) {
@@ -40,12 +40,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Setup Compose Bottom Nav
+        
         updateBottomNav()
         
         handleNavigationIntent(intent)
         
-        // Sync Activity Theme with App Theme (affects Window background and XML layouts)
+        
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 com.projectapp.tempus.ui.theme.ThemeManager.themeMode.collect { mode ->
@@ -78,18 +78,18 @@ class MainActivity : AppCompatActivity() {
                 "timeline" -> {
                     val timelineItem = navItems.find { it.route == NavItem.Timeline.route }
                     if (timelineItem != null) {
-                        // Switch to Timeline tab if not already there
+                        
                         if (currentRoute != NavItem.Timeline.route) {
                             currentRoute = NavItem.Timeline.route
                             navigate(timelineItem.fragmentId)
                         }
 
-                        // Handle additional actions (Add Task or Open Specific Task)
+                        
                         val openAddTask = intent.getBooleanExtra("OPEN_ADD_TASK", false)
                         val taskId = intent.getStringExtra("TASK_ID")
 
                         if (openAddTask) {
-                            // Delay slightly to ensure fragment is attached
+                            
                             binding.root.post {
                                 val bundle = Bundle().apply {
                                     putString("selectedDate", java.time.LocalDate.now().toString())
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                                 navController.navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
                             }
                         } else if (!taskId.isNullOrEmpty()) {
-                             // Delay slightly to ensure fragment is attached
+                             
                             binding.root.post {
                                 val bundle = Bundle().apply {
                                     putString("taskId", taskId)
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 "garden" -> {
-                    // Navigate to Garden fragment
+                    
                     binding.root.post {
                         navController.navigate(R.id.gardenFragment)
                     }

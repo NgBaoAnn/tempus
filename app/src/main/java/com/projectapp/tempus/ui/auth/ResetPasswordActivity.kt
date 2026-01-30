@@ -58,8 +58,8 @@ class ResetPasswordActivity : ComponentActivity() {
             try {
                 authService.updatePassword(password)
                 Toast.makeText(this@ResetPasswordActivity, "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show()
-                // Navigate to Main or Login? Usually Login or Main depending on flow.
-                // Since updatePassword uses current session, user is logged in.
+                
+                
                 startActivity(Intent(this@ResetPasswordActivity, MainActivity::class.java))
                 finishAffinity()
             } catch (e: Exception) {
@@ -105,7 +105,7 @@ fun ResetPasswordScreen(
         
         Spacer(modifier = Modifier.height(40.dp))
         
-        // Password Field
+        
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -129,7 +129,7 @@ fun ResetPasswordScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Confirm Password Field
+        
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },

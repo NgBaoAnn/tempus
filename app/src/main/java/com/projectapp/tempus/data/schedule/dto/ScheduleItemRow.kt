@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class ScheduleItemRow(
     val id: String,
     @SerialName("task_id") val taskId: String,
-    val date: String,                 // "YYYY-MM-DD"
+    val date: String,                 
     val status: StatusType? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("edited_version") val editedVersion: String? = null,

@@ -3,9 +3,7 @@ package com.projectapp.tempus.data.social.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * DTO cho conversations table
- */
+
 @Serializable
 data class ConversationDto(
     val id: String,
@@ -21,9 +19,7 @@ data class ConversationDto(
     val createdAt: String
 )
 
-/**
- * DTO cho messages table
- */
+
 @Serializable
 data class MessageDto(
     val id: String,
@@ -40,9 +36,7 @@ data class MessageDto(
     val createdAt: String
 )
 
-/**
- * DTO để tạo conversation mới
- */
+
 @Serializable
 data class CreateConversationDto(
     @SerialName("participant1_id")
@@ -51,9 +45,7 @@ data class CreateConversationDto(
     val participant2Id: String
 )
 
-/**
- * DTO để gửi message mới
- */
+
 @Serializable
 data class CreateMessageDto(
     @SerialName("conversation_id")
@@ -65,9 +57,7 @@ data class CreateMessageDto(
     val messageType: String = "text"
 )
 
-/**
- * DTO để update conversation sau khi gửi message
- */
+
 @Serializable
 data class UpdateConversationDto(
     @SerialName("last_message_at")

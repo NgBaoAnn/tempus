@@ -26,9 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Premium Note Editor Screen with Modern Design
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditorScreen(
@@ -71,7 +69,7 @@ fun NoteEditorScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header decoration
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,7 +87,7 @@ fun NoteEditorScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Title field with premium styling
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -124,7 +122,7 @@ fun NoteEditorScreen(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Modern divider
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,7 +145,7 @@ fun NoteEditorScreen(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Content field with premium styling
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,7 +182,7 @@ fun NoteEditorScreen(
         }
     }
     
-    // Modern Delete Dialog
+    
     if (showDeleteDialog) {
         ModernDeleteDialog(
             onDismiss = { showDeleteDialog = false },
@@ -241,7 +239,7 @@ private fun EditorTopBar(
             }
         },
         actions = {
-            // Delete button (only for editing)
+            
             AnimatedVisibility(
                 visible = !isNew,
                 enter = fadeIn() + scaleIn(),
@@ -265,7 +263,7 @@ private fun EditorTopBar(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Save button with premium styling
+            
             Box(
                 modifier = Modifier
                     .padding(end = 8.dp)

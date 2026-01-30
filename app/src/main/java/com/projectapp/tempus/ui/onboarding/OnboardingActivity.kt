@@ -22,14 +22,7 @@ import com.projectapp.tempus.ui.auth.LoginActivity
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 
-/**
- * Onboarding Activity - Entry point của app
- * 
- * Flow:
- * 1. Đã đăng nhập → MainActivity
- * 2. Chưa đăng nhập + Đã xem onboarding → LoginActivity
- * 3. Chưa đăng nhập + Chưa xem onboarding → Onboarding → LoginActivity
- */
+
 class OnboardingActivity : ComponentActivity() {
     
     companion object {
@@ -51,10 +44,10 @@ class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Load session from storage and check login status
+        
         lifecycleScope.launch {
             try {
-                // Load session from storage first
+                
                 SupabaseClientProvider.client.auth.loadFromStorage()
                 Log.d(TAG, "Session loaded from storage")
                 
@@ -69,13 +62,13 @@ class OnboardingActivity : ComponentActivity() {
                 Log.e(TAG, "Error loading session: ${e.message}", e)
             }
             
-            // Check onboarding status if not logged in
+            
             if (isOnboardingCompleted(this@OnboardingActivity)) {
                 navigateToLogin()
                 return@launch
             }
             
-            // Show onboarding
+            
             showOnboarding()
         }
     }
@@ -112,9 +105,7 @@ class OnboardingActivity : ComponentActivity() {
     }
 }
 
-/**
- * Light theme for Onboarding
- */
+
 @Composable
 fun OnboardingTheme(
     content: @Composable () -> Unit

@@ -37,16 +37,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.R
 
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * PREMIUM CHAT INPUT - AI-Native Design
- * Features: Glass morphism, gradient send button, focus glow effect
- * ═══════════════════════════════════════════════════════════════════════════════
- */
 
-/**
- * Premium chat input with glass morphism design
- */
 @Composable
 fun ChatInput(
     value: String,
@@ -69,7 +60,7 @@ fun ChatInput(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Text input field with glass morphism
+            
             ChatTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -85,7 +76,7 @@ fun ChatInput(
                     .focusRequester(focusRequester)
             )
             
-            // Premium send button
+            
             PremiumSendButton(
                 onClick = {
                     if (value.isNotBlank() && enabled) {
@@ -100,9 +91,7 @@ fun ChatInput(
     }
 }
 
-/**
- * Glass morphism text field
- */
+
 @Composable
 private fun ChatTextField(
     value: String,
@@ -163,9 +152,7 @@ private fun ChatTextField(
     )
 }
 
-/**
- * Premium gradient send button with glow effect
- */
+
 @Composable
 private fun PremiumSendButton(
     onClick: () -> Unit,
@@ -191,7 +178,7 @@ private fun PremiumSendButton(
     }
     
     Box(contentAlignment = Alignment.Center) {
-        // Glow effect when enabled
+        
         if (enabled) {
             Box(
                 modifier = Modifier
@@ -202,7 +189,7 @@ private fun PremiumSendButton(
             )
         }
         
-        // Button
+        
         Box(
             modifier = modifier
                 .size(ChatDimens.SendButtonSize)

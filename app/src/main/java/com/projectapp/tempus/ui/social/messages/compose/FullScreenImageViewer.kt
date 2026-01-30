@@ -40,10 +40,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-/**
- * Full screen image viewer with zoom, download and share capabilities
- * Similar to Messenger's image viewer experience
- */
+
 @Composable
 fun FullScreenImageViewer(
     imageUrl: String,
@@ -52,12 +49,12 @@ fun FullScreenImageViewer(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     
-    // Zoom state
+    
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
     
-    // Loading states
+    
     var isDownloading by remember { mutableStateOf(false) }
     var isSharing by remember { mutableStateOf(false) }
 
@@ -74,7 +71,7 @@ fun FullScreenImageViewer(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            // Image with zoom & pan
+            
             AsyncImage(
                 model = imageUrl,
                 contentDescription = "Full screen image",
@@ -101,7 +98,7 @@ fun FullScreenImageViewer(
                 contentScale = ContentScale.Fit
             )
             
-            // Top bar with close button
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -123,7 +120,7 @@ fun FullScreenImageViewer(
                 }
             }
             
-            // Bottom bar with download & share
+            
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -132,7 +129,7 @@ fun FullScreenImageViewer(
                     .padding(24.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Download button
+                
                 FilledTonalIconButton(
                     onClick = {
                         scope.launch {
@@ -163,7 +160,7 @@ fun FullScreenImageViewer(
                     }
                 }
                 
-                // Share button
+                
                 FilledTonalIconButton(
                     onClick = {
                         scope.launch {
@@ -198,13 +195,11 @@ fun FullScreenImageViewer(
     }
 }
 
-/**
- * Download image to device gallery
- */
+
 private suspend fun downloadImage(context: Context, imageUrl: String) {
     withContext(Dispatchers.IO) {
         try {
-            // Load bitmap from URL
+            
             val loader = ImageLoader(context)
             val request = ImageRequest.Builder(context)
                 .data(imageUrl)
@@ -218,7 +213,7 @@ private suspend fun downloadImage(context: Context, imageUrl: String) {
                 val filename = "Tempus_${System.currentTimeMillis()}.jpg"
                 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // Android 10+ use MediaStore
+                    
                     val contentValues = ContentValues().apply {
                         put(MediaStore.Images.Media.DISPLAY_NAME, filename)
                         put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
@@ -236,7 +231,7 @@ private suspend fun downloadImage(context: Context, imageUrl: String) {
                         }
                     }
                 } else {
-                    // Legacy storage
+                    
                     val picturesDir = Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES
                     )
@@ -261,13 +256,11 @@ private suspend fun downloadImage(context: Context, imageUrl: String) {
     }
 }
 
-/**
- * Share image to other apps
- */
+
 private suspend fun shareImage(context: Context, imageUrl: String) {
     withContext(Dispatchers.IO) {
         try {
-            // Load bitmap from URL
+            
             val loader = ImageLoader(context)
             val request = ImageRequest.Builder(context)
                 .data(imageUrl)
@@ -278,7 +271,7 @@ private suspend fun shareImage(context: Context, imageUrl: String) {
             if (result is SuccessResult) {
                 val bitmap = (result.drawable as BitmapDrawable).bitmap
                 
-                // Save to cache for sharing
+                
                 val cachePath = File(context.cacheDir, "shared_images")
                 cachePath.mkdirs()
                 val file = File(cachePath, "share_${System.currentTimeMillis()}.jpg")
@@ -287,7 +280,7 @@ private suspend fun shareImage(context: Context, imageUrl: String) {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 }
                 
-                // Get URI via FileProvider
+                
                 val uri = FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",

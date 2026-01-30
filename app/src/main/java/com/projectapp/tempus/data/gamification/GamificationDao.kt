@@ -6,13 +6,10 @@ import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * DAO cho các operations liên quan đến Gamification
- */
+
 @Dao
 interface GamificationDao {
     
-    // ==================== User Points ====================
     
     @Query("SELECT * FROM user_points WHERE id = 'current_user'")
     fun getUserPoints(): Flow<UserPointsEntity?>
@@ -23,7 +20,6 @@ interface GamificationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateUserPoints(points: UserPointsEntity)
     
-    // ==================== Point History ====================
     
     @Insert
     suspend fun addPointHistory(history: PointHistoryEntity)
@@ -40,7 +36,12 @@ interface GamificationDao {
     @Query("SELECT SUM(points) FROM point_history WHERE timestamp >= :startTime")
     suspend fun getPointsEarnedSince(startTime: Long): Int?
     
-    // ==================== Trees ====================
+    @Query("DELETE FROM point_history")
+    suspend fun clearPointHistory()
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPointHistoryWithReplace(history: PointHistoryEntity)
+    
     
     @Query("SELECT * FROM trees WHERE isAlive = 1 ORDER BY createdAt DESC")
     fun getAliveTrees(): Flow<List<TreeEntity>>

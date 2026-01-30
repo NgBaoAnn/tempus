@@ -5,37 +5,37 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     
-    <!-- Circle background -->
+    
     <path
         android:fillColor="#4CAF50"
         android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z"/>
     
-    <!-- Target/Focus icon -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M12,8c-2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4 -1.79,-4 -4,-4zM12,14c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2 -0.9,2 -2,2z"/>
     
-    <!-- Center dot -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M12,11m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"/>
     
-    <!-- Top crosshair -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M11,5h2v3h-2z"/>
     
-    <!-- Bottom crosshair -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M11,16h2v3h-2z"/>
     
-    <!-- Left crosshair -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M5,11h3v2h-3z"/>
     
-    <!-- Right crosshair -->
+    
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M16,11h3v2h-3z"/>

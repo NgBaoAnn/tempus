@@ -17,17 +17,10 @@ import com.projectapp.tempus.data.sync.GamificationSyncManager
 import com.projectapp.tempus.data.sync.NotesSyncManager
 import com.projectapp.tempus.data.sync.SyncManager
 
-/**
- * Simple dependency provider for repositories
- * Centralizes creation of repositories and ensures proper singleton behavior
- * 
- * Usage:
- * val repo = RepositoryProvider.getScheduleRepository(context)
- * val syncManager = RepositoryProvider.getSyncManager(context)
- */
+
 object RepositoryProvider {
     
-    // Schedule repositories
+    
     @Volatile
     private var scheduleRepository: OfflineFirstScheduleRepository? = null
     
@@ -40,7 +33,7 @@ object RepositoryProvider {
     @Volatile
     private var syncManager: SyncManager? = null
     
-    // Gamification repositories
+    
     @Volatile
     private var gamificationRepository: OfflineFirstGamificationRepository? = null
     
@@ -53,7 +46,7 @@ object RepositoryProvider {
     @Volatile
     private var gamificationSyncManager: GamificationSyncManager? = null
     
-    // Notes repositories
+    
     @Volatile
     private var notesRepository: NotesRepository? = null
     
@@ -63,11 +56,7 @@ object RepositoryProvider {
     @Volatile
     private var notesSyncManager: NotesSyncManager? = null
     
-    // ==================== SCHEDULE REPOSITORIES ====================
     
-    /**
-     * Get the offline-first schedule repository (main repository for UI)
-     */
     fun getScheduleRepository(context: Context): OfflineFirstScheduleRepository {
         return scheduleRepository ?: synchronized(this) {
             scheduleRepository ?: createScheduleRepository(context).also {
@@ -76,9 +65,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get local repository (Room operations only)
-     */
+    
     fun getLocalRepository(context: Context): LocalScheduleRepository {
         return localRepository ?: synchronized(this) {
             localRepository ?: createLocalRepository(context).also {
@@ -87,9 +74,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get remote repository (Supabase operations, for sync only)
-     */
+    
     fun getRemoteRepository(): SupabaseScheduleRepository {
         return remoteRepository ?: synchronized(this) {
             remoteRepository ?: SupabaseScheduleRepository().also {
@@ -98,9 +83,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get sync manager
-     */
+    
     fun getSyncManager(context: Context): SyncManager {
         return syncManager ?: synchronized(this) {
             syncManager ?: createSyncManager(context).also {
@@ -109,11 +92,7 @@ object RepositoryProvider {
         }
     }
     
-    // ==================== GAMIFICATION REPOSITORIES ====================
     
-    /**
-     * Get the offline-first gamification repository (main repository for UI)
-     */
     fun getGamificationRepository(context: Context): GamificationRepository {
         return gamificationRepository ?: synchronized(this) {
             gamificationRepository ?: createGamificationRepository(context).also {
@@ -122,9 +101,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get local gamification repository (Room operations only)
-     */
+    
     fun getLocalGamificationRepository(context: Context): LocalGamificationRepository {
         return localGamificationRepository ?: synchronized(this) {
             localGamificationRepository ?: createLocalGamificationRepository(context).also {
@@ -133,9 +110,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get remote gamification repository (Supabase operations, for sync only)
-     */
+    
     fun getRemoteGamificationRepository(): SupabaseGamificationRepository {
         return remoteGamificationRepository ?: synchronized(this) {
             remoteGamificationRepository ?: SupabaseGamificationRepository().also {
@@ -144,9 +119,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get gamification sync manager for pushing/pulling gamification data
-     */
+    
     fun getGamificationSyncManager(context: Context): GamificationSyncManager {
         return gamificationSyncManager ?: synchronized(this) {
             gamificationSyncManager ?: createGamificationSyncManager(context).also {
@@ -155,11 +128,7 @@ object RepositoryProvider {
         }
     }
     
-    // ==================== NOTES REPOSITORIES ====================
     
-    /**
-     * Get notes repository (local-first)
-     */
     fun getNotesRepository(context: Context): NotesRepository {
         return notesRepository ?: synchronized(this) {
             notesRepository ?: NotesRepository(context).also {
@@ -168,9 +137,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get remote notes repository (Supabase operations, for sync only)
-     */
+    
     fun getRemoteNotesRepository(): SupabaseNotesRepository {
         return remoteNotesRepository ?: synchronized(this) {
             remoteNotesRepository ?: SupabaseNotesRepository().also {
@@ -179,9 +146,7 @@ object RepositoryProvider {
         }
     }
     
-    /**
-     * Get notes sync manager for pushing/pulling notes data
-     */
+    
     fun getNotesSyncManager(context: Context): NotesSyncManager {
         return notesSyncManager ?: synchronized(this) {
             notesSyncManager ?: createNotesSyncManager(context).also {
@@ -190,11 +155,7 @@ object RepositoryProvider {
         }
     }
     
-    // ==================== CLEAR ====================
     
-    /**
-     * Clear all instances (call on logout)
-     */
     fun clear() {
         scheduleRepository = null
         localRepository = null
@@ -204,10 +165,9 @@ object RepositoryProvider {
         gamificationSyncManager = null
         notesRepository = null
         notesSyncManager = null
-        // Note: Don't clear remote repositories as they're stateless
+        
     }
     
-    // ==================== PRIVATE FACTORY METHODS ====================
     
     private fun createScheduleRepository(context: Context): OfflineFirstScheduleRepository {
         val localRepo = getLocalRepository(context)
@@ -231,7 +191,7 @@ object RepositoryProvider {
     }
     
     private fun createLocalGamificationRepository(context: Context): LocalGamificationRepository {
-        // Use TempusDatabase (unified) instead of separate GamificationDatabase
+        
         val database = TempusDatabase.getDatabase(context)
         return LocalGamificationRepository(database.gamificationDao())
     }

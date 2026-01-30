@@ -148,7 +148,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
     private fun calculateEndTime(startIso: String, durationStr: String): String {
         return try {
             val start = java.time.LocalDateTime.parse(startIso, java.time.format.DateTimeFormatter.ISO_DATE_TIME)
-            // durationStr format "HH:mm:ss"
+            
             val parts = durationStr.split(":")
             val h = parts.getOrNull(0)?.toLongOrNull() ?: 0
             val m = parts.getOrNull(1)?.toLongOrNull() ?: 0
@@ -157,7 +157,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
             val end = start.plusHours(h).plusMinutes(m).plusSeconds(s)
             end.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)
         } catch (e: Exception) {
-            startIso // Fallback
+            startIso 
         }
     }
 
@@ -220,31 +220,28 @@ class SupabaseScheduleRepository : ScheduleRepository {
     }
 
     override suspend fun deleteSchedule(id: String) {
-        // First delete related sub_task (FK constraint)
+        
         supabase.from("sub_task")
             .delete {
                 filter { eq("schedule_id", id) }
             }
         
-        // Delete related schedule_items (FK constraint)
+        
         supabase.from("schedule_items")
             .delete {
                 filter { eq("task_id", id) }
             }
         
-        // Then delete the schedule
+        
         supabase.from("schedule")
             .delete {
                 filter { eq("id", id) }
             }
     }
     
-    /**
-     * Delete all schedules for a user that start from a specific date onwards
-     * This will also delete related sub_tasks and schedule_items
-     */
+    
     override suspend fun deleteSchedulesFromDate(userId: String, fromDate: String): Int {
-        // Get all schedules for this user that start from the given date
+        
         val schedulesToDelete = supabase.from("schedule")
             .select {
                 filter {
@@ -254,7 +251,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
             }
             .decodeList<ScheduleRow>()
         
-        // Delete each schedule with its related data
+        
         schedulesToDelete.forEach { schedule ->
             deleteSchedule(schedule.id)
         }
@@ -262,12 +259,9 @@ class SupabaseScheduleRepository : ScheduleRepository {
         return schedulesToDelete.size
     }
     
-    /**
-     * Set end_date for all schedules of a user to stop them from appearing from today onwards.
-     * This keeps historical data - schedules still appear for past dates.
-     */
+    
     override suspend fun setEndDateForAllSchedules(userId: String, endDate: String): Int {
-        // Get all schedules for this user that don't have an end_date or have end_date > today
+        
         val schedulesToUpdate = supabase.from("schedule")
             .select {
                 filter {
@@ -277,7 +271,7 @@ class SupabaseScheduleRepository : ScheduleRepository {
             .decodeList<ScheduleRow>()
             .filter { it.endDate == null || it.endDate > endDate }
         
-        // Update each schedule with end_date
+        
         schedulesToUpdate.forEach { schedule ->
             supabase.from("schedule")
                 .update(
@@ -290,9 +284,6 @@ class SupabaseScheduleRepository : ScheduleRepository {
         return schedulesToUpdate.size
     }
     
-    // ============================================
-    // SUBTASK METHODS
-    // ============================================
     
     override suspend fun getSubTasks(scheduleId: String): List<SubTaskRow> {
         return supabase.from("sub_task")

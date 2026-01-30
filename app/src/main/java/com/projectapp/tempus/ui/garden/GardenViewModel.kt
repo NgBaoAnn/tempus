@@ -29,7 +29,7 @@ data class GardenUiState(
 
 class GardenViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Use OfflineFirstGamificationRepository for offline-first functionality
+    
     private val repository = RepositoryProvider.getGamificationRepository(application)
     private val pointsManager = PointsManager(repository)
 
@@ -45,14 +45,14 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            // Observe points
+            
             launch {
                 pointsManager.getUserPoints().collectLatest { points ->
                     _uiState.update { it.copy(userPoints = points) }
                 }
             }
 
-            // Observe trees
+            
             launch {
                 pointsManager.getAliveTrees().collectLatest { trees ->
                     val mature = trees.count { TreeState.fromString(it.state) == TreeState.TREE }
@@ -82,7 +82,7 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             checkDeadTrees()
-            // Force reset isLoading after a short delay to handle case where flow doesn't emit
+            
             kotlinx.coroutines.delay(500)
             _uiState.update { it.copy(isLoading = false) }
         }
@@ -94,7 +94,7 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
             val treeId = pointsManager.plantTree(type)
             if (treeId != null) {
                 onSuccess()
-                // isLoading will be set to false when trees flow emits
+                
             } else {
                 _uiState.update { it.copy(isLoading = false) }
                 onError("Không đủ điểm để trồng cây!")
@@ -119,7 +119,7 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 repository.killTree(tree.id)
                 onSuccess()
-                // isLoading will be set to false when trees flow emits
+                
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false) }
                 onError(e.message ?: "Lỗi khi xóa cây")

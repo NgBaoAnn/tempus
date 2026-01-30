@@ -1,8 +1,6 @@
 package com.projectapp.tempus.domain.model
 
-/**
- * Các trạng thái phát triển của cây
- */
+
 enum class TreeState(
     val displayName: String,
     val minPoints: Int,

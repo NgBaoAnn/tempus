@@ -15,32 +15,27 @@ import java.time.format.DateTimeFormatter
 
 class BuildTimelineUseCase {
 
-    /**
-     * 1. Hàm parse chuỗi thời gian từ Database (timestamptz).
-     * Xử lý linh hoạt các trường hợp có hoặc không có 'T', có hoặc không có offset.
-     */
+    
     private fun parseToZonedDateTime(s: String): ZonedDateTime {
-        // Chuẩn hóa chuỗi: Postgres có thể trả về "2025-12-21 12:00:00+00" (dấu cách)
-        // Java LocalTime thích "2025-12-21T12:00:00+00" (chữ T)
+        
+        
         val isoString = s.replace(" ", "T")
 
         return try {
-            // Trường hợp chuẩn ISO có Offset (VD: ...+00 hoặc ...+07:00)
+            
             OffsetDateTime.parse(isoString).toZonedDateTime()
         } catch (_: Exception) {
             try {
-                // Trường hợp thiếu Offset -> Mặc định gán là UTC
+                
                 LocalDateTime.parse(isoString).atZone(ZoneId.of("UTC"))
             } catch (_: Exception) {
-                // Fallback: Lấy ngày đầu ngày hệ thống
+                
                 LocalDate.parse(s.split(" ")[0]).atStartOfDay(ZoneId.systemDefault())
             }
         }
     }
 
-    /**
-     * 2. Hàm parse Duration từ chuỗi Postgres "HH:mm:ss"
-     */
+    
     private fun parseDuration(timeStr: String?): Duration {
         if (timeStr.isNullOrEmpty()) return Duration.ZERO
         return try {
@@ -50,7 +45,7 @@ class BuildTimelineUseCase {
             val s = if (parts.size > 2) parts[2].toLong() else 0L
             Duration.ofHours(h).plusMinutes(m).plusSeconds(s)
         } catch (e: Exception) {
-            Duration.ofMinutes(30) // Fallback 30p nếu lỗi
+            Duration.ofMinutes(30) 
         }
     }
 
@@ -64,38 +59,37 @@ class BuildTimelineUseCase {
 
         val itemsByTask = items.associateBy { it.taskId }
 
-        // Lấy múi giờ hiện tại của điện thoại (VD: Asia/Ho_Chi_Minh)
+        
         val systemZone = ZoneId.systemDefault()
 
-        // Hàm kiểm tra xem Task có diễn ra trong ngày targetDate hay không
+        
         fun occursOnDate(s: ScheduleRow): Boolean {
-            // Quan trọng: Phải chuyển giờ DB sang giờ Local trước khi so sánh ngày
+            
             val startZdt = parseToZonedDateTime(s.startTimeDate).withZoneSameInstant(systemZone)
             val startDate = startZdt.toLocalDate()
 
-            // Check end_date - if set, schedule doesn't appear after this date
-            // endDate is the LAST day the schedule appears (inclusive)
+            
             val endDate = s.endDate?.let { 
                 try { LocalDate.parse(it.split("T")[0].split(" ")[0]) } 
                 catch (_: Exception) { null } 
             }
             if (endDate != null && targetDate.isAfter(endDate)) {
-                return false // Schedule has ended, don't show on days AFTER endDate
+                return false 
             }
 
-            // Phải sau ngày bắt đầu
+            
             if (targetDate.isBefore(startDate)) return false
 
             return when (s.repeat) {
                 RepeatType.once -> targetDate == startDate
-                RepeatType.daily -> true // Đã check isBefore ở trên
+                RepeatType.daily -> true 
                 RepeatType.weekly -> targetDate.dayOfWeek == startDate.dayOfWeek
                 RepeatType.monthly -> targetDate.dayOfMonth == startDate.dayOfMonth
                 RepeatType.custom -> {
-                    // Parse repeat_days: "1,3,5" = Thứ 2, 4, 6 (1=Monday, 7=Sunday)
+                    
                     val repeatDays = s.repeatDays?.split(",")?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
                     if (repeatDays.isEmpty()) return false
-                    // DayOfWeek.MONDAY.value = 1, SUNDAY.value = 7
+                    
                     repeatDays.contains(targetDate.dayOfWeek.value)
                 }
             }
@@ -110,30 +104,30 @@ class BuildTimelineUseCase {
 
                 val ev = item?.editedVersion?.let { editedVersions[it] }
 
-                // ----- label safe (UNKNOWN fallback) -----
+                
                 val lbEnum = ev?.label ?: s.label ?: ScheduleLabel.book
                 val labelStr = if (lbEnum == ScheduleLabel.UNKNOWN) "book" else lbEnum.name
 
-                // ----- color -----
+                
                 val colorStr = (ev?.color ?: s.color) ?: "#808080"
 
-                // ----- start time -----
+                
                 val sourceIso = ev?.startTimeDate ?: s.startTimeDate
                 val utcTime = parseToZonedDateTime(sourceIso)
                 val localZonedTime = utcTime.withZoneSameInstant(systemZone)
                 val uiStartTime = LocalDateTime.of(targetDate, localZonedTime.toLocalTime())
 
-                // ----- duration -----
+                
                 val durationStr = ev?.implementationTime ?: s.implementationTime
                 val uiDuration = parseDuration(durationStr)
 
-                // ----- createdAt parsing (for sorting) -----
+                
                 val createdAtLdt = s.createdAt?.let { 
                     try { parseToZonedDateTime(it).withZoneSameInstant(systemZone).toLocalDateTime() } 
                     catch (_: Exception) { null }
                 }
 
-                // ----- subtasks -----
+                
                 val subtaskInfos = subtasksMap[s.id]?.map { st ->
                     SubtaskInfo(
                         id = st.id ?: "",
@@ -142,10 +136,10 @@ class BuildTimelineUseCase {
                     )
                 } ?: emptyList()
 
-                // ----- title -----
+                
                 val titleStr = ev?.name ?: s.name
 
-                // ----- priority -----
+                
                 val priorityVal = ev?.priority ?: s.priority ?: PriorityType.medium
 
                 TimelineBlock(

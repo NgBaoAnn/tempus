@@ -24,21 +24,17 @@ import com.projectapp.tempus.domain.usecase.DayHeatmapData
 import com.projectapp.tempus.domain.usecase.HeatLevel
 import java.time.LocalDate
 
-/**
- * Single day cell in the heatmap calendar grid.
- * Displays day number, completion indicator, and task count.
- * Background color represents completion rate.
- */
+
 @Composable
 fun HeatmapDayCell(
-    day: DayHeatmapData?,  // null = padding cell (empty)
+    day: DayHeatmapData?,  
     isToday: Boolean = false,
     isSelected: Boolean = false,
     isDarkMode: Boolean = false,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // Handle padding cells (null days)
+    
     if (day == null) {
         Box(
             modifier = modifier
@@ -48,7 +44,7 @@ fun HeatmapDayCell(
         return
     }
     
-    // Animate background color changes
+    
     val backgroundColor by animateColorAsState(
         targetValue = HeatmapColors.getBackgroundColor(day.heatLevel, isDarkMode),
         animationSpec = tween(durationMillis = 300),
@@ -58,7 +54,7 @@ fun HeatmapDayCell(
     val textColor = HeatmapColors.getTextColor(day.heatLevel, isDarkMode)
     val indicatorColor = HeatmapColors.getIndicatorColor(day.heatLevel)
     
-    // Border for today/selected state
+    
     val borderModifier = when {
         isSelected -> Modifier.border(
             width = 2.dp,
@@ -88,7 +84,7 @@ fun HeatmapDayCell(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(1.dp)
         ) {
-            // Day number
+            
             Text(
                 text = day.date.dayOfMonth.toString(),
                 fontSize = 13.sp,
@@ -98,7 +94,7 @@ fun HeatmapDayCell(
                 lineHeight = 14.sp
             )
             
-            // Completion indicator (only show if has tasks)
+            
             if (day.totalTasks > 0) {
                 Spacer(modifier = Modifier.height(1.dp))
                 
@@ -106,7 +102,7 @@ fun HeatmapDayCell(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Status dot
+                    
                     Box(
                         modifier = Modifier
                             .size(5.dp)
@@ -116,7 +112,7 @@ fun HeatmapDayCell(
                     
                     Spacer(modifier = Modifier.width(2.dp))
                     
-                    // Task count
+                    
                     Text(
                         text = "${day.completedTasks}/${day.totalTasks}",
                         fontSize = 9.sp,
@@ -130,9 +126,7 @@ fun HeatmapDayCell(
     }
 }
 
-/**
- * Empty/Padding cell for calendar grid alignment.
- */
+
 @Composable
 fun EmptyDayCell(
     modifier: Modifier = Modifier
@@ -146,9 +140,7 @@ fun EmptyDayCell(
     )
 }
 
-/**
- * Preview-style cell for skeleton loading.
- */
+
 @Composable
 fun SkeletonDayCell(
     modifier: Modifier = Modifier

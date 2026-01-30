@@ -60,9 +60,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material.ripple.rememberRipple
 
-/**
- * Get drawable resource ID for schedule label - matches existing drawable files
- */
+
 fun getLabelIconResId(label: String): Int = when (label.lowercase()) {
     "wakeup" -> R.drawable.wakeup
     "eat" -> R.drawable.eat
@@ -74,7 +72,7 @@ fun getLabelIconResId(label: String): Int = when (label.lowercase()) {
     "sleep" -> R.drawable.sleep
     "clean" -> R.drawable.clean
     "garden" -> R.drawable.ic_garden
-    else -> R.drawable.book  // Default
+    else -> R.drawable.book  
 }
 
 @Composable
@@ -83,7 +81,7 @@ fun TimelineScreen(
     selectedDate: LocalDate,
     monthYear: String,
     weeks: List<List<LocalDate>>,
-    // Search/Sort/Filter state
+    
     searchQuery: String = "",
     sortBy: SortOption = SortOption.START_TIME,
     filterLabels: Set<ScheduleLabel> = emptySet(),
@@ -98,7 +96,7 @@ fun TimelineScreen(
     onVoiceClick: () -> Unit = {},
     onTaskClick: (TimelineBlock) -> Unit,
     onStatusToggle: (TimelineBlock) -> Unit,
-    // Search/Sort/Filter callbacks
+    
     onSearchQueryChanged: (String) -> Unit = {},
     onSortChanged: (SortOption) -> Unit = {},
     onFilterLabelToggle: (ScheduleLabel) -> Unit = {},
@@ -117,7 +115,7 @@ fun TimelineScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Voice Command (Small FAB style)
+                
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -139,7 +137,7 @@ fun TimelineScreen(
                     )
                 }
                 
-                // Add Task FAB (Main)
+                
                 Box(
                     modifier = Modifier
                         .size(56.dp)
@@ -163,13 +161,13 @@ fun TimelineScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        // Use LazyColumn for collapsible header behavior
+        
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Fixed Top Bar (always visible)
+            
             item(key = "topbar") {
                 TimelineTopBar(
                     monthYear = monthYear,
@@ -179,12 +177,12 @@ fun TimelineScreen(
                 )
             }
             
-            // Daily Quote Card (scrolls away)
+            
             item(key = "quote") {
                 DailyQuoteCard(quote = dailyQuote)
             }
             
-            // Week Calendar - STICKY (sticks to top when scrolling)
+            
             stickyHeader(key = "week_calendar") {
                 Column(
                     modifier = Modifier
@@ -201,7 +199,7 @@ fun TimelineScreen(
                 }
             }
             
-            // Filter/Sort Bar (scrolls with content but after calendar)
+            
             item(key = "filter_bar") {
                 FilterSortBar(
                     searchQuery = searchQuery,
@@ -221,10 +219,10 @@ fun TimelineScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
             
-            // Timeline Content
+            
             when {
                 isLoading -> {
-                    // Shimmer Loading Skeleton items
+                    
                     items(5, key = { "skeleton_$it" }) {
                         SkeletonTaskItemInline()
                     }
@@ -235,7 +233,7 @@ fun TimelineScreen(
                     }
                 }
                 else -> {
-                    // Task items
+                    
                     itemsIndexed(
                         items = blocks,
                         key = { _, block -> block.taskId }
@@ -243,12 +241,12 @@ fun TimelineScreen(
                         val nextBlock = blocks.getOrNull(index + 1)
                         val blockEndTime = block.startTime.plus(block.duration)
                         
-                        // Check for overlap: current block ends AFTER next block starts
+                        
                         val hasOverlap = nextBlock != null && 
                             !blockEndTime.isBefore(nextBlock.startTime) &&
                             !blockEndTime.isEqual(nextBlock.startTime)
                         
-                        // Check for free time: current block ends BEFORE next block starts
+                        
                         val showFreeTime = nextBlock != null && 
                             blockEndTime.isBefore(nextBlock.startTime)
                         
@@ -260,12 +258,12 @@ fun TimelineScreen(
                             onSubtaskToggle = onSubtaskToggle
                         )
                         
-                        // Show overlap warning between overlapping tasks
+                        
                         if (hasOverlap && nextBlock != null) {
                             OverlapWarning()
                         }
                         
-                        // Show free time between tasks with gap
+                        
                         if (showFreeTime && nextBlock != null) {
                             val freeStart = blockEndTime
                             val freeEnd = nextBlock.startTime
@@ -279,7 +277,7 @@ fun TimelineScreen(
                         }
                     }
                     
-                    // Bottom padding for FAB
+                    
                     item(key = "bottom_spacer") {
                         Spacer(modifier = Modifier.height(80.dp))
                     }
@@ -289,9 +287,7 @@ fun TimelineScreen(
     }
 }
 
-/**
- * Inline skeleton item for LazyColumn
- */
+
 @Composable
 private fun SkeletonTaskItemInline() {
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -314,9 +310,7 @@ private fun SkeletonTaskItemInline() {
     SkeletonTaskItem(shimmerBrush)
 }
 
-/**
- * Shimmer Loading Skeleton for Timeline
- */
+
 @Composable
 private fun TimelineLoadingSkeleton() {
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -362,7 +356,7 @@ private fun SkeletonTaskItem(brush: Brush) {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Time skeleton
+        
         Box(
             modifier = Modifier
                 .width(50.dp)
@@ -371,7 +365,7 @@ private fun SkeletonTaskItem(brush: Brush) {
                 .background(brush)
         )
         
-        // Task card skeleton
+        
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -379,7 +373,7 @@ private fun SkeletonTaskItem(brush: Brush) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Title skeleton
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
@@ -388,7 +382,7 @@ private fun SkeletonTaskItem(brush: Brush) {
                     .background(brush)
             )
             
-            // Subtitle skeleton
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -397,7 +391,7 @@ private fun SkeletonTaskItem(brush: Brush) {
                     .background(brush)
             )
             
-            // Duration skeleton
+            
             Box(
                 modifier = Modifier
                     .width(80.dp)
@@ -409,9 +403,7 @@ private fun SkeletonTaskItem(brush: Brush) {
     }
 }
 
-/**
- * Swipeable Week Calendar Strip using HorizontalPager
- */
+
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun SwipeableWeekCalendarStrip(
@@ -421,7 +413,7 @@ fun SwipeableWeekCalendarStrip(
 ) {
     if (weeks.isEmpty()) return
     
-    // Find the index of the current week containing selected date
+    
     val currentWeekIndex = weeks.indexOfFirst { week ->
         week.any { it == selectedDate }
     }.coerceAtLeast(0)
@@ -431,7 +423,7 @@ fun SwipeableWeekCalendarStrip(
         pageCount = { weeks.size }
     )
     
-    // Sync pager with selected date
+    
     LaunchedEffect(selectedDate) {
         val newIndex = weeks.indexOfFirst { week -> week.any { it == selectedDate } }
         if (newIndex >= 0 && newIndex != pagerState.currentPage) {
@@ -442,10 +434,10 @@ fun SwipeableWeekCalendarStrip(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
+            .background(MaterialTheme.colorScheme.surface) 
             .padding(bottom = 8.dp)
     ) {
-        // Day labels (T2, T3, T4, T5, T6, T7, CN)
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -473,7 +465,7 @@ fun SwipeableWeekCalendarStrip(
         
         Spacer(modifier = Modifier.height(4.dp))
         
-        // Swipeable week pages
+        
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxWidth()
@@ -498,7 +490,7 @@ fun SwipeableWeekCalendarStrip(
                             .clip(CircleShape)
                             .background(
                                 when {
-                                    isSelected -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
+                                    isSelected -> MaterialTheme.colorScheme.primary 
                                     else -> Color.Transparent
                                 }
                             )
@@ -516,7 +508,7 @@ fun SwipeableWeekCalendarStrip(
                             text = date.dayOfMonth.toString(),
                             color = when {
                                 isSelected -> Color.White
-                                isToday -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
+                                isToday -> MaterialTheme.colorScheme.primary 
                                 else -> MaterialTheme.colorScheme.onSurface
                             },
                             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
@@ -540,23 +532,23 @@ private fun TimelineTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
+            .background(MaterialTheme.colorScheme.surface) 
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Month Picker
+        
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)) // Explicit primary tint
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)) 
                 .clickable { onMonthPickerClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = monthYear,
-                color = MaterialTheme.colorScheme.primary, // Explicit Primary Blue
+                color = MaterialTheme.colorScheme.primary, 
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
@@ -569,12 +561,12 @@ private fun TimelineTopBar(
             )
         }
         
-        // Right icons
+        
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Streak badge (chỉ hiện khi có streak > 0)
+            
             if (currentStreak > 0) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -599,12 +591,12 @@ private fun TimelineTopBar(
                 }
             }
             
-            // Garden button - dùng icon từ drawable
+            
             IconButton(onClick = onGardenClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_garden),
                     contentDescription = stringResource(R.string.timeline_garden),
-                    tint = Color.Unspecified, // Giữ màu gốc từ drawable
+                    tint = Color.Unspecified, 
                     modifier = Modifier.size(34.dp)
                 )
             }
@@ -625,10 +617,10 @@ fun WeekCalendarStrip(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface) // Ensure surface background
+            .background(MaterialTheme.colorScheme.surface) 
             .padding(bottom = 8.dp)
     ) {
-        // Day labels (T2, T3, T4, T5, T6, T7, CN)
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -656,7 +648,7 @@ fun WeekCalendarStrip(
         
         Spacer(modifier = Modifier.height(4.dp))
         
-        // Day numbers
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -675,7 +667,7 @@ fun WeekCalendarStrip(
                         .clip(CircleShape)
                         .background(
                             when {
-                                isSelected -> TempusDesignSystem.Primary // Explicit Primary Blue
+                                isSelected -> TempusDesignSystem.Primary 
                                 else -> Color.Transparent
                             }
                         )
@@ -696,7 +688,7 @@ fun WeekCalendarStrip(
                         text = date.dayOfMonth.toString(),
                         color = when {
                             isSelected -> Color.White
-                            isToday -> MaterialTheme.colorScheme.primary // Explicit Primary Blue
+                            isToday -> MaterialTheme.colorScheme.primary 
                             else -> MaterialTheme.colorScheme.onSurface
                         },
                         fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
@@ -715,7 +707,7 @@ fun TimelineList(
     onStatusToggle: (TimelineBlock) -> Unit,
     onSubtaskToggle: (subtaskId: String, isDone: Boolean) -> Unit = { _, _ -> }
 ) {
-    // Staggered animation state
+    
     var visible by remember { mutableStateOf(false) }
     
     LaunchedEffect(blocks) {
@@ -738,7 +730,7 @@ fun TimelineList(
                 modifier = Modifier.fadeInSlideUp(
                     index = index,
                     visible = visible,
-                    delayPerItem = 40 // Faster cascade
+                    delayPerItem = 40 
                 )
             ) {
                 TimelineItem(
@@ -757,7 +749,7 @@ fun TimelineList(
                 
                 Box(
                     modifier = Modifier.fadeInSlideUp(
-                        index = index, // Sync with task item
+                        index = index, 
                         visible = visible,
                         delayPerItem = 40,
                         initialOffsetY = 10f
@@ -796,11 +788,11 @@ fun TimelineItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = !isDone) { onTaskClick() } // Disable click on completed tasks
+            .clickable(enabled = !isDone) { onTaskClick() } 
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Time Column
+        
         Column(
             modifier = Modifier.width(50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -824,12 +816,12 @@ fun TimelineItem(
         
         Spacer(modifier = Modifier.width(8.dp))
         
-        // Vertical Line + Dot
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(24.dp)
         ) {
-            // Colored Dot
+            
             Box(
                 modifier = Modifier
                     .size(12.dp)
@@ -837,7 +829,7 @@ fun TimelineItem(
                     .background(taskColor)
             )
             
-            // Vertical Line (if not last)
+            
             if (!isLast) {
                 Box(
                     modifier = Modifier
@@ -850,8 +842,7 @@ fun TimelineItem(
         
         Spacer(modifier = Modifier.width(12.dp))
         
-        // Task Card
-        // Task Card with Premium Styling
+        
         val isHighPriority = block.priority == PriorityType.high
         
         TempusCard(
@@ -864,7 +855,7 @@ fun TimelineItem(
             gradientColors = if (isHighPriority) 
                 listOf(TempusDesignSystem.Error.copy(alpha = 0.1f), MaterialTheme.colorScheme.surface)
             else TempusDesignSystem.Gradients.Primary,
-            onClick = if (isDone) null else onTaskClick // Disable click on completed tasks
+            onClick = if (isDone) null else onTaskClick 
         ) {
             Row(
                 modifier = Modifier
@@ -872,11 +863,11 @@ fun TimelineItem(
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Icon based on label with simplified container
+                
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp)) // Softer corners
+                        .clip(RoundedCornerShape(12.dp)) 
                         .background(taskColor.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -890,7 +881,7 @@ fun TimelineItem(
                 
                 Spacer(modifier = Modifier.width(12.dp))
                 
-                // Title & Time
+                
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
@@ -904,7 +895,7 @@ fun TimelineItem(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         
-                        // Priority Badge - Premium Glow
+                        
                         if (block.priority != PriorityType.medium) {
                             Spacer(modifier = Modifier.width(6.dp))
                             Box(
@@ -943,14 +934,14 @@ fun TimelineItem(
                     )
                 }
                 
-                // Checkbox with Premium Animation
+                
                 Box(
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(if (isDone) taskColor else Color.Transparent)
-                        .scalePressEffect() // Interactive feel
+                        .scalePressEffect() 
                         .then(
                             if (!isDone) {
                                 Modifier.border(
@@ -978,7 +969,7 @@ fun TimelineItem(
                 }
             }
             
-            // Subtasks display moved outside main row for better layout
+            
             if (block.subtasks.isNotEmpty()) {
                 Column(modifier = Modifier.padding(start = 64.dp, end = 12.dp, bottom = 12.dp)) {
                     block.subtasks.take(3).forEach { subtask ->
@@ -1033,12 +1024,10 @@ fun TimelineItem(
     }
 }
 
-/**
- * Warning indicator for overlapping tasks - matches TimelineItem layout
- */
+
 @Composable
 fun OverlapWarning() {
-    val warningColor = Color(0xFFFF9800) // Orange/Amber
+    val warningColor = Color(0xFFFF9800) 
     
     Row(
         modifier = Modifier
@@ -1046,12 +1035,12 @@ fun OverlapWarning() {
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Time Column placeholder (same width as TimelineItem)
+        
         Spacer(modifier = Modifier.width(50.dp))
         
         Spacer(modifier = Modifier.width(8.dp))
         
-        // Vertical Line area (same as TimelineItem)
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(24.dp)
@@ -1066,7 +1055,7 @@ fun OverlapWarning() {
         
         Spacer(modifier = Modifier.width(12.dp))
         
-        // Warning Card (same position as task card)
+        
         Row(
             modifier = Modifier
                 .weight(1f)
@@ -1117,7 +1106,7 @@ fun FreeTimeBlock(
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Time Column
+        
         Column(
             modifier = Modifier.width(50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -1141,7 +1130,7 @@ fun FreeTimeBlock(
         
         Spacer(modifier = Modifier.width(8.dp))
         
-        // Vertical Line
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(24.dp)
@@ -1156,7 +1145,7 @@ fun FreeTimeBlock(
         
         Spacer(modifier = Modifier.width(12.dp))
         
-        // Free Time Content
+        
         Column(
             modifier = Modifier
                 .weight(1f)

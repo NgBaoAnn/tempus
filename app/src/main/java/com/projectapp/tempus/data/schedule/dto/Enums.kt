@@ -9,7 +9,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-// ===================== RepeatType =====================
+
 object RepeatTypeSerializer : KSerializer<RepeatType> {
     override val descriptor: SerialDescriptor = 
         PrimitiveSerialDescriptor("RepeatType", PrimitiveKind.STRING)
@@ -22,7 +22,7 @@ object RepeatTypeSerializer : KSerializer<RepeatType> {
         val stringValue = decoder.decodeString()
         return RepeatType.entries.firstOrNull { 
             it.name.equals(stringValue, ignoreCase = true) 
-        } ?: RepeatType.once // fallback to 'once' if unknown
+        } ?: RepeatType.once 
     }
 }
 
@@ -32,10 +32,10 @@ enum class RepeatType {
     @SerialName("daily") daily,
     @SerialName("weekly") weekly,
     @SerialName("monthly") monthly,
-    @SerialName("custom") custom // Lặp theo các thứ tùy chọn (dùng với repeat_days)
+    @SerialName("custom") custom 
 }
 
-// ===================== StatusType =====================
+
 object StatusTypeSerializer : KSerializer<StatusType> {
     override val descriptor: SerialDescriptor = 
         PrimitiveSerialDescriptor("StatusType", PrimitiveKind.STRING)
@@ -48,7 +48,7 @@ object StatusTypeSerializer : KSerializer<StatusType> {
         val stringValue = decoder.decodeString()
         return StatusType.entries.firstOrNull { 
             it.name.equals(stringValue, ignoreCase = true) 
-        } ?: StatusType.planned // fallback to 'planned' if unknown
+        } ?: StatusType.planned 
     }
 }
 
@@ -59,7 +59,7 @@ enum class StatusType {
     @SerialName("delete") delete
 }
 
-// ===================== SourceType =====================
+
 object SourceTypeSerializer : KSerializer<SourceType> {
     override val descriptor: SerialDescriptor = 
         PrimitiveSerialDescriptor("SourceType", PrimitiveKind.STRING)
@@ -72,7 +72,7 @@ object SourceTypeSerializer : KSerializer<SourceType> {
         val stringValue = decoder.decodeString()
         return SourceType.entries.firstOrNull { 
             it.name.equals(stringValue, ignoreCase = true) 
-        } ?: SourceType.manual // fallback to 'manual' if unknown
+        } ?: SourceType.manual 
     }
 }
 
@@ -83,11 +83,7 @@ enum class SourceType {
     @SerialName("personalization") PERSONALIZATION
 }
 
-// ===================== ScheduleLabel =====================
-/**
- * Custom serializer cho ScheduleLabel để xử lý các giá trị không xác định từ database
- * Thay vì crash với JSON parse error, nó sẽ trả về UNKNOWN
- */
+
 object ScheduleLabelSerializer : KSerializer<ScheduleLabel> {
     override val descriptor: SerialDescriptor = 
         PrimitiveSerialDescriptor("ScheduleLabel", PrimitiveKind.STRING)

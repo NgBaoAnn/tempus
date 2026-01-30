@@ -4,9 +4,7 @@ import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * DTO để map với bảng trees trên Supabase
- */
+
 @Serializable
 data class TreeDto(
     val id: Long? = null,
@@ -26,9 +24,7 @@ data class TreeDto(
     val isAlive: Boolean = true
 )
 
-/**
- * Convert DTO sang Entity
- */
+
 fun TreeDto.toEntity(): TreeEntity {
     return TreeEntity(
         id = id ?: 0,
@@ -42,9 +38,7 @@ fun TreeDto.toEntity(): TreeEntity {
     )
 }
 
-/**
- * Convert Entity sang DTO
- */
+
 fun TreeEntity.toDto(userId: String): TreeDto {
     return TreeDto(
         id = if (id == 0L) null else id,
@@ -59,9 +53,7 @@ fun TreeEntity.toDto(userId: String): TreeDto {
     )
 }
 
-/**
- * DTO cho update tree (không có id, user_id, created_at)
- */
+
 @Serializable
 data class TreeUpdateDto(
     val name: String,
@@ -87,9 +79,7 @@ fun TreeEntity.toUpdateDto(): TreeUpdateDto {
     )
 }
 
-/**
- * DTO cho kill tree
- */
+
 @Serializable
 data class KillTreeDto(
     val state: String = "DEAD",

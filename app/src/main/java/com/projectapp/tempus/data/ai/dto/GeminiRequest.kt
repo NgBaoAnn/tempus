@@ -2,10 +2,7 @@ package com.projectapp.tempus.data.ai.dto
 
 import com.google.gson.annotations.SerializedName
 
-/**
- * Request DTO for Gemini API
- * Reference: https://ai.google.dev/api/generate-content
- */
+
 data class GeminiRequest(
     val contents: List<Content>,
     val generationConfig: GenerationConfig? = null,
@@ -13,7 +10,7 @@ data class GeminiRequest(
 )
 
 data class Content(
-    val role: String,  // "user" or "model"
+    val role: String,  
     val parts: List<Part>
 )
 

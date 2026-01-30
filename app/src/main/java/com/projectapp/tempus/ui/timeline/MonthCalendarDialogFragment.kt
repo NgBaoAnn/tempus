@@ -43,9 +43,9 @@ class MonthCalendarDialogFragment(
 
         btnPrev.setOnClickListener {
             ym = ym.minusMonths(1)
-            data = emptyMap()          // clear icons để UI không giữ data cũ
+            data = emptyMap()          
             render()
-            onMonthChange(ym)          // ✅ nhờ Fragment load icons tháng này
+            onMonthChange(ym)          
         }
 
         btnNext.setOnClickListener {
@@ -56,7 +56,7 @@ class MonthCalendarDialogFragment(
         }
 
         render()
-        onMonthChange(ym) // ✅ mở dialog xong -> load luôn tháng hiện tại
+        onMonthChange(ym) 
 
         return AlertDialog.Builder(requireContext())
             .setView(v)

@@ -13,13 +13,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.projectapp.tempus.ui.garden.compose.GardenScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Fragment hiển thị vườn cây của người dùng
- * Migrated to Jetpack Compose
- */
+
 class GardenFragment : Fragment() {
 
-    // Use ui.garden.GardenViewModel (the main one that GardenScreen expects)
+    
     private val viewModel: GardenViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

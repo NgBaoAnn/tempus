@@ -6,9 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
-/**
- * Simple DTO cho friend_requests table - không có FK joins
- */
+
 @Serializable
 data class FriendRequestSimpleDto(
     val id: String,
@@ -20,16 +18,16 @@ data class FriendRequestSimpleDto(
     @SerialName("created_at")
     val createdAt: String? = null,
     @SerialName("updated_at")
-    val updatedAt: String? = null  // Nullable vì có thể chưa được set
+    val updatedAt: String? = null  
 ) {
     fun toDomain(): FriendRequest {
         return FriendRequest(
             id = id,
             senderId = senderId,
-            senderUsername = "User", // Placeholder
+            senderUsername = "User", 
             senderAvatar = null,
             receiverId = receiverId,
-            receiverUsername = "User", // Placeholder
+            receiverUsername = "User", 
             receiverAvatar = null,
             status = FriendRequestStatus.fromString(status ?: "pending"),
             createdAt = try {
@@ -46,9 +44,7 @@ data class FriendRequestSimpleDto(
     }
 }
 
-/**
- * Simple DTO cho friendships table - không có FK joins
- */
+
 @Serializable
 data class FriendshipSimpleDto(
     val id: String,
@@ -57,12 +53,10 @@ data class FriendshipSimpleDto(
     @SerialName("user2_id")
     val user2Id: String,
     @SerialName("created_at")
-    val createdAt: String? = null  // Nullable để tương thích với database
+    val createdAt: String? = null  
 )
 
-/**
- * Simple DTO cho blocked_users table - không có FK joins
- */
+
 @Serializable
 data class BlockedUserSimpleDto(
     val id: String,
@@ -71,21 +65,17 @@ data class BlockedUserSimpleDto(
     @SerialName("blocked_id")
     val blockedId: String,
     @SerialName("created_at")
-    val createdAt: String? = null  // Nullable để tương thích với database
+    val createdAt: String? = null  
 )
 
-/**
- * Helper DTO for decoding blocked_id only
- */
+
 @Serializable
 data class BlockedIdDto(
     @SerialName("blocked_id")
     val blockedId: String
 )
 
-/**
- * Helper DTO for decoding blocker_id only
- */
+
 @Serializable
 data class BlockerIdDto(
     @SerialName("blocker_id")

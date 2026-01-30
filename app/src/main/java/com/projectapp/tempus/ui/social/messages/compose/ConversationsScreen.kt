@@ -30,9 +30,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/**
- * Màn hình danh sách conversations
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationsScreen(
@@ -43,12 +41,12 @@ fun ConversationsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Auto-reload conversations when screen opens to ensure blocked users are filtered
+    
     LaunchedEffect(Unit) {
         viewModel.loadConversations()
     }
 
-    // Show errors
+    
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -165,7 +163,7 @@ private fun ConversationCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar with gradient border
+            
             Box(
                 modifier = Modifier
                     .size(52.dp)

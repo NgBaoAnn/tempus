@@ -6,13 +6,11 @@ import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Local Repository cho Gamification - chỉ làm việc với Room
- */
+
 class LocalGamificationRepository(
     private val dao: GamificationDao
 ) {
-    // ==================== User Points ====================
+    
     
     fun getUserPoints(): Flow<UserPointsEntity?> = dao.getUserPoints()
     
@@ -24,7 +22,6 @@ class LocalGamificationRepository(
         Log.d("LocalGamRepo", "updateUserPoints: DONE")
     }
     
-    // ==================== Point History ====================
     
     suspend fun addPointHistory(history: PointHistoryEntity) {
         Log.d("LocalGamRepo", "addPointHistory: points=${history.points}, reason=${history.reason}")
@@ -40,7 +37,15 @@ class LocalGamificationRepository(
     
     suspend fun getPointsEarnedSince(startTime: Long): Int = dao.getPointsEarnedSince(startTime) ?: 0
     
-    // ==================== Trees ====================
+    suspend fun clearPointHistory() {
+        Log.d("LocalGamRepo", "clearPointHistory: Clearing all point history for sync")
+        dao.clearPointHistory()
+    }
+    
+    suspend fun insertPointHistoryWithReplace(history: PointHistoryEntity) {
+        dao.insertPointHistoryWithReplace(history)
+    }
+    
     
     fun getAliveTrees(): Flow<List<TreeEntity>> = dao.getAliveTrees()
     
@@ -56,10 +61,9 @@ class LocalGamificationRepository(
     
     suspend fun killTree(treeId: Long) = dao.killTree(treeId)
     
-    // ==================== Clear Data (for logout) ====================
     
     suspend fun clearAllData() {
-        // Note: GamificationDao cần thêm các @Query DELETE
-        // Tạm thời để trống - gamification data có thể giữ lại vì có userId
+        
+        
     }
 }

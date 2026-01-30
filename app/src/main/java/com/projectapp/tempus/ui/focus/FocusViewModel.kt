@@ -20,9 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * Represents an installed app
- */
+
 data class InstalledApp(
     val packageName: String,
     val appName: String,
@@ -30,9 +28,7 @@ data class InstalledApp(
     val isBlocked: Boolean = false
 )
 
-/**
- * UI State for Focus Mode settings
- */
+
 data class FocusUiState(
     val focusModeEnabled: Boolean = false,
     val autoStartWithTimer: Boolean = true,
@@ -47,9 +43,7 @@ data class FocusUiState(
     val showAppPicker: Boolean = false
 )
 
-/**
- * ViewModel for Focus Mode settings and blocked apps management
- */
+
 class FocusViewModel(application: Application) : AndroidViewModel(application) {
     
     private val context = application.applicationContext
@@ -92,51 +86,39 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = FocusUiState()
     )
     
-    /**
-     * Toggle Focus Mode enabled state
-     */
+    
     fun toggleFocusMode(enabled: Boolean) {
         viewModelScope.launch {
             preferences.setFocusModeEnabled(enabled)
         }
     }
     
-    /**
-     * Toggle auto-start with timer
-     */
+    
     fun toggleAutoStart(enabled: Boolean) {
         viewModelScope.launch {
             preferences.setAutoStartWithTimer(enabled)
         }
     }
     
-    /**
-     * Toggle show overlay setting
-     */
+    
     fun toggleShowOverlay(show: Boolean) {
         viewModelScope.launch {
             preferences.setShowOverlay(show)
         }
     }
     
-    /**
-     * Show app picker bottom sheet
-     */
+    
     fun showAppPicker() {
         _showAppPicker.value = true
         loadInstalledApps()
     }
     
-    /**
-     * Hide app picker
-     */
+    
     fun hideAppPicker() {
         _showAppPicker.value = false
     }
     
-    /**
-     * Load installed apps list
-     */
+    
     private fun loadInstalledApps() {
         viewModelScope.launch {
             _isLoadingApps.value = true
@@ -154,7 +136,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
                 
                 installedApps
                     .filter { appInfo ->
-                        // Filter out system apps and the Tempus app itself
+                        
                         val isLaunchable = pm.getLaunchIntentForPackage(appInfo.packageName) != null
                         val isNotSelf = appInfo.packageName != context.packageName
                         isLaunchable && isNotSelf
@@ -175,9 +157,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
-    /**
-     * Add an app to blocked list
-     */
+    
     fun blockApp(app: InstalledApp) {
         viewModelScope.launch {
             val entity = BlockedAppEntity(
@@ -186,44 +166,36 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
             )
             database.blockedAppDao().insertBlockedApp(entity)
             
-            // Update installed apps list
+            
             _installedApps.value = _installedApps.value.map {
                 if (it.packageName == app.packageName) it.copy(isBlocked = true) else it
             }
         }
     }
     
-    /**
-     * Remove an app from blocked list
-     */
+    
     fun unblockApp(packageName: String) {
         viewModelScope.launch {
             database.blockedAppDao().deleteByPackageName(packageName)
             
-            // Update installed apps list
+            
             _installedApps.value = _installedApps.value.map {
                 if (it.packageName == packageName) it.copy(isBlocked = false) else it
             }
         }
     }
     
-    /**
-     * Request usage stats permission
-     */
+    
     fun requestUsagePermission() {
         appUsageManager.requestUsageStatsPermission()
     }
     
-    /**
-     * Request overlay permission
-     */
+    
     fun requestOverlayPermission() {
         appUsageManager.requestOverlayPermission()
     }
     
-    /**
-     * Check if all required permissions are granted
-     */
+    
     fun hasAllPermissions(): Boolean {
         return appUsageManager.hasUsageStatsPermission() && appUsageManager.hasOverlayPermission()
     }

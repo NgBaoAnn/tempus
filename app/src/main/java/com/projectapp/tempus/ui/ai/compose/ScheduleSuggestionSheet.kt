@@ -42,9 +42,7 @@ import com.projectapp.tempus.domain.model.ScheduleSuggestion
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 
-/**
- * Bottom sheet for previewing and accepting/rejecting schedule suggestions
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleSuggestionSheet(
@@ -55,7 +53,7 @@ fun ScheduleSuggestionSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedItems = remember { mutableStateListOf<String>().apply { 
-        addAll(suggestions.map { it.id })  // Select all by default
+        addAll(suggestions.map { it.id })  
     }}
     
     ModalBottomSheet(
@@ -70,7 +68,7 @@ fun ScheduleSuggestionSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp)
         ) {
-            // Header
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,7 +90,7 @@ fun ScheduleSuggestionSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Suggestions list
+            
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -119,12 +117,12 @@ fun ScheduleSuggestionSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Action buttons
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Reject/Cancel button
+                
                 OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f),
@@ -135,7 +133,7 @@ fun ScheduleSuggestionSheet(
                     Text("Hủy")
                 }
                 
-                // Accept button
+                
                 Button(
                     onClick = {
                         val accepted = suggestions.filter { selectedItems.contains(it.id) }
@@ -154,9 +152,7 @@ fun ScheduleSuggestionSheet(
     }
 }
 
-/**
- * Single suggestion item with checkbox
- */
+
 @Composable
 private fun SuggestionItem(
     suggestion: ScheduleSuggestion,
@@ -189,7 +185,7 @@ private fun SuggestionItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox
+            
             Checkbox(
                 checked = isSelected,
                 onCheckedChange = { onToggle() },
@@ -201,7 +197,7 @@ private fun SuggestionItem(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Time indicator
+            
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.width(60.dp)
@@ -227,7 +223,7 @@ private fun SuggestionItem(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Task info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = suggestion.name,
@@ -245,7 +241,7 @@ private fun SuggestionItem(
                 )
             }
             
-            // Priority indicator
+            
             Box(
                 modifier = Modifier
                     .size(8.dp)

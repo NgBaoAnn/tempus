@@ -10,15 +10,7 @@ import com.projectapp.tempus.ui.garden.compose.BranchConfig
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Branch Renderer
- * Contains functions for rendering tree branches
- */
 
-/**
- * Draws an organic branch with bezier curve
- * Returns the end point of the branch for attaching leaves/fruits
- */
 fun DrawScope.drawOrganicBranch(
     branch: BranchConfig,
     trunkTop: Offset,
@@ -42,7 +34,7 @@ fun DrawScope.drawOrganicBranch(
     val endX = attachPoint.x + sin(angleRad) * branchLength
     val endY = attachPoint.y - cos(angleRad) * branchLength
     
-    // Control point for curve (slight droop)
+    
     val ctrlX = attachPoint.x + sin(angleRad) * branchLength * 0.6f
     val ctrlY = attachPoint.y - cos(angleRad) * branchLength * 0.4f + branchLength * 0.05f
     
@@ -51,7 +43,7 @@ fun DrawScope.drawOrganicBranch(
         quadraticBezierTo(ctrlX, ctrlY, endX, endY)
     }
     
-    // Branch với gradient stroke
+    
     drawPath(
         path = branchPath,
         brush = Brush.linearGradient(

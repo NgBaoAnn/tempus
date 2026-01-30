@@ -26,10 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-/**
- * Foreground Service that monitors app usage during Focus Mode
- * Detects when blocked apps are opened and shows blocking overlay
- */
+
 class FocusModeService : Service() {
     
     companion object {
@@ -41,7 +38,7 @@ class FocusModeService : Service() {
         const val ACTION_STOP = "com.projectapp.tempus.FOCUS_STOP"
         const val EXTRA_DURATION_SECONDS = "duration_seconds"
         
-        private const val POLLING_INTERVAL_MS = 1000L // Check every 1 second
+        private const val POLLING_INTERVAL_MS = 1000L 
         
         fun startFocusMode(context: Context, durationSeconds: Long) {
             val intent = Intent(context, FocusModeService::class.java).apply {
@@ -82,12 +79,12 @@ class FocusModeService : Service() {
             
             checkForegroundApp()
             
-            // Decrement remaining time
+            
             if (remainingSeconds > 0) {
                 remainingSeconds--
                 updateNotification()
             } else {
-                // Time's up, stop monitoring
+                
                 stopSelf()
                 return
             }
@@ -128,7 +125,7 @@ class FocusModeService : Service() {
         remainingSeconds = durationSeconds
         isMonitoring = true
         
-        // Start foreground service
+        
         val notification = createNotification()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -140,12 +137,12 @@ class FocusModeService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
         
-        // Load blocked apps
+        
         serviceScope.launch {
             blockedPackages = database.blockedAppDao().getAllBlockedPackages()
             Log.d(TAG, "Focus Mode started. Blocking ${blockedPackages.size} apps")
             
-            // Start polling
+            
             handler.post(monitorRunnable)
         }
     }
@@ -155,7 +152,7 @@ class FocusModeService : Service() {
         handler.removeCallbacks(monitorRunnable)
         blockingOverlay.hide()
         
-        // Save focus time to preferences
+        
         serviceScope.launch {
             val focusedMinutes = (remainingSeconds / 60)
             preferences.addFocusTime(focusedMinutes)
@@ -170,21 +167,21 @@ class FocusModeService : Service() {
         if (foregroundApp != null && blockedPackages.contains(foregroundApp)) {
             Log.d(TAG, "Blocked app detected: $foregroundApp")
             
-            // Increment blocked attempts
+            
             serviceScope.launch {
                 preferences.incrementBlockedAttempts()
             }
             
-            // Get app name
+            
             val appName = getAppName(foregroundApp)
             val remainingTimeText = formatTime(remainingSeconds)
             
-            // Show overlay
+            
             if (appUsageManager.hasOverlayPermission()) {
                 blockingOverlay.show(appName, remainingTimeText)
             }
         } else {
-            // Hide overlay if visible and current app is not blocked
+            
             if (blockingOverlay.isVisible()) {
                 blockingOverlay.hide()
             }

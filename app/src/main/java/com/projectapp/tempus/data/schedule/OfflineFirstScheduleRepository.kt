@@ -10,14 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
-/**
- * Offline-First Schedule Repository
- * 
- * Tất cả CRUD operations đều làm trên Room (local) trước.
- * Sau đó user manual sync để push lên Supabase.
- * 
- * Thay thế SupabaseScheduleRepository cho các UI operations.
- */
+
 class OfflineFirstScheduleRepository(
     private val context: Context,
     private val localRepo: LocalScheduleRepository
@@ -76,7 +69,7 @@ class OfflineFirstScheduleRepository(
         dates: List<String>,
         taskIds: List<String>
     ): List<ScheduleItemRow> {
-        // Implement using multiple date queries or range
+        
         if (dates.isEmpty()) return emptyList()
         val minDate = dates.minOrNull() ?: return emptyList()
         val maxDate = dates.maxOrNull() ?: return emptyList()
@@ -121,7 +114,7 @@ class OfflineFirstScheduleRepository(
         
         val inserted = localRepo.insertSchedule(entity)
         
-        // Refresh widget khi có schedule mới
+        
         WidgetRefreshHelper.refreshTasksWidget(context)
         
         return inserted.toRow()
@@ -153,7 +146,7 @@ class OfflineFirstScheduleRepository(
         
         localRepo.updateSchedule(updated)
         
-        // Refresh widget khi schedule được cập nhật
+        
         WidgetRefreshHelper.refreshTasksWidget(context)
         
         return updated.toRow()
@@ -166,7 +159,7 @@ class OfflineFirstScheduleRepository(
     ): ScheduleItemRow {
         val entity = localRepo.upsertScheduleItem(taskId, date, status.name)
         
-        // Refresh widget khi trạng thái task thay đổi
+        
         WidgetRefreshHelper.refreshTasksWidget(context)
         
         return ScheduleItemRow(
@@ -223,7 +216,7 @@ class OfflineFirstScheduleRepository(
                 },
                 localUpdatedAt = System.currentTimeMillis()
             )
-            // Need to add update method to local repo
+            
             ScheduleItemRow(
                 id = updated.id,
                 taskId = updated.taskId,
@@ -243,16 +236,16 @@ class OfflineFirstScheduleRepository(
     override suspend fun deleteSchedule(id: String) {
         localRepo.deleteSchedule(id)
         
-        // Refresh widget khi schedule bị xóa
+        
         WidgetRefreshHelper.refreshTasksWidget(context)
     }
     
     override suspend fun deleteSchedulesFromDate(userId: String, fromDate: String): Int {
-        // Get schedules and mark for deletion
+        
         val schedules = localRepo.getAllSchedules(userId)
         var count = 0
         for (schedule in schedules) {
-            // Check if schedule starts from given date
+            
             try {
                 val scheduleDate = java.time.OffsetDateTime.parse(schedule.startTimeDate)
                     .toLocalDate().toString()
@@ -261,7 +254,7 @@ class OfflineFirstScheduleRepository(
                     count++
                 }
             } catch (e: Exception) {
-                // Skip invalid dates
+                
             }
         }
         return count
@@ -279,7 +272,6 @@ class OfflineFirstScheduleRepository(
         return count
     }
     
-    // ==================== SUBTASK OPERATIONS ====================
     
     override suspend fun getSubTasks(scheduleId: String): List<SubTaskRow> {
         return localRepo.getSubTasks(scheduleId).map { entity ->
@@ -329,17 +321,15 @@ class OfflineFirstScheduleRepository(
     override suspend fun updateSubTaskStatus(subTaskId: String, isDone: Boolean) {
         localRepo.updateSubTaskStatus(subTaskId, isDone)
         
-        // Refresh widget khi subtask status thay đổi
+        
         WidgetRefreshHelper.refreshTasksWidget(context)
     }
     
-    // ==================== SYNC HELPERS ====================
     
     fun getPendingCountFlow(): Flow<Int> {
         return localRepo.getTotalPendingCountFlow()
     }
     
-    // ==================== PRIVATE HELPERS ====================
     
     private fun millisToIso(millis: Long): String {
         return java.time.Instant.ofEpochMilli(millis)

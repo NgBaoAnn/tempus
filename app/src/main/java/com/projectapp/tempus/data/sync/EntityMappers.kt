@@ -3,11 +3,6 @@ package com.projectapp.tempus.data.sync
 import com.projectapp.tempus.data.local.entity.*
 import com.projectapp.tempus.data.schedule.dto.*
 
-/**
- * Extension functions để convert giữa Room Entity và Supabase DTO
- */
-
-// ==================== SCHEDULE ====================
 
 fun ScheduleEntity.toRow(): ScheduleRow {
     return ScheduleRow(
@@ -64,13 +59,11 @@ fun ScheduleEntity.toUpdateMap(): Map<String, Any?> {
     )
 }
 
-// ==================== SCHEDULE ITEM ====================
 
 fun ScheduleItemEntity.toStatusType(): StatusType {
     return StatusType.entries.find { it.name == status } ?: StatusType.planned
 }
 
-// ==================== SUBTASK ====================
 
 fun SubTaskEntity.toRow(): SubTaskRow {
     return SubTaskRow(
@@ -93,7 +86,6 @@ fun SubTaskEntity.toInsertMap(): Map<String, Any?> {
     )
 }
 
-// ==================== HELPERS ====================
 
 private fun millisToIso(millis: Long): String {
     return java.time.Instant.ofEpochMilli(millis)

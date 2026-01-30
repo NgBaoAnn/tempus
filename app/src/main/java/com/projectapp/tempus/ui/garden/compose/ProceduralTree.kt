@@ -19,7 +19,7 @@ import com.projectapp.tempus.domain.model.TreeType
 import kotlin.math.cos
 import kotlin.math.sin
 
-// Modular renderers - drawing utilities
+
 import com.projectapp.tempus.ui.garden.compose.drawing.lighten
 import com.projectapp.tempus.ui.garden.compose.drawing.darken
 import com.projectapp.tempus.ui.garden.compose.drawing.ProceduralTreeSize
@@ -39,7 +39,7 @@ import com.projectapp.tempus.ui.garden.compose.drawing.drawIllustrationFruit
 import com.projectapp.tempus.ui.garden.compose.drawing.darken
 import com.projectapp.tempus.ui.garden.compose.drawing.lighten
 
-// Modular renderers - tree-specific
+
 import com.projectapp.tempus.ui.garden.compose.trees.drawSakuraBlossomCluster
 import com.projectapp.tempus.ui.garden.compose.trees.drawFallenPetal
 import com.projectapp.tempus.ui.garden.compose.trees.drawConiferTree
@@ -51,25 +51,7 @@ import com.projectapp.tempus.ui.garden.compose.trees.drawBambooCulms
 import com.projectapp.tempus.ui.garden.compose.trees.drawBambooTopLeaves
 import com.projectapp.tempus.ui.garden.compose.trees.drawBambooSingleStalk
 
-/**
- * ProceduralTree - Illustration-style tree renderer với hierarchical per-part motion
- * 
- * Visual style: Forest app-like, game illustration, NOT diagram
- * - Organic bezier trunk with gradient
- * - Many small leaf clusters (teardrop/organic shapes)
- * - Shadow under pot/tree
- * - Soft palette, no hard outlines
- * 
- * This file contains only the main composable.
- * Rendering functions are organized in:
- * - drawing/BaseRenderer.kt - Ground shadows, canopy base, leaf positioning
- * - drawing/PotRenderer.kt - Pot and soil rendering
- * - drawing/LeafRenderer.kt - All leaf shape rendering
- * - drawing/FruitRenderer.kt - Fruit rendering
- * - drawing/TrunkRenderer.kt - Trunk drawing
- * - drawing/BranchRenderer.kt - Branch drawing
- * - trees/ folder - Tree-specific renderers (Oak, Sakura, Pine, etc.)
- */
+
 @Composable
 fun ProceduralTree(
     treeType: TreeType,
@@ -78,20 +60,20 @@ fun ProceduralTree(
     treeId: Long? = null,
     size: Dp = 150.dp
 ) {
-    // Seed cho deterministic randomness
+    
     val seed = remember(treeType, treeId) {
         (treeId?.toInt() ?: treeType.name.hashCode()) and 0x7FFFFFFF
     }
     
-    // Wind state
+    
     val windState by rememberWindState(seed)
     
-    // Get config cho current stage
+    
     val currentConfig = remember(treeType, growthStage, seed) {
         getTreeConfig(treeType, growthStage, seed)
     }
     
-    // Stage transition animation
+    
     val transitionState = updateTransition(targetState = growthStage, label = "stageTransition")
     
     val trunkGrowth by transitionState.animateFloat(
@@ -155,7 +137,7 @@ fun ProceduralTree(
         fruitOpacity = if (growthStage == TreeState.TREE) 1f else 0f
     )
     
-    // Canvas rendering
+    
     Canvas(
         modifier = modifier.size(size)
     ) {
@@ -168,30 +150,28 @@ fun ProceduralTree(
         val parts = config.parts
         val scale = parts.overallScale
         
-        // Calculate positions first
+        
         val potHeight = (config.pot?.height ?: 0f) * canvasHeight
         val trunkBaseY = baseY - potHeight * 0.35f
         
-        // Calculate trunk sway
+        
         val trunkRotation = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
             windState.getRotation("trunk", 0f, 0.3f) * (1f - parts.stiffness)
         } else 0f
         
-        // ====== Z-ORDER: BACK TO FRONT ======
         
-        // 1. Ground shadow (very back)
         drawGroundShadow(centerX, baseY, canvasWidth * 0.35f * scale)
         
-        // 2. Pot body (behind everything except shadow)
+        
         config.pot?.let { pot ->
             drawIllustrationPot(pot, centerX, baseY, canvasWidth, canvasHeight)
         }
         
-        // 3. Calculate trunk top position first (needed for branches)
+        
         val trunkHeight = canvasHeight * parts.trunk.height * animState.trunkGrowth * scale
         val trunkTop = Offset(centerX, trunkBaseY - trunkHeight)
         
-        // 4. Draw BRANCHES FIRST (behind trunk)
+        
         val branchEnds = mutableMapOf<LeafAttachment, Offset>()
         branchEnds[LeafAttachment.TRUNK] = trunkTop
         
@@ -217,16 +197,15 @@ fun ProceduralTree(
             }
         }
         
-        // 5. Draw TRUNK (in front of branches, covers branch attachment points)
-        // Check if this is a bamboo tree (stalks will be drawn later with leaves)
+        
         val hasBambooLeaves = parts.leafClusters.any { it.shape == LeafShape.BAMBOO }
         
         if (!hasBambooLeaves) {
-            // Check for Palm tree
+            
             val hasPalmLeaves = parts.leafClusters.any { it.shape == LeafShape.FAN_PALM }
             
             if (hasPalmLeaves) {
-                 // Special trunk for Palm with rings - capture returned trunkTop
+                 
                  val palmTrunkTop = drawPalmTrunk(
                     trunk = parts.trunk,
                     centerX = centerX,
@@ -237,10 +216,10 @@ fun ProceduralTree(
                     scale = scale,
                     seed = seed
                 )
-                // Update trunkTop to follow trunk rotation
+                
                 branchEnds[LeafAttachment.TRUNK] = palmTrunkTop
             } else {
-                // Normal organic trunk for other trees
+                
                 drawOrganicTrunk(
                     trunk = parts.trunk,
                     centerX = centerX,
@@ -253,14 +232,13 @@ fun ProceduralTree(
                 )
             }
         }
-        // For bamboo, stalks are drawn together with leaves in the special BAMBOO section below
         
-        // 6. Soil mound (on top of pot, around trunk base)
+        
         if (config.showSoil) {
             drawSoilMound(config.soilColor, centerX, trunkBaseY + canvasHeight * 0.01f, canvasWidth * 0.18f * scale, canvasHeight * 0.025f)
         }
         
-        // 6. Draw many small leaf clusters (illustration style)
+        
         val leafClusterCount = when (growthStage) {
             TreeState.SEED -> 4
             TreeState.SPROUT -> 8
@@ -270,13 +248,13 @@ fun ProceduralTree(
         }
         
         if (animState.leafOpacity > 0f && leafClusterCount > 0) {
-            // Check if this is a palm/coconut tree with FROND leaves
+            
             val hasFrondLeaves = parts.leafClusters.any { it.shape == LeafShape.FROND }
             val hasConiferLeaves = parts.leafClusters.any { it.shape == LeafShape.CONIFER }
             
             if (hasFrondLeaves) {
-                // ===== SPECIAL: Cây dừa - Vẽ QUẢ TRƯỚC để lá phủ lên =====
-                // Draw fruits FIRST so leaves cover them (natural look)
+                
+                
                 parts.fruits.forEach { fruit ->
                     if (animState.fruitOpacity > 0f) {
                         val attachPoint = branchEnds[fruit.attachTo] ?: trunkTop
@@ -293,7 +271,7 @@ fun ProceduralTree(
                     }
                 }
                 
-                // ===== Vẽ tàu lá dừa từ đỉnh trunk (SAU quả) =====
+                
                 parts.leafClusters.forEach { cluster ->
                     val spreadAngle = cluster.phaseOffset
                     val frondSize = canvasHeight * cluster.size * scale * animState.leafScale
@@ -313,7 +291,7 @@ fun ProceduralTree(
                     )
                 }
             } else if (hasConiferLeaves) {
-                // ===== SPECIAL: Vẽ cây thông với các tầng tam giác nhọn =====
+                
                 val tierCount = when (growthStage) {
                     TreeState.SEED -> 1
                     TreeState.SPROUT -> 2
@@ -322,8 +300,7 @@ fun ProceduralTree(
                     TreeState.DEAD -> 0
                 }
                 
-                // Sử dụng trunkRotation để tán và thân đồng bộ chuyển động
-                // Nhân với 2 để tán có amplitude lớn hơn thân một chút
+                
                 val coniferSway = trunkRotation * 2f
                 
                 drawConiferTree(
@@ -337,10 +314,8 @@ fun ProceduralTree(
                     seed = seed
                 )
             } else if (parts.leafClusters.any { it.shape == LeafShape.PETAL }) {
-                // ===== SPECIAL: SAKURA - Vẽ cụm hoa anh đào tại mỗi branch endpoint =====
-                // Tạo hiệu ứng cloud-like với nhiều cụm nhỏ rời rạc
                 
-                // Vẽ các blossom clusters tại mỗi branch end
+                
                 parts.leafClusters.forEach { cluster ->
                     val attachPoint = branchEnds[cluster.attachTo] ?: trunkTop
                     val clusterSize = canvasHeight * cluster.size * scale * animState.leafScale
@@ -349,7 +324,7 @@ fun ProceduralTree(
                         windState.getRotation("leaf", cluster.phaseOffset, 0.6f) * (1f - parts.stiffness * 0.5f)
                     } else 0f
                     
-                    // Draw sakura blossom cloud cluster
+                    
                     drawSakuraBlossomCluster(
                         center = Offset(attachPoint.x, attachPoint.y - clusterSize * 0.3f),
                         radius = clusterSize,
@@ -360,7 +335,7 @@ fun ProceduralTree(
                     )
                 }
                 
-                // Thêm một số cánh hoa rơi ở phía dưới (optional decoration)
+                
                 if (growthStage == TreeState.TREE) {
                     for (i in 0 until 5) {
                         val petalX = trunkTop.x + (stableRandom(seed, i + 100) - 0.5f) * canvasHeight * 0.4f
@@ -377,8 +352,7 @@ fun ProceduralTree(
                     }
                 }
             } else if (parts.leafClusters.any { it.shape == LeafShape.OAK_CLOUD }) {
-                // ===== SPECIAL: OAK - Vẽ tán lá sồi nhiều lớp như mây =====
-                // Tạo hiệu ứng cloud-like với nhiều cụm tròn chồng lên nhau
+                
                 
                 val canopyRadius = canvasHeight * when (growthStage) {
                     TreeState.SEED -> 0.10f
@@ -392,8 +366,7 @@ fun ProceduralTree(
                     windState.getRotation("leaf", stablePhaseOffset(seed, 0), 0.5f) * (1f - parts.stiffness * 0.5f)
                 } else 0f
                 
-                // Draw unified oak cloud canopy centered above trunk
-                // Offset +0.1f để hạ thấp tán lá, bao phủ phần trên của thân
+                
                 drawOakCanopy(
                     center = Offset(trunkTop.x, trunkTop.y + canopyRadius * 0.1f),
                     radiusX = canopyRadius * 1.2f,
@@ -404,18 +377,18 @@ fun ProceduralTree(
                     seed = seed
                 )
             } else if (parts.leafClusters.any { it.shape == LeafShape.BAMBOO }) {
-                // ===== SPECIAL: BAMBOO - Vẽ 3 thân tre với lá xòe ở đỉnh =====
-                // Draw 3 bamboo stalks at different positions and heights
+                
+                
                 val stalkConfigs = listOf(
-                    Triple(-0.08f, 1.0f, 0),    // Left stalk: offsetX, heightRatio, seedOffset
-                    Triple(0f, 1.15f, 1),       // Center stalk (tallest)
-                    Triple(0.08f, 0.85f, 2)     // Right stalk (shorter)
+                    Triple(-0.08f, 1.0f, 0),    
+                    Triple(0f, 1.15f, 1),       
+                    Triple(0.08f, 0.85f, 2)     
                 )
                 
                 val baseHeight = canvasHeight * parts.trunk.height * animState.trunkGrowth * scale
                 val baseWidth = canvasHeight * parts.trunk.width * scale * 1.2f
                 
-                // Use same phase for all stalks so they sway together in same direction
+                
                 val sharedPhase = stablePhaseOffset(seed, 0)
                 val baseSway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
                     windState.getRotation("branch", sharedPhase, 0.7f) * (1f - parts.stiffness) * 1.5f
@@ -426,10 +399,10 @@ fun ProceduralTree(
                     val stalkHeight = baseHeight * heightRatio
                     val stalkWidth = baseWidth * (0.9f + stableRandom(seed, seedOffset) * 0.2f)
                     
-                    // Slight variation in sway amount but same direction
+                    
                     val stalkSway = baseSway * (0.9f + seedOffset * 0.05f)
                     
-                    // Draw bamboo stalk with segments
+                    
                     val stalkTop = drawBambooSingleStalk(
                         centerX = stalkX,
                         baseY = trunkBaseY,
@@ -442,14 +415,14 @@ fun ProceduralTree(
                         seed = seed + seedOffset
                     )
                     
-                    // Draw fan-shaped leaves at top - balanced size with trunk
+                    
                     val leafSize = canvasHeight * 0.15f * scale * animState.leafScale * (0.7f + heightRatio * 0.3f)
                     
-                    // Use different green shades for each stalk
+                    
                     val leafColor = when (seedOffset) {
-                        0 -> parts.baseColor.darken(0.1f)    // Darker green
-                        1 -> parts.baseColor                  // Base green
-                        else -> parts.baseColor.lighten(0.15f) // Lighter green
+                        0 -> parts.baseColor.darken(0.1f)    
+                        1 -> parts.baseColor                  
+                        else -> parts.baseColor.lighten(0.15f) 
                     }
                     
                     drawBambooTopLeaves(
@@ -462,7 +435,7 @@ fun ProceduralTree(
                     )
                 }
             } else if (parts.leafClusters.any { it.shape == LeafShape.FAN_PALM }) {
-                // ===== SPECIAL: PALM - Chỉ vẽ 1 tán lá duy nhất tại đỉnh thân =====
+                
                 val cluster = parts.leafClusters.first { it.shape == LeafShape.FAN_PALM }
                 val crownSize = canvasHeight * cluster.size * scale * animState.leafScale
                 
@@ -470,11 +443,10 @@ fun ProceduralTree(
                     windState.getRotation("leaf", cluster.phaseOffset, 0.5f) * (1f - parts.stiffness * 0.5f)
                 } else 0f
                 
-                // Sử dụng palmTrunkTop từ branchEnds (đã lưu từ drawPalmTrunk)
-                // để lá gắn liền với đỉnh thân khi thân sway
+                
                 val palmLeafCenter = branchEnds[LeafAttachment.TRUNK] ?: trunkTop
                 
-                // Vẽ 1 tán FAN_PALM duy nhất tại đỉnh trunk
+                
                 drawIllustrationLeaf(
                     center = palmLeafCenter,
                     size = crownSize,
@@ -485,7 +457,7 @@ fun ProceduralTree(
                     seed = seed
                 )
             } else {
-                // ===== NORMAL: Canopy cho các loại cây khác =====
+                
                 val canopyRadius = canvasHeight * when (growthStage) {
                     TreeState.SEED -> 0.08f
                     TreeState.SPROUT -> 0.12f
@@ -494,11 +466,10 @@ fun ProceduralTree(
                     TreeState.DEAD -> 0f
                 } * scale * animState.leafScale
                 
-                // Canopy offset: positive = lower, negative = higher
-                // Thay đổi từ -0.3f thành +0.15f để hạ thấp tán lá
+                
                 val canopyYOffset = canopyRadius * 0.15f
                 
-                // Draw canopy base (solid green mass) first for cohesion
+                
                 drawCanopyBase(
                     center = Offset(trunkTop.x, trunkTop.y + canopyYOffset),
                     radiusX = canopyRadius * 1.1f,
@@ -507,7 +478,7 @@ fun ProceduralTree(
                     opacity = animState.leafOpacity * 0.7f
                 )
                 
-                // Generate tightly clustered leaf positions
+                
                 val leafPositions = generateTightLeafPositions(
                     center = Offset(trunkTop.x, trunkTop.y + canopyYOffset),
                     radiusX = canopyRadius,
@@ -516,12 +487,12 @@ fun ProceduralTree(
                     seed = seed
                 )
                 
-                // Draw leaf shadows first
+                
                 leafPositions.forEach { pos ->
                     drawLeafShadow(pos, canvasHeight * 0.025f * scale * animState.leafScale)
                 }
                 
-                // Draw leaves with different depths
+                
                 leafPositions.forEachIndexed { index, pos ->
                     val leafRotation = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
                         windState.getRotation("leaf", stablePhaseOffset(seed, index), 0.7f + index * 0.02f) * 
@@ -541,10 +512,10 @@ fun ProceduralTree(
             }
         }
         
-        // 7. Draw fruits (skip for FROND trees - already drawn before leaves)
+        
         val hasFrondLeaves = parts.leafClusters.any { it.shape == LeafShape.FROND }
         if (!hasFrondLeaves) {
-            // Tính toán canopy area để đặt táo trong tán lá
+            
             val canopyRadius = canvasHeight * when (growthStage) {
                 TreeState.SEED -> 0.08f
                 TreeState.SPROUT -> 0.12f
@@ -553,28 +524,28 @@ fun ProceduralTree(
                 TreeState.DEAD -> 0f
             } * scale * animState.leafScale
             
-            // Canopy center (same as Oak canopy - offset +0.1f)
+            
             val canopyYOffset = canopyRadius * 0.1f
             val canopyCenter = Offset(trunkTop.x, trunkTop.y + canopyYOffset)
             
-            // Tính canopy sway để táo di chuyển cùng tán lá
+            
             val canopySway = if (parts.stiffness < 1f && growthStage != TreeState.DEAD) {
                 windState.getRotation("leaf", stablePhaseOffset(seed, 0), 0.5f) * (1f - parts.stiffness * 0.5f)
             } else 0f
             
             parts.fruits.forEach { fruit ->
                 if (animState.fruitOpacity > 0f) {
-                    // Tính attachPoint trong khu vực tán lá
+                    
                     val attachPoint = if (fruit.attachTo == LeafAttachment.TRUNK) {
-                        // Đặt táo trong vùng canopy
-                        // fruit.position 0.0-1.0 maps to bottom-to-top of canopy
+                        
+                        
                         val fruitYOffset = (fruit.position - 0.5f) * canopyRadius * 1.2f
                         val fruitY = canopyCenter.y + fruitYOffset
                         
-                        // Thêm offset ngang dựa trên phaseOffset để trải táo sang hai bên
+                        
                         val spreadX = sin(fruit.phaseOffset * 1.5f) * canopyRadius * 0.6f
                         
-                        // Thêm canopy sway để táo di chuyển cùng tán lá
+                        
                         val swayX = sin(Math.toRadians(canopySway.toDouble())).toFloat() * canopyRadius * 0.3f
                         
                         Offset(centerX + spreadX + swayX, fruitY)
@@ -598,12 +569,7 @@ fun ProceduralTree(
     }
 }
 
-// ========== Local drawing functions that stay in this file ==========
 
-/**
- * Organic trunk với bezier curves và gradient
- * This function stays here because it's core to the tree and modifies local state
- */
 private fun DrawScope.drawOrganicTrunk(
     trunk: TrunkConfig,
     centerX: Float,
@@ -622,11 +588,11 @@ private fun DrawScope.drawOrganicTrunk(
     val highlightColor = color.lighten(0.15f)
     val shadowColor = color.darken(0.2f)
     
-    // Apply rotation from root
+    
     rotate(rotation, pivot = Offset(centerX, baseY)) {
-        // Trunk path với organic curves
+        
         val trunkPath = Path().apply {
-            // Left side with subtle curve
+            
             moveTo(centerX - baseWidth / 2, baseY)
             cubicTo(
                 centerX - baseWidth / 2 + baseWidth * 0.05f, baseY - trunkHeight * 0.3f,
@@ -634,10 +600,10 @@ private fun DrawScope.drawOrganicTrunk(
                 centerX - topWidth / 2, baseY - trunkHeight
             )
             
-            // Top
+            
             lineTo(centerX + topWidth / 2, baseY - trunkHeight)
             
-            // Right side
+            
             cubicTo(
                 centerX + topWidth / 2 + topWidth * 0.1f, baseY - trunkHeight * 0.7f,
                 centerX + baseWidth / 2 - baseWidth * 0.05f, baseY - trunkHeight * 0.3f,
@@ -646,7 +612,7 @@ private fun DrawScope.drawOrganicTrunk(
             close()
         }
         
-        // 3D gradient fill
+        
         drawPath(
             path = trunkPath,
             brush = Brush.horizontalGradient(
@@ -656,7 +622,7 @@ private fun DrawScope.drawOrganicTrunk(
             )
         )
         
-        // Texture lines
+        
         val textureCount = 3
         for (i in 0 until textureCount) {
             val yPos = baseY - trunkHeight * (0.2f + i * 0.25f)
@@ -672,10 +638,7 @@ private fun DrawScope.drawOrganicTrunk(
     }
 }
 
-/**
- * Organic branch với bezier curve
- * This function stays here because it returns branchEnd position
- */
+
 private fun DrawScope.drawOrganicBranch(
     branch: BranchConfig,
     trunkTop: Offset,
@@ -689,19 +652,19 @@ private fun DrawScope.drawOrganicBranch(
     val branchLength = canvasHeight * branch.length * growthFactor * scale
     val branchWidth = canvasHeight * branch.width * scale
     
-    // Calculate branch start point (at configured height on trunk)
+    
     val branchStartY = trunkBaseY - (trunkBaseY - trunkTop.y) * branch.attachHeight
     val branchStart = Offset(trunkTop.x, branchStartY)
     
-    // Combined rotation
+    
     val totalRotation = branch.angle + parentRotation + selfRotation
     val rotationRad = Math.toRadians(totalRotation.toDouble()).toFloat()
     
-    // Branch endpoint
+    
     val endX = branchStart.x + sin(rotationRad) * branchLength
     val endY = branchStart.y - cos(rotationRad) * branchLength
     
-    // Control point for organic curve
+    
     val ctrlX = branchStart.x + sin(rotationRad) * branchLength * 0.5f + branchLength * 0.1f
     val ctrlY = branchStart.y - cos(rotationRad) * branchLength * 0.5f
     

@@ -14,34 +14,30 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * UI State cho Friends Screen
- */
+
 data class FriendsUiState(
     val friends: List<Friendship> = emptyList(),
     val pendingRequests: List<FriendRequest> = emptyList(),
     val sentRequests: List<FriendRequest> = emptyList(),
     val searchResults: List<UserBasicDto> = emptyList(),
     val blockedUsers: List<UserBasicDto> = emptyList(),
-    val discoverUsers: List<UserBasicDto> = emptyList(), // All users for Discover tab
+    val discoverUsers: List<UserBasicDto> = emptyList(), 
     val isLoading: Boolean = false,
     val isSearching: Boolean = false,
     val isLoadingDiscover: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null,
-    val selectedTab: FriendsTab = FriendsTab.DISCOVER // Default to Discover tab
+    val selectedTab: FriendsTab = FriendsTab.DISCOVER 
 )
 
 enum class FriendsTab {
-    DISCOVER,  // Thêm Discover tab - hiển thị tất cả users
+    DISCOVER,  
     FRIENDS,
     REQUESTS,
     BLOCKED
 }
 
-/**
- * ViewModel cho Friends Screen
- */
+
 class FriendsViewModel(
     private val friendRepository: FriendRepository = SupabaseFriendRepository()
 ) : ViewModel() {
@@ -53,14 +49,12 @@ class FriendsViewModel(
         loadData()
     }
 
-    /**
-     * Load tất cả dữ liệu ban đầu
-     */
+    
     fun loadData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            // Load friends
+            
             friendRepository.getFriends()
                 .onSuccess { friends ->
                     _uiState.update { it.copy(friends = friends) }
@@ -69,16 +63,16 @@ class FriendsViewModel(
                     _uiState.update { it.copy(error = "Không thể tải danh sách bạn bè") }
                 }
             
-            // Load pending requests
+            
             friendRepository.getPendingReceivedRequests()
                 .onSuccess { requests ->
                     _uiState.update { it.copy(pendingRequests = requests) }
                 }
                 .onFailure { e ->
-                    // Just log error for requests, don't show user error yet if other parts succeed
+                    
                 }
             
-            // Load sent requests
+            
             friendRepository.getSentRequests()
                 .onSuccess { requests ->
                     _uiState.update { it.copy(sentRequests = requests) }
@@ -86,18 +80,16 @@ class FriendsViewModel(
             
             _uiState.update { it.copy(isLoading = false) }
             
-            // Load discover users (with filtering) after loading other data
+            
             loadAllUsers()
         }
     }
 
-    /**
-     * Chuyển tab
-     */
+    
     fun selectTab(tab: FriendsTab) {
         _uiState.update { it.copy(selectedTab = tab) }
         
-        // Load data based on tab
+        
         when (tab) {
             FriendsTab.DISCOVER -> {
                 if (_uiState.value.discoverUsers.isEmpty()) {
@@ -109,33 +101,31 @@ class FriendsViewModel(
                     loadBlockedUsers()
                 }
             }
-            else -> { /* Data already loaded in loadData() */ }
+            else -> {  }
         }
     }
 
-    /**
-     * Load tất cả users cho Discover tab
-     */
+    
     fun loadAllUsers() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingDiscover = true) }
             
-            // 1. First, fetch all blocked user IDs (both directions)
+            
             val allBlockedIds = friendRepository.getAllBlockedUserIds()
                 .getOrDefault(emptyList())
                 .toMutableList()
             
-            // Gather other IDs to exclude
+            
             val state = _uiState.value
             val excludedIds = mutableListOf<String>()
             
-            // Exclude Friends
+            
             excludedIds.addAll(state.friends.map { it.friendId })
             
-            // Exclude Pending Requests (Senders) - Don't show people who sent us requests
+            
             excludedIds.addAll(state.pendingRequests.map { it.senderId })
             
-            // Exclude ALL Blocked Users (both directions)
+            
             excludedIds.addAll(allBlockedIds)
             
             friendRepository.getAllUsers(excludedIds)
@@ -153,9 +143,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Tìm kiếm user theo username
-     */
+    
     fun searchUsers(query: String) {
         if (query.isBlank()) {
             _uiState.update { it.copy(searchResults = emptyList(), isSearching = false) }
@@ -181,9 +169,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Gửi lời mời kết bạn
-     */
+    
     fun sendFriendRequest(userId: String) {
         viewModelScope.launch {
             friendRepository.sendFriendRequest(userId)
@@ -197,21 +183,19 @@ class FriendsViewModel(
                     }
                 }
                 .onFailure { e ->
-                    // User-friendly error message
+                    
                     _uiState.update { it.copy(error = "Kết bạn không thành công") }
                 }
         }
     }
 
-    /**
-     * Chấp nhận lời mời
-     */
+    
     fun acceptRequest(requestId: String) {
         viewModelScope.launch {
             friendRepository.acceptFriendRequest(requestId)
                 .onSuccess {
                     _uiState.update { it.copy(successMessage = "Đã chấp nhận lời mời!") }
-                    loadData() // Reload to update friends list
+                    loadData() 
                 }
                 .onFailure { e ->
                     _uiState.update { it.copy(error = "Không thể chấp nhận") }
@@ -219,9 +203,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Từ chối lời mời
-     */
+    
     fun rejectRequest(requestId: String) {
         viewModelScope.launch {
             friendRepository.rejectFriendRequest(requestId)
@@ -239,9 +221,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Huỷ lời mời đã gửi
-     */
+    
     fun cancelRequest(requestId: String) {
         viewModelScope.launch {
             friendRepository.cancelFriendRequest(requestId)
@@ -259,9 +239,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Huỷ kết bạn
-     */
+    
     fun unfriend(friendshipId: String) {
         viewModelScope.launch {
             friendRepository.unfriend(friendshipId)
@@ -279,9 +257,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Chặn user
-     */
+    
     fun blockUser(userId: String) {
         viewModelScope.launch {
             friendRepository.blockUser(userId)
@@ -296,9 +272,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Bỏ chặn user
-     */
+    
     fun unblockUser(userId: String) {
         viewModelScope.launch {
             friendRepository.unblockUser(userId)
@@ -316,9 +290,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Load danh sách user đã chặn
-     */
+    
     fun loadBlockedUsers() {
         viewModelScope.launch {
             friendRepository.getBlockedUsers()
@@ -331,9 +303,7 @@ class FriendsViewModel(
         }
     }
 
-    /**
-     * Clear messages
-     */
+    
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

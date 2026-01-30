@@ -32,16 +32,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * PREMIUM AI CHAT BUBBLES - AI-Native Design
- * Features: Gradient bubbles, glow effects, glass morphism, smooth animations
- * ═══════════════════════════════════════════════════════════════════════════════
- */
 
-/**
- * User message bubble - Right aligned with gradient background
- */
 @Composable
 fun UserMessageBubble(
     message: ChatMessage,
@@ -56,9 +47,9 @@ fun UserMessageBubble(
             .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.End
     ) {
-        // Glow effect behind bubble
+        
         Box {
-            // Subtle glow
+            
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -73,7 +64,7 @@ fun UserMessageBubble(
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             )
             
-            // Gradient bubble
+            
             Box(
                 modifier = Modifier
                     .widthIn(max = maxBubbleWidth)
@@ -104,7 +95,7 @@ fun UserMessageBubble(
             }
         }
         
-        // Timestamp
+        
         Text(
             text = formatTimestamp(message.timestamp),
             style = MaterialTheme.typography.labelSmall,
@@ -114,9 +105,7 @@ fun UserMessageBubble(
     }
 }
 
-/**
- * AI message bubble - Left aligned with avatar and glass morphism
- */
+
 @Composable
 fun AIMessageBubble(
     message: ChatMessage,
@@ -132,9 +121,9 @@ fun AIMessageBubble(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Top
     ) {
-        // AI Avatar with glow
+        
         Box {
-            // Avatar glow
+            
             Box(
                 modifier = Modifier
                     .size(ChatDimens.AvatarSize + 4.dp)
@@ -144,7 +133,7 @@ fun AIMessageBubble(
                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
             )
             
-            // Avatar
+            
             Box(
                 modifier = Modifier
                     .size(ChatDimens.AvatarSize)
@@ -174,7 +163,7 @@ fun AIMessageBubble(
         Spacer(modifier = Modifier.width(10.dp))
         
         Column {
-            // Glass morphism bubble
+            
             Box(
                 modifier = Modifier
                     .widthIn(max = maxBubbleWidth)
@@ -215,7 +204,7 @@ fun AIMessageBubble(
                 )
             }
             
-            // Timestamp
+            
             Text(
                 text = formatTimestamp(message.timestamp),
                 style = MaterialTheme.typography.labelSmall,
@@ -226,9 +215,7 @@ fun AIMessageBubble(
     }
 }
 
-/**
- * Premium Typing indicator with pulsing dots and cyan glow
- */
+
 @Composable
 fun TypingIndicator(
     visible: Boolean,
@@ -247,9 +234,9 @@ fun TypingIndicator(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.Top
         ) {
-            // AI Avatar with thinking glow
+            
             Box {
-                // Animated glow
+                
                 val infiniteTransition = rememberInfiniteTransition(label = "avatarGlow")
                 val glowAlpha by infiniteTransition.animateFloat(
                     initialValue = 0.3f,
@@ -298,7 +285,7 @@ fun TypingIndicator(
             
             Spacer(modifier = Modifier.width(10.dp))
             
-            // Glass bubble with animated dots
+            
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(
@@ -336,9 +323,7 @@ fun TypingIndicator(
     }
 }
 
-/**
- * Animated typing dot with scale and alpha animation
- */
+
 @Composable
 private fun TypingDot(
     delayMillis: Int,
@@ -382,9 +367,7 @@ private fun TypingDot(
     )
 }
 
-/**
- * Message bubble wrapper that displays the correct type
- */
+
 @Composable
 fun MessageBubble(
     message: ChatMessage,
@@ -397,9 +380,7 @@ fun MessageBubble(
     }
 }
 
-/**
- * Format timestamp to HH:mm
- */
+
 private fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp))

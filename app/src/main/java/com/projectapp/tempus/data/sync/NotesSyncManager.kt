@@ -5,10 +5,7 @@ import com.projectapp.tempus.data.notes.NotesRepository
 import com.projectapp.tempus.data.notes.SupabaseNotesRepository
 import com.projectapp.tempus.data.notes.entity.NoteEntity
 
-/**
- * Sync Manager cho Notes data
- * Push local Room data lên Supabase khi logout
- */
+
 class NotesSyncManager(
     private val localRepo: NotesRepository,
     private val remoteRepo: SupabaseNotesRepository
@@ -16,17 +13,14 @@ class NotesSyncManager(
     companion object {
         private const val TAG = "NotesSync"
         
-        // Sync status constants
+        
         const val SYNCED = "SYNCED"
         const val PENDING_CREATE = "PENDING_CREATE"
         const val PENDING_UPDATE = "PENDING_UPDATE"
         const val PENDING_DELETE = "PENDING_DELETE"
     }
     
-    /**
-     * Push tất cả notes data từ Room lên Supabase
-     * Gọi trước khi logout
-     */
+    
     suspend fun pushToServer(): Result<NotesSyncResult> {
         return try {
             var inserted = 0
@@ -34,7 +28,7 @@ class NotesSyncManager(
             var deleted = 0
             var failed = 0
             
-            // Get all notes that need sync
+            
             val pendingNotes = localRepo.getPendingSyncNotes()
             Log.d(TAG, "=== NOTES SYNC START ===")
             Log.d(TAG, "Found ${pendingNotes.size} pending notes to sync")
@@ -71,7 +65,7 @@ class NotesSyncManager(
                             Log.d(TAG, "Attempting DELETE for note ${note.id}")
                             val success = remoteRepo.deleteNote(note.id)
                             if (success) {
-                                // Actually delete from local after syncing delete
+                                
                                 localRepo.hardDeleteNote(note.id)
                                 deleted++
                                 Log.d(TAG, "DELETE SUCCESS: ${note.id}")
@@ -106,23 +100,20 @@ class NotesSyncManager(
         }
     }
     
-    /**
-     * Pull notes từ Supabase về Room
-     * Gọi sau khi login
-     */
+    
     suspend fun pullFromServer(userId: String): Result<NotesSyncResult> {
         return try {
             var inserted = 0
             
-            // Get all notes from server
+            
             val serverNotes = remoteRepo.getAllNotes()
             
             for (noteRow in serverNotes) {
                 try {
-                    // Convert to entity using fromRow
+                    
                     val entity = NoteEntity.fromRow(noteRow)
                     
-                    // Insert or update in local
+                    
                     localRepo.insertOrUpdate(entity)
                     inserted++
                     
@@ -148,9 +139,7 @@ class NotesSyncManager(
     }
 }
 
-/**
- * Kết quả sync notes
- */
+
 data class NotesSyncResult(
     val inserted: Int,
     val updated: Int,

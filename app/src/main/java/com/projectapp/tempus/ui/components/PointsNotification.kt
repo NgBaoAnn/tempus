@@ -28,46 +28,39 @@ import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
-/**
- * Bright, vibrant colors following UI/UX Pro Max guidelines
- */
+
 private object PointsColors {
-    // Bright gradient for earning points
+    
     val EarnGradientStart = Color(0xFF00E676)
     val EarnGradientEnd = Color(0xFF00C853)
     
-    // Gradient for losing points
+    
     val DeductGradientStart = Color(0xFFFF6B6B)
     val DeductGradientEnd = Color(0xFFEE5A5A)
     
-    // Card background
+    
     val CardBackground = Color(0xFFFFFFF8)
     
-    // Text colors
+    
     val TextDark = Color(0xFF1A1A2E)
     val TextMuted = Color(0xFF6B7280)
 }
 
-/**
- * State holder for showing points notification
- */
+
 data class PointsNotificationState(
     val show: Boolean = false,
     val points: Int = 0,
     val reason: String = ""
 )
 
-/**
- * Modern horizontal layout points notification
- * Icon and points are aligned horizontally for better visual flow
- */
+
 @Composable
 fun PointsNotification(
     points: Int,
     reason: String,
     onDismiss: () -> Unit
 ) {
-    // Auto dismiss after 3 seconds
+    
     LaunchedEffect(Unit) {
         delay(3000)
         onDismiss()
@@ -92,7 +85,7 @@ fun PointsNotification(
             dismissOnClickOutside = true
         )
     ) {
-        // Bounce scale animation
+        
         var scale by remember { mutableFloatStateOf(0.7f) }
         val animatedScale by animateFloatAsState(
             targetValue = scale,
@@ -128,13 +121,13 @@ fun PointsNotification(
                     .fillMaxWidth()
                     .padding(28.dp)
             ) {
-                // ===== HORIZONTAL LAYOUT: Icon + Points =====
+                
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Icon with gradient circle background
+                    
                     Box(
                         modifier = Modifier
                             .size(64.dp)
@@ -154,7 +147,7 @@ fun PointsNotification(
                     
                     Spacer(modifier = Modifier.width(16.dp))
                     
-                    // Points value + label stacked
+                    
                     Column {
                         Text(
                             text = pointsText,
@@ -175,7 +168,7 @@ fun PointsNotification(
                 
                 Spacer(modifier = Modifier.height(20.dp))
                 
-                // Reason with pill/tag style
+                
                 Surface(
                     shape = RoundedCornerShape(24.dp),
                     color = accentColor.copy(alpha = 0.12f)
@@ -203,7 +196,7 @@ fun PointsNotification(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Tap to dismiss hint
+                
                 Text(
                     text = "Nhấn để đóng",
                     fontSize = 12.sp,

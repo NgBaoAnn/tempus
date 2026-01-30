@@ -30,9 +30,7 @@ import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.social.dto.UserBasicDto
 
-/**
- * Dialog tìm kiếm và gửi lời mời kết bạn
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchUserDialog(
@@ -63,7 +61,7 @@ fun SearchUserDialog(
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
-                // Header
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -86,7 +84,7 @@ fun SearchUserDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Search Field
+                
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { 
@@ -127,7 +125,7 @@ fun SearchUserDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Results
+                
                 when {
                     isSearching -> {
                         Box(
@@ -212,7 +210,7 @@ private fun SearchResultItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -230,7 +228,7 @@ private fun SearchResultItem(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.username,
@@ -246,7 +244,7 @@ private fun SearchResultItem(
                 }
             }
             
-            // Add button
+            
             if (requestSent) {
                 Text(
                     text = stringResource(R.string.social_requests_sent),

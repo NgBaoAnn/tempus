@@ -12,11 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
-/**
- * Manager quản lý tất cả logic liên quan đến điểm và cây
- */
+
 class PointsManager(
-    val repository: GamificationRepository  // Exposed for direct access when needed
+    val repository: GamificationRepository  
 ) {
     companion object {
         const val STREAK_MULTIPLIER = 1.5f
@@ -24,30 +22,23 @@ class PointsManager(
     
     private val treeCalculator = TreeGrowthCalculator()
     
-    // ==================== Points Operations ====================
     
-    /**
-     * Lấy điểm hiện tại của user (Flow để observe changes)
-     */
     fun getUserPoints(): Flow<UserPointsEntity?> = repository.getUserPoints()
     
-    /**
-     * Kiếm điểm từ một action
-     * @return Số điểm thực tế được cộng (sau khi áp dụng streak bonus)
-     */
+    
     suspend fun earnPoints(action: PointAction): Int {
         val current = repository.getOrCreateUserPoints()
         
-        // Áp dụng streak multiplier nếu đang có streak và action là kiếm điểm
+        
         val hasStreak = current.currentStreak >= 3
         val multiplier = if (hasStreak && action.isEarning()) STREAK_MULTIPLIER else 1f
         val finalPoints = (action.points * multiplier).toInt()
         
-        // Update total points
+        
         val newTotal = (current.totalPoints + finalPoints).coerceAtLeast(0)
         repository.updateUserPoints(current.copy(totalPoints = newTotal))
         
-        // Log history
+        
         repository.addPointHistory(PointHistoryEntity(
             points = finalPoints,
             reason = action.name
@@ -56,30 +47,23 @@ class PointsManager(
         return finalPoints
     }
     
-    /**
-     * Kiếm điểm Pomodoro dựa trên thời gian tập trung
-     * @param focusMinutes Số phút đã tập trung
-     * @return Số điểm thực tế được cộng (1 điểm/phút, có streak bonus)
-     * 
-     * Công thức: 1 điểm/phút + bonus nếu streak >= 3
-     * Ví dụ: 25 phút = 25 điểm, với streak x1.5 = 37 điểm
-     */
+    
     suspend fun earnPomodoroPoints(focusMinutes: Int): Int {
         val current = repository.getOrCreateUserPoints()
         
-        // Base: 1 điểm/phút
+        
         val basePoints = focusMinutes.coerceAtLeast(1)
         
-        // Áp dụng streak multiplier
+        
         val hasStreak = current.currentStreak >= 3
         val multiplier = if (hasStreak) STREAK_MULTIPLIER else 1f
         val finalPoints = (basePoints * multiplier).toInt()
         
-        // Update total points
+        
         val newTotal = (current.totalPoints + finalPoints).coerceAtLeast(0)
         repository.updateUserPoints(current.copy(totalPoints = newTotal))
         
-        // Log history với số phút
+        
         repository.addPointHistory(PointHistoryEntity(
             points = finalPoints,
             reason = "POMODORO_${focusMinutes}m"
@@ -88,10 +72,7 @@ class PointsManager(
         return finalPoints
     }
     
-    /**
-     * Dùng điểm (trừ điểm)
-     * @return true nếu thành công, false nếu không đủ điểm
-     */
+    
     suspend fun spendPoints(amount: Int, reason: String): Boolean {
         val current = repository.getOrCreateUserPoints()
         if (current.totalPoints < amount) return false
@@ -108,21 +89,19 @@ class PointsManager(
         return true
     }
     
-    /**
-     * Cập nhật streak khi user hoàn thành task trong ngày
-     */
+    
     suspend fun updateStreak() {
         val today = LocalDate.now().toString()
         val current = repository.getOrCreateUserPoints()
         
-        // Đã active hôm nay rồi, không cần update
+        
         if (current.lastActiveDate == today) return
         
         val yesterday = LocalDate.now().minusDays(1).toString()
         val newStreak = if (current.lastActiveDate == yesterday) {
             current.currentStreak + 1
         } else {
-            1  // Reset streak
+            1  
         }
         
         repository.updateUserPoints(current.copy(
@@ -131,7 +110,7 @@ class PointsManager(
             lastActiveDate = today
         ))
         
-        // Award streak bonuses
+        
         when (newStreak) {
             3 -> earnPoints(PointAction.STREAK_BONUS_3)
             7 -> earnPoints(PointAction.STREAK_BONUS_7)
@@ -139,22 +118,13 @@ class PointsManager(
         }
     }
     
-    /**
-     * Lấy lịch sử điểm
-     */
+    
     fun getPointHistory(): Flow<List<PointHistoryEntity>> = repository.getPointHistory()
     
-    // ==================== Tree Operations ====================
     
-    /**
-     * Lấy danh sách cây còn sống
-     */
     fun getAliveTrees(): Flow<List<TreeEntity>> = repository.getAliveTrees()
     
-    /**
-     * Trồng cây mới
-     * @return ID của cây mới, null nếu không đủ điểm
-     */
+    
     suspend fun plantTree(type: TreeType, name: String = type.displayName): Long? {
         val current = repository.getOrCreateUserPoints()
         
@@ -162,11 +132,11 @@ class PointsManager(
             return null
         }
         
-        // Trừ điểm
+        
         val success = spendPoints(type.costToPlant, "PLANT_${type.name}")
         if (!success) return null
         
-        // Tạo cây mới
+        
         val tree = TreeEntity(
             name = name,
             treeType = type.name,
@@ -176,19 +146,16 @@ class PointsManager(
         return repository.plantTree(tree)
     }
     
-    /**
-     * Tưới cây (đầu tư điểm vào cây)
-     * @return TreeState mới sau khi tưới, null nếu thất bại
-     */
+    
     suspend fun waterTree(treeId: Long, points: Int = 10): TreeState? {
         val tree = repository.getTreeById(treeId) ?: return null
         if (!tree.isAlive) return null
         
-        // Trừ điểm
+        
         val success = spendPoints(points, "WATER_TREE_$treeId")
         if (!success) return null
         
-        // Cập nhật cây
+        
         val newInvestedPoints = tree.investedPoints + points
         val newState = treeCalculator.calculateState(newInvestedPoints)
         
@@ -201,9 +168,7 @@ class PointsManager(
         return newState
     }
     
-    /**
-     * Kiểm tra và cập nhật cây chết (gọi mỗi khi mở app)
-     */
+    
     suspend fun checkAndUpdateDeadTrees() {
         val trees = repository.getAliveTrees().first()
         
@@ -214,9 +179,7 @@ class PointsManager(
         }
     }
     
-    /**
-     * Lấy thông tin chi tiết của một cây
-     */
+    
     suspend fun getTreeInfo(treeId: Long): TreeInfo? {
         val tree = repository.getTreeById(treeId) ?: return null
         val state = TreeState.fromString(tree.state)
@@ -233,9 +196,7 @@ class PointsManager(
     }
 }
 
-/**
- * Data class chứa thông tin đầy đủ của một cây
- */
+
 data class TreeInfo(
     val entity: TreeEntity,
     val state: TreeState,

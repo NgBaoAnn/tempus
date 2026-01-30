@@ -5,66 +5,53 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 
-/**
- * Use case to parse AI text response into structured schedule suggestions
- * 
- * Supports multiple formats:
- * - "8:00 - 9:00: Học Toán"
- * - "08h00 - 09h00 Học Lý"
- * - JSON format from structured prompt
- */
+
 class ParseScheduleSuggestionUseCase {
     
     companion object {
-        // Pattern: "HH:MM - HH:MM: Task name" or "HH:MM-HH:MM Task name"
+        
         private val TIME_RANGE_PATTERN = Pattern.compile(
             """(\d{1,2})[h:.]?(\d{2})?\s*[-–~]\s*(\d{1,2})[h:.]?(\d{2})?\s*[:\-]?\s*(.+)""",
             Pattern.CASE_INSENSITIVE
         )
         
-        // Pattern: "• HH:MM: Task name" or "- HH:MM Task name"
+        
         private val BULLET_TIME_PATTERN = Pattern.compile(
             """[•\-*]\s*(\d{1,2})[h:.]?(\d{2})?\s*[:\-]?\s*(.+)""",
             Pattern.CASE_INSENSITIVE
         )
         
-        // Default duration if only start time is provided
+        
         private const val DEFAULT_DURATION_MINUTES = 60
     }
     
-    /**
-     * Parse AI response text into list of schedule suggestions
-     * 
-     * @param aiResponse The raw text response from AI
-     * @param targetDate The date for which suggestions are being created (default: today)
-     * @return List of parsed ScheduleSuggestion objects
-     */
+    
     fun parse(
         aiResponse: String, 
         targetDate: String = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
     ): List<ScheduleSuggestion> {
         val suggestions = mutableListOf<ScheduleSuggestion>()
         
-        // Try parsing JSON first
+        
         val jsonSuggestions = tryParseJson(aiResponse, targetDate)
         if (jsonSuggestions.isNotEmpty()) {
             return jsonSuggestions
         }
         
-        // Parse line by line
+        
         val lines = aiResponse.split("\n")
         for (line in lines) {
             val trimmedLine = line.trim()
             if (trimmedLine.isEmpty()) continue
             
-            // Try time range pattern first (e.g., "8:00 - 9:00: Học Toán")
+            
             val rangeResult = parseTimeRange(trimmedLine, targetDate)
             if (rangeResult != null) {
                 suggestions.add(rangeResult)
                 continue
             }
             
-            // Try bullet with time pattern (e.g., "• 8:00 Học Toán")
+            
             val bulletResult = parseBulletTime(trimmedLine, targetDate)
             if (bulletResult != null) {
                 suggestions.add(bulletResult)
@@ -74,11 +61,9 @@ class ParseScheduleSuggestionUseCase {
         return suggestions
     }
     
-    /**
-     * Try to parse JSON formatted response
-     */
+    
     private fun tryParseJson(response: String, targetDate: String): List<ScheduleSuggestion> {
-        // Look for JSON array pattern
+        
         val jsonStart = response.indexOf("[")
         val jsonEnd = response.lastIndexOf("]")
         
@@ -88,21 +73,18 @@ class ParseScheduleSuggestionUseCase {
         
         try {
             val jsonString = response.substring(jsonStart, jsonEnd + 1)
-            // Simple JSON parsing without external library
+            
             return parseSimpleJsonArray(jsonString, targetDate)
         } catch (e: Exception) {
             return emptyList()
         }
     }
     
-    /**
-     * Simple JSON array parser for schedule objects
-     * Expected format: [{"name": "...", "start": "HH:MM", "end": "HH:MM"}, ...]
-     */
+    
     private fun parseSimpleJsonArray(json: String, targetDate: String): List<ScheduleSuggestion> {
         val suggestions = mutableListOf<ScheduleSuggestion>()
         
-        // Find all objects in array
+        
         val objectPattern = Pattern.compile("""\{[^}]+\}""")
         val matcher = objectPattern.matcher(json)
         
@@ -117,9 +99,7 @@ class ParseScheduleSuggestionUseCase {
         return suggestions
     }
     
-    /**
-     * Parse a single JSON object into ScheduleSuggestion
-     */
+    
     private fun parseJsonObject(json: String, targetDate: String): ScheduleSuggestion? {
         val nameMatch = Regex(""""(?:name|task|title)"\s*:\s*"([^"]+)"""").find(json)
         val startMatch = Regex(""""(?:start|startTime|start_time|from)"\s*:\s*"([^"]+)"""").find(json)

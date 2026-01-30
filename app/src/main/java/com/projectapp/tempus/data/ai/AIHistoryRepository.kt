@@ -10,10 +10,7 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-/**
- * Repository để quản lý AI Chat History với Supabase
- * Lưu trữ và truy xuất conversation history giữa user và AI
- */
+
 class AIHistoryRepository {
     
     private val supabase = SupabaseClientProvider.client
@@ -23,15 +20,7 @@ class AIHistoryRepository {
         return supabase.auth.currentUserOrNull()?.id
     }
     
-    /**
-     * Lưu một cặp prompt/response vào database
-     * @param prompt User's message
-     * @param response AI's response
-     * @param sessionId Session ID to group messages
-     * @param title Optional session title (AI-generated)
-     * @param mode Chat mode (ask/agent/life_planner)
-     * @return true if saved successfully
-     */
+    
     suspend fun saveConversation(
         prompt: String,
         response: String,
@@ -72,11 +61,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Lấy lịch sử chat của user, sắp xếp theo thời gian mới nhất trước
-     * @param limit Số lượng records tối đa (default: 50)
-     * @return List of AIHistoryRow, newest first
-     */
+    
     suspend fun getHistory(limit: Int = 50): List<AIHistoryRow> {
         val userId = getCurrentUserId()
         
@@ -104,19 +89,12 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Lấy lịch sử theo thứ tự thời gian (cũ trước) để hiển thị đúng thứ tự chat
-     * @param limit Số lượng records tối đa
-     * @return List of AIHistoryRow, oldest first for display
-     */
+    
     suspend fun getHistoryForDisplay(limit: Int = 50): List<AIHistoryRow> {
         return getHistory(limit).reversed()
     }
     
-    /**
-     * Xóa toàn bộ lịch sử chat của user
-     * @return true if deleted successfully
-     */
+    
     suspend fun clearHistory(): Boolean {
         val userId = getCurrentUserId()
         
@@ -141,10 +119,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Xóa một record history cụ thể
-     * @param historyId ID của record cần xóa
-     */
+    
     suspend fun deleteHistory(historyId: String): Boolean {
         return try {
             supabase.from(TABLE_NAME)
@@ -162,11 +137,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Lấy danh sách các sessions (distinct by session_id)
-     * Mỗi session có title và thời gian tạo
-     * @return List of sessions with title and created_at
-     */
+    
     suspend fun getSessionList(): List<AIHistoryRow> {
         val userId = getCurrentUserId()
         
@@ -176,7 +147,7 @@ class AIHistoryRepository {
         }
         
         return try {
-            // Lấy tất cả records và group theo session_id ở client side
+            
             val result = supabase.from(TABLE_NAME)
                 .select {
                     filter {
@@ -186,7 +157,7 @@ class AIHistoryRepository {
                 }
                 .decodeList<AIHistoryRow>()
             
-            // Group by session_id và lấy record đầu tiên (mới nhất) của mỗi session
+            
             val sessions = result
                 .filter { it.sessionId != null }
                 .groupBy { it.sessionId }
@@ -201,11 +172,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Lấy tất cả messages của một session
-     * @param sessionId ID của session
-     * @return List of messages trong session, oldest first
-     */
+    
     suspend fun getSessionMessages(sessionId: String): List<AIHistoryRow> {
         val userId = getCurrentUserId()
         
@@ -233,10 +200,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Xóa toàn bộ session
-     * @param sessionId ID của session cần xóa
-     */
+    
     suspend fun deleteSession(sessionId: String): Boolean {
         val userId = getCurrentUserId()
         
@@ -262,11 +226,7 @@ class AIHistoryRepository {
         }
     }
     
-    /**
-     * Update title cho session
-     * @param sessionId ID của session
-     * @param title Title mới
-     */
+    
     suspend fun updateSessionTitle(sessionId: String, title: String): Boolean {
         val userId = getCurrentUserId()
         

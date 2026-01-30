@@ -2,18 +2,16 @@ package com.projectapp.tempus.data.personalization
 
 import kotlinx.serialization.Serializable
 
-/**
- * Data class representing a custom time period defined by the user
- */
+
 @Serializable
 data class CustomTimePeriod(
     val id: String,
     val name: String,
-    val startTime: String,  // HH:mm format
-    val endTime: String,    // HH:mm format
+    val startTime: String,  
+    val endTime: String,    
     val color: String = "#007AFF",
     val description: String = "",
-    val label: String = "book" // Default label for custom periods
+    val label: String = "book" 
 )
 
 /**
@@ -89,9 +87,7 @@ enum class LifestylePreset(
     )
 }
 
-/**
- * Data class containing all personalization settings for user's daily routine
- */
+
 @Serializable
 data class PersonalizationSettings(
     val lifestyle: String = LifestylePreset.CUSTOM.name,

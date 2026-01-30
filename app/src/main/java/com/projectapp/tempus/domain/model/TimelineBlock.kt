@@ -8,17 +8,17 @@ import java.time.LocalDateTime
 
 data class TimelineBlock(
     val taskId: String,
-    val scheduleItemId: String?,   // null nếu chưa có item
+    val scheduleItemId: String?,   
     val title: String,
     val label: String,
-    val labelEnum: ScheduleLabel = ScheduleLabel.book, // For filtering
+    val labelEnum: ScheduleLabel = ScheduleLabel.book, 
     val color: String,
     val startTime: LocalDateTime,
     val duration: Duration,
-    // ---------------------------
+    
     val priority: PriorityType = PriorityType.medium,
     val status: StatusType,
-    val createdAt: LocalDateTime? = null, // For sorting by created date
+    val createdAt: LocalDateTime? = null, 
     val subtasks: List<SubtaskInfo> = emptyList()
 )
 

@@ -1,15 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme - Night mode aligned with TempusDesignSystem -->
+    
     <style name="Theme.Tempus" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary brand color - Blue 400 for dark mode -->
+        
         <item name="colorPrimary">#FF60A5FA</item>
         <item name="colorPrimaryVariant">#FF1E3A8A</item>
         <item name="colorOnPrimary">#FF0F172A</item>
-        <!-- Secondary brand color - Teal 400 -->
+        
         <item name="colorSecondary">#FF2DD4BF</item>
         <item name="colorSecondaryVariant">#FF14B8A6</item>
         <item name="colorOnSecondary">#FF0F172A</item>
-        <!-- Status bar color -->
+        
         <item name="android:windowBackground">@color/app_background</item>
         <item name="android:colorBackground">@color/app_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

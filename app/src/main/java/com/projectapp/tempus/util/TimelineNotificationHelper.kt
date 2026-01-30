@@ -16,13 +16,13 @@ object TimelineNotificationHelper {
 
     const val CHANNEL_ID = "timeline_channel"
     
-    // Priority colors
-    private const val COLOR_HIGH = 0xFFE53935.toInt()    // Red
-    private const val COLOR_MEDIUM = 0xFFFFA726.toInt()  // Orange  
-    private const val COLOR_LOW = 0xFF43A047.toInt()     // Green
-    private const val COLOR_DEFAULT = 0xFF2196F3.toInt() // Blue
     
-    // Category label icons mapping
+    private const val COLOR_HIGH = 0xFFE53935.toInt()    
+    private const val COLOR_MEDIUM = 0xFFFFA726.toInt()  
+    private const val COLOR_LOW = 0xFF43A047.toInt()     
+    private const val COLOR_DEFAULT = 0xFF2196F3.toInt() 
+    
+    
     private val CATEGORY_ICONS = mapOf(
         "wakeup" to R.drawable.ic_timer,
         "eat" to R.drawable.ic_timer,
@@ -52,13 +52,7 @@ object TimelineNotificationHelper {
         }
     }
 
-    /**
-     * Show enhanced task notification with:
-     * - Priority-based colors
-     * - Snooze action button
-     * - Expanded BigText style
-     * - Category-based icon
-     */
+    
     fun showTaskNotification(
         context: Context,
         taskId: String,
@@ -74,7 +68,7 @@ object TimelineNotificationHelper {
 
         createNotificationChannel(context)
 
-        // Intent to open MainActivity and navigate to Timeline
+        
         val contentIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("NAVIGATE_TO", "timeline")
@@ -88,7 +82,7 @@ object TimelineNotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Snooze action intent
+        
         val snoozeIntent = Intent(context, NotificationSnoozeReceiver::class.java).apply {
             action = NotificationSnoozeReceiver.ACTION_SNOOZE
             putExtra("TASK_ID", taskId)
@@ -102,21 +96,21 @@ object TimelineNotificationHelper {
         
         val snoozePendingIntent = PendingIntent.getBroadcast(
             context,
-            taskId.hashCode() + 1000, // Different request code
+            taskId.hashCode() + 1000, 
             snoozeIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Determine notification color based on priority
+        
         val notificationColor = getPriorityColor(priority, color)
         
-        // Choose icon based on category
+        
         val iconRes = getCategoryIcon(categoryLabel)
         
-        // Build time range text
+        
         val timeRange = if (endTime.isNotEmpty()) "Từ $startTime đến $endTime" else "Bắt đầu lúc $startTime"
         
-        // Build priority label
+        
         val priorityEmoji = when (priority.lowercase()) {
             "high" -> "🔴"
             "medium" -> "🟠"
@@ -124,7 +118,7 @@ object TimelineNotificationHelper {
             else -> "🔵"
         }
         
-        // Build expanded content
+        
         val expandedText = buildString {
             append("$priorityEmoji Độ ưu tiên: ${getPriorityText(priority)}\n")
             append("⏰ $timeRange")

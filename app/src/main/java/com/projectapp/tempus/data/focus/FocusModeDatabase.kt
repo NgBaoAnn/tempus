@@ -5,9 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-/**
- * Room Database for Focus Mode data
- */
+
 @Database(
     entities = [BlockedAppEntity::class],
     version = 1,

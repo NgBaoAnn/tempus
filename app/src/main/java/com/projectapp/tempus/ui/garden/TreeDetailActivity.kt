@@ -35,9 +35,7 @@ import com.projectapp.tempus.ui.garden.compose.WateringAnimation
 import com.projectapp.tempus.ui.theme.TempusTheme
 import kotlinx.coroutines.launch
 
-/**
- * Activity hiển thị chi tiết cây với animation đung đưa
- */
+
 class TreeDetailActivity : ComponentActivity() {
     
     companion object {
@@ -96,12 +94,12 @@ private fun TreeDetailScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // Use offline-first repository
+    
     val repository = remember { RepositoryProvider.getGamificationRepository(context) }
     val pointsManager = remember { PointsManager(repository) }
     val treeCalculator = remember { TreeGrowthCalculator() }
     
-    // MUTABLE STATE - để UI update real-time
+    
     var currentState by remember { mutableStateOf(initialState) }
     var currentInvestedPoints by remember { mutableIntStateOf(initialInvestedPoints) }
     var currentProgress by remember { mutableFloatStateOf(initialProgress) }
@@ -114,7 +112,7 @@ private fun TreeDetailScreen(
     
     val canWater = currentState != TreeState.TREE && currentState != TreeState.DEAD
     
-    // Delete confirmation dialog
+    
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -176,7 +174,7 @@ private fun TreeDetailScreen(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Large Procedural Tree với glow effect
+            
             Box(
                 modifier = Modifier
                     .size(220.dp)
@@ -198,7 +196,7 @@ private fun TreeDetailScreen(
                     size = ProceduralTreeSize.XLARGE.dp
                 )
             
-                // Water animation overlay
+                
                 WateringAnimation(
                     isPlaying = showWateringAnimation,
                     onAnimationEnd = { showWateringAnimation = false }
@@ -207,7 +205,7 @@ private fun TreeDetailScreen(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // State Badge
+            
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = getTreeGlowColor(currentState).copy(alpha = 0.15f)
@@ -223,7 +221,7 @@ private fun TreeDetailScreen(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Progress Bar
+            
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -261,7 +259,7 @@ private fun TreeDetailScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // WATER BUTTON - Ngay dưới thanh tiến độ
+            
             if (canWater) {
                 Button(
                     onClick = {
@@ -276,7 +274,7 @@ private fun TreeDetailScreen(
                                 currentProgress = treeCalculator.getProgressPercent(currentInvestedPoints)
                                 currentDaysUntilDeath = 7
                                 
-                                // Trigger water animation
+                                
                                 showWateringAnimation = true
                                 
                                 Toast.makeText(context, "💧 Đã tưới cây thành công!", Toast.LENGTH_SHORT).show()
@@ -330,7 +328,7 @@ private fun TreeDetailScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Info Card
+            
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -369,7 +367,7 @@ private fun TreeDetailScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Delete Button
+            
             OutlinedButton(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier
