@@ -79,7 +79,8 @@ object SourceTypeSerializer : KSerializer<SourceType> {
 @Serializable(with = SourceTypeSerializer::class)
 enum class SourceType {
     @SerialName("manual") manual,
-    @SerialName("ai") ai
+    @SerialName("ai") ai,
+    @SerialName("personalization") PERSONALIZATION
 }
 
 // ===================== ScheduleLabel =====================

@@ -17,6 +17,18 @@ data class CustomTimePeriod(
 )
 
 /**
+ * Data class for tasks that user wants AI to schedule
+ */
+@Serializable
+data class PersonalizationTask(
+    val id: String,
+    val name: String,
+    val description: String = "",
+    val estimatedMinutes: Int = 60, // Estimated duration in minutes
+    val priority: String = "medium" // high, medium, low
+)
+
+/**
  * Preset lifestyle types with default settings
  */
 enum class LifestylePreset(
@@ -85,9 +97,11 @@ data class PersonalizationSettings(
     val lifestyle: String = LifestylePreset.CUSTOM.name,
     val wakeUpTime: String = "07:00",      // HH:mm format
     val sleepTime: String = "23:00",       // HH:mm format
-    val workStartTime: String = "08:00",   // HH:mm format
-    val workEndTime: String = "17:00",     // HH:mm format
+    val workStartTime: String = "08:00",   // HH:mm format (kept for backward compat)
+    val workEndTime: String = "17:00",     // HH:mm format (kept for backward compat)
     val customTimePeriods: List<CustomTimePeriod> = emptyList(),
     // Days of week to apply (1 = Monday, 7 = Sunday)
-    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6) // Default: Mon-Sat
+    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6), // Default: Mon-Sat
+    // Tasks for AI to schedule
+    val pendingTasks: List<PersonalizationTask> = emptyList()
 )

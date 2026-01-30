@@ -40,8 +40,10 @@ import androidx.compose.ui.window.Dialog
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.personalization.CustomTimePeriod
 import com.projectapp.tempus.data.personalization.LifestylePreset
+import com.projectapp.tempus.data.personalization.PersonalizationTask
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.ui.setting.PersonalizationUiState
+import com.projectapp.tempus.ui.setting.SchedulePreviewItem
 import com.projectapp.tempus.ui.setting.TimePickerTarget
 
 /**
@@ -76,6 +78,18 @@ fun PersonalizationScreen(
     onDismissLabelSheet: () -> Unit,
     onSelectLabel: (ScheduleLabel) -> Unit,
     getLabelDisplayName: (ScheduleLabel) -> String,
+    // Task management callbacks
+    onShowAddTaskDialog: () -> Unit,
+    onDismissAddTaskDialog: () -> Unit,
+    onUpdateNewTaskName: (String) -> Unit,
+    onUpdateNewTaskDescription: (String) -> Unit,
+    onUpdateNewTaskMinutes: (Int) -> Unit,
+    onUpdateNewTaskPriority: (String) -> Unit,
+    onSaveNewTask: () -> Unit,
+    onRemoveTask: (String) -> Unit,
+    onGenerateScheduleWithAI: () -> Unit,
+    onConfirmSchedule: () -> Unit,
+    onDismissSchedulePreview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Show Add Custom Period Screen if active
@@ -162,55 +176,40 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Section: GIỜ LÀM VIỆC
+            // Section: CÔNG VIỆC CÁ NHÂN (replaced GIỜ LÀM VIỆC)
             item {
-                SectionTitle(text = stringResource(R.string.pers_section_work))
+                SectionTitle(text = "CÔNG VIỆC CÁ NHÂN")
             }
 
-            item {
-                TimeSettingsCard(
-                    items = listOf(
-                        TimeSettingData(stringResource(R.string.pers_work_start), uiState.workStartTime, PersonalizationColors.Green, TimePickerTarget.WORK_START),
-                        TimeSettingData(stringResource(R.string.pers_work_end), uiState.workEndTime, PersonalizationColors.Orange, TimePickerTarget.WORK_END)
-                    ),
-                    onShowTimePicker = onShowTimePicker
-                )
-            }
-
-            // Section: THỜI GIAN TÙY CHỈNH
-            item {
-                SectionTitle(text = stringResource(R.string.pers_section_custom))
-            }
-
-            // Custom time periods list
-            if (uiState.customTimePeriods.isNotEmpty()) {
+            // Task list
+            if (uiState.pendingTasks.isNotEmpty()) {
                 item {
-                    CustomPeriodsCard(
-                        periods = uiState.customTimePeriods,
-                        onRemove = onRemoveCustomPeriod
+                    TasksListCard(
+                        tasks = uiState.pendingTasks,
+                        onRemove = onRemoveTask
                     )
                 }
             }
 
-            // Add custom period button
+            // Add task button
             item {
                 AddCustomPeriodCard(
-                    onClick = onShowAddCustomPeriod,
-                    text = stringResource(R.string.pers_add_period)
+                    onClick = onShowAddTaskDialog,
+                    text = "+ Thêm công việc"
                 )
             }
 
-            // Spacer
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Reset button
-            item {
-                ResetPlanButton(
-                    isLoading = uiState.isLoading,
-                    onClick = onShowResetConfirmation
-                )
+            // Generate schedule with AI button
+            if (uiState.pendingTasks.isNotEmpty()) {
+                item {
+                    GenerateScheduleButton(
+                        isLoading = uiState.isGeneratingSchedule,
+                        onClick = onGenerateScheduleWithAI
+                    )
+                }
             }
 
+            // Bottom spacer
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
@@ -259,6 +258,32 @@ fun PersonalizationScreen(
             activeDaysLabel = activeDaysLabel,
             onDismiss = onDismissResetConfirmation,
             onConfirm = onConfirmReset
+        )
+    }
+    
+    // Add Task Dialog
+    if (uiState.showAddTaskDialog) {
+        AddTaskDialog(
+            taskName = uiState.newTaskName,
+            taskDescription = uiState.newTaskDescription,
+            estimatedMinutes = uiState.newTaskEstimatedMinutes,
+            priority = uiState.newTaskPriority,
+            onNameChange = onUpdateNewTaskName,
+            onDescriptionChange = onUpdateNewTaskDescription,
+            onMinutesChange = onUpdateNewTaskMinutes,
+            onPriorityChange = onUpdateNewTaskPriority,
+            onDismiss = onDismissAddTaskDialog,
+            onSave = onSaveNewTask
+        )
+    }
+    
+    // Schedule Preview Dialog
+    if (uiState.showSchedulePreview) {
+        SchedulePreviewDialog(
+            previewItems = uiState.generatedSchedulePreview,
+            isLoading = uiState.isGeneratingSchedule,
+            onConfirm = onConfirmSchedule,
+            onDismiss = onDismissSchedulePreview
         )
     }
 }
@@ -717,6 +742,354 @@ private fun LabelPickerSheet(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+// ======================== ADD TASK DIALOG ========================
+
+@Composable
+private fun AddTaskDialog(
+    taskName: String,
+    taskDescription: String,
+    estimatedMinutes: Int,
+    priority: String,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onMinutesChange: (Int) -> Unit,
+    onPriorityChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceDark)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                // Title
+                Text(
+                    text = "Thêm công việc",
+                    color = PersonalizationColors.TextPrimary,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                // Task name input
+                OutlinedTextField(
+                    value = taskName,
+                    onValueChange = onNameChange,
+                    label = { Text("Tên công việc *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PersonalizationColors.AccentPrimary,
+                        unfocusedBorderColor = PersonalizationColors.Divider,
+                        focusedLabelColor = PersonalizationColors.AccentPrimary,
+                        unfocusedLabelColor = PersonalizationColors.TextSecondary,
+                        focusedTextColor = PersonalizationColors.TextPrimary,
+                        unfocusedTextColor = PersonalizationColors.TextPrimary
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Description input (optional)
+                OutlinedTextField(
+                    value = taskDescription,
+                    onValueChange = onDescriptionChange,
+                    label = { Text("Mô tả (tùy chọn)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 2,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PersonalizationColors.AccentPrimary,
+                        unfocusedBorderColor = PersonalizationColors.Divider,
+                        focusedLabelColor = PersonalizationColors.AccentPrimary,
+                        unfocusedLabelColor = PersonalizationColors.TextSecondary,
+                        focusedTextColor = PersonalizationColors.TextPrimary,
+                        unfocusedTextColor = PersonalizationColors.TextPrimary
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Time estimation
+                Text(
+                    text = "Thời gian ước tính",
+                    color = PersonalizationColors.TextSecondary,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                val timeOptions = listOf(15, 30, 45, 60, 90, 120)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(timeOptions) { minutes ->
+                        val isSelected = minutes == estimatedMinutes
+                        Surface(
+                            onClick = { onMinutesChange(minutes) },
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSelected) PersonalizationColors.AccentPrimary else PersonalizationColors.ChipBackground
+                        ) {
+                            Text(
+                                text = "${minutes}p",
+                                color = if (isSelected) Color.White else PersonalizationColors.TextSecondary,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Priority selection
+                Text(
+                    text = "Độ ưu tiên",
+                    color = PersonalizationColors.TextSecondary,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf("high" to "Cao", "medium" to "Trung bình", "low" to "Thấp").forEach { (value, label) ->
+                        val isSelected = value == priority
+                        val priorityColor = when (value) {
+                            "high" -> Color(0xFFE53935)
+                            "low" -> Color(0xFF4CAF50)
+                            else -> Color(0xFFFFA726)
+                        }
+                        
+                        Surface(
+                            onClick = { onPriorityChange(value) },
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSelected) priorityColor else PersonalizationColors.ChipBackground
+                        ) {
+                            Text(
+                                text = label,
+                                color = if (isSelected) Color.White else PersonalizationColors.TextSecondary,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = PersonalizationColors.TextSecondary
+                        )
+                    ) {
+                        Text("Hủy")
+                    }
+                    
+                    Button(
+                        onClick = onSave,
+                        enabled = taskName.isNotBlank(),
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PersonalizationColors.AccentPrimary
+                        )
+                    ) {
+                        Text("Thêm")
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ======================== SCHEDULE PREVIEW DIALOG ========================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SchedulePreviewDialog(
+    previewItems: List<SchedulePreviewItem>,
+    isLoading: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = PersonalizationColors.SurfaceCard,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                // Header
+                Text(
+                    text = "Lịch trình được đề xuất",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PersonalizationColors.TextPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "AI đã phân tích và tạo lịch trình tối ưu cho bạn. Xác nhận để thêm vào timeline.",
+                    fontSize = 14.sp,
+                    color = PersonalizationColors.TextSecondary
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Schedule items list
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(previewItems.sortedBy { it.startTime }) { item ->
+                        SchedulePreviewItemCard(item = item)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = PersonalizationColors.TextSecondary
+                        )
+                    ) {
+                        Text("Hủy")
+                    }
+                    
+                    Button(
+                        onClick = onConfirm,
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PersonalizationColors.Green
+                        )
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Xác nhận")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SchedulePreviewItemCard(item: SchedulePreviewItem) {
+    val itemColor = try {
+        Color(android.graphics.Color.parseColor(item.color))
+    } catch (e: Exception) {
+        PersonalizationColors.Blue
+    }
+    
+    val priorityColor = when (item.priority) {
+        "high" -> Color(0xFFE53935)
+        "low" -> Color(0xFF4CAF50)
+        else -> Color(0xFFFFA726)
+    }
+    
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = PersonalizationColors.ChipBackground
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Color indicator
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(40.dp)
+                    .background(
+                        color = itemColor,
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            // Content
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = PersonalizationColors.TextPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "${item.startTime} - ${item.endTime}",
+                    fontSize = 13.sp,
+                    color = PersonalizationColors.TextSecondary
+                )
+            }
+            
+            // Priority badge
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = priorityColor.copy(alpha = 0.15f)
+            ) {
+                Text(
+                    text = when (item.priority) {
+                        "high" -> "Cao"
+                        "low" -> "Thấp"
+                        else -> "TB"
+                    },
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = priorityColor,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
         }
     }
 }
@@ -1321,6 +1694,134 @@ private fun AddCustomPeriodCard(
                 color = PersonalizationColors.AccentTertiary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+// ======================== TASKS LIST CARD ========================
+
+@Composable
+private fun TasksListCard(
+    tasks: List<PersonalizationTask>,
+    onRemove: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceDark),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            tasks.forEachIndexed { index, task ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Priority indicator
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when (task.priority) {
+                                    "high" -> Color(0xFFE53935)
+                                    "low" -> Color(0xFF4CAF50)
+                                    else -> Color(0xFFFFA726)
+                                }
+                            )
+                    )
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = task.name,
+                            color = PersonalizationColors.TextPrimary,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "${task.estimatedMinutes} phút • ${
+                                when (task.priority) {
+                                    "high" -> "Cao"
+                                    "low" -> "Thấp"
+                                    else -> "Trung bình"
+                                }
+                            }",
+                            color = PersonalizationColors.TextSecondary,
+                            fontSize = 13.sp
+                        )
+                    }
+
+                    IconButton(onClick = { onRemove(task.id) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "Xóa",
+                            tint = Color.Red.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                
+                if (index < tasks.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 20.dp),
+                        thickness = 1.dp,
+                        color = PersonalizationColors.Divider
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ======================== GENERATE SCHEDULE BUTTON ========================
+
+@Composable
+private fun GenerateScheduleButton(
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = !isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = PersonalizationColors.AccentPrimary,
+            contentColor = Color.White
+        )
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Đang tạo lịch...",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Tạo lịch với AI",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }

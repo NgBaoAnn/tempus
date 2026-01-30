@@ -51,6 +51,18 @@ class PersonalizationActivity : ComponentActivity() {
                         onDismissLabelSheet = { viewModel.dismissLabelSheet() },
                         onSelectLabel = { label -> viewModel.selectLabel(label) },
                         getLabelDisplayName = { label -> viewModel.getLabelDisplayName(label) },
+                        // Task management callbacks
+                        onShowAddTaskDialog = { viewModel.showAddTaskDialog() },
+                        onDismissAddTaskDialog = { viewModel.dismissAddTaskDialog() },
+                        onUpdateNewTaskName = { name -> viewModel.updateNewTaskName(name) },
+                        onUpdateNewTaskDescription = { desc -> viewModel.updateNewTaskDescription(desc) },
+                        onUpdateNewTaskMinutes = { mins -> viewModel.updateNewTaskEstimatedMinutes(mins) },
+                        onUpdateNewTaskPriority = { priority -> viewModel.updateNewTaskPriority(priority) },
+                        onSaveNewTask = { viewModel.saveNewTask() },
+                        onRemoveTask = { taskId -> viewModel.removeTask(taskId) },
+                        onGenerateScheduleWithAI = { viewModel.generateScheduleWithAI() },
+                        onConfirmSchedule = { viewModel.confirmScheduleGeneration() },
+                        onDismissSchedulePreview = { viewModel.dismissSchedulePreview() },
                         modifier = Modifier.padding(paddingValues)
                     )
                 }

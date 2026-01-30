@@ -5,9 +5,12 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
+import com.projectapp.tempus.data.ai.AIRepository
+import com.projectapp.tempus.data.ai.ScheduleSlot
 import com.projectapp.tempus.data.personalization.CustomTimePeriod
 import com.projectapp.tempus.data.personalization.LifestylePreset
 import com.projectapp.tempus.data.personalization.PersonalizationSettings
+import com.projectapp.tempus.data.personalization.PersonalizationTask
 import com.projectapp.tempus.data.personalization.SharedPrefsPersonalizationRepository
 import com.projectapp.tempus.data.RepositoryProvider
 import com.projectapp.tempus.data.schedule.dto.RepeatType
@@ -35,11 +38,14 @@ data class PersonalizationUiState(
     val workEndTime: String = "17:00",
     val customTimePeriods: List<CustomTimePeriod> = emptyList(),
     val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6), // Mon-Sat by default
+    val pendingTasks: List<PersonalizationTask> = emptyList(), // Tasks for AI
     val showResetConfirmation: Boolean = false,
     val showAddCustomPeriodScreen: Boolean = false,
+    val showAddTaskDialog: Boolean = false, // New task dialog
     val showLifestyleSheet: Boolean = false,
     val showLabelSheet: Boolean = false,
     val isLoading: Boolean = false,
+    val isGeneratingSchedule: Boolean = false, // AI generating
     val showTimePickerFor: TimePickerTarget? = null,
     // For add custom period screen
     val newPeriodName: String = "",
@@ -47,7 +53,27 @@ data class PersonalizationUiState(
     val newPeriodStartTime: String = "08:00",
     val newPeriodEndTime: String = "09:00",
     val newPeriodColor: String = "#007AFF",
-    val newPeriodLabel: ScheduleLabel = ScheduleLabel.book
+    val newPeriodLabel: ScheduleLabel = ScheduleLabel.book,
+    // For add task dialog
+    val newTaskName: String = "",
+    val newTaskDescription: String = "",
+    val newTaskEstimatedMinutes: Int = 60,
+    val newTaskPriority: String = "medium",
+    // Schedule preview
+    val showSchedulePreview: Boolean = false,
+    val generatedSchedulePreview: List<SchedulePreviewItem> = emptyList()
+)
+
+/**
+ * Preview item for generated schedule before confirmation
+ */
+data class SchedulePreviewItem(
+    val name: String,
+    val startTime: String,
+    val endTime: String,
+    val priority: String,
+    val label: String,
+    val color: String
 )
 
 /**
@@ -88,7 +114,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
             workStartTime = settings.workStartTime,
             workEndTime = settings.workEndTime,
             customTimePeriods = settings.customTimePeriods,
-            activeDays = settings.activeDays
+            activeDays = settings.activeDays,
+            pendingTasks = settings.pendingTasks
         )
     }
 
@@ -101,7 +128,8 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
             workStartTime = currentState.workStartTime,
             workEndTime = currentState.workEndTime,
             customTimePeriods = currentState.customTimePeriods,
-            activeDays = currentState.activeDays
+            activeDays = currentState.activeDays,
+            pendingTasks = currentState.pendingTasks
         )
         personalizationRepo.saveSettings(settings)
     }
@@ -272,6 +300,224 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         val updatedList = _uiState.value.customTimePeriods.filter { it.id != id }
         _uiState.value = _uiState.value.copy(customTimePeriods = updatedList)
         saveSettings()
+    }
+
+    // ==================== Task Management ====================
+    
+    fun showAddTaskDialog() {
+        _uiState.value = _uiState.value.copy(
+            showAddTaskDialog = true,
+            newTaskName = "",
+            newTaskDescription = "",
+            newTaskEstimatedMinutes = 60,
+            newTaskPriority = "medium"
+        )
+    }
+    
+    fun dismissAddTaskDialog() {
+        _uiState.value = _uiState.value.copy(showAddTaskDialog = false)
+    }
+    
+    fun updateNewTaskName(name: String) {
+        _uiState.value = _uiState.value.copy(newTaskName = name)
+    }
+    
+    fun updateNewTaskDescription(description: String) {
+        _uiState.value = _uiState.value.copy(newTaskDescription = description)
+    }
+    
+    fun updateNewTaskEstimatedMinutes(minutes: Int) {
+        _uiState.value = _uiState.value.copy(newTaskEstimatedMinutes = minutes)
+    }
+    
+    fun updateNewTaskPriority(priority: String) {
+        _uiState.value = _uiState.value.copy(newTaskPriority = priority)
+    }
+    
+    fun saveNewTask() {
+        val state = _uiState.value
+        if (state.newTaskName.isBlank()) return
+        
+        val newTask = PersonalizationTask(
+            id = UUID.randomUUID().toString(),
+            name = state.newTaskName.trim(),
+            description = state.newTaskDescription.trim(),
+            estimatedMinutes = state.newTaskEstimatedMinutes,
+            priority = state.newTaskPriority
+        )
+        
+        val updatedTasks = state.pendingTasks + newTask
+        _uiState.value = state.copy(
+            pendingTasks = updatedTasks,
+            showAddTaskDialog = false,
+            newTaskName = "",
+            newTaskDescription = "",
+            newTaskEstimatedMinutes = 60,
+            newTaskPriority = "medium"
+        )
+        saveSettings()
+    }
+    
+    fun removeTask(taskId: String) {
+        val updatedTasks = _uiState.value.pendingTasks.filter { it.id != taskId }
+        _uiState.value = _uiState.value.copy(pendingTasks = updatedTasks)
+        saveSettings()
+    }
+    
+    /**
+     * Generate schedule preview with AI from pending tasks
+     * Shows preview dialog for user confirmation before saving
+     */
+    fun generateScheduleWithAI() {
+        val state = _uiState.value
+        if (state.pendingTasks.isEmpty()) return
+        
+        viewModelScope.launch {
+            _uiState.value = state.copy(isGeneratingSchedule = true)
+            
+            try {
+                val aiRepo = AIRepository(scheduleRepo)
+                
+                val tasks = state.pendingTasks.map { task ->
+                    AIRepository.PersonalizationTaskInput(
+                        name = task.name,
+                        description = task.description,
+                        estimatedMinutes = task.estimatedMinutes,
+                        priority = task.priority
+                    )
+                }
+                
+                val result = aiRepo.generateSchedulePreview(
+                    wakeUpTime = state.wakeUpTime,
+                    sleepTime = state.sleepTime,
+                    tasks = tasks,
+                    activeDays = state.activeDays
+                )
+                
+                result.onSuccess { slots ->
+                    Log.d("PersonalizationVM", "Generated ${slots.size} schedule slots for preview")
+                    // Convert ScheduleSlot to SchedulePreviewItem and show preview
+                    val previewItems = slots.map { slot ->
+                        SchedulePreviewItem(
+                            name = slot.name,
+                            startTime = slot.startTime,
+                            endTime = slot.endTime,
+                            priority = slot.priority,
+                            label = slot.label,
+                            color = getColorForLabel(slot.label)
+                        )
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        isGeneratingSchedule = false,
+                        showSchedulePreview = true,
+                        generatedSchedulePreview = previewItems
+                    )
+                }.onFailure { e ->
+                    Log.e("PersonalizationVM", "Failed to generate schedule: ${e.message}")
+                    _uiState.value = _uiState.value.copy(isGeneratingSchedule = false)
+                }
+            } catch (e: Exception) {
+                Log.e("PersonalizationVM", "Error generating schedule: ${e.message}")
+                _uiState.value = _uiState.value.copy(isGeneratingSchedule = false)
+            }
+        }
+    }
+    
+    /**
+     * Confirm schedule generation - saves to database
+     * Also sets end_date for existing schedules to preserve historical data
+     */
+    fun confirmScheduleGeneration() {
+        val state = _uiState.value
+        if (state.generatedSchedulePreview.isEmpty()) return
+        
+        viewModelScope.launch {
+            _uiState.value = state.copy(isGeneratingSchedule = true)
+            
+            try {
+                // Get current user ID
+                val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+                if (userId == null) {
+                    Log.e("PersonalizationVM", "User not logged in")
+                    _uiState.value = _uiState.value.copy(isGeneratingSchedule = false)
+                    return@launch
+                }
+                
+                val today = java.time.LocalDate.now()
+                val yesterday = today.minusDays(1)
+                val yesterdayStr = yesterday.toString() // YYYY-MM-DD format
+                
+                // Step 1: Set end_date for all existing schedules to YESTERDAY
+                // This ensures they don't appear from today onwards (BuildTimelineUseCase uses isAfter check)
+                val updatedCount = scheduleRepo.setEndDateForAllSchedules(userId, yesterdayStr)
+                Log.d("PersonalizationVM", "Set end_date for $updatedCount schedules to $yesterdayStr")
+                
+                // Step 2: Save new AI-generated schedules
+                val aiRepo = AIRepository(scheduleRepo)
+                
+                // Convert preview items back to ScheduleSlot
+                val slots = state.generatedSchedulePreview.map { item ->
+                    ScheduleSlot(
+                        name = item.name,
+                        startTime = item.startTime,
+                        endTime = item.endTime,
+                        priority = item.priority,
+                        label = item.label
+                    )
+                }
+                
+                val result = aiRepo.saveGeneratedSchedulesToDatabase(
+                    slots = slots,
+                    activeDays = state.activeDays
+                )
+                
+                result.onSuccess { count ->
+                    Log.d("PersonalizationVM", "Saved $count schedules to database")
+                    _uiState.value = _uiState.value.copy(
+                        pendingTasks = emptyList(),
+                        showSchedulePreview = false,
+                        generatedSchedulePreview = emptyList(),
+                        isGeneratingSchedule = false
+                    )
+                    saveSettings()
+                }.onFailure { e ->
+                    Log.e("PersonalizationVM", "Failed to save schedules: ${e.message}")
+                    _uiState.value = _uiState.value.copy(isGeneratingSchedule = false)
+                }
+            } catch (e: Exception) {
+                Log.e("PersonalizationVM", "Error saving schedules: ${e.message}")
+                _uiState.value = _uiState.value.copy(isGeneratingSchedule = false)
+            }
+        }
+    }
+    
+    /**
+     * Dismiss schedule preview without saving
+     */
+    fun dismissSchedulePreview() {
+        _uiState.value = _uiState.value.copy(
+            showSchedulePreview = false,
+            generatedSchedulePreview = emptyList()
+        )
+    }
+    
+    /**
+     * Get color for label
+     */
+    private fun getColorForLabel(label: String): String {
+        return when (label) {
+            "wakeup" -> "#FF9800"
+            "eat" -> "#FFC107"
+            "exercise" -> "#4CAF50"
+            "rest" -> "#9C27B0"
+            "water" -> "#2196F3"
+            "book" -> "#3F51B5"
+            "sleep" -> "#607D8B"
+            "clean" -> "#00BCD4"
+            "cook" -> "#E91E63"
+            "garden" -> "#8BC34A"
+            else -> "#3F51B5"
+        }
     }
 
     // Reset confirmation handlers
