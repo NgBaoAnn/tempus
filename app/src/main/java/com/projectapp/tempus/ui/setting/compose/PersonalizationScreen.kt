@@ -1040,35 +1040,110 @@ private fun SchedulePreviewDialog(
         }
     }
     
-    // Edit dialog
+    // Edit dialog with time pickers
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+    
     if (editingItem != null) {
         AlertDialog(
             onDismissRequest = { editingItem = null },
             title = { Text("Chỉnh sửa lịch", color = PersonalizationColors.TextPrimary) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     OutlinedTextField(
                         value = editName,
                         onValueChange = { editName = it },
                         label = { Text("Tên") },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PersonalizationColors.AccentPrimary,
+                            unfocusedBorderColor = PersonalizationColors.Divider,
+                            focusedLabelColor = PersonalizationColors.AccentPrimary,
+                            unfocusedLabelColor = PersonalizationColors.TextSecondary,
+                            focusedTextColor = PersonalizationColors.TextPrimary,
+                            unfocusedTextColor = PersonalizationColors.TextPrimary
+                        )
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(
-                            value = editStartTime,
-                            onValueChange = { editStartTime = it },
-                            label = { Text("Bắt đầu (HH:mm)") },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = editEndTime,
-                            onValueChange = { editEndTime = it },
-                            label = { Text("Kết thúc (HH:mm)") },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
+                    
+                    // Time selection buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Start time button
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Bắt đầu",
+                                fontSize = 12.sp,
+                                color = PersonalizationColors.TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                onClick = { showStartTimePicker = true },
+                                shape = RoundedCornerShape(12.dp),
+                                color = PersonalizationColors.ChipBackground
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AccessTime,
+                                        contentDescription = null,
+                                        tint = PersonalizationColors.AccentPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = editStartTime,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = PersonalizationColors.TextPrimary
+                                    )
+                                }
+                            }
+                        }
+                        
+                        // End time button
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Kết thúc",
+                                fontSize = 12.sp,
+                                color = PersonalizationColors.TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                onClick = { showEndTimePicker = true },
+                                shape = RoundedCornerShape(12.dp),
+                                color = PersonalizationColors.ChipBackground
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AccessTime,
+                                        contentDescription = null,
+                                        tint = PersonalizationColors.AccentPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = editEndTime,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = PersonalizationColors.TextPrimary
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -1091,6 +1166,31 @@ private fun SchedulePreviewDialog(
                 }
             },
             containerColor = PersonalizationColors.SurfaceCard
+        )
+    }
+    
+    // Time picker dialogs for editing
+    if (showStartTimePicker) {
+        TimePickerDialog(
+            initialTime = editStartTime,
+            title = "Chọn giờ bắt đầu",
+            onDismiss = { showStartTimePicker = false },
+            onConfirm = { hour, minute ->
+                editStartTime = String.format("%02d:%02d", hour, minute)
+                showStartTimePicker = false
+            }
+        )
+    }
+    
+    if (showEndTimePicker) {
+        TimePickerDialog(
+            initialTime = editEndTime,
+            title = "Chọn giờ kết thúc",
+            onDismiss = { showEndTimePicker = false },
+            onConfirm = { hour, minute ->
+                editEndTime = String.format("%02d:%02d", hour, minute)
+                showEndTimePicker = false
+            }
         )
     }
 }
