@@ -8,9 +8,7 @@ import com.projectapp.tempus.data.gamification.entity.PointHistoryEntity
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 
-/**
- * Room Database cho hệ thống Gamification
- */
+
 @Database(
     entities = [
         UserPointsEntity::class,

@@ -2,17 +2,14 @@ package com.projectapp.tempus.domain.model
 
 import java.util.UUID
 
-/**
- * Represents a schedule suggestion parsed from AI response
- * User can preview and accept/reject before saving to database
- */
+
 data class ScheduleSuggestion(
     val id: String = UUID.randomUUID().toString(),
-    val name: String,              // Task name (e.g., "Học Toán")
-    val startTime: String,         // HH:mm format (e.g., "08:00")
-    val endTime: String? = null,   // HH:mm format (optional)
-    val durationMinutes: Int,      // Duration in minutes
-    val date: String,              // yyyy-MM-dd format
+    val name: String,              
+    val startTime: String,         
+    val endTime: String? = null,   
+    val durationMinutes: Int,      
+    val date: String,              
     val priority: Priority = Priority.MEDIUM,
     val isAccepted: Boolean = false
 ) {
@@ -20,9 +17,7 @@ data class ScheduleSuggestion(
         HIGH, MEDIUM, LOW
     }
     
-    /**
-     * Calculate end time from start time and duration
-     */
+    
     fun calculateEndTime(): String {
         if (endTime != null) return endTime
         
@@ -39,16 +34,12 @@ data class ScheduleSuggestion(
         return String.format("%02d:%02d", endHour, endMinute)
     }
     
-    /**
-     * Format time range for display
-     */
+    
     fun formatTimeRange(): String {
         return "$startTime - ${calculateEndTime()}"
     }
     
-    /**
-     * Convert to implementation time format (HH:MM:SS)
-     */
+    
     fun toImplementationTime(): String {
         val hours = durationMinutes / 60
         val minutes = durationMinutes % 60

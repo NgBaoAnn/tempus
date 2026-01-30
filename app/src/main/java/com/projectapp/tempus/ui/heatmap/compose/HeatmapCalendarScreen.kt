@@ -39,10 +39,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Main Heatmap Calendar Screen.
- * Displays a monthly grid with color-coded completion rates.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HeatmapCalendarScreen(
@@ -76,17 +73,17 @@ fun HeatmapCalendarScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Month Stats Summary Card
+            
             if (monthData != null) {
                 MonthStatsCard(stats = monthData.monthStats)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
-            // Legend
+            
             HeatmapLegend()
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Calendar Grid
+            
             if (isLoading) {
                 HeatmapLoadingSkeleton()
             } else if (monthData != null) {
@@ -101,9 +98,7 @@ fun HeatmapCalendarScreen(
     }
 }
 
-/**
- * Top App Bar with month navigation.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HeatmapTopBar(
@@ -161,9 +156,7 @@ private fun HeatmapTopBar(
     )
 }
 
-/**
- * Month statistics summary card.
- */
+
 @Composable
 private fun MonthStatsCard(stats: MonthStats) {
     val completionPercent = (stats.avgCompletionRate * 100).toInt()
@@ -192,7 +185,7 @@ private fun MonthStatsCard(stats: MonthStats) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Completion Rate
+                
                 StatItem(
                     value = "$completionPercent%",
                     label = "Hoàn thành",
@@ -203,14 +196,14 @@ private fun MonthStatsCard(stats: MonthStats) {
                     }
                 )
                 
-                // Total Tasks
+                
                 StatItem(
                     value = "${stats.completedTasks}/${stats.totalTasks}",
                     label = "Tasks",
                     color = MaterialTheme.colorScheme.primary
                 )
                 
-                // Days with Tasks
+                
                 StatItem(
                     value = "${stats.daysWithTasks}",
                     label = "Ngày hoạt động",
@@ -218,7 +211,7 @@ private fun MonthStatsCard(stats: MonthStats) {
                 )
             }
             
-            // Best/Worst day info
+            
             if (stats.bestDay != null || stats.worstDay != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
@@ -272,9 +265,7 @@ private fun StatItem(
     }
 }
 
-/**
- * Color legend for heatmap.
- */
+
 @Composable
 private fun HeatmapLegend() {
     Row(
@@ -290,7 +281,7 @@ private fun HeatmapLegend() {
         
         Spacer(modifier = Modifier.width(6.dp))
         
-        // Color boxes
+        
         listOf(
             HeatLevel.NONE,
             HeatLevel.LOW,
@@ -315,9 +306,7 @@ private fun HeatmapLegend() {
     }
 }
 
-/**
- * Calendar grid with Monday-Sunday layout.
- */
+
 @Composable
 private fun HeatmapGrid(
     monthData: MonthHeatmapData,
@@ -327,11 +316,11 @@ private fun HeatmapGrid(
 ) {
     val today = LocalDate.now()
     
-    // Build calendar cells with padding for alignment
+    
     val cells = buildCalendarCells(monthData)
     
     Column {
-        // Weekday headers
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -350,7 +339,7 @@ private fun HeatmapGrid(
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Calendar grid - 7 columns
+        
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
             modifier = Modifier.fillMaxWidth(),
@@ -373,25 +362,22 @@ private fun HeatmapGrid(
     }
 }
 
-/**
- * Build calendar cells with padding for month alignment.
- * Ensures first day of month aligns with correct weekday.
- */
+
 private fun buildCalendarCells(monthData: MonthHeatmapData): List<DayHeatmapData?> {
     val cells = mutableListOf<DayHeatmapData?>()
     
     val firstDayOfMonth = monthData.yearMonth.atDay(1)
     val startOffset = (firstDayOfMonth.dayOfWeek.value - DayOfWeek.MONDAY.value + 7) % 7
     
-    // Add empty padding cells before first day
+    
     repeat(startOffset) {
         cells.add(null)
     }
     
-    // Add actual days
+    
     cells.addAll(monthData.days)
     
-    // Add padding at end to complete the last week
+    
     while (cells.size % 7 != 0) {
         cells.add(null)
     }
@@ -399,13 +385,11 @@ private fun buildCalendarCells(monthData: MonthHeatmapData): List<DayHeatmapData
     return cells
 }
 
-/**
- * Loading skeleton for calendar.
- */
+
 @Composable
 private fun HeatmapLoadingSkeleton() {
     Column {
-        // Weekday headers
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -424,7 +408,7 @@ private fun HeatmapLoadingSkeleton() {
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Skeleton grid - 6 rows × 7 columns
+        
         repeat(6) { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),

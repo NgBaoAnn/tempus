@@ -8,11 +8,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Duration
 
-/**
- * Service to parse Vietnamese natural language into task data using AI
- * 
- * Flow: Voice Text → AI API (Gemini) → Structured JSON → ParsedTask
- */
+
 class TaskParserService(
     private val aiRepository: AIRepository
 ) {
@@ -21,7 +17,7 @@ class TaskParserService(
         private const val TAG = "TaskParserService"
     }
     
-    // System instruction for parsing voice commands
+    
     private val parsingPrompt = """
 Bạn là parser chuyển câu nói tiếng Việt thành task.
 Trả về JSON với format CHÍNH XÁC sau (không thêm text):
@@ -49,9 +45,7 @@ Input: "Học tiếng Anh tối nay 2 tiếng"
 Output: {"taskName": "Học tiếng Anh", "date": "2026-01-25", "time": "19:00", "duration": 120, "confidence": 1.0}
 """.trimIndent()
     
-    /**
-     * Parse Vietnamese voice text into ParsedTask using AI
-     */
+    
     suspend fun parse(text: String, today: LocalDate = LocalDate.now()): ParsedTask {
         Log.d(TAG, "Parsing voice text: $text")
         
@@ -73,25 +67,23 @@ Output:
             },
             onFailure = { error ->
                 Log.e(TAG, "AI call failed: ${error.message}", error)
-                // Fallback: return raw text with error info
+                
                 ParsedTask(
                     rawText = text,
-                    taskName = text, // Sử dụng text gốc làm task name
-                    date = today,    // Mặc định hôm nay
+                    taskName = text, 
+                    date = today,    
                     time = null,
                     duration = Duration.ofMinutes(60),
-                    confidence = 0.5f // 50% confidence for fallback
+                    confidence = 0.5f 
                 )
             }
         )
     }
     
-    /**
-     * Parse JSON response from AI into ParsedTask
-     */
+    
     private fun parseJsonResponse(rawText: String, jsonResponse: String, today: LocalDate): ParsedTask {
         return try {
-            // Find JSON in response
+            
             val jsonStart = jsonResponse.indexOf("{")
             val jsonEnd = jsonResponse.lastIndexOf("}") + 1
             

@@ -9,9 +9,7 @@ import com.projectapp.tempus.data.notes.entity.NoteEntity
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.from
 
-/**
- * Repository để sync Notes với Supabase
- */
+
 class SupabaseNotesRepository {
     
     private val supabase = SupabaseClientProvider.client
@@ -21,9 +19,7 @@ class SupabaseNotesRepository {
         return supabase.auth.currentUserOrNull()?.id
     }
     
-    /**
-     * Lấy tất cả notes của user từ Supabase
-     */
+    
     suspend fun getAllNotes(): List<NoteRow> {
         val userId = getCurrentUserId() ?: return emptyList()
         
@@ -38,9 +34,7 @@ class SupabaseNotesRepository {
         }
     }
     
-    /**
-     * Insert note mới lên Supabase
-     */
+    
     suspend fun insertNote(entity: NoteEntity): Boolean {
         val userId = getCurrentUserId()
         Log.d("SupabaseNotesRepo", "=== INSERT NOTE START ===")
@@ -55,10 +49,10 @@ class SupabaseNotesRepository {
         }
         
         return try {
-            // Use serializable DTO for proper serialization
+            
             val insertDto = NoteInsertWithId(
                 id = entity.id,
-                userId = userId,  // Use current auth user ID for RLS compliance
+                userId = userId,  
                 title = entity.title,
                 content = entity.content,
                 isPinned = entity.isPinned,
@@ -80,9 +74,7 @@ class SupabaseNotesRepository {
         }
     }
     
-    /**
-     * Update note trên Supabase
-     */
+    
     suspend fun updateNote(entity: NoteEntity): Boolean {
         return try {
             supabase.from(TABLE_NAME)
@@ -105,9 +97,7 @@ class SupabaseNotesRepository {
         }
     }
     
-    /**
-     * Xóa note khỏi Supabase
-     */
+    
     suspend fun deleteNote(noteId: String): Boolean {
         return try {
             supabase.from(TABLE_NAME)

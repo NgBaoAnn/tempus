@@ -17,15 +17,12 @@ import com.projectapp.tempus.ui.notes.compose.NoteEditorScreen
 import com.projectapp.tempus.ui.notes.compose.NotesScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Fragment cho Quick Notes feature
- * Sử dụng Compose UI để hiển thị danh sách ghi chú
- */
+
 class NotesFragment : Fragment() {
     
     private val viewModel: NotesViewModel by viewModels()
     
-    // State to track if we're in editor mode - must be Compose state for recomposition
+    
     private var isEditing by mutableStateOf(false)
     
     override fun onCreateView(

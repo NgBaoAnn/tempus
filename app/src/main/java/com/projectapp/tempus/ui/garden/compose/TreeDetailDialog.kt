@@ -12,9 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.domain.model.TreeState
 
-/**
- * Dialog hiển thị chi tiết cây với modern design
- */
+
 @Composable
 fun TreeDetailDialog(
     tree: TreeUiModel,
@@ -46,25 +44,25 @@ fun TreeDetailDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // State
+                
                 DetailRow(
                     label = "📊 Trạng thái",
                     value = "${tree.state.emoji} ${tree.state.displayName}"
                 )
                 
-                // Progress
+                
                 DetailRow(
                     label = "📈 Tiến độ",
                     value = "${tree.progressPercent.toInt()}%"
                 )
                 
-                // Invested
+                
                 DetailRow(
                     label = "💰 Đã đầu tư",
                     value = "${tree.investedPoints} điểm"
                 )
                 
-                // Days until death (if applicable)
+                
                 if (tree.isAlive && tree.state != TreeState.TREE) {
                     val warningColor = when {
                         tree.daysUntilDeath <= 1 -> Color(0xFFFF3B30)
@@ -79,7 +77,7 @@ fun TreeDetailDialog(
                     )
                 }
                 
-                // Progress bar
+                
                 Column {
                     Text(
                         text = "Tiến độ phát triển",
@@ -154,9 +152,7 @@ private fun DetailRow(
     }
 }
 
-/**
- * Dialog xác nhận xóa cây
- */
+
 @Composable
 fun DeleteTreeDialog(
     treeName: String,

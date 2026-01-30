@@ -13,9 +13,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.focusModeDataStore: DataStore<Preferences> by preferencesDataStore(name = "focus_mode_prefs")
 
-/**
- * DataStore preferences for Focus Mode settings
- */
+
 class FocusModePreferences(private val context: Context) {
     
     companion object {

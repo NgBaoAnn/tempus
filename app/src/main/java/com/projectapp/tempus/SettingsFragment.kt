@@ -42,7 +42,7 @@ class SettingsFragment : Fragment() {
 
     private lateinit var exportRepository: DataExportRepository
 
-    // Compose state - using mutableStateOf properly
+    
     private val userInfoState = mutableStateOf(UserInfo())
 
     override fun onCreateView(
@@ -53,7 +53,7 @@ class SettingsFragment : Fragment() {
         isLoggedIn = checkLogin()
         exportRepository = DataExportRepository(requireContext())
         
-        // Initialize user profile cache
+        
         com.projectapp.tempus.data.user.UserProfileCache.init(requireContext())
 
         return ComposeView(requireContext()).apply {
@@ -115,8 +115,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    // ===== NAVIGATION =====
-
+    
     private fun navigateToProfile() {
         val intent = Intent(requireContext(), ProfileActivity::class.java)
         startActivity(intent)
@@ -159,8 +158,7 @@ class SettingsFragment : Fragment() {
         startActivity(intent)
     }
 
-    // ===== SYNC FUNCTION =====
-
+    
     private fun performSync() {
         val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
         if (userId == null) {
@@ -172,9 +170,8 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
             
             try {
-                // ... (sync logic) ...
                 
-                // 3. Sync Notes data
+                
                 val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(requireContext())
                 notesSyncManager.pushToServer()
                 notesSyncManager.pullFromServer(userId)
@@ -188,8 +185,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    // ===== EXPORT FUNCTIONS =====
-
+    
     private fun exportToJson() {
         lifecycleScope.launch {
             Toast.makeText(requireContext(), getString(R.string.msg_exporting), Toast.LENGTH_SHORT).show()
@@ -243,8 +239,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    // ===== DELETE FUNCTIONS (2-STEP + BIOMETRIC) =====
-
+    
     private fun showDeleteConfirmationStep1() {
         AlertDialog.Builder(requireContext())
             .setTitle("⚠️ Xóa tất cả dữ liệu")
@@ -265,7 +260,7 @@ class SettingsFragment : Fragment() {
             }
 
             else -> {
-                // Nếu không có biometric, skip đến step 2
+                
                 showDeleteConfirmationStep2()
             }
         }
@@ -355,13 +350,13 @@ class SettingsFragment : Fragment() {
     }
 
     private fun logout() {
-        // Check network connectivity first
+        
         val connectivityManager = requireContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
         val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         val hasInternet = networkCapabilities?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
         
         if (!hasInternet) {
-            // Show warning dialog if no internet
+            
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("⚠️ Không có kết nối mạng")
                 .setMessage("Nếu bạn đăng xuất khi không có mạng, dữ liệu chưa đồng bộ sẽ bị mất.\n\nBạn có chắc muốn đăng xuất?")
@@ -382,20 +377,20 @@ class SettingsFragment : Fragment() {
                     Toast.makeText(requireContext(), getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
                 }
                 
-                // Call AuthService logout with context for auto-sync push
+                
                 val authService = com.projectapp.tempus.data.auth.AuthService(SupabaseClientProvider.client)
                 authService.logout(
                     syncBeforeLogout = syncBeforeLogout,
                     context = requireContext()
                 )
                 
-                // Clear user profile cache on logout (from master)
+                
                 com.projectapp.tempus.data.user.UserProfileCache.clearCache()
                 
                 Toast.makeText(requireContext(), getString(R.string.msg_logout_success), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 android.util.Log.e("Settings", "Logout error", e)
-                // Continue to login screen even if logout fails
+                
             }
             
             val intent = Intent(requireContext(), LoginActivity::class.java)

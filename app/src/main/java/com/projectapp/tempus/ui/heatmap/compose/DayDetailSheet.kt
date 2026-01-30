@@ -33,10 +33,7 @@ import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Bottom sheet showing day details when tapping a calendar cell.
- * Displays completion summary, task list, and quick actions.
- */
+
 @Composable
 fun DayDetailSheet(
     dayData: DayHeatmapData?,
@@ -54,7 +51,7 @@ fun DayDetailSheet(
             .padding(horizontal = 20.dp)
             .padding(bottom = 32.dp)
     ) {
-        // Handle indicator
+        
         Box(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -66,17 +63,17 @@ fun DayDetailSheet(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Date Header
+        
         if (dayData != null) {
             DayHeader(dayData = dayData)
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Completion Summary
+            
             CompletionSummary(dayData = dayData)
             Spacer(modifier = Modifier.height(20.dp))
         }
         
-        // Task List
+        
         Text(
             text = "Tasks",
             fontWeight = FontWeight.SemiBold,
@@ -117,12 +114,12 @@ fun DayDetailSheet(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Action Buttons
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // View Timeline Button
+            
             OutlinedButton(
                 onClick = onViewTimeline,
                 modifier = Modifier.weight(1f),
@@ -140,7 +137,7 @@ fun DayDetailSheet(
                 Text("Xem Timeline")
             }
             
-            // Add Task Button
+            
             Button(
                 onClick = onAddTask,
                 modifier = Modifier.weight(1f),
@@ -161,9 +158,7 @@ fun DayDetailSheet(
     }
 }
 
-/**
- * Date header with weekday name.
- */
+
 @Composable
 private fun DayHeader(dayData: DayHeatmapData) {
     val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale("vi"))
@@ -178,9 +173,7 @@ private fun DayHeader(dayData: DayHeatmapData) {
     )
 }
 
-/**
- * Completion summary with progress bar.
- */
+
 @Composable
 private fun CompletionSummary(dayData: DayHeatmapData) {
     val percent = (dayData.completionRate * 100).toInt()
@@ -225,7 +218,7 @@ private fun CompletionSummary(dayData: DayHeatmapData) {
             if (dayData.totalTasks > 0) {
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Progress bar
+                
                 LinearProgressIndicator(
                     progress = { dayData.completionRate },
                     modifier = Modifier
@@ -240,9 +233,7 @@ private fun CompletionSummary(dayData: DayHeatmapData) {
     }
 }
 
-/**
- * Single task item in the list.
- */
+
 @Composable
 private fun TaskListItem(
     task: TimelineBlock,
@@ -271,7 +262,7 @@ private fun TaskListItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Status Icon
+            
             IconButton(
                 onClick = onToggleStatus,
                 modifier = Modifier.size(32.dp)
@@ -290,7 +281,7 @@ private fun TaskListItem(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Task Info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.title,
@@ -310,7 +301,7 @@ private fun TaskListItem(
                 )
             }
             
-            // Label indicator
+            
             Box(
                 modifier = Modifier
                     .size(24.dp)
@@ -329,9 +320,7 @@ private fun TaskListItem(
     }
 }
 
-/**
- * Placeholder when no tasks exist for the day.
- */
+
 @Composable
 private fun EmptyTasksPlaceholder() {
     Box(

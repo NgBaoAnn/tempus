@@ -2,23 +2,19 @@ package com.projectapp.tempus.data.personalization
 
 import kotlinx.serialization.Serializable
 
-/**
- * Data class representing a custom time period defined by the user
- */
+
 @Serializable
 data class CustomTimePeriod(
     val id: String,
     val name: String,
-    val startTime: String,  // HH:mm format
-    val endTime: String,    // HH:mm format
+    val startTime: String,  
+    val endTime: String,    
     val color: String = "#007AFF",
     val description: String = "",
-    val label: String = "book" // Default label for custom periods
+    val label: String = "book" 
 )
 
-/**
- * Preset lifestyle types with default settings
- */
+
 enum class LifestylePreset(
     val displayName: String,
     val wakeUpTime: String,
@@ -77,17 +73,15 @@ enum class LifestylePreset(
     )
 }
 
-/**
- * Data class containing all personalization settings for user's daily routine
- */
+
 @Serializable
 data class PersonalizationSettings(
     val lifestyle: String = LifestylePreset.CUSTOM.name,
-    val wakeUpTime: String = "07:00",      // HH:mm format
-    val sleepTime: String = "23:00",       // HH:mm format
-    val workStartTime: String = "08:00",   // HH:mm format
-    val workEndTime: String = "17:00",     // HH:mm format
+    val wakeUpTime: String = "07:00",      
+    val sleepTime: String = "23:00",       
+    val workStartTime: String = "08:00",   
+    val workEndTime: String = "17:00",     
     val customTimePeriods: List<CustomTimePeriod> = emptyList(),
-    // Days of week to apply (1 = Monday, 7 = Sunday)
-    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6) // Default: Mon-Sat
+    
+    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6) 
 )

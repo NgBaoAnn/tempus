@@ -44,10 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.LifePlanProposal
 import com.projectapp.tempus.domain.model.Milestone
 
-/**
- * Preview card for a life plan proposal
- * Shows plan details with milestone timeline and action buttons
- */
+
 @Composable
 fun LifePlanPreviewCard(
     proposal: LifePlanProposal,
@@ -71,7 +68,7 @@ fun LifePlanPreviewCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -105,7 +102,7 @@ fun LifePlanPreviewCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Description
+            
             Text(
                 text = plan.description,
                 style = MaterialTheme.typography.bodyMedium,
@@ -116,7 +113,7 @@ fun LifePlanPreviewCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Milestones Timeline (show first 3)
+            
             Text(
                 text = "📅 Milestones",
                 style = MaterialTheme.typography.labelLarge,
@@ -145,7 +142,7 @@ fun LifePlanPreviewCard(
                 }
             }
             
-            // Warnings if any
+            
             if (plan.warnings.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
@@ -168,7 +165,7 @@ fun LifePlanPreviewCard(
                 }
             }
             
-            // Tips preview
+            
             if (plan.tips.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
@@ -195,7 +192,7 @@ fun LifePlanPreviewCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Stats row
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -207,7 +204,7 @@ fun LifePlanPreviewCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Action buttons
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -260,7 +257,7 @@ private fun MilestoneItem(
         modifier = Modifier.padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Timeline indicator
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

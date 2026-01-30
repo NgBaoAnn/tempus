@@ -12,7 +12,7 @@ data class EditedVersionRow(
     val label: ScheduleLabel? = null,
     val description: String? = null,
     val priority: PriorityType? = null,
-    // ----------------------------------------------------
+    
 
     val color: String? = null,
     @SerialName("start_time_date") val startTimeDate: String? = null,

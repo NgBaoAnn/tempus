@@ -14,14 +14,7 @@ import com.projectapp.tempus.ui.garden.compose.stableRandom
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Coconut Tree Renderer (Cây Dừa)
- * Renders tropical coconut palm fronds with natural droop (for COCONUT tree type with LeafShape.FROND)
- */
 
-/**
- * Draw a coconut palm frond from origin, spreading at angle then drooping down
- */
 fun DrawScope.drawCoconutFrond(
     origin: Offset,
     spreadAngle: Float,
@@ -35,10 +28,10 @@ fun DrawScope.drawCoconutFrond(
     val highlightColor = baseColor.lighten(0.15f).copy(alpha = opacity)
     val shadowColor = baseColor.darken(0.2f).copy(alpha = opacity)
     
-    // Góc ban đầu - xoè ra từ thân
+    
     val spreadRad = Math.toRadians(spreadAngle.toDouble()).toFloat()
     
-    // Control points cho bezier curve - tạo hình dáng cong rũ tự nhiên
+    
     val cp1Distance = frondLength * 0.35f
     val cp1X = origin.x + sin(spreadRad) * cp1Distance
     val cp1Y = origin.y - cos(spreadRad) * cp1Distance * 0.8f
@@ -48,15 +41,15 @@ fun DrawScope.drawCoconutFrond(
     val cp2X = origin.x + sin(spreadRad) * cp2Distance * 0.8f
     val cp2Y = origin.y - cos(spreadRad) * cp2Distance * 0.5f + droopAmount
     
-    // Điểm cuối - rũ xuống
+    
     val endX = origin.x + sin(spreadRad) * frondLength * 0.6f
     val endY = origin.y + droopAmount * 1.5f
     
-    // Path cho tàu lá (thickened bezier)
+    
     val frondPath = Path().apply {
         moveTo(origin.x, origin.y)
         
-        // Cạnh ngoài (xa thân cây)
+        
         val outerOffset = frondWidth * 0.5f
         cubicTo(
             cp1X + cos(spreadRad) * outerOffset, cp1Y - sin(spreadRad) * outerOffset,
@@ -64,10 +57,10 @@ fun DrawScope.drawCoconutFrond(
             endX + outerOffset * 0.2f, endY
         )
         
-        // Đầu lá nhọn
+        
         lineTo(endX - outerOffset * 0.1f, endY + frondWidth * 0.15f)
         
-        // Cạnh trong (gần thân cây)
+        
         cubicTo(
             cp2X - outerOffset * 0.4f, cp2Y + outerOffset * 0.2f,
             cp1X - cos(spreadRad) * outerOffset * 0.3f, cp1Y + sin(spreadRad) * outerOffset * 0.3f,
@@ -76,7 +69,7 @@ fun DrawScope.drawCoconutFrond(
         close()
     }
     
-    // Fill tàu lá with gradient
+    
     drawPath(
         path = frondPath,
         brush = Brush.linearGradient(
@@ -86,7 +79,7 @@ fun DrawScope.drawCoconutFrond(
         )
     )
     
-    // Gân giữa (cuống lá)
+    
     val midRibPath = Path().apply {
         moveTo(origin.x, origin.y)
         cubicTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY)
@@ -97,7 +90,7 @@ fun DrawScope.drawCoconutFrond(
         style = Stroke(width = frondWidth * 0.08f, cap = StrokeCap.Round)
     )
     
-    // Các gân phụ (6 gân mỗi bên)
+    
     for (i in 1..6) {
         val t = i * 0.12f + 0.1f
         val ribT = t * t
@@ -118,9 +111,7 @@ fun DrawScope.drawCoconutFrond(
     }
 }
 
-/**
- * Draw coconut fruits at palm tree top
- */
+
 fun DrawScope.drawCoconuts(
     origin: Offset,
     count: Int,
@@ -139,7 +130,7 @@ fun DrawScope.drawCoconuts(
         val x = origin.x + cos(angleRad) * dist
         val y = origin.y + sin(angleRad) * dist * 0.6f + size * 0.3f
         
-        // Coconut body
+        
         drawOval(
             brush = Brush.radialGradient(
                 colors = listOf(highlightColor.copy(alpha = opacity), coconutColor.copy(alpha = opacity)),

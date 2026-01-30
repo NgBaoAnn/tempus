@@ -17,9 +17,7 @@ import com.projectapp.tempus.ui.social.messages.compose.ChatScreen
 import com.projectapp.tempus.ui.social.messages.compose.ConversationsScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Screen đang hiển thị trong Social module
- */
+
 sealed class SocialScreen {
     object Friends : SocialScreen()
     object Conversations : SocialScreen()
@@ -27,10 +25,7 @@ sealed class SocialScreen {
     data class Profile(val userId: String) : SocialScreen()
 }
 
-/**
- * Fragment chính cho Social module
- * Hiển thị danh sách bạn bè, lời mời kết bạn, và tin nhắn
- */
+
 class SocialFragment : Fragment() {
 
     private val friendsViewModel: FriendsViewModel by viewModels()
@@ -54,14 +49,12 @@ class SocialFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh data when returning to this fragment
+        
         friendsViewModel.loadData()
     }
 }
 
-/**
- * Navigation host cho Social module
- */
+
 @Composable
 fun SocialNavHost(
     friendsViewModel: FriendsViewModel

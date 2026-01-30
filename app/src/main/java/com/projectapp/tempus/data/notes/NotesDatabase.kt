@@ -6,10 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.projectapp.tempus.data.notes.entity.NoteEntity
 
-/**
- * Room Database cho hệ thống Notes
- * Version 2: Added userId, syncStatus, UUID primary key for Supabase sync
- */
+
 @Database(
     entities = [NoteEntity::class],
     version = 2,
@@ -30,7 +27,7 @@ abstract class NotesDatabase : RoomDatabase() {
                     NotesDatabase::class.java,
                     "notes_database"
                 )
-                    .fallbackToDestructiveMigration() // Cho phép xóa data cũ khi upgrade
+                    .fallbackToDestructiveMigration() 
                     .build()
                 INSTANCE = instance
                 instance

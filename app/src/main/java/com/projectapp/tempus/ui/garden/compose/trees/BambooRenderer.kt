@@ -16,16 +16,7 @@ import com.projectapp.tempus.ui.garden.compose.stableRandom
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Bamboo Tree Renderer
- * Renders bamboo with segmented culms and shooting leaves
- */
 
-/**
- * Draw a single bamboo stalk with segments (like HTML drawBambooStalk)
- * Used by ProceduralTree for single stalk rendering
- * Returns the top position for attaching leaves
- */
 fun DrawScope.drawBambooSingleStalk(
     centerX: Float,
     baseY: Float,
@@ -46,7 +37,7 @@ fun DrawScope.drawBambooSingleStalk(
             val segY = baseY - segmentHeight * (segIndex + 1)
             val segWidth = width * (1f - segIndex * 0.05f)
             
-            // Segment body with gradient (like HTML demo)
+            
             drawRoundRect(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
@@ -64,7 +55,7 @@ fun DrawScope.drawBambooSingleStalk(
                 cornerRadius = CornerRadius(segWidth / 3)
             )
             
-            // Joint ring (node) between segments - like HTML ellipse
+            
             if (segIndex < segmentCount - 1) {
                 drawOval(
                     color = darkColor.copy(alpha = opacity),
@@ -78,16 +69,14 @@ fun DrawScope.drawBambooSingleStalk(
         }
     }
     
-    // Return top position (affected by sway)
+    
     val swayRad = Math.toRadians(sway.toDouble()).toFloat()
     val topX = centerX + sin(swayRad) * height
     val topY = baseY - height
     return Offset(topX, topY)
 }
 
-/**
- * Draw bamboo culms (main stalks) with segments and nodes
- */
+
 fun DrawScope.drawBambooCulms(
     baseCenter: Offset,
     height: Float,
@@ -114,7 +103,7 @@ fun DrawScope.drawBambooCulms(
                 val segY = baseCenter.y - segmentHeight * (segIndex + 1)
                 val segWidth = culmWidth * (1f - segIndex * 0.05f)
                 
-                // Segment body
+                
                 drawRoundRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
@@ -129,7 +118,7 @@ fun DrawScope.drawBambooCulms(
                     cornerRadius = CornerRadius(segWidth / 4)
                 )
                 
-                // Node ring (between segments)
+                
                 if (segIndex < segmentCount - 1) {
                     drawOval(
                         color = baseColor.darken(0.2f).copy(alpha = opacity),
@@ -137,7 +126,7 @@ fun DrawScope.drawBambooCulms(
                         size = Size(segWidth * 0.6f, segmentHeight * 0.06f)
                     )
                     
-                    // Leaves shooting from nodes (every 2nd node)
+                    
                     if (segIndex % 2 == 0) {
                         val leafSide = if (culmIndex % 2 == 0) 1f else -1f
                         drawBambooLeaf(
@@ -156,9 +145,7 @@ fun DrawScope.drawBambooCulms(
     }
 }
 
-/**
- * Draw a single bamboo leaf
- */
+
 fun DrawScope.drawBambooLeaf(
     nodePoint: Offset,
     length: Float,
@@ -204,7 +191,7 @@ fun DrawScope.drawBambooLeaf(
         )
     )
     
-    // Center vein
+    
     drawLine(
         color = color.darken(0.15f).copy(alpha = opacity * 0.5f),
         start = nodePoint,
@@ -214,10 +201,7 @@ fun DrawScope.drawBambooLeaf(
     )
 }
 
-/**
- * Draw fan-shaped bamboo leaves at the top of culm (like HTML demo)
- * 7 leaves spreading from -70° to +70° using rotate/translate like HTML
- */
+
 fun DrawScope.drawBambooTopLeaves(
     origin: Offset,
     size: Float,
@@ -230,29 +214,23 @@ fun DrawScope.drawBambooTopLeaves(
     val lightColor = baseColor.lighten(0.15f)
     val darkColor = baseColor.darken(0.1f)
     
-    // Wind sway rotation
+    
     rotate(sway, pivot = origin) {
         for (i in 0 until leafCount) {
-            // Spread from -70° to +70° like HTML demo
+            
             val angle = -70f + (140f / (leafCount - 1)) * i
             val leafLength = size * (0.8f + stableRandom(seed, i) * 0.4f)
             val leafWidth = leafLength * 0.15f
             
-            // Convert angle to radians (negative because going UP from origin)
+            
             val angleRad = Math.toRadians(angle.toDouble()).toFloat()
             
-            // Leaf path in local coordinates (going UP from origin, then rotate)
-            // Using bezier curves exactly like HTML demo:
-            // ctx.moveTo(0, 0);
-            // ctx.bezierCurveTo(leafWidth, -leafLength * 0.3, leafWidth * 0.5, -leafLength * 0.8, 0, -leafLength);
-            // ctx.bezierCurveTo(-leafWidth * 0.5, -leafLength * 0.8, -leafWidth, -leafLength * 0.3, 0, 0);
             
             val leafPath = Path().apply {
-                // Start at origin
+                
                 moveTo(origin.x, origin.y)
                 
-                // First bezier curve (right side going up)
-                // Transform: rotate by angle, then translate by origin
+                
                 val cp1X = origin.x + leafWidth * cos(angleRad) - (-leafLength * 0.3f) * sin(angleRad)
                 val cp1Y = origin.y + leafWidth * sin(angleRad) + (-leafLength * 0.3f) * cos(angleRad)
                 
@@ -264,7 +242,7 @@ fun DrawScope.drawBambooTopLeaves(
                 
                 cubicTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY)
                 
-                // Second bezier curve (left side coming down)
+                
                 val cp3X = origin.x + (-leafWidth * 0.5f) * cos(angleRad) - (-leafLength * 0.8f) * sin(angleRad)
                 val cp3Y = origin.y + (-leafWidth * 0.5f) * sin(angleRad) + (-leafLength * 0.8f) * cos(angleRad)
                 
@@ -276,14 +254,14 @@ fun DrawScope.drawBambooTopLeaves(
                 close()
             }
             
-            // Choose color based on position for depth effect (like HTML: i % 2, i % 3)
+            
             val leafColor = when {
                 i % 2 == 0 -> baseColor
                 i % 3 == 0 -> lightColor
                 else -> darkColor
             }
             
-            // Fill leaf
+            
             drawPath(
                 path = leafPath,
                 color = leafColor.copy(alpha = opacity * (0.85f + stableRandom(seed, i + 100) * 0.15f))

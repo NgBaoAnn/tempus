@@ -24,9 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-/**
- * Premium Floating Action Button
- */
+
 @Composable
 fun TempusFloatingButton(
     onClick: () -> Unit,
@@ -42,7 +40,7 @@ fun TempusFloatingButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
-    // Scale animation on press
+    
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.9f else 1f,
         label = "fabScale"

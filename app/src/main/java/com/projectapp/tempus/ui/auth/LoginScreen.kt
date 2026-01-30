@@ -54,7 +54,7 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.height(26.dp))
         
-        // Header
+        
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.ic_logo_tiramisu),
@@ -67,7 +67,7 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(70.dp))
         
-        // Welcome
+        
         Text("Chào mừng trở lại", fontSize = 26.sp, fontWeight = FontWeight.Bold, 
             color = AuthColors.TextPrimary, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(10.dp))
@@ -76,14 +76,14 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(50.dp))
         
-        // Form Card
+        
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = AuthColors.CardBackground)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Email
+                
                 Text("Email", fontSize = 16.sp, color = AuthColors.TextPrimary)
                 Spacer(modifier = Modifier.height(4.dp))
                 AuthInputField(
@@ -98,7 +98,7 @@ fun LoginScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Password
+                
                 Text("Mật khẩu", fontSize = 16.sp, color = AuthColors.TextPrimary)
                 Spacer(modifier = Modifier.height(4.dp))
                 AuthPasswordField(
@@ -112,7 +112,7 @@ fun LoginScreen(
             }
         }
         
-        // Forgot Password
+        
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             TextButton(onClick = { showForgotPasswordDialog = true }) {
                 Text("Quên mật khẩu?", color = AuthColors.TextSecondary)
@@ -121,7 +121,7 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(10.dp))
         
-        // Login Button
+        
         Button(
             onClick = { onLoginClick(email, password) },
             modifier = Modifier.fillMaxWidth().height(55.dp),
@@ -133,7 +133,7 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(10.dp))
         
-        // Google Button
+        
         OutlinedButton(
             onClick = onGoogleClick,
             modifier = Modifier.fillMaxWidth().height(55.dp),
@@ -147,7 +147,7 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(10.dp))
         
-        // Register Link
+        
         TextButton(onClick = onRegisterClick, modifier = Modifier.fillMaxWidth()) {
             Text("Chưa có tài khoản? Đăng ký ngay", fontSize = 16.sp, color = AuthColors.PrimaryBlue)
         }

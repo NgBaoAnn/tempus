@@ -34,7 +34,7 @@ data class ProfileUiState(
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     
     private val supabase = SupabaseClientProvider.client
-    // Use OfflineFirstGamificationRepository for offline-first functionality
+    
     private val gamificationRepo = RepositoryProvider.getGamificationRepository(application)
     private val userRepository = SupabaseUserRepository()
     
@@ -50,10 +50,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             try {
-                // First try to load from cache for instant display (offline support)
+                
                 val cachedProfile = com.projectapp.tempus.data.user.UserProfileCache.getProfile()
                 if (cachedProfile != null) {
-                    // Use cached data immediately
+                    
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
@@ -64,7 +64,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
                 
-                // Get current user from Supabase Auth for auth check
+                
                 val authUser = supabase.auth.currentUserOrNull()
                 
                 if (authUser == null) {
@@ -74,12 +74,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 
                 val email = authUser.email ?: ""
                 
-                // Fetch full user details from Repository (public.users table)
+                
                 val dbUser = userRepository.getCurrentUser()
                 
                 val createdAt = authUser.createdAt?.toString()?.take(10) ?: ""
                 
-                // Get gamification data from Room (offline-first)
+                
                 val userPoints = gamificationRepo.getUserPointsOnce()
                 val treeCount = gamificationRepo.getAliveTreeCount()
                 
@@ -87,7 +87,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     it.copy(
                         isLoading = false,
                         email = email,
-                        fullName = dbUser.username, // Load from DB
+                        fullName = dbUser.username, 
                         totalPoints = userPoints?.totalPoints ?: 0,
                         currentStreak = userPoints?.currentStreak ?: 0,
                         treeCount = treeCount,
@@ -96,14 +96,14 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
             } catch (e: Exception) {
-                // If network fetch fails, keep showing cached data (already set above)
-                // Only update loading state and error if no cached data was shown
+                
+                
                 _uiState.update { currentState ->
                     if (currentState.fullName.isEmpty()) {
-                        // No cached data, show error
+                        
                         currentState.copy(isLoading = false, error = "Lỗi tải thông tin: ${e.message}")
                     } else {
-                        // Has cached data, just stop loading
+                        
                         currentState.copy(isLoading = false)
                     }
                 }
@@ -116,9 +116,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isSaving = true, saveSuccess = false, error = null) }
             
             try {
-                // Get current DB user first
+                
                 val currentUser = userRepository.getCurrentUser()
-                // Update username in DB
+                
                 val updatedUser = currentUser.copy(username = newName)
                 userRepository.updateUser(updatedUser)
                 
@@ -157,10 +157,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isSaving = true, saveSuccess = false, error = null) }
             
             try {
-                // Upload avatar and update user profile
+                
                 userRepository.uploadAvatar(byteArray)
                 
-                // Refresh profile to show new avatar
+                
                 loadProfile()
                 
                 _uiState.update { 

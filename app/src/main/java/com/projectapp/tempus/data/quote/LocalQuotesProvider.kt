@@ -4,9 +4,7 @@ import com.projectapp.tempus.data.quote.dto.QuoteDto
 import com.projectapp.tempus.data.user.UserProfileCache
 import kotlin.random.Random
 
-/**
- * Cung cấp danh sách quotes local để fallback khi API thất bại
- */
+
 object LocalQuotesProvider {
     
     private val quotesVi = listOf(
@@ -79,25 +77,19 @@ object LocalQuotesProvider {
         return if (languageCode == "en") quotesEn else quotesVi
     }
     
-    /**
-     * Lấy quote ngẫu nhiên dựa trên seed (thường là ngày)
-     */
+    
     fun getQuoteForSeed(seed: Int, languageCode: String): QuoteDto {
         val list = getQuotes(languageCode)
         val random = Random(seed)
         return list[random.nextInt(list.size)]
     }
     
-    /**
-     * Lấy quote theo index
-     */
+    
     fun getQuoteByIndex(index: Int, languageCode: String): QuoteDto {
         val list = getQuotes(languageCode)
         return list[index % list.size]
     }
     
-    /**
-     * Tổng số quotes
-     */
+    
     fun getTotalQuotes(languageCode: String): Int = getQuotes(languageCode).size
 }

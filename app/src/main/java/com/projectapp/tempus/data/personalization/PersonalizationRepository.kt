@@ -5,18 +5,14 @@ import android.content.SharedPreferences
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-/**
- * Repository interface for personalization settings
- */
+
 interface PersonalizationRepository {
     fun getSettings(): PersonalizationSettings
     fun saveSettings(settings: PersonalizationSettings)
     fun resetToDefaults()
 }
 
-/**
- * SharedPreferences implementation of PersonalizationRepository
- */
+
 class SharedPrefsPersonalizationRepository(context: Context) : PersonalizationRepository {
     
     private val prefs: SharedPreferences = context.getSharedPreferences(

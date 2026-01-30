@@ -25,9 +25,7 @@ import com.projectapp.tempus.data.voice.dto.ParsedTask
 import com.projectapp.tempus.domain.model.AgentProposal
 import java.time.format.DateTimeFormatter
 
-/**
- * Voice Input states
- */
+
 sealed class VoiceInputState {
     object Idle : VoiceInputState()
     object Listening : VoiceInputState()
@@ -37,9 +35,7 @@ sealed class VoiceInputState {
     data class Error(val message: String) : VoiceInputState()
 }
 
-/**
- * Voice Input Bottom Sheet
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoiceInputSheet(
@@ -63,7 +59,7 @@ fun VoiceInputSheet(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Handle bar
+            
             Box(
                 modifier = Modifier
                     .width(40.dp)
@@ -78,9 +74,9 @@ fun VoiceInputSheet(
                 is VoiceInputState.Idle -> IdleState(onStartListening)
                 is VoiceInputState.Listening -> ListeningState(partialText, onStopListening)
                 is VoiceInputState.Processing -> ProcessingState()
-                is VoiceInputState.Parsed -> ParsedState( // Keep for backward compatibility if needed, or remove
+                is VoiceInputState.Parsed -> ParsedState( 
                     task = state.task,
-                    onConfirm = { /* Legacy path */ },
+                    onConfirm = {  },
                     onRetry = onStartListening
                 )
                 is VoiceInputState.ProposalReady -> ProposalState(
@@ -112,10 +108,10 @@ private fun ProposalState(
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Intent
+                
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.AutoAwesome, // AI icon
+                        imageVector = Icons.Default.AutoAwesome, 
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -130,7 +126,7 @@ private fun ProposalState(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Impact / Details
+                
                 Text(
                     text = proposal.impact,
                     fontSize = 14.sp,
@@ -139,7 +135,7 @@ private fun ProposalState(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Actions preview (simple list)
+                
                 proposal.actions.forEach { action ->
                     Row(
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -165,7 +161,7 @@ private fun ProposalState(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Action buttons
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -228,7 +224,7 @@ private fun ListeningState(partialText: String, onStop: () -> Unit) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Always show text display area
+        
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -280,7 +276,7 @@ private fun ParsedState(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Parsed result card
+        
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -304,7 +300,7 @@ private fun ParsedState(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Date & Time
+                
                 if (task.date != null || task.time != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -326,7 +322,7 @@ private fun ParsedState(
                     }
                 }
                 
-                // Duration
+                
                 if (task.duration != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -345,7 +341,7 @@ private fun ParsedState(
                     }
                 }
                 
-                // Confidence indicator
+                
                 Spacer(modifier = Modifier.height(8.dp))
                 val confidenceColor = when {
                     task.confidence >= 0.8f -> Color(0xFF4CAF50)
@@ -362,7 +358,7 @@ private fun ParsedState(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Action buttons
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)

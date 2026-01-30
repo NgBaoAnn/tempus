@@ -37,7 +37,7 @@ import com.projectapp.tempus.domain.usecase.TrendType
 import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
 
-// StatsDesign object removed. Using MaterialTheme.colorScheme directly.
+
 private val PomodoroGradient = Brush.linearGradient(
     colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
 )
@@ -45,7 +45,6 @@ private val SuccessGradient = Brush.linearGradient(
     colors = listOf(Color(0xFF00C853), Color(0xFF69F0AE))
 )
 
-// ======================== DATA CLASSES ========================
 
 data class StatisticsUiData(
     val rangeLabel: String = "",
@@ -59,7 +58,6 @@ data class StatisticsUiData(
     val pomodoroMinutes: Int = 0
 )
 
-// ======================== MAIN SCREEN ========================
 
 @Composable
 fun StatisticsScreen(
@@ -78,12 +76,12 @@ fun StatisticsScreen(
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
-        // Header
+        
         HeaderSection()
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Mode Toggle
+        
         ModeToggle(
             isWeekMode = uiData.isWeekMode,
             onModeChange = onModeChange
@@ -91,12 +89,12 @@ fun StatisticsScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Heatmap Preview Card
+        
         HeatmapPreviewCard(onClick = onOpenHeatmap)
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Stats Overview Cards
+        
         StatsOverviewRow(
             pomodoroCount = uiData.pomodoroCount,
             pomodoroMinutes = uiData.pomodoroMinutes,
@@ -106,7 +104,7 @@ fun StatisticsScreen(
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Progress Card
+        
         ProgressCard(
             rangeLabel = uiData.rangeLabel,
             totalTasks = uiData.totalTasks,
@@ -115,7 +113,7 @@ fun StatisticsScreen(
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Chart Section
+        
         ChartCard(
             dailyStats = uiData.dailyStats,
             isWeekMode = uiData.isWeekMode,
@@ -126,13 +124,13 @@ fun StatisticsScreen(
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Insights Card
+        
         uiData.insights?.let { insights ->
             InsightsCard(insights = insights)
             Spacer(modifier = Modifier.height(20.dp))
         }
         
-        // Categories Section
+        
         if (uiData.topCategories.isNotEmpty()) {
             CategoriesCard(categories = uiData.topCategories)
         }
@@ -141,7 +139,6 @@ fun StatisticsScreen(
     }
 }
 
-// ======================== HEADER ========================
 
 @Composable
 private fun HeaderSection() {
@@ -165,7 +162,6 @@ private fun HeaderSection() {
     }
 }
 
-// ======================== MODE TOGGLE ========================
 
 @Composable
 private fun ModeToggle(
@@ -235,7 +231,6 @@ private fun ToggleChip(
     }
 }
 
-// ======================== STATS OVERVIEW ROW ========================
 
 @Composable
 private fun StatsOverviewRow(
@@ -248,7 +243,7 @@ private fun StatsOverviewRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Pomodoro Card
+        
         StatCard(
             title = stringResource(R.string.stats_pomodoro),
             value = "$pomodoroCount",
@@ -259,7 +254,7 @@ private fun StatsOverviewRow(
             modifier = Modifier.weight(1f)
         )
         
-        // Tasks Card
+        
         StatCard(
             title = stringResource(R.string.stats_completed),
             value = "$completedTasks",
@@ -340,7 +335,6 @@ private fun StatCard(
     }
 }
 
-// ======================== PROGRESS CARD ========================
 
 @Composable
 private fun ProgressCard(
@@ -405,7 +399,7 @@ private fun ProgressCard(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Circular Progress Indicator
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -496,7 +490,6 @@ private fun ProgressStatRow(
     }
 }
 
-// ======================== CHART CARD ========================
 
 @Composable
 private fun ChartCard(
@@ -538,7 +531,7 @@ private fun ChartCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Bar Chart
+            
             BarChart(
                 dailyStats = dailyStats,
                 isWeekMode = isWeekMode,
@@ -549,7 +542,7 @@ private fun ChartCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Navigation
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -623,7 +616,7 @@ private fun BarChart(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            // Y-axis labels
+            
             Column(
                 modifier = Modifier
                     .width(40.dp)
@@ -640,11 +633,11 @@ private fun BarChart(
                 }
             }
             
-            // Colors for Canvas (captured outside)
+            
             val gridLineColor = MaterialTheme.colorScheme.outlineVariant
             val barColor = MaterialTheme.colorScheme.primary
             
-            // Bar chart canvas
+            
             Canvas(
                 modifier = Modifier
                     .weight(1f)
@@ -653,7 +646,7 @@ private fun BarChart(
                 val chartWidth = size.width
                 val chartHeight = size.height
                 
-                // Draw horizontal grid lines
+                
                 val gridLines = 4
                 for (i in 0..gridLines) {
                     val y = (chartHeight / gridLines) * i
@@ -666,7 +659,7 @@ private fun BarChart(
                     )
                 }
                 
-                // Draw bars
+                
                 val barWidthRatio = if (isWeekMode) 0.6f else 0.8f
                 val barWidth = (chartWidth / dailyStats.size) * barWidthRatio
                 val barSpacing = chartWidth / dailyStats.size
@@ -690,7 +683,7 @@ private fun BarChart(
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // X-axis labels
+        
         if (isWeekMode) {
             Row(
                 modifier = Modifier
@@ -739,7 +732,6 @@ private fun BarChart(
     }
 }
 
-// ======================== INSIGHTS CARD ========================
 
 @Composable
 private fun InsightsCard(insights: InsightsData) {
@@ -775,7 +767,7 @@ private fun InsightsCard(insights: InsightsData) {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Average Rate
+            
             InsightItem(
                 icon = Icons.Outlined.Speed,
                 label = stringResource(R.string.stats_completion_rate),
@@ -783,7 +775,7 @@ private fun InsightsCard(insights: InsightsData) {
                 iconTint = MaterialTheme.colorScheme.primary
             )
             
-            // Best Day
+            
             insights.bestDay?.let { (day, rate) ->
                 InsightItem(
                     icon = Icons.Filled.TrendingUp,
@@ -793,7 +785,7 @@ private fun InsightsCard(insights: InsightsData) {
                 )
             }
             
-            // Worst Day
+            
             insights.worstDay?.let { (day, rate) ->
                 InsightItem(
                     icon = Icons.Filled.TrendingDown,
@@ -803,7 +795,7 @@ private fun InsightsCard(insights: InsightsData) {
                 )
             }
             
-            // Trend
+            
             val (trendIcon, trendText, trendColor) = when (insights.trend) {
                 TrendType.UP -> Triple(Icons.Filled.TrendingUp, stringResource(R.string.stats_trend_up), Color(0xFF4CAF50))
                 TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, stringResource(R.string.stats_trend_down), MaterialTheme.colorScheme.error)
@@ -818,7 +810,7 @@ private fun InsightsCard(insights: InsightsData) {
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Suggestion Card
+            
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -884,9 +876,7 @@ private fun InsightItem(
     }
 }
 
-// ======================== CATEGORIES CARD ========================
 
-// Category icon mapping
 private fun getCategoryIcon(label: String): ImageVector = when (label) {
     "wakeup" -> Icons.Outlined.WbSunny
     "eat" -> Icons.Outlined.Restaurant
@@ -998,7 +988,7 @@ private fun CategoryItem(category: CategoryStats) {
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Progress bar
+        
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1021,7 +1011,6 @@ private fun CategoryItem(category: CategoryStats) {
     }
 }
 
-// ======================== HEATMAP PREVIEW CARD ========================
 
 @Composable
 private fun HeatmapPreviewCard(

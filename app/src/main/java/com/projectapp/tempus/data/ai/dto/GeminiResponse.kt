@@ -2,10 +2,7 @@ package com.projectapp.tempus.data.ai.dto
 
 import com.google.gson.annotations.SerializedName
 
-/**
- * Response DTO for Gemini API
- * Reference: https://ai.google.dev/api/generate-content
- */
+
 data class GeminiResponse(
     val candidates: List<Candidate>?,
     val promptFeedback: PromptFeedback? = null,
@@ -35,9 +32,7 @@ data class UsageMetadata(
     val totalTokenCount: Int = 0
 )
 
-/**
- * Error response from Gemini API
- */
+
 data class GeminiErrorResponse(
     val error: GeminiError
 )

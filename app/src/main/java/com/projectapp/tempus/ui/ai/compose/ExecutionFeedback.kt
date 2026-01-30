@@ -29,9 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.ExecutionResult
 
-/**
- * Card showing execution result after user accepts a proposal
- */
+
 @Composable
 fun ExecutionFeedback(
     result: ExecutionResult,
@@ -54,7 +52,7 @@ fun ExecutionFeedback(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header
+            
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -76,7 +74,7 @@ fun ExecutionFeedback(
                 HorizontalDivider(color = ChatColors.SurfaceVariant)
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Changes applied
+                
                 Text(
                     text = "Đã thực hiện:",
                     style = MaterialTheme.typography.labelMedium,
@@ -112,7 +110,7 @@ fun ExecutionFeedback(
             HorizontalDivider(color = ChatColors.SurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Execution time
+            
             Text(
                 text = "⏱️ Thời gian: ${result.executionTimeMs}ms",
                 style = MaterialTheme.typography.bodySmall,
@@ -146,9 +144,7 @@ private fun ChangeItem(
     }
 }
 
-/**
- * Animated wrapper for execution feedback
- */
+
 @Composable
 fun AnimatedExecutionFeedback(
     result: ExecutionResult?,

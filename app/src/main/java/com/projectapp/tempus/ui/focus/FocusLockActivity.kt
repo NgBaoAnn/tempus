@@ -44,12 +44,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-// ===== DESIGN TOKENS =====
-// FocusDesignTokens removed in favor of MaterialTheme.colorScheme
 
-/**
- * Premium Focus Lock Activity with modern design
- */
 class FocusLockActivity : ComponentActivity() {
     
     companion object {
@@ -81,7 +76,7 @@ class FocusLockActivity : ComponentActivity() {
     
     private var remainingSeconds by mutableLongStateOf(0L)
     private var totalSeconds by mutableLongStateOf(0L)
-    private var timerColor by mutableStateOf(Color(0xFF3B82F6)) // Default Blue
+    private var timerColor by mutableStateOf(Color(0xFF3B82F6)) 
     private var showUnlockDialog by mutableStateOf(false)
     
     private var countDownTimer: CountDownTimer? = null
@@ -153,7 +148,7 @@ class FocusLockActivity : ComponentActivity() {
     }
 }
 
-// ===== MAIN SCREEN =====
+
 @Composable
 fun PremiumFocusLockScreen(
     remainingSeconds: Long,
@@ -178,23 +173,23 @@ fun PremiumFocusLockScreen(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Ambient glow effect
+        
         AmbientGlowBackground()
         
-        // Floating particles
+        
         FloatingParticles()
         
-        // Main content
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(32.dp)
         ) {
-            // Status badge
+            
             StatusBadge()
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Timer display
+            
             AnimatedTimerRing(
                 progress = progress,
                 remainingSeconds = remainingSeconds
@@ -202,12 +197,12 @@ fun PremiumFocusLockScreen(
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Motivational message
+            
             MotivationalSection(progress = progress)
             
             Spacer(modifier = Modifier.height(64.dp))
             
-            // Unlock hint
+            
             Text(
                 text = "NHẤN BACK ĐỂ MỞ KHOÁ",
                 fontSize = 11.sp,
@@ -217,7 +212,7 @@ fun PremiumFocusLockScreen(
             )
         }
         
-        // Unlock dialog
+        
         if (showUnlockDialog) {
             PremiumUnlockDialog(
                 onDismiss = onDismissDialog,
@@ -227,7 +222,6 @@ fun PremiumFocusLockScreen(
     }
 }
 
-// ===== COMPONENTS =====
 
 @Composable
 private fun StatusBadge() {
@@ -254,7 +248,7 @@ private fun StatusBadge() {
             )
             .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        // Live indicator
+        
         Box(
             modifier = Modifier
                 .size(8.dp)
@@ -318,7 +312,7 @@ private fun AnimatedTimerRing(
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(300.dp)
     ) {
-        // Outer glow
+        
         Canvas(
             modifier = Modifier
                 .size(300.dp)
@@ -330,7 +324,7 @@ private fun AnimatedTimerRing(
             )
         }
         
-        // Decorative outer ring
+        
         Canvas(modifier = Modifier.size(280.dp)) {
             val dotCount = 60
             val radius = size.minDimension / 2 - 8
@@ -352,19 +346,19 @@ private fun AnimatedTimerRing(
             }
         }
         
-        // Main progress ring
+        
         Canvas(modifier = Modifier.size(240.dp)) {
             val strokeWidth = 6.dp.toPx()
             val radius = (size.minDimension - strokeWidth) / 2
             
-            // Track
+            
             drawCircle(
                 color = surfaceColor.copy(alpha = 0.1f),
                 radius = radius,
                 style = Stroke(width = strokeWidth)
             )
             
-            // Progress arc with gradient
+            
             drawArc(
                 brush = Brush.sweepGradient(
                     colors = listOf(
@@ -388,7 +382,7 @@ private fun AnimatedTimerRing(
             )
         }
         
-        // Glass inner circle
+        
         Box(
             modifier = Modifier
                 .size(200.dp)
@@ -467,7 +461,7 @@ private fun AmbientGlowBackground() {
     val color2 = MaterialTheme.colorScheme.tertiary
     
     Canvas(modifier = Modifier.fillMaxSize()) {
-        // Top-left glow
+        
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -481,7 +475,7 @@ private fun AmbientGlowBackground() {
             radius = size.width * 0.5f
         )
         
-        // Bottom-right glow
+        
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -607,7 +601,6 @@ private fun PremiumUnlockDialog(
     )
 }
 
-// ===== UTILITIES =====
 
 private data class ParticleData(
     val x: Float,

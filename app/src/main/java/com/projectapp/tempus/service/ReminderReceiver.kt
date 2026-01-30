@@ -8,10 +8,7 @@ import com.projectapp.tempus.util.NotificationPreferences
 import com.projectapp.tempus.util.TimelineNotificationHelper
 import java.time.LocalDate
 
-/**
- * BroadcastReceiver for handling scheduled task reminders
- * Checks for duplicate notifications before showing
- */
+
 class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -35,7 +32,7 @@ class ReminderReceiver : BroadcastReceiver() {
         Log.d("ReminderReceiver", "Time: $startTime - $endTime")
         Log.d("ReminderReceiver", "Priority: $priority")
         
-        // Check if task has already been notified today (prevents duplicates)
+        
         if (NotificationPreferences.isTaskNotified(context, taskId, today)) {
             Log.d("ReminderReceiver", "⏭️ Task already notified today, skipping")
             Log.d("ReminderReceiver", "========================================")
@@ -55,7 +52,7 @@ class ReminderReceiver : BroadcastReceiver() {
             color = color
         )
         
-        // Mark task as notified for today
+        
         NotificationPreferences.markTaskNotified(context, taskId, today)
         
         Log.d("ReminderReceiver", "✅ Notification shown and marked as notified")

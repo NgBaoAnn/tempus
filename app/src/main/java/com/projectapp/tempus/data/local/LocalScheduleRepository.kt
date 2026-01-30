@@ -5,14 +5,11 @@ import com.projectapp.tempus.data.local.entity.*
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-/**
- * Repository cho các thao tác local với Room database
- * Tất cả CRUD operations đều làm trên local và đánh dấu syncStatus phù hợp
- */
+
 class LocalScheduleRepository(
     private val scheduleDao: ScheduleDao
 ) {
-    // ==================== SCHEDULE OPERATIONS ====================
+    
     
     suspend fun getAllSchedules(userId: String): List<ScheduleEntity> {
         return scheduleDao.getActiveSchedules(userId)
@@ -26,9 +23,7 @@ class LocalScheduleRepository(
         return scheduleDao.getScheduleById(id)
     }
     
-    /**
-     * Insert schedule mới (tạo local, chưa sync)
-     */
+    
     suspend fun insertSchedule(entity: ScheduleEntity): ScheduleEntity {
         val withSyncStatus = entity.copy(
             id = if (entity.id.isBlank()) UUID.randomUUID().toString() else entity.id,
@@ -39,13 +34,11 @@ class LocalScheduleRepository(
         return withSyncStatus
     }
     
-    /**
-     * Update schedule (đánh dấu pending update)
-     */
+    
     suspend fun updateSchedule(entity: ScheduleEntity): ScheduleEntity {
         val withSyncStatus = entity.copy(
             syncStatus = if (entity.syncStatus == SyncStatus.PENDING_CREATE.name) {
-                // Nếu vẫn đang pending create, giữ nguyên status
+                
                 SyncStatus.PENDING_CREATE.name
             } else {
                 SyncStatus.PENDING_UPDATE.name
@@ -56,17 +49,15 @@ class LocalScheduleRepository(
         return withSyncStatus
     }
     
-    /**
-     * Delete schedule (soft delete nếu đã sync, hard delete nếu chưa)
-     */
+    
     suspend fun deleteSchedule(id: String) {
         val schedule = scheduleDao.getScheduleById(id) ?: return
         
         if (schedule.syncStatus == SyncStatus.PENDING_CREATE.name) {
-            // Chưa từng sync lên server, xóa luôn
+            
             scheduleDao.deleteSchedule(id)
         } else {
-            // Đã sync, đánh dấu xóa để sync sau
+            
             scheduleDao.updateSchedule(
                 schedule.copy(
                     syncStatus = SyncStatus.PENDING_DELETE.name,
@@ -76,14 +67,11 @@ class LocalScheduleRepository(
         }
     }
     
-    /**
-     * Hard delete (thực sự xóa khỏi Room, gọi sau khi sync xong)
-     */
+    
     suspend fun hardDeleteSchedule(id: String) {
         scheduleDao.deleteSchedule(id)
     }
     
-    // ==================== SCHEDULE ITEM OPERATIONS ====================
     
     suspend fun getItemsByDate(taskIds: List<String>, date: String): List<ScheduleItemEntity> {
         return scheduleDao.getItemsByDate(taskIds, date)
@@ -97,9 +85,7 @@ class LocalScheduleRepository(
         return scheduleDao.getItemByTaskAndDate(taskId, date)
     }
     
-    /**
-     * Upsert schedule item (tạo hoặc cập nhật trạng thái cho ngày cụ thể)
-     */
+    
     suspend fun upsertScheduleItem(taskId: String, date: String, status: String): ScheduleItemEntity {
         val existing = scheduleDao.getItemByTaskAndDate(taskId, date)
         
@@ -130,7 +116,6 @@ class LocalScheduleRepository(
         }
     }
     
-    // ==================== SUBTASK OPERATIONS ====================
     
     suspend fun getSubTasks(scheduleId: String): List<SubTaskEntity> {
         return scheduleDao.getSubTasks(scheduleId)
@@ -169,7 +154,6 @@ class LocalScheduleRepository(
         scheduleDao.deleteSubTasksByScheduleId(scheduleId)
     }
     
-    // ==================== EDITED VERSION OPERATIONS ====================
     
     suspend fun getEditedVersionsByIds(ids: List<String>): List<EditedVersionEntity> {
         return scheduleDao.getEditedVersionsByIds(ids)
@@ -185,7 +169,6 @@ class LocalScheduleRepository(
         return withSyncStatus
     }
     
-    // ==================== CATEGORY OPERATIONS ====================
     
     suspend fun getCategories(userId: String): List<CategoryEntity> {
         return scheduleDao.getCategories(userId)
@@ -195,7 +178,6 @@ class LocalScheduleRepository(
         return scheduleDao.getCategoriesFlow(userId)
     }
     
-    // ==================== SYNC QUERIES ====================
     
     suspend fun getPendingSchedules(): List<ScheduleEntity> {
         return scheduleDao.getPendingSchedules()
@@ -225,11 +207,7 @@ class LocalScheduleRepository(
         scheduleDao.markSubTaskSynced(id)
     }
     
-    // ==================== BULK OPERATIONS ====================
     
-    /**
-     * Replace tất cả data cho user (dùng khi pull từ server)
-     */
     suspend fun replaceAllData(
         userId: String,
         schedules: List<ScheduleEntity>,
@@ -240,9 +218,7 @@ class LocalScheduleRepository(
         scheduleDao.replaceAllDataForUser(userId, schedules, items, subTasks, categories)
     }
     
-    /**
-     * Insert batch (không clear existing, dùng cho merge)
-     */
+    
     suspend fun insertSchedules(schedules: List<ScheduleEntity>) {
         scheduleDao.insertSchedules(schedules)
     }
@@ -255,11 +231,7 @@ class LocalScheduleRepository(
         scheduleDao.insertSubTasks(subTasks)
     }
     
-    // ==================== CLEAR DATA (for logout) ====================
     
-    /**
-     * Clear ALL local data - gọi khi logout để đảm bảo data isolation giữa các users
-     */
     suspend fun clearAllLocalData() {
         scheduleDao.clearAllLocalData()
     }

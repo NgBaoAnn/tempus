@@ -17,14 +17,14 @@ import androidx.core.view.WindowCompat
 
 @Composable
 fun TempusTheme(
-    dynamicColor: Boolean = false, // Keep disabled for consistent branding
+    dynamicColor: Boolean = false, 
     content: @Composable () -> Unit
 ) {
-    // Observe theme mode from ThemeManager
+    
     val themeMode by ThemeManager.themeMode.collectAsState()
     val isSystemDark = isSystemInDarkTheme()
     
-    // Determine if dark theme should be used
+    
     val darkTheme = when (themeMode) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true

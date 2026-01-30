@@ -26,11 +26,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.projectapp.tempus.R
 
-/**
- * ViewModel for AI Chat with Ask/Agent modes
- * Implements state machine for Agent Mode flow
- * Now with persistent chat history via Supabase
- */
+
 class AIViewModel(
     application: Application,
     scheduleRepository: ScheduleRepository? = null,
@@ -41,33 +37,21 @@ class AIViewModel(
     private val aiHistoryRepository = AIHistoryRepository()
     private val parseScheduleUseCase = ParseScheduleSuggestionUseCase()
     
-    // Track if history has been loaded
+    
     private var historyLoaded = false
     
-    // ============================================
-    // CHAT MODE STATE
-    // ============================================
     
     private val _chatMode = MutableLiveData(ChatMode.ASK)
     val chatMode: LiveData<ChatMode> = _chatMode
     
-    // ============================================
-    // AGENT STATE MACHINE
-    // ============================================
     
     private val _agentState = MutableLiveData<AgentState>(AgentState.Idle)
     val agentState: LiveData<AgentState> = _agentState
     
-    // ============================================
-    // LIFE PLANNER STATE
-    // ============================================
     
     private val _lifePlanState = MutableLiveData<LifePlanState>(LifePlanState.Idle)
     val lifePlanState: LiveData<LifePlanState> = _lifePlanState
     
-    // ============================================
-    // CHAT MESSAGES
-    // ============================================
     
     private val _messages = MutableLiveData<List<ChatMessage>>(emptyList())
     val messages: LiveData<List<ChatMessage>> = _messages
@@ -78,9 +62,6 @@ class AIViewModel(
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
     
-    // ============================================
-    // SCHEDULE SUGGESTIONS (Legacy support)
-    // ============================================
     
     private val _suggestions = MutableLiveData<List<ScheduleSuggestion>>(emptyList())
     val suggestions: LiveData<List<ScheduleSuggestion>> = _suggestions
@@ -88,9 +69,6 @@ class AIViewModel(
     private val _showSuggestionSheet = MutableLiveData(false)
     val showSuggestionSheet: LiveData<Boolean> = _showSuggestionSheet
     
-    // ============================================
-    // HISTORY SHEET STATE
-    // ============================================
     
     private val _showHistorySheet = MutableLiveData(false)
     val showHistorySheet: LiveData<Boolean> = _showHistorySheet
@@ -101,9 +79,6 @@ class AIViewModel(
     private val _isLoadingHistory = MutableLiveData(false)
     val isLoadingHistory: LiveData<Boolean> = _isLoadingHistory
     
-    // ============================================
-    // SESSION MANAGEMENT
-    // ============================================
     
     private var currentSessionId: String = java.util.UUID.randomUUID().toString()
     private var currentSessionTitle: String? = null
@@ -115,13 +90,7 @@ class AIViewModel(
         loadChatHistory()
     }
     
-    // ============================================
-    // CHAT HISTORY PERSISTENCE
-    // ============================================
     
-    /**
-     * Load chat history from Supabase when ViewModel initializes
-     */
     private fun loadChatHistory() {
         if (historyLoaded) return
         
@@ -131,14 +100,14 @@ class AIViewModel(
                 val history = aiHistoryRepository.getHistoryForDisplay(limit = 100)
                 
                 if (history.isEmpty()) {
-                    // No history, show welcome message
+                    
                     showWelcomeMessage()
                 } else {
-                    // Convert history to ChatMessages
+                    
                     val messages = mutableListOf<ChatMessage>()
                     
                     for (record in history) {
-                        // Add user's prompt
+                        
                         record.prompt?.let { prompt ->
                             messages.add(ChatMessage(
                                 text = prompt,
@@ -147,7 +116,7 @@ class AIViewModel(
                             ))
                         }
                         
-                        // Add AI's response
+                        
                         record.response?.let { response ->
                             messages.add(ChatMessage(
                                 text = response,
@@ -165,7 +134,7 @@ class AIViewModel(
                 historyLoaded = true
             } catch (e: Exception) {
                 Log.e("AIViewModel", "Failed to load chat history: ${e.message}", e)
-                // Fallback to welcome message on error
+                
                 showWelcomeMessage()
             } finally {
                 _isLoading.value = false
@@ -173,9 +142,7 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Save a conversation exchange (prompt + response) to database
-     */
+    
     private fun saveToHistory(prompt: String, response: String) {
         val mode = when (_chatMode.value) {
             ChatMode.ASK -> "ask"
@@ -186,22 +153,22 @@ class AIViewModel(
         
         viewModelScope.launch {
             try {
-                // Generate title for first message in session (await completion before saving)
+                
                 val shouldGenerateTitle = isFirstMessageInSession && currentSessionTitle == null
                 if (shouldGenerateTitle) {
-                    // Generate and wait for title
+                    
                     val titleResult = aiRepository.generateChatTitle(prompt)
                     titleResult.onSuccess { title ->
                         currentSessionTitle = title
                         Log.d("AIViewModel", "Generated session title: $title")
                     }.onFailure { e ->
                         Log.e("AIViewModel", "Title generation failed: ${e.message}")
-                        // Use fallback title
+                        
                         currentSessionTitle = prompt.take(30)
                     }
                 }
                 
-                // Now save with title (guaranteed to have a value now)
+                
                 aiHistoryRepository.saveConversation(
                     prompt = prompt,
                     response = response,
@@ -218,58 +185,41 @@ class AIViewModel(
         }
     }
     
-    // ============================================
-    // NEW CHAT FUNCTION
-    // ============================================
     
-    /**
-     * Start a new chat session
-     * Clears current messages and creates a new session ID
-     */
     fun startNewChat() {
-        // Generate new session ID
+        
         currentSessionId = java.util.UUID.randomUUID().toString()
         currentSessionTitle = null
         isFirstMessageInSession = true
         
-        // Clear messages and show welcome
+        
         _messages.value = emptyList()
         aiRepository.clearHistory()
         welcomeMessageShown = false
         showWelcomeMessage()
         
-        // Reset states
+        
         _agentState.value = AgentState.Idle
         _lifePlanState.value = LifePlanState.Idle
         
-        // Close history sheet if open
+        
         _showHistorySheet.value = false
         
         Log.d("AIViewModel", "Started new chat session: $currentSessionId")
     }
     
-    // ============================================
-    // HISTORY SHEET FUNCTIONS
-    // ============================================
     
-    /**
-     * Open history sheet and load sessions
-     */
     fun openHistorySheet() {
         _showHistorySheet.value = true
         loadHistorySessions()
     }
     
-    /**
-     * Close history sheet
-     */
+    
     fun closeHistorySheet() {
         _showHistorySheet.value = false
     }
     
-    /**
-     * Load chat sessions grouped by session_id
-     */
+    
     private fun loadHistorySessions() {
         viewModelScope.launch {
             _isLoadingHistory.value = true
@@ -279,7 +229,7 @@ class AIViewModel(
                 val sessions = sessionList.map { record ->
                     val sessionId = record.sessionId ?: return@map null
                     
-                    // Use title from record, or fallback to date
+                    
                     val displayTitle = record.title 
                         ?: formatDisplayDate(record.createdAt?.take(10) ?: "")
                     
@@ -290,7 +240,7 @@ class AIViewModel(
                         title = displayTitle,
                         date = record.createdAt?.take(10) ?: "",
                         displayDate = formatDisplayDate(record.createdAt?.take(10) ?: ""),
-                        conversations = emptyList(), // Will be loaded when selected
+                        conversations = emptyList(), 
                         previewText = previewText,
                         messageCount = 0
                     )
@@ -307,16 +257,14 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Load a specific session into chat
-     */
+    
     fun loadSession(session: com.projectapp.tempus.ui.ai.compose.ChatSession) {
         viewModelScope.launch {
             try {
-                // Load messages for this session from database
+                
                 val sessionMessages = aiHistoryRepository.getSessionMessages(session.sessionId)
                 
-                // Convert to ChatMessages
+                
                 val messages = mutableListOf<ChatMessage>()
                 
                 for (record in sessionMessages) {
@@ -341,7 +289,7 @@ class AIViewModel(
                 welcomeMessageShown = true
                 _showHistorySheet.value = false
                 
-                // Set current session to this loaded session
+                
                 currentSessionId = session.sessionId
                 currentSessionTitle = session.title
                 isFirstMessageInSession = false
@@ -353,16 +301,14 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Delete a specific session
-     */
+    
     fun deleteSession(session: com.projectapp.tempus.ui.ai.compose.ChatSession) {
         viewModelScope.launch {
             try {
-                // Delete entire session
+                
                 aiHistoryRepository.deleteSession(session.sessionId)
                 
-                // Reload sessions
+                
                 loadHistorySessions()
                 Log.d("AIViewModel", "Deleted session: ${session.sessionId}")
             } catch (e: Exception) {
@@ -371,9 +317,7 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Format date string for display
-     */
+    
     private fun formatDisplayDate(dateStr: String): String {
         return try {
             val date = java.time.LocalDate.parse(dateStr)
@@ -392,9 +336,6 @@ class AIViewModel(
         }
     }
     
-    // ============================================
-    // MODE TOGGLE
-    // ============================================
     
     fun toggleMode() {
         val newMode = when (_chatMode.value) {
@@ -407,14 +348,14 @@ class AIViewModel(
     }
     
     fun setMode(mode: ChatMode) {
-        // Reset states when switching modes
+        
         if (_chatMode.value != mode) {
             _agentState.value = AgentState.Idle
             _lifePlanState.value = LifePlanState.Idle
         }
         _chatMode.value = mode
         
-        // Add mode switch message
+        
         val modeMessage = when (mode) {
             ChatMode.ASK -> getApplication<Application>().getString(R.string.ai_mode_switch_ask)
             ChatMode.AGENT -> getApplication<Application>().getString(R.string.ai_mode_switch_agent)
@@ -424,9 +365,6 @@ class AIViewModel(
         addSystemMessage(modeMessage)
     }
     
-    // ============================================
-    // SEND MESSAGE (MODE-AWARE)
-    // ============================================
     
     fun sendMessage(text: String) {
         if (text.isBlank()) return
@@ -447,28 +385,22 @@ class AIViewModel(
         }
     }
     
-    // ============================================
-    // ASK MODE HANDLER
-    // ============================================
     
     private suspend fun handleAskMode(text: String) {
         val result = aiRepository.sendAskModeMessage(text)
         
         result.onSuccess { responseText ->
             addAIMessage(responseText)
-            // Save to history after successful response
+            
             saveToHistory(text, responseText)
         }.onFailure { exception ->
             handleError(exception)
         }
     }
     
-    // ============================================
-    // AGENT MODE HANDLERS
-    // ============================================
     
     private suspend fun handleAgentMode(text: String) {
-        // Step 1: Request proposal (dry-run)
+        
         _agentState.value = AgentState.Proposing
         
         val result = aiRepository.requestProposal(text)
@@ -476,18 +408,18 @@ class AIViewModel(
         result.onSuccess { response ->
             when (response) {
                 is AIRepository.AgentResponse.Proposal -> {
-                    // Got a structured proposal - show proposal card
+                    
                     _agentState.value = AgentState.AwaitingAccept(response.proposal)
                     val responseText = getApplication<Application>().getString(R.string.ai_proposal_ready)
                     addAIMessage(responseText)
-                    // Save proposal to history
+                    
                     saveToHistory(text, responseText + "\n[Proposal: ${response.proposal.intent}]")
                 }
                 is AIRepository.AgentResponse.TextOnly -> {
-                    // AI responded with text (not an action request)
+                    
                     _agentState.value = AgentState.Idle
                     addAIMessage(response.text)
-                    // Save to history
+                    
                     saveToHistory(text, response.text)
                 }
             }
@@ -497,9 +429,7 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Accept the current proposal (Step 2: Execute)
-     */
+    
     fun acceptProposal() {
         val currentState = _agentState.value
         if (currentState !is AgentState.AwaitingAccept) return
@@ -515,7 +445,7 @@ class AIViewModel(
             result.onSuccess { executionResult ->
                 _agentState.value = AgentState.Done(executionResult)
                 
-                // Add success message to chat
+                
                 val changesText = executionResult.changesApplied.joinToString("\n") { "• $it" }
                 val context = getApplication<Application>()
                 addAIMessage(context.getString(R.string.ai_proposal_executed_success, changesText, executionResult.executionTimeMs))
@@ -532,28 +462,18 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Cancel the current proposal
-     */
+    
     fun cancelProposal() {
         _agentState.value = AgentState.Idle
         addSystemMessage(getApplication<Application>().getString(R.string.ai_proposal_cancelled))
     }
     
-    /**
-     * Reset agent state (after viewing Done/Error)
-     */
+    
     fun resetAgentState() {
         _agentState.value = AgentState.Idle
     }
     
-    // ============================================
-    // LIFE PLANNER MODE HANDLERS
-    // ============================================
     
-    /**
-     * Handle messages in Life Planner mode
-     */
     private suspend fun handleLifePlannerMode(text: String) {
         _lifePlanState.value = LifePlanState.Analyzing
         addAIMessage(getApplication<Application>().getString(R.string.ai_planner_analyzing))
@@ -577,7 +497,7 @@ class AIViewModel(
             """.trimMargin()
             
             addAIMessage(summaryMessage)
-            // Save to history
+            
             saveToHistory(text, summaryMessage)
         }.onFailure { exception ->
             _lifePlanState.value = LifePlanState.Error(exception.message ?: getApplication<Application>().getString(R.string.ai_planner_failed, ""))
@@ -585,9 +505,7 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Accept the life plan and create schedules
-     */
+    
     fun acceptLifePlan() {
         val currentState = _lifePlanState.value
         if (currentState !is LifePlanState.AwaitingApproval) return
@@ -619,24 +537,17 @@ class AIViewModel(
         }
     }
     
-    /**
-     * Reject the life plan proposal
-     */
+    
     fun rejectLifePlan() {
         _lifePlanState.value = LifePlanState.Idle
         addSystemMessage(getApplication<Application>().getString(R.string.ai_planner_cancelled))
     }
     
-    /**
-     * Reset life plan state
-     */
+    
     fun resetLifePlanState() {
         _lifePlanState.value = LifePlanState.Idle
     }
     
-    // ============================================
-    // HELPER METHODS
-    // ============================================
     
     private fun showWelcomeMessage() {
         if (!welcomeMessageShown) {
@@ -672,9 +583,6 @@ class AIViewModel(
         addAIMessage(getApplication<Application>().getString(R.string.msg_error))
     }
     
-    // ============================================
-    // LEGACY SUPPORT
-    // ============================================
     
     fun acceptSuggestions(accepted: List<ScheduleSuggestion>) {
         viewModelScope.launch {
@@ -697,13 +605,10 @@ class AIViewModel(
         _suggestions.value = emptyList()
     }
     
-    /**
-     * Clear all chat messages and history
-     * Also deletes persisted history from database
-     */
+    
     fun clearChat() {
         viewModelScope.launch {
-            // Clear from Supabase
+            
             try {
                 aiHistoryRepository.clearHistory()
                 Log.d("AIViewModel", "Cleared history from database")
@@ -712,7 +617,7 @@ class AIViewModel(
             }
         }
         
-        // Clear local state
+        
         aiRepository.clearHistory()
         welcomeMessageShown = false
         historyLoaded = false

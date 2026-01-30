@@ -4,13 +4,10 @@ import androidx.room.*
 import com.projectapp.tempus.data.local.entity.*
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Data Access Object cho Schedule và các entity liên quan
- */
+
 @Dao
 interface ScheduleDao {
     
-    // ==================== SCHEDULE QUERIES ====================
     
     @Query("SELECT * FROM schedules WHERE userId = :userId AND syncStatus != 'PENDING_DELETE' ORDER BY createdAt DESC")
     fun getAllSchedulesFlow(userId: String): Flow<List<ScheduleEntity>>
@@ -21,10 +18,7 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedules WHERE userId = :userId AND syncStatus != 'PENDING_DELETE'")
     suspend fun getActiveSchedules(userId: String): List<ScheduleEntity>
     
-    /**
-     * Get all schedules for alarm scheduling
-     * Excludes deleted, orders by start time for scheduling
-     */
+    
     @Query("""
         SELECT * FROM schedules 
         WHERE userId = :userId 
@@ -33,10 +27,7 @@ interface ScheduleDao {
     """)
     suspend fun getSchedulesForAlarm(userId: String): List<ScheduleEntity>
     
-    /**
-     * Get today's tasks for widget display
-     * Filters by date, excludes deleted, sorts by start time, limits to 5
-     */
+    
     @Query("""
         SELECT * FROM schedules 
         WHERE userId = :userId 
@@ -53,7 +44,6 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedules WHERE id IN (:ids)")
     suspend fun getSchedulesByIds(ids: List<String>): List<ScheduleEntity>
     
-    // ==================== SCHEDULE ITEM QUERIES ====================
     
     @Query("SELECT * FROM schedule_items WHERE taskId IN (:taskIds) AND date = :date")
     suspend fun getItemsByDate(taskIds: List<String>, date: String): List<ScheduleItemEntity>
@@ -70,7 +60,6 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedule_items WHERE id = :id")
     suspend fun getItemById(id: String): ScheduleItemEntity?
     
-    // ==================== SUBTASK QUERIES ====================
     
     @Query("SELECT * FROM sub_tasks WHERE scheduleId = :scheduleId ORDER BY orderNo")
     suspend fun getSubTasks(scheduleId: String): List<SubTaskEntity>
@@ -84,7 +73,6 @@ interface ScheduleDao {
     @Query("SELECT * FROM sub_tasks WHERE id = :id")
     suspend fun getSubTaskById(id: String): SubTaskEntity?
     
-    // ==================== CATEGORY QUERIES ====================
     
     @Query("SELECT * FROM categories WHERE userId = :userId ORDER BY name")
     suspend fun getCategories(userId: String): List<CategoryEntity>
@@ -95,7 +83,6 @@ interface ScheduleDao {
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategoryById(id: String): CategoryEntity?
     
-    // ==================== EDITED VERSION QUERIES ====================
     
     @Query("SELECT * FROM edited_versions WHERE id = :id")
     suspend fun getEditedVersionById(id: String): EditedVersionEntity?
@@ -103,7 +90,6 @@ interface ScheduleDao {
     @Query("SELECT * FROM edited_versions WHERE id IN (:ids)")
     suspend fun getEditedVersionsByIds(ids: List<String>): List<EditedVersionEntity>
     
-    // ==================== INSERT OPERATIONS ====================
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSchedule(schedule: ScheduleEntity)
@@ -135,7 +121,6 @@ interface ScheduleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEditedVersions(editedVersions: List<EditedVersionEntity>)
     
-    // ==================== UPDATE OPERATIONS ====================
     
     @Update
     suspend fun updateSchedule(schedule: ScheduleEntity)
@@ -149,7 +134,6 @@ interface ScheduleDao {
     @Update
     suspend fun updateCategory(category: CategoryEntity)
     
-    // ==================== DELETE OPERATIONS ====================
     
     @Query("DELETE FROM schedules WHERE id = :id")
     suspend fun deleteSchedule(id: String)
@@ -172,7 +156,6 @@ interface ScheduleDao {
     @Query("DELETE FROM edited_versions WHERE id = :id")
     suspend fun deleteEditedVersion(id: String)
     
-    // ==================== SYNC QUERIES ====================
     
     @Query("SELECT * FROM schedules WHERE syncStatus != 'SYNCED'")
     suspend fun getPendingSchedules(): List<ScheduleEntity>
@@ -189,7 +172,7 @@ interface ScheduleDao {
     @Query("SELECT * FROM edited_versions WHERE syncStatus != 'SYNCED'")
     suspend fun getPendingEditedVersions(): List<EditedVersionEntity>
     
-    // Pending count flows for UI badge
+    
     @Query("""
         SELECT 
             (SELECT COUNT(*) FROM schedules WHERE syncStatus != 'SYNCED') +
@@ -201,7 +184,7 @@ interface ScheduleDao {
     @Query("SELECT COUNT(*) FROM schedules WHERE syncStatus != 'SYNCED'")
     fun getPendingScheduleCountFlow(): Flow<Int>
     
-    // Mark as synced
+    
     @Query("UPDATE schedules SET syncStatus = 'SYNCED', serverUpdatedAt = :serverTime WHERE id = :id")
     suspend fun markScheduleSynced(id: String, serverTime: Long)
     
@@ -217,7 +200,6 @@ interface ScheduleDao {
     @Query("UPDATE edited_versions SET syncStatus = 'SYNCED' WHERE id = :id")
     suspend fun markEditedVersionSynced(id: String)
     
-    // ==================== BULK OPERATIONS (for initial sync) ====================
     
     @Query("DELETE FROM schedules WHERE userId = :userId")
     suspend fun clearSchedulesForUser(userId: String)
@@ -239,20 +221,19 @@ interface ScheduleDao {
         subTasks: List<SubTaskEntity>,
         categories: List<CategoryEntity>
     ) {
-        // Clear existing data
+        
         clearSubTasksForUser(userId)
         clearItemsForUser(userId)
         clearSchedulesForUser(userId)
         clearCategoriesForUser(userId)
         
-        // Insert new data
+        
         insertCategories(categories)
         insertSchedules(schedules)
         insertScheduleItems(items)
         insertSubTasks(subTasks)
     }
     
-    // ==================== CLEAR ALL DATA (for logout) ====================
     
     @Query("DELETE FROM schedules")
     suspend fun deleteAllSchedules()
@@ -269,9 +250,7 @@ interface ScheduleDao {
     @Query("DELETE FROM edited_versions")
     suspend fun deleteAllEditedVersions()
     
-    /**
-     * Clear ALL local data - gọi khi logout để đảm bảo data isolation giữa các users
-     */
+    
     @Transaction
     suspend fun clearAllLocalData() {
         deleteAllSubTasks()

@@ -24,9 +24,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Data class representing a chat session
- */
+
 data class ChatSession(
     val sessionId: String,
     val title: String,
@@ -37,9 +35,7 @@ data class ChatSession(
     val messageCount: Int
 )
 
-/**
- * Bottom sheet for viewing and selecting chat history
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistorySheet(
@@ -61,7 +57,7 @@ fun HistorySheet(
             )
             .padding(top = 8.dp)
     ) {
-        // Handle bar
+        
         Box(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -73,7 +69,7 @@ fun HistorySheet(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Header
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,7 +85,7 @@ fun HistorySheet(
             )
             
             Row {
-                // Clear all button
+                
                 if (sessions.isNotEmpty()) {
                     TextButton(
                         onClick = onClearAllHistory,
@@ -110,7 +106,7 @@ fun HistorySheet(
                     }
                 }
                 
-                // Close button
+                
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -123,7 +119,7 @@ fun HistorySheet(
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Content
+        
         if (isLoading) {
             Box(
                 modifier = Modifier
@@ -134,7 +130,7 @@ fun HistorySheet(
                 CircularProgressIndicator()
             }
         } else if (sessions.isEmpty()) {
-            // Empty state
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -164,7 +160,7 @@ fun HistorySheet(
                 }
             }
         } else {
-            // Sessions list
+            
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -187,9 +183,7 @@ fun HistorySheet(
     }
 }
 
-/**
- * Card for a single chat session
- */
+
 @Composable
 private fun HistorySessionCard(
     session: ChatSession,
@@ -219,7 +213,7 @@ private fun HistorySessionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Title (AI-generated or date fallback)
+                
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = session.title,
@@ -238,7 +232,7 @@ private fun HistorySessionCard(
                 
                 Spacer(modifier = Modifier.width(8.dp))
                 
-                // Message count badge
+                
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
@@ -254,7 +248,7 @@ private fun HistorySessionCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Preview text
+            
             Text(
                 text = session.previewText,
                 style = MaterialTheme.typography.bodyMedium,
@@ -265,13 +259,13 @@ private fun HistorySessionCard(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Actions row
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Continue button
+                
                 TextButton(onClick = onClick) {
                     Text(
                         text = stringResource(R.string.ai_history_continue),
@@ -279,7 +273,7 @@ private fun HistorySessionCard(
                     )
                 }
                 
-                // Delete button
+                
                 IconButton(
                     onClick = { showDeleteConfirm = true },
                     modifier = Modifier.size(36.dp)
@@ -295,7 +289,7 @@ private fun HistorySessionCard(
         }
     }
     
-    // Delete confirmation dialog
+    
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
@@ -323,9 +317,7 @@ private fun HistorySessionCard(
     }
 }
 
-/**
- * Parse ISO datetime string to display format
- */
+
 fun formatHistoryDate(isoDate: String?, locale: Locale = Locale.getDefault()): String {
     if (isoDate == null) return ""
     
@@ -343,6 +335,6 @@ fun formatHistoryDate(isoDate: String?, locale: Locale = Locale.getDefault()): S
             }
         }
     } catch (e: Exception) {
-        isoDate.take(10) // Fallback to raw date part
+        isoDate.take(10) 
     }
 }

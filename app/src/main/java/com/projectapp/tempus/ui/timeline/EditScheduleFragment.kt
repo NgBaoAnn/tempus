@@ -25,7 +25,7 @@ class EditScheduleFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val currentUserId = com.projectapp.tempus.core.supabase.SupabaseClientProvider.client
                     .auth.currentSessionOrNull()?.user?.id ?: ""
-                // Use OfflineFirstScheduleRepository for offline-first functionality
+                
                 val repo = RepositoryProvider.getScheduleRepository(requireContext())
                 return EditScheduleViewModel(repo, currentUserId) as T
             }
@@ -43,7 +43,7 @@ class EditScheduleFragment : Fragment() {
                         onClose = { findNavController().popBackStack() },
                         onSaveSuccess = { 
                             Toast.makeText(context, "Đã lưu thành công!", Toast.LENGTH_SHORT).show()
-                            // Refresh widget to show new/updated task
+                            
                             com.projectapp.tempus.widget.TasksWidgetProvider.refreshAllWidgets(requireContext())
                             findNavController().popBackStack() 
                         }
@@ -57,10 +57,10 @@ class EditScheduleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         val taskIdArgs = arguments?.getString("taskId")
-        val selectedDateArgs = arguments?.getString("selectedDate") // Ngày user đang xem
+        val selectedDateArgs = arguments?.getString("selectedDate") 
         viewModel.initialize(taskIdArgs, selectedDateArgs)
         
-        // Error handling
+        
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.errorEvent.collect { error ->
                 Toast.makeText(context, error, Toast.LENGTH_LONG).show()

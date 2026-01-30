@@ -18,7 +18,7 @@ object TimerEventBus {
         _events.emit(event)
     }
     
-    // Non-suspend helper for Java/Receiver
+    
     fun tryEmit(event: TimerEvent) {
         _events.tryEmit(event)
     }

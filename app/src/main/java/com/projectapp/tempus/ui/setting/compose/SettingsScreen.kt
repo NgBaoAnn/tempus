@@ -36,17 +36,13 @@ import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.components.TempusCard
 import com.projectapp.tempus.R
 
-/**
- * User information data class for SettingsScreen
- */
+
 data class UserInfo(
     val name: String = "",
     val email: String = "",
     val avatar: String? = null
 )
-/**
- * Modern Settings Screen - iOS-inspired design
- */
+
 
 @Composable
 fun SettingsScreen(
@@ -71,7 +67,7 @@ fun SettingsScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
-        // Header
+        
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,11 +81,11 @@ fun SettingsScreen(
             )
         }
         
-        // Sections container with padding
+        
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            // Profile Card
+            
             ProfileCard(
                 userName = userInfo.name.ifEmpty { stringResource(R.string.settings_profile_user_default) },
                 userEmail = userInfo.email.ifEmpty { "user@email.com" },
@@ -99,7 +95,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Section: CHUNG
+            
             SectionHeader(text = stringResource(R.string.settings_section_general))
             
             SettingsGroup {
@@ -112,7 +108,7 @@ fun SettingsScreen(
                 )
                 SettingsDivider()
                 SettingsItem(
-                    icon = Icons.Outlined.Info, // Using Info icon for Language temporarily or custom
+                    icon = Icons.Outlined.Info, 
                     iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
                     iconTint = MaterialTheme.colorScheme.secondary,
                     title = stringResource(R.string.settings_item_language),
@@ -138,7 +134,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Section: DỮ LIỆU & QUYỀN RIÊNG TƯ
+            
             SectionHeader(text = stringResource(R.string.settings_section_data))
             
             SettingsGroup {
@@ -161,7 +157,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Section: HỖ TRỢ
+            
             SectionHeader(text = stringResource(R.string.settings_section_support))
             
             SettingsGroup {
@@ -176,7 +172,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Section: PHÁP LÝ
+            
             SectionHeader(text = stringResource(R.string.settings_section_legal))
             
             SettingsGroup {
@@ -199,7 +195,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Section: THÔNG TIN
+            
             SectionHeader(text = stringResource(R.string.settings_section_info))
             
             SettingsGroup {
@@ -214,7 +210,7 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            // Logout Button
+            
             Button(
                 onClick = onLogoutClick,
                 modifier = Modifier
@@ -248,9 +244,7 @@ fun SettingsScreen(
     }
 }
 
-/**
- * Section header with uppercase styling
- */
+
 @Composable
 private fun SectionHeader(text: String) {
     Text(
@@ -263,9 +257,7 @@ private fun SectionHeader(text: String) {
     )
 }
 
-/**
- * Settings group container - iOS-style card
- */
+
 @Composable
 private fun SettingsGroup(
     content: @Composable ColumnScope.() -> Unit
@@ -281,9 +273,7 @@ private fun SettingsGroup(
     }
 }
 
-/**
- * Settings item with icon badge
- */
+
 @Composable
 private fun SettingsItem(
     icon: ImageVector,
@@ -304,7 +294,7 @@ private fun SettingsItem(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon container - rounded square
+        
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -322,7 +312,7 @@ private fun SettingsItem(
         
         Spacer(modifier = Modifier.width(16.dp))
         
-        // Title
+        
         Text(
             text = title,
             fontSize = 17.sp,
@@ -331,7 +321,7 @@ private fun SettingsItem(
             modifier = Modifier.weight(1f)
         )
         
-        // Chevron
+        
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
@@ -341,9 +331,7 @@ private fun SettingsItem(
     }
 }
 
-/**
- * Settings item with value (no chevron)
- */
+
 @Composable
 private fun SettingsItemValue(
     icon: ImageVector,
@@ -359,7 +347,7 @@ private fun SettingsItemValue(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon container
+        
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -377,7 +365,7 @@ private fun SettingsItemValue(
         
         Spacer(modifier = Modifier.width(16.dp))
         
-        // Title
+        
         Text(
             text = title,
             fontSize = 17.sp,
@@ -386,7 +374,7 @@ private fun SettingsItemValue(
             modifier = Modifier.weight(1f)
         )
         
-        // Value
+        
         Text(
             text = value,
             fontSize = 17.sp,
@@ -395,9 +383,7 @@ private fun SettingsItemValue(
     }
 }
 
-/**
- * Divider with indent
- */
+
 @Composable
 private fun SettingsDivider() {
     HorizontalDivider(
@@ -407,9 +393,7 @@ private fun SettingsDivider() {
     )
 }
 
-/**
- * Profile Card with user info
- */
+
 @Composable
 private fun ProfileCard(
     userName: String,
@@ -434,7 +418,7 @@ private fun ProfileCard(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            
             Box(
                 modifier = Modifier
                     .size(56.dp)

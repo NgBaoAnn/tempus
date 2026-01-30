@@ -57,7 +57,7 @@ class TimelineFragment : Fragment() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val supabase = SupabaseClientProvider.client
                 val myUserId = supabase.auth.currentUserOrNull()?.id ?: ""
-                // Use OfflineFirstScheduleRepository for offline-first functionality
+                
                 val repo = RepositoryProvider.getScheduleRepository(requireContext())
                 val gamificationRepo = RepositoryProvider.getGamificationRepository(requireContext())
                 val pointsManager = PointsManager(gamificationRepo)
@@ -73,10 +73,10 @@ class TimelineFragment : Fragment() {
     
     private var speechRecognitionManager: SpeechRecognitionManager? = null
     
-    // Callback to show voice sheet after permission granted
+    
     private var onPermissionGranted: (() -> Unit)? = null
     
-    // Permission launcher for RECORD_AUDIO
+    
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -112,7 +112,7 @@ class TimelineFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize speech recognition
+        
         speechRecognitionManager = SpeechRecognitionManager(requireContext())
         
         return ComposeView(requireContext()).apply {
@@ -122,21 +122,21 @@ class TimelineFragment : Fragment() {
                 com.projectapp.tempus.ui.theme.TempusTheme {
                     val uiState by viewModel.ui.collectAsState()
                 val weeks = buildWeeksAround(uiState.date)
-                // Use current locale based on language setting for proper month name display
+                
                 val currentLocale = com.projectapp.tempus.ui.language.LanguageManager.getCurrentLanguage().let {
                     if (it == "en") Locale.ENGLISH else Locale("vi")
                 }
                 val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", currentLocale)
                 
-                // Voice sheet state - controlled by Fragment for permission handling
+                
                 var showVoiceSheet by remember { mutableStateOf(false) }
                 val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
                 val scope = rememberCoroutineScope()
                 
-                // Capture the setter for permission callback
+                
                 val openVoiceSheet = { showVoiceSheet = true }
                 
-                // Voice ViewModel - use OfflineFirstScheduleRepository
+                
                 val supabaseForVoice = SupabaseClientProvider.client
                 val voiceUserId = supabaseForVoice.auth.currentUserOrNull()?.id ?: ""
                 val voiceRepo = RepositoryProvider.getScheduleRepository(requireContext())
@@ -151,13 +151,13 @@ class TimelineFragment : Fragment() {
                 val voiceState by voiceViewModel.state.collectAsState()
                 val voicePartialText by voiceViewModel.partialText.collectAsState()
 
-                // Handle navigation argument
+                
                 LaunchedEffect(Unit) {
                     arguments?.getString("date")?.let { dateStr ->
                         try {
                             val pickedDate = LocalDate.parse(dateStr)
                             viewModel.onSelectDate(pickedDate)
-                            // Clear argument to avoid re-triggering on rotation/recomposition
+                            
                             arguments?.remove("date")
                         } catch (e: Exception) {
                             Log.e("TimelineFragment", "Invalid date arg: $dateStr")
@@ -166,12 +166,12 @@ class TimelineFragment : Fragment() {
                 }
                 
                 TimelineScreen(
-                    // Nếu có filter active thì dùng filteredBlocks (có thể empty), không có filter thì dùng blocks gốc
+                    
                     blocks = if (uiState.isFilterActive) uiState.filteredBlocks else uiState.blocks,
                     selectedDate = uiState.date,
                     monthYear = uiState.date.format(formatter),
                     weeks = weeks.map { it.days },
-                    // Search/Sort/Filter state
+                    
                     searchQuery = uiState.searchQuery,
                     sortBy = uiState.sortBy,
                     filterLabels = uiState.filterLabels,
@@ -179,7 +179,7 @@ class TimelineFragment : Fragment() {
                     filterStatus = uiState.filterStatus,
                     isFilterActive = uiState.isFilterActive,
                     dailyQuote = uiState.dailyQuote,
-                    // Callbacks
+                    
                     isLoading = uiState.isLoading,
                     onDateSelected = { date ->
                         viewModel.onSelectDate(date)
@@ -195,7 +195,7 @@ class TimelineFragment : Fragment() {
                         findNavController().navigate(R.id.action_timelineFragment_to_editScheduleFragment, bundle)
                     },
                     onVoiceClick = {
-                        // Check permission first, then show voice sheet
+                        
                         checkAndRequestMicPermission {
                             openVoiceSheet()
                         }
@@ -211,7 +211,7 @@ class TimelineFragment : Fragment() {
                         val newStatus = if (block.status == StatusType.done) StatusType.planned else StatusType.done
                         viewModel.onToggleStatus(block.taskId, newStatus)
                     },
-                    // Search/Sort/Filter callbacks
+                    
                     onSearchQueryChanged = { query -> viewModel.onSearchQueryChanged(query) },
                     onSortChanged = { sortOption -> viewModel.onSortChanged(sortOption) },
                     onFilterLabelToggle = { label -> viewModel.onFilterLabelToggle(label) },
@@ -227,7 +227,7 @@ class TimelineFragment : Fragment() {
                     currentStreak = uiState.currentStreak
                 )
                 
-                // Points earned notification overlay
+                
                 val earnedPoints = uiState.earnedPoints
                 val earnedReason = uiState.earnedReason
                 if (earnedPoints != null && earnedReason != null) {
@@ -240,7 +240,7 @@ class TimelineFragment : Fragment() {
                     )
                 }
                 
-                // Voice Input Bottom Sheet
+                
                 if (showVoiceSheet) {
                     ModalBottomSheet(
                         onDismissRequest = { 
@@ -255,15 +255,15 @@ class TimelineFragment : Fragment() {
                             onStartListening = { voiceViewModel.startListening() },
                             onStopListening = { voiceViewModel.stopListening() },
                             onConfirmProposal = {
-                                // Confirm proposal via AI Agent
+                                
                                 voiceViewModel.confirmProposal()
                                 
-                                // Close sheet and refresh timeline
+                                
                                 scope.launch {
                                     sheetState.hide()
                                     showVoiceSheet = false
-                                    // Refresh timeline to show changes
-                                    // Note: Ideally we should wait for confirmation, but for now we follow existing pattern
+                                    
+                                    
                                     viewModel.onRefresh()
                                 }
                             },
@@ -287,11 +287,10 @@ class TimelineFragment : Fragment() {
         super.onResume()
         viewModel.onRefresh()
         
-        // Reload daily quote in case language setting changed
+        
         viewModel.reloadDailyQuote()
         
-        // Sync all timeline alarms when timeline loads
-        // At this point, user auth is guaranteed to be ready
+        
         com.projectapp.tempus.service.TimelineAlarmManager.syncAllAlarms(requireContext())
     }
 
@@ -304,7 +303,7 @@ class TimelineFragment : Fragment() {
                 viewModel.onSelectDate(date)
             },
             onMonthChange = { yearMonth ->
-                // Can load month data if needed
+                
             }
         )
         dialog.show(parentFragmentManager, "MonthCalendarDialogFragment")

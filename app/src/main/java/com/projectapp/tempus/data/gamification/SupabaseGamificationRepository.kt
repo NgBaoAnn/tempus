@@ -21,21 +21,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-/**
- * Implementation của GamificationRepository sử dụng Supabase
- */
+
 class SupabaseGamificationRepository(
     private val supabase: SupabaseClient = SupabaseClientProvider.client
 ) : GamificationRepository {
     
-    /**
-     * Lấy user ID hiện tại, return null nếu chưa đăng nhập
-     */
+    
     private fun getCurrentUserId(): String? {
         return supabase.auth.currentUserOrNull()?.id
     }
     
-    // ==================== User Points ====================
     
     override fun getUserPoints(): Flow<UserPointsEntity?> = flow {
         while (true) {
@@ -46,7 +41,7 @@ class SupabaseGamificationRepository(
                 null
             }
             emit(result)
-            delay(5000) // Poll every 5 seconds
+            delay(5000) 
         }
     }
     
@@ -71,13 +66,13 @@ class SupabaseGamificationRepository(
     
     override suspend fun getOrCreateUserPoints(): UserPointsEntity {
         val userId = getCurrentUserId() 
-            ?: return UserPointsEntity() // Return default nếu chưa login
+            ?: return UserPointsEntity() 
         
         return try {
             val existing = getUserPointsOnce()
             if (existing != null) return existing
             
-            // Tạo mới nếu chưa có
+            
             val newPoints = UserPointsDto(userId = userId)
             
             supabase.from("user_points")
@@ -96,17 +91,17 @@ class SupabaseGamificationRepository(
         android.util.Log.d("GamificationRepo", "updateUserPoints called with totalPoints=${points.totalPoints}")
         
         try {
-            // Kiểm tra xem đã có record chưa
+            
             val existing = getUserPointsOnce()
             android.util.Log.d("GamificationRepo", "Existing points: ${existing?.totalPoints}")
             
             if (existing == null) {
-                // Insert mới
+                
                 android.util.Log.d("GamificationRepo", "Inserting new user_points record")
                 supabase.from("user_points")
                     .insert(points.toDto(userId))
             } else {
-                // Update
+                
                 android.util.Log.d("GamificationRepo", "Updating user_points: new total=${points.totalPoints}")
                 supabase.from("user_points")
                     .update(points.toUpdateDto()) {
@@ -122,7 +117,6 @@ class SupabaseGamificationRepository(
         }
     }
     
-    // ==================== Point History ====================
     
     override suspend fun addPointHistory(history: PointHistoryEntity) {
         val userId = getCurrentUserId() ?: return
@@ -165,7 +159,27 @@ class SupabaseGamificationRepository(
         }
     }
     
-    // ==================== Trees ====================
+    
+    suspend fun getPointHistoryOnce(): List<PointHistoryEntity> {
+        val userId = getCurrentUserId() ?: return emptyList()
+        
+        return try {
+            supabase.from("point_history")
+                .select {
+                    filter {
+                        eq("user_id", userId)
+                    }
+                    order("timestamp", Order.DESCENDING)
+                    limit(500) 
+                }
+                .decodeList<PointHistoryDto>()
+                .map { it.toEntity() }
+        } catch (e: Exception) {
+            android.util.Log.e("GamificationRepo", "Error getting point history once: ${e.message}")
+            emptyList()
+        }
+    }
+    
     
     override fun getAliveTrees(): Flow<List<TreeEntity>> = flow {
         while (true) {
@@ -197,9 +211,7 @@ class SupabaseGamificationRepository(
         }
     }
     
-    /**
-     * Get alive trees once (no polling) - for immediate refresh
-     */
+    
     suspend fun getAliveTreesOnce(): List<TreeEntity> {
         val userId = getCurrentUserId() ?: return emptyList()
         
@@ -322,22 +334,19 @@ class SupabaseGamificationRepository(
         }
     }
     
-    /**
-     * Upsert tree - insert hoặc update nếu đã tồn tại
-     * Dùng cho sync để tránh duplicate key error
-     */
+    
     suspend fun upsertTree(tree: TreeEntity) {
         val userId = getCurrentUserId() ?: return
         
         try {
-            // Check if tree exists
+            
             val existing = getTreeById(tree.id)
             if (existing != null) {
-                // Update existing tree
+                
                 updateTree(tree)
                 android.util.Log.d("GamificationRepo", "Upserted (updated) tree: ${tree.id}")
             } else {
-                // Insert new tree
+                
                 plantTree(tree)
                 android.util.Log.d("GamificationRepo", "Upserted (inserted) tree: ${tree.id}")
             }
@@ -362,9 +371,7 @@ class SupabaseGamificationRepository(
         }
     }
     
-    /**
-     * Xóa cây hoàn toàn khỏi database
-     */
+    
     suspend fun deleteTree(treeId: Long) {
         val userId = getCurrentUserId() ?: return
         

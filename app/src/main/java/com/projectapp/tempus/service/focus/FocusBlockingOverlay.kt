@@ -14,10 +14,7 @@ import android.widget.TextView
 import com.projectapp.tempus.MainActivity
 import com.projectapp.tempus.R
 
-/**
- * Overlay window that appears when a blocked app is detected
- * Shows a warning message and option to return to Tempus
- */
+
 class FocusBlockingOverlay(private val context: Context) {
     
     private val windowManager: WindowManager by lazy {
@@ -46,13 +43,11 @@ class FocusBlockingOverlay(private val context: Context) {
         }
     }
     
-    /**
-     * Show the blocking overlay with app name and remaining time
-     */
+    
     @SuppressLint("InflateParams")
     fun show(blockedAppName: String, remainingTimeText: String) {
         if (isShowing) {
-            // Update existing overlay
+            
             updateContent(blockedAppName, remainingTimeText)
             return
         }
@@ -75,7 +70,7 @@ class FocusBlockingOverlay(private val context: Context) {
             findViewById<TextView>(R.id.tvRemainingTime)?.text = remainingTimeText
             
             findViewById<Button>(R.id.btnReturnToApp)?.setOnClickListener {
-                // Launch Tempus app
+                
                 val intent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 }
@@ -96,9 +91,7 @@ class FocusBlockingOverlay(private val context: Context) {
         }
     }
     
-    /**
-     * Hide the overlay
-     */
+    
     fun hide() {
         if (!isShowing) return
         
@@ -113,8 +106,6 @@ class FocusBlockingOverlay(private val context: Context) {
         }
     }
     
-    /**
-     * Check if overlay is currently visible
-     */
+    
     fun isVisible(): Boolean = isShowing
 }

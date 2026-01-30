@@ -13,14 +13,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Fruit Rendering
- * Functions for drawing fruits on trees
- */
 
-/**
- * Illustration-style fruit
- */
 fun DrawScope.drawIllustrationFruit(
     fruit: FruitConfig,
     attachPoint: Offset,
@@ -32,7 +25,7 @@ fun DrawScope.drawIllustrationFruit(
     val fruitSize = canvasHeight * fruit.size * scale
     val swayOffset = sin(Math.toRadians(sway.toDouble())).toFloat() * fruitSize * 0.3f
     
-    // Dùng phaseOffset để tách các quả ra theo chiều ngang
+    
     val spreadOffset = sin(fruit.phaseOffset) * fruitSize * 1.5f
     
     val fruitCenter = Offset(
@@ -40,14 +33,14 @@ fun DrawScope.drawIllustrationFruit(
         attachPoint.y + fruitSize * 0.6f + abs(cos(fruit.phaseOffset)) * fruitSize * 0.3f
     )
     
-    // Fruit shadow
+    
     drawOval(
         color = Color.Black.copy(alpha = 0.1f),
         topLeft = Offset(fruitCenter.x - fruitSize * 0.8f, fruitCenter.y + fruitSize * 0.8f),
         size = Size(fruitSize * 1.6f, fruitSize * 0.3f)
     )
     
-    // Fruit body với gradient
+    
     drawCircle(
         brush = Brush.radialGradient(
             colors = listOf(
@@ -62,14 +55,14 @@ fun DrawScope.drawIllustrationFruit(
         center = fruitCenter
     )
     
-    // Highlight
+    
     drawCircle(
         color = Color.White.copy(alpha = opacity * 0.35f),
         radius = fruitSize * 0.25f,
         center = Offset(fruitCenter.x - fruitSize * 0.35f, fruitCenter.y - fruitSize * 0.35f)
     )
     
-    // Stem
+    
     val stemPath = Path().apply {
         moveTo(fruitCenter.x, fruitCenter.y - fruitSize)
         quadraticBezierTo(
@@ -83,7 +76,7 @@ fun DrawScope.drawIllustrationFruit(
         style = Stroke(width = fruitSize * 0.12f, cap = StrokeCap.Round)
     )
     
-    // Small leaf on stem
+    
     val leafX = fruitCenter.x + fruitSize * 0.15f
     val leafY = fruitCenter.y - fruitSize * 1.1f
     drawOval(

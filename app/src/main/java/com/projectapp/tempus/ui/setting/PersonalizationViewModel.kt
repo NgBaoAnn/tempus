@@ -24,9 +24,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-/**
- * UI State for Personalization screen
- */
+
 data class PersonalizationUiState(
     val lifestyle: LifestylePreset = LifestylePreset.CUSTOM,
     val wakeUpTime: String = "07:00",
@@ -34,14 +32,14 @@ data class PersonalizationUiState(
     val workStartTime: String = "08:00",
     val workEndTime: String = "17:00",
     val customTimePeriods: List<CustomTimePeriod> = emptyList(),
-    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6), // Mon-Sat by default
+    val activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6), 
     val showResetConfirmation: Boolean = false,
     val showAddCustomPeriodScreen: Boolean = false,
     val showLifestyleSheet: Boolean = false,
     val showLabelSheet: Boolean = false,
     val isLoading: Boolean = false,
     val showTimePickerFor: TimePickerTarget? = null,
-    // For add custom period screen
+    
     val newPeriodName: String = "",
     val newPeriodDescription: String = "",
     val newPeriodStartTime: String = "08:00",
@@ -50,20 +48,16 @@ data class PersonalizationUiState(
     val newPeriodLabel: ScheduleLabel = ScheduleLabel.book
 )
 
-/**
- * Enum to identify which time picker is being shown
- */
+
 enum class TimePickerTarget {
     WAKE_UP, SLEEP, WORK_START, WORK_END, NEW_PERIOD_START, NEW_PERIOD_END
 }
 
-/**
- * ViewModel for Personalization settings screen
- */
+
 class PersonalizationViewModel(application: Application) : AndroidViewModel(application) {
 
     private val personalizationRepo = SharedPrefsPersonalizationRepository(application)
-    // Use OfflineFirstScheduleRepository for offline-first functionality
+    
     private val scheduleRepo = RepositoryProvider.getScheduleRepository(application)
 
     private val _uiState = MutableStateFlow(PersonalizationUiState())
@@ -106,7 +100,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         personalizationRepo.saveSettings(settings)
     }
 
-    // Lifestyle preset selection
+    
     fun showLifestyleSheet() {
         _uiState.value = _uiState.value.copy(showLifestyleSheet = true)
     }
@@ -127,11 +121,11 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         saveSettings()
     }
 
-    // Day of week selection
+    
     fun toggleDay(dayOfWeek: Int) {
         val currentDays = _uiState.value.activeDays.toMutableList()
         if (currentDays.contains(dayOfWeek)) {
-            if (currentDays.size > 1) { // Keep at least one day
+            if (currentDays.size > 1) { 
                 currentDays.remove(dayOfWeek)
             }
         } else {
@@ -142,11 +136,11 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         saveSettings()
     }
 
-    // Time change handlers
+    
     fun onWakeUpTimeChange(time: String) {
         _uiState.value = _uiState.value.copy(
             wakeUpTime = time,
-            lifestyle = LifestylePreset.CUSTOM // Switch to custom when manually changing
+            lifestyle = LifestylePreset.CUSTOM 
         )
         saveSettings()
     }
@@ -175,7 +169,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         saveSettings()
     }
 
-    // Time picker dialog handlers
+    
     fun showTimePicker(target: TimePickerTarget) {
         _uiState.value = _uiState.value.copy(showTimePickerFor = target)
     }
@@ -202,7 +196,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         dismissTimePicker()
     }
 
-    // Label sheet handlers
+    
     fun showLabelSheet() {
         _uiState.value = _uiState.value.copy(showLabelSheet = true)
     }
@@ -218,7 +212,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         )
     }
 
-    // Add custom period screen handlers
+    
     fun showAddCustomPeriodScreen() {
         _uiState.value = _uiState.value.copy(
             showAddCustomPeriodScreen = true,
@@ -274,7 +268,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         saveSettings()
     }
 
-    // Reset confirmation handlers
+    
     fun showResetConfirmation() {
         _uiState.value = _uiState.value.copy(showResetConfirmation = true)
     }
@@ -283,11 +277,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         _uiState.value = _uiState.value.copy(showResetConfirmation = false)
     }
 
-    /**
-     * Confirms reset:
-     * 1. Deletes all schedules from today onwards
-     * 2. Creates new daily repeating tasks for wake up, sleep, work, and custom periods
-     */
+    
     fun confirmReset() {
         viewModelScope.launch {
             try {
@@ -303,49 +293,48 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 val state = _uiState.value
                 val today = LocalDate.now()
                 
-                // Step 1: Set end_date for all existing schedules to today
-                // This keeps historical data but stops them from appearing from today onwards
-                val todayStr = today.toString() // YYYY-MM-DD format
+                
+                val todayStr = today.toString() 
                 val updatedCount = scheduleRepo.setEndDateForAllSchedules(userId, todayStr)
                 Log.d("PersonalizationVM", "Set end_date for $updatedCount schedules to $todayStr")
 
-                // Step 2: Create Wake Up task
+                
                 createDailyTask(
                     userId = userId,
                     name = "Thức dậy",
                     timeStr = state.wakeUpTime,
                     date = today,
                     label = ScheduleLabel.wakeup,
-                    color = "#FF9500", // Orange
+                    color = "#FF9500", 
                     duration = "00:30:00",
                     activeDays = state.activeDays
                 )
 
-                // Step 3: Create Sleep task
+                
                 createDailyTask(
                     userId = userId,
                     name = "Đi ngủ",
                     timeStr = state.sleepTime,
                     date = today,
                     label = ScheduleLabel.sleep,
-                    color = "#5856D6", // Purple
+                    color = "#5856D6", 
                     duration = "00:30:00",
                     activeDays = state.activeDays
                 )
 
-                // Step 4: Create Work Start task
+                
                 createDailyTask(
                     userId = userId,
                     name = "Làm việc",
                     timeStr = state.workStartTime,
                     date = today,
                     label = ScheduleLabel.book,
-                    color = "#34C759", // Green
+                    color = "#34C759", 
                     duration = calculateDuration(state.workStartTime, state.workEndTime),
                     activeDays = state.activeDays
                 )
 
-                // Step 5: Create custom time period tasks
+                
                 state.customTimePeriods.forEach { period ->
                     val periodLabel = try {
                         ScheduleLabel.valueOf(period.label)
@@ -375,9 +364,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    /**
-     * Creates a daily repeating task on the timeline
-     */
+    
     private suspend fun createDailyTask(
         userId: String,
         name: String,
@@ -386,7 +373,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         label: ScheduleLabel,
         color: String,
         duration: String,
-        activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7) // Mặc định tất cả các ngày
+        activeDays: List<Int> = listOf(1, 2, 3, 4, 5, 6, 7) 
     ) {
         try {
             val timeParts = timeStr.split(":")
@@ -399,7 +386,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 .withZoneSameInstant(ZoneId.of("UTC"))
                 .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
-            // Nếu chọn tất cả 7 ngày -> daily, ngược lại -> custom với repeat_days
+            
             val isAllDays = activeDays.sorted() == listOf(1, 2, 3, 4, 5, 6, 7)
             val repeatType = if (isAllDays) RepeatType.daily else RepeatType.custom
             val repeatDays = if (isAllDays) null else activeDays.sorted().joinToString(",")
@@ -426,10 +413,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    /**
-     * Calculates duration between two time strings (HH:mm format)
-     * Returns duration in HH:MM:SS format
-     */
+    
     private fun calculateDuration(startTime: String, endTime: String): String {
         return try {
             val startParts = startTime.split(":")
@@ -438,7 +422,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
             val startMinutes = (startParts[0].toInt() * 60) + startParts[1].toInt()
             var endMinutes = (endParts[0].toInt() * 60) + endParts[1].toInt()
             
-            // Handle overnight duration (e.g., 22:00 to 06:00)
+            
             if (endMinutes < startMinutes) {
                 endMinutes += 24 * 60
             }
@@ -449,13 +433,11 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
             
             String.format("%02d:%02d:00", hours, minutes)
         } catch (e: Exception) {
-            "01:00:00" // Default 1 hour
+            "01:00:00" 
         }
     }
 
-    /**
-     * Get active days as formatted string
-     */
+    
     fun getActiveDaysLabel(): String {
         val state = _uiState.value
         return when {
@@ -480,9 +462,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
         }
     }
     
-    /**
-     * Get label display name
-     */
+    
     fun getLabelDisplayName(label: ScheduleLabel): String {
         return when (label) {
             ScheduleLabel.wakeup -> "Thức dậy"

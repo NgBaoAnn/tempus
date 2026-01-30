@@ -14,15 +14,7 @@ import com.projectapp.tempus.ui.garden.compose.stableRandom
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Trunk Renderer
- * Contains functions for rendering tree trunks with various styles
- */
 
-/**
- * Draws an organic trunk with bezier curves and 3D gradient effect
- * Returns the position of the trunk top for attaching branches
- */
 fun DrawScope.drawOrganicTrunk(
     trunk: TrunkConfig,
     centerX: Float,
@@ -39,12 +31,12 @@ fun DrawScope.drawOrganicTrunk(
     
     rotate(rotation, pivot = Offset(centerX, baseY)) {
         if (trunk.segments > 1) {
-            // Segmented trunk (bamboo style)
+            
             drawBambooTrunk(trunk, centerX, baseY, canvasHeight, growthFactor, scale)
         } else {
-            // Organic bezier trunk
+            
             val trunkPath = Path().apply {
-                // Left edge - slight curve outward then inward
+                
                 moveTo(centerX - baseWidth / 2, baseY)
                 val curveAmount = baseWidth * 0.08f * (stableRandom(seed, 0) - 0.5f)
                 cubicTo(
@@ -53,10 +45,10 @@ fun DrawScope.drawOrganicTrunk(
                     centerX - topWidth / 2, baseY - trunkHeight
                 )
                 
-                // Top edge
+                
                 lineTo(centerX + topWidth / 2, baseY - trunkHeight)
                 
-                // Right edge - mirror curve
+                
                 cubicTo(
                     centerX + topWidth / 2 + curveAmount * 0.5f, baseY - trunkHeight * 0.7f,
                     centerX + baseWidth / 2 - curveAmount, baseY - trunkHeight * 0.3f,
@@ -65,7 +57,7 @@ fun DrawScope.drawOrganicTrunk(
                 close()
             }
             
-            // Trunk gradient (3D effect)
+            
             drawPath(
                 path = trunkPath,
                 brush = Brush.horizontalGradient(
@@ -80,7 +72,7 @@ fun DrawScope.drawOrganicTrunk(
                 )
             )
             
-            // Subtle bark texture lines
+            
             for (i in 1..3) {
                 val lineY = baseY - trunkHeight * (0.2f + i * 0.2f)
                 val lineWidth = baseWidth - (baseWidth - topWidth) * (0.2f + i * 0.2f)
@@ -103,9 +95,7 @@ fun DrawScope.drawOrganicTrunk(
     )
 }
 
-/**
- * Draws a Palm trunk with distinct ring texture (leaf scars)
- */
+
 fun DrawScope.drawPalmTrunk(
     trunk: TrunkConfig,
     centerX: Float,
@@ -121,9 +111,9 @@ fun DrawScope.drawPalmTrunk(
     val topWidth = baseWidth * trunk.taperRatio
     
     rotate(rotation, pivot = Offset(centerX, baseY)) {
-        // Organic bezier trunk shape
+        
         val trunkPath = Path().apply {
-            // Left edge
+            
             moveTo(centerX - baseWidth / 2, baseY)
             val curveAmount = baseWidth * 0.05f * (stableRandom(seed, 0) - 0.5f)
             cubicTo(
@@ -132,10 +122,10 @@ fun DrawScope.drawPalmTrunk(
                 centerX - topWidth / 2, baseY - trunkHeight
             )
             
-            // Top edge
+            
             lineTo(centerX + topWidth / 2, baseY - trunkHeight)
             
-            // Right edge
+            
             cubicTo(
                 centerX + topWidth / 2 + curveAmount * 0.5f, baseY - trunkHeight * 0.7f,
                 centerX + baseWidth / 2 - curveAmount, baseY - trunkHeight * 0.3f,
@@ -144,7 +134,7 @@ fun DrawScope.drawPalmTrunk(
             close()
         }
         
-        // Trunk gradient
+        
         drawPath(
             path = trunkPath,
             brush = Brush.horizontalGradient(
@@ -159,17 +149,17 @@ fun DrawScope.drawPalmTrunk(
             )
         )
         
-        // Palm leaf scars (rings) - Strong visual texture
+        
         val ringCount = 12
         for (i in 1..ringCount) {
             val progress = i.toFloat() / (ringCount + 1)
-            // Slightly irregular spacing
+            
             val adjustedProgress = progress + (stableRandom(seed, i) - 0.5f) * 0.02f
             
             val lineY = baseY - trunkHeight * adjustedProgress
             val lineWidth = baseWidth - (baseWidth - topWidth) * adjustedProgress
             
-            // Ring line (dark scar)
+            
             drawLine(
                 color = trunk.color.darken(0.3f).copy(alpha = 0.6f),
                 start = Offset(centerX - lineWidth * 0.48f, lineY),
@@ -178,7 +168,7 @@ fun DrawScope.drawPalmTrunk(
                 cap = StrokeCap.Round
             )
             
-            // Highlight above ring
+            
             drawLine(
                 color = trunk.color.lighten(0.15f).copy(alpha = 0.4f),
                 start = Offset(centerX - lineWidth * 0.45f, lineY - baseWidth * 0.015f),
@@ -189,20 +179,14 @@ fun DrawScope.drawPalmTrunk(
         }
     }
     
-    // Tính vị trí đỉnh thân sau rotation
-    // Điểm gốc trước rotation: (centerX, baseY - trunkHeight)
-    // Pivot point của rotation: (centerX, baseY)
-    // Sau rotation, cần xoay điểm gốc quanh pivot
+    
     val rotRad = Math.toRadians(rotation.toDouble()).toFloat()
     val originalTopX = centerX
     val originalTopY = baseY - trunkHeight
     
-    // Xoay điểm (originalTopX, originalTopY) quanh pivot (centerX, baseY)
-    // Công thức: 
-    // x' = cos(θ) * (x - px) - sin(θ) * (y - py) + px
-    // y' = sin(θ) * (x - px) + cos(θ) * (y - py) + py
-    val dx = originalTopX - centerX  // = 0
-    val dy = originalTopY - baseY    // = -trunkHeight
+    
+    val dx = originalTopX - centerX  
+    val dy = originalTopY - baseY    
     
     val rotatedX = cos(rotRad) * dx - sin(rotRad) * dy + centerX
     val rotatedY = sin(rotRad) * dx + cos(rotRad) * dy + baseY
@@ -210,9 +194,7 @@ fun DrawScope.drawPalmTrunk(
     return Offset(rotatedX, rotatedY)
 }
 
-/**
- * Draws a bamboo-style segmented trunk with joint rings
- */
+
 fun DrawScope.drawBambooTrunk(
     trunk: TrunkConfig,
     centerX: Float,
@@ -231,7 +213,7 @@ fun DrawScope.drawBambooTrunk(
         val segY = baseY - segmentHeight * (i + 1)
         val segWidth = baseWidth - (baseWidth - topWidth) * (i.toFloat() / segmentCount)
         
-        // Segment body với gradient
+        
         drawRoundRect(
             brush = Brush.horizontalGradient(
                 colors = listOf(
@@ -245,7 +227,7 @@ fun DrawScope.drawBambooTrunk(
             cornerRadius = CornerRadius(segWidth / 3)
         )
         
-        // Joint ring
+        
         if (i < segmentCount - 1) {
             drawOval(
                 color = trunk.color.darken(0.15f),

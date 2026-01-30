@@ -2,49 +2,39 @@ package com.projectapp.tempus.data.ai
 
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 
-/**
- * Utility để tự động phân loại hoạt động và gán icon/màu sắc phù hợp
- * Sử dụng keyword matching để xác định loại hoạt động
- */
+
 object ActivityClassifier {
     
-    /**
-     * Danh sách màu sắc có sẵn (từ EditScheduleScreen)
-     */
+    
     private val availableColors = listOf(
-        "#FF3B30",  // Red - Alert/Important
-        "#FF9500",  // Orange - Exercise/Active
-        "#FFCC00",  // Yellow - Social/Fun
-        "#34C759",  // Green - Health/Nature
-        "#00C7BE",  // Teal - Water/Fresh
-        "#007AFF",  // Blue - Work/Study
-        "#5856D6",  // Purple - Creative
-        "#AF52DE",  // Magenta - Rest/Relax
-        "#FF2D55",  // Pink - Personal
-        "#A2845E"   // Brown - Home/Garden
+        "#FF3B30",  
+        "#FF9500",  
+        "#FFCC00",  
+        "#34C759",  
+        "#00C7BE",  
+        "#007AFF",  
+        "#5856D6",  
+        "#AF52DE",  
+        "#FF2D55",  
+        "#A2845E"   
     )
     
-    /**
-     * Map từ ScheduleLabel sang màu sắc phù hợp
-     */
+    
     private val labelToColor = mapOf(
-        ScheduleLabel.wakeup to "#FF9500",   // Orange - energetic morning
-        ScheduleLabel.eat to "#FFCC00",      // Yellow - meal time
-        ScheduleLabel.exercise to "#FF3B30", // Red - active/exercise
-        ScheduleLabel.rest to "#AF52DE",     // Magenta - relaxation
-        ScheduleLabel.water to "#00C7BE",    // Teal - hydration
-        ScheduleLabel.book to "#007AFF",     // Blue - study/learning
-        ScheduleLabel.sleep to "#5856D6",    // Purple - night/sleep
-        ScheduleLabel.clean to "#34C759",    // Green - clean environment
-        ScheduleLabel.cook to "#FF2D55",     // Pink - cooking
-        ScheduleLabel.garden to "#A2845E",   // Brown - gardening
-        ScheduleLabel.UNKNOWN to "#007AFF"   // Default blue
+        ScheduleLabel.wakeup to "#FF9500",   
+        ScheduleLabel.eat to "#FFCC00",      
+        ScheduleLabel.exercise to "#FF3B30", 
+        ScheduleLabel.rest to "#AF52DE",     
+        ScheduleLabel.water to "#00C7BE",    
+        ScheduleLabel.book to "#007AFF",     
+        ScheduleLabel.sleep to "#5856D6",    
+        ScheduleLabel.clean to "#34C759",    
+        ScheduleLabel.cook to "#FF2D55",     
+        ScheduleLabel.garden to "#A2845E",   
+        ScheduleLabel.UNKNOWN to "#007AFF"   
     )
     
-    /**
-     * Keywords để classify activity vào từng category
-     * Lowercase để dễ matching
-     */
+    
     private val labelKeywords = mapOf(
         ScheduleLabel.wakeup to listOf(
             "thức dậy", "wake up", "dạy sớm", "buổi sáng", "morning", 
@@ -94,23 +84,19 @@ object ActivityClassifier {
         )
     )
     
-    /**
-     * Classify activity name thành ScheduleLabel phù hợp
-     * @param activityName Tên hoạt động
-     * @return ScheduleLabel phù hợp nhất hoặc book (default cho học tập/làm việc)
-     */
+    
     fun classifyActivity(activityName: String): ScheduleLabel {
         val lowerName = activityName.lowercase()
         
-        // Tìm label có keyword match nhiều nhất
-        var bestLabel = ScheduleLabel.book  // Default: học tập/làm việc
+        
+        var bestLabel = ScheduleLabel.book  
         var bestScore = 0
         
         for ((label, keywords) in labelKeywords) {
             var score = 0
             for (keyword in keywords) {
                 if (lowerName.contains(keyword)) {
-                    score += keyword.length  // Longer match = higher score
+                    score += keyword.length  
                 }
             }
             if (score > bestScore) {
@@ -122,29 +108,19 @@ object ActivityClassifier {
         return bestLabel
     }
     
-    /**
-     * Lấy màu sắc phù hợp cho ScheduleLabel
-     * @param label ScheduleLabel
-     * @return Hex color string
-     */
+    
     fun getColorForLabel(label: ScheduleLabel): String {
-        return labelToColor[label] ?: "#007AFF"  // Default blue
+        return labelToColor[label] ?: "#007AFF"  
     }
     
-    /**
-     * Classify activity và trả về cả label lẫn color
-     * @param activityName Tên hoạt động
-     * @return Pair(ScheduleLabel, ColorHex)
-     */
+    
     fun classifyWithColor(activityName: String): Pair<ScheduleLabel, String> {
         val label = classifyActivity(activityName)
         val color = getColorForLabel(label)
         return Pair(label, color)
     }
     
-    /**
-     * Lấy random color cho trường hợp không xác định được label
-     */
+    
     fun getRandomColor(): String {
         return availableColors.random()
     }

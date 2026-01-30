@@ -5,24 +5,21 @@ import androidx.room.PrimaryKey
 import com.projectapp.tempus.data.notes.dto.NoteRow
 import java.time.Instant
 
-/**
- * Entity lưu trữ ghi chú của người dùng
- * Hỗ trợ sync với Supabase
- */
+
 @Entity(tableName = "notes")
 data class NoteEntity(
     @PrimaryKey
-    val id: String = java.util.UUID.randomUUID().toString(), // UUID for Supabase sync
-    val userId: String = "",  // User ID for multi-user support
+    val id: String = java.util.UUID.randomUUID().toString(), 
+    val userId: String = "",  
     val title: String = "",
     val content: String,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val isPinned: Boolean = false,
-    val color: String? = null,  // Optional color for note cards
+    val color: String? = null,  
     
-    // Sync fields
-    val syncStatus: String = "PENDING_CREATE",  // SYNCED, PENDING_CREATE, PENDING_UPDATE, PENDING_DELETE
+    
+    val syncStatus: String = "PENDING_CREATE",  
     val localUpdatedAt: Long = System.currentTimeMillis(),
     val serverUpdatedAt: Long? = null
 ) {

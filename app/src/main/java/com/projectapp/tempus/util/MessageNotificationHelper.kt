@@ -38,10 +38,10 @@ object MessageNotificationHelper {
         senderName: String,
         messageContent: String
     ) {
-        // Create intent to open app (ideally to specific chat)
+        
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            // Put extras to navigate to chat if possible
+            
             putExtra("conversation_id", conversationId)
         }
         
@@ -50,7 +50,7 @@ object MessageNotificationHelper {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Ensure this resource exists or use default
+            .setSmallIcon(R.drawable.ic_launcher_foreground) 
             .setContentTitle(senderName)
             .setContentText(messageContent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -63,10 +63,10 @@ object MessageNotificationHelper {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Request permission if missing
+                
                 return
             }
-            // Use time as ID for unique notifications
+            
             notify(System.currentTimeMillis().toInt(), builder.build())
         }
     }

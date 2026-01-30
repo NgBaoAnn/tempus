@@ -14,9 +14,7 @@ import com.projectapp.tempus.R
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
 
-/**
- * ImageTree - Hiển thị ảnh cây realistic với animation đung đưa nhẹ
- */
+
 @Composable
 fun ImageTree(
     state: TreeState,
@@ -27,7 +25,7 @@ fun ImageTree(
 ) {
     val imageRes = getTreeImageRes(state)
     
-    // Gentle sway animation
+    
     val infiniteTransition = rememberInfiniteTransition(label = "treeSway")
     
     val rotation by infiniteTransition.animateFloat(
@@ -74,7 +72,7 @@ fun ImageTree(
                 .fillMaxSize()
                 .graphicsLayer {
                     if (enableAnimation && state != TreeState.DEAD) {
-                        // Set pivot point to bottom center so only top sways
+                        
                         transformOrigin = TransformOrigin(0.5f, 1f)
                         rotationZ = rotation
                     }
@@ -84,15 +82,13 @@ fun ImageTree(
 }
 
 enum class TreeImageSize {
-    SMALL,   // 70dp
-    MEDIUM,  // 100dp  
-    LARGE,   // 150dp
-    XLARGE   // 180dp
+    SMALL,   
+    MEDIUM,  
+    LARGE,   
+    XLARGE   
 }
 
-/**
- * Lấy drawable resource dựa trên state của cây
- */
+
 private fun getTreeImageRes(state: TreeState): Int {
     return when (state) {
         TreeState.SEED -> R.drawable.tree_seed

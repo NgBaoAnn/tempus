@@ -5,17 +5,11 @@ import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Offline-First Gamification Repository
- * 
- * Tất cả operations đều làm trên Room (local) trước.
- * Sync sẽ được xử lý riêng khi login/logout.
- */
+
 class OfflineFirstGamificationRepository(
     private val localRepo: LocalGamificationRepository
 ) : GamificationRepository {
     
-    // ==================== User Points ====================
     
     override fun getUserPoints(): Flow<UserPointsEntity?> = localRepo.getUserPoints()
     
@@ -39,7 +33,6 @@ class OfflineFirstGamificationRepository(
         localRepo.updateUserPoints(points)
     }
     
-    // ==================== Point History ====================
     
     override suspend fun addPointHistory(history: PointHistoryEntity) {
         localRepo.addPointHistory(history)
@@ -47,7 +40,6 @@ class OfflineFirstGamificationRepository(
     
     override fun getPointHistory(): Flow<List<PointHistoryEntity>> = localRepo.getPointHistory()
     
-    // ==================== Trees ====================
     
     override fun getAliveTrees(): Flow<List<TreeEntity>> = localRepo.getAliveTrees()
     

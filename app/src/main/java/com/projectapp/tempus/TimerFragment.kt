@@ -42,33 +42,33 @@ import kotlinx.coroutines.launch
 
 class TimerFragment : Fragment() {
 
-    // Timer state
+    
     private var timerState by mutableStateOf(TimerState.SETUP)
     private var hours by mutableIntStateOf(0)
     private var minutes by mutableIntStateOf(15)
-    private var selectedQuickIndex by mutableIntStateOf(4) // Custom by default
+    private var selectedQuickIndex by mutableIntStateOf(4) 
     private var selectedColor by mutableStateOf(TimerColors.TimerGreen)
     private var secondsRemaining by mutableLongStateOf(0L)
     private var totalSeconds by mutableLongStateOf(0L)
     
     private var countDownTimer: CountDownTimer? = null
     
-    // Gamification
+    
     private lateinit var pointsManager: PointsManager
     
-    // Points notification state
+    
     private var pointsNotification by mutableStateOf(PointsNotificationState())
     
-    // Focus Mode
+    
     private lateinit var focusModePreferences: FocusModePreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize Focus Mode preferences
+        
         focusModePreferences = FocusModePreferences(requireContext())
         
-        // Request notification permission for Android 13+
+        
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(
                     requireContext(),
@@ -82,7 +82,7 @@ class TimerFragment : Fragment() {
             }
         }
         
-        // Listen to TimerEventBus
+        
         lifecycleScope.launch {
             TimerEventBus.events.collect { event ->
                 Log.d("TimerFragment", "Received event: $event")
@@ -108,7 +108,7 @@ class TimerFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize gamification with offline-first repository
+        
         val repository = RepositoryProvider.getGamificationRepository(requireContext())
         pointsManager = PointsManager(repository)
         
@@ -138,7 +138,7 @@ class TimerFragment : Fragment() {
                                 1 -> { hours = 0; minutes = 5 }
                                 2 -> { hours = 0; minutes = 30 }
                                 3 -> { hours = 1; minutes = 0 }
-                                // 4 = Custom, keep current values
+                                
                             }
                         },
                         onColorSelect = { selectedColor = it },
@@ -159,7 +159,7 @@ class TimerFragment : Fragment() {
                         }
                     )
                     
-                    // Points earned notification overlay
+                    
                     if (pointsNotification.show) {
                         PointsNotification(
                             points = pointsNotification.points,
@@ -185,20 +185,20 @@ class TimerFragment : Fragment() {
         secondsRemaining = totalSeconds
         timerState = TimerState.RUNNING
         
-        // Show notification
+        
         TimerNotificationHelper.showTimerNotification(
             requireContext(),
             TimerNotificationHelper.formatTime(secondsRemaining),
             false
         )
         
-        // Start Focus Lock Screen if enabled
+        
         lifecycleScope.launch {
             val focusModeEnabled = focusModePreferences.focusModeEnabled.first()
             val autoStart = focusModePreferences.autoStartWithTimer.first()
             
             if (focusModeEnabled && autoStart) {
-                // Launch the focus lock screen
+                
                 FocusLockActivity.start(
                     requireContext(),
                     totalSeconds,
@@ -216,14 +216,14 @@ class TimerFragment : Fragment() {
             override fun onTick(millisUntilFinished: Long) {
                 secondsRemaining = millisUntilFinished / 1000
                 
-                // Update notification
+                
                 TimerNotificationHelper.showTimerNotification(
                     requireContext(),
                     TimerNotificationHelper.formatTime(secondsRemaining),
                     false
                 )
                 
-                // Update Focus Lock Screen
+                
                 FocusLockActivity.sendTimerUpdate(requireContext(), secondsRemaining)
             }
 
@@ -231,22 +231,22 @@ class TimerFragment : Fragment() {
                 secondsRemaining = 0
                 timerState = TimerState.SETUP
                 
-                // Cancel notification
+                
                 TimerNotificationHelper.cancelNotification(requireContext())
                 
-                // Close Focus Lock Screen
+                
                 FocusLockActivity.sendTimerFinish(requireContext())
                 
-                // 🎮 Award Pomodoro points when timer completes
+                
                 viewLifecycleOwner.lifecycleScope.launch {
-                    // Calculate focus minutes from totalSeconds
+                    
                     val focusMinutes = (totalSeconds / 60).toInt().coerceAtLeast(1)
                     
-                    // Award 1 point per minute
+                    
                     val earnedPoints = pointsManager.earnPomodoroPoints(focusMinutes)
                     pointsManager.updateStreak()
                     
-                    // Show visual notification with minutes info
+                    
                     pointsNotification = PointsNotificationState(
                         show = true,
                         points = earnedPoints,
@@ -261,7 +261,7 @@ class TimerFragment : Fragment() {
         countDownTimer?.cancel()
         timerState = TimerState.PAUSED
         
-        // Update notification to show Resume button
+        
         TimerNotificationHelper.showTimerNotification(
             requireContext(),
             TimerNotificationHelper.formatTime(secondsRemaining),
@@ -272,7 +272,7 @@ class TimerFragment : Fragment() {
     private fun resumeTimer() {
         timerState = TimerState.RUNNING
         
-        // Update notification to show Pause button
+        
         TimerNotificationHelper.showTimerNotification(
             requireContext(),
             TimerNotificationHelper.formatTime(secondsRemaining),
@@ -287,10 +287,10 @@ class TimerFragment : Fragment() {
         timerState = TimerState.SETUP
         secondsRemaining = 0
         
-        // Cancel notification
+        
         TimerNotificationHelper.cancelNotification(requireContext())
         
-        // Stop Focus Mode
+        
         FocusModeService.stopFocusMode(requireContext())
     }
 

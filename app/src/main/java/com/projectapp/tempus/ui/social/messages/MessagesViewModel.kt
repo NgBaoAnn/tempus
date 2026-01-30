@@ -15,9 +15,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-/**
- * UI State cho Messages
- */
+
 data class MessagesUiState(
     val isLoading: Boolean = false,
     val isSending: Boolean = false,
@@ -28,9 +26,7 @@ data class MessagesUiState(
     val error: String? = null
 )
 
-/**
- * ViewModel quản lý messaging với realtime support
- */
+
 class MessagesViewModel : ViewModel() {
     
     private val repository: MessageRepository = SupabaseMessageRepository()
@@ -51,9 +47,7 @@ class MessagesViewModel : ViewModel() {
         loadConversations()
     }
     
-    /**
-     * Tải danh sách conversations
-     */
+    
     fun loadConversations() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -79,9 +73,7 @@ class MessagesViewModel : ViewModel() {
         }
     }
     
-    /**
-     * Mở chat với một bạn bè
-     */
+    
     fun openChat(friendId: String, friendUsername: String, friendAvatar: String?) {
         viewModelScope.launch {
             _uiState.update { 
@@ -92,17 +84,17 @@ class MessagesViewModel : ViewModel() {
                 ) 
             }
             
-            // Get or create conversation
+            
             repository.getOrCreateConversation(friendId)
                 .onSuccess { conversation ->
                     _uiState.update { 
                         it.copy(currentConversationId = conversation.id) 
                     }
                     
-                    // Load existing messages
+                    
                     loadMessages(conversation.id)
                     
-                    // Subscribe to realtime updates
+                    
                     subscribeToRealtimeMessages(conversation.id)
                 }
                 .onFailure { error ->
@@ -117,9 +109,7 @@ class MessagesViewModel : ViewModel() {
         }
     }
     
-    /**
-     * Tải tin nhắn trong conversation
-     */
+    
     private suspend fun loadMessages(conversationId: String) {
         repository.getMessages(conversationId)
             .onSuccess { messages ->
@@ -141,11 +131,9 @@ class MessagesViewModel : ViewModel() {
             }
     }
     
-    /**
-     * Subscribe để nhận tin nhắn realtime
-     */
+    
     private fun subscribeToRealtimeMessages(conversationId: String) {
-        // Cancel previous subscription
+        
         realtimeJob?.cancel()
         
         val currentUserId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
@@ -155,7 +143,7 @@ class MessagesViewModel : ViewModel() {
                 .collect { newMessage ->
                     Log.d(TAG, "New realtime message: ${newMessage.content}")
                     
-                    // Add message to list if not already present
+                    
                     _uiState.update { state ->
                         if (state.currentMessages.none { it.id == newMessage.id }) {
                             state.copy(
@@ -166,7 +154,7 @@ class MessagesViewModel : ViewModel() {
                         }
                     }
                     
-                    // Send notification if message is from other user
+                    
                     if (newMessage.senderId != currentUserId) {
                         val senderName = _uiState.value.currentChatFriend?.username ?: "Bạn bè"
                         _notificationEvents.emit(
@@ -181,9 +169,7 @@ class MessagesViewModel : ViewModel() {
         }
     }
     
-    /**
-     * Gửi tin nhắn
-     */
+    
     fun sendMessage(content: String) {
         val conversationId = _uiState.value.currentConversationId ?: return
         
@@ -194,8 +180,8 @@ class MessagesViewModel : ViewModel() {
             
             repository.sendMessage(conversationId, content.trim())
                 .onSuccess { message ->
-                    // Message will be added via realtime subscription
-                    // But add immediately for better UX
+                    
+                    
                     _uiState.update { state ->
                         if (state.currentMessages.none { it.id == message.id }) {
                             state.copy(
@@ -219,9 +205,7 @@ class MessagesViewModel : ViewModel() {
         }
     }
     
-    /**
-     * Gửi tin nhắn hình ảnh
-     */
+    
     fun sendImageMessage(imageBytes: ByteArray) {
         val conversationId = _uiState.value.currentConversationId ?: return
         
@@ -230,7 +214,7 @@ class MessagesViewModel : ViewModel() {
             
             repository.sendImageMessage(conversationId, imageBytes)
                 .onSuccess { message ->
-                    // Message will be added via realtime subscription
+                    
                     _uiState.update { state ->
                         if (state.currentMessages.none { it.id == message.id }) {
                             state.copy(
@@ -254,9 +238,7 @@ class MessagesViewModel : ViewModel() {
         }
     }
     
-    /**
-     * Đóng chat - cleanup realtime subscription
-     */
+    
     fun closeChat() {
         realtimeJob?.cancel()
         realtimeJob = null
@@ -273,13 +255,11 @@ class MessagesViewModel : ViewModel() {
             ) 
         }
         
-        // Reload conversations to update last message preview
+        
         loadConversations()
     }
     
-    /**
-     * Xóa lỗi
-     */
+    
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

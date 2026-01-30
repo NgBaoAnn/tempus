@@ -46,10 +46,6 @@ import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
 import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 
-/**
- * Premium Blue Liquid Glass Design System
- * Style: Flowing glass, smooth transitions, translucent, modern premium
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,26 +58,23 @@ fun FriendsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showSearchDialog by remember { mutableStateOf(false) }
     
-    // Auto-reload data when screen opens (e.g. returning from Profile after blocking)
+    
     LaunchedEffect(Unit) {
         viewModel.loadData()
-        // If on discovery tab, we might want to reload that too, but loadData gets friends/blocked
-        // which drives the filtering. loadAllUsers is usually triggered by tab change or pull-refresh.
-        // But to be safe if user blocked someone, we should refresh blocked list.
-        // loadData() calls getFriends and getPending.
-        // We probably also want to refresh the blocked list explicitly to ensure filters are up to date.
+        
+        
         viewModel.loadBlockedUsers()
         
-        // If we are in Discovery tab, reload all users to apply new block filter
+        
         if (uiState.selectedTab == FriendsTab.DISCOVER) {
             viewModel.loadAllUsers()
         }
     }
     
-    // Snackbar state
+    
     val snackbarHostState = remember { SnackbarHostState() }
     
-    // Show error/success messages
+    
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -114,20 +107,20 @@ fun FriendsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Header
+            
             FriendsHeader(
                 pendingCount = uiState.pendingRequests.size,
                 onMessagesClick = onNavigateToMessages
             )
             
-            // Tab Bar
+            
             FriendsTabBar(
                 selectedTab = uiState.selectedTab,
                 onTabSelected = viewModel::selectTab,
                 pendingCount = uiState.pendingRequests.size
             )
             
-            // Content
+            
             when {
                 uiState.selectedTab == FriendsTab.DISCOVER && uiState.isLoadingDiscover -> {
                     Box(
@@ -181,7 +174,7 @@ fun FriendsScreen(
         }
     }
     
-    // Search Dialog
+    
     if (showSearchDialog) {
         SearchUserDialog(
             searchResults = uiState.searchResults,
@@ -243,7 +236,7 @@ private fun FriendsHeader(
                     }
                 }
                 
-                // Messages button with glass effect
+                
                 Surface(
                     onClick = onMessagesClick,
                     modifier = Modifier.size(48.dp),
@@ -294,7 +287,7 @@ private fun FriendsTabBar(
         },
         divider = {}
     ) {
-        // Discover tab
+        
         Tab(
             selected = selectedTab == FriendsTab.DISCOVER,
             onClick = { onTabSelected(FriendsTab.DISCOVER) },
@@ -305,7 +298,7 @@ private fun FriendsTabBar(
                 )
             }
         )
-        // Friends tab  
+        
         Tab(
             selected = selectedTab == FriendsTab.FRIENDS,
             onClick = { onTabSelected(FriendsTab.FRIENDS) },
@@ -316,7 +309,7 @@ private fun FriendsTabBar(
                 )
             }
         )
-        // Requests tab
+        
         Tab(
             selected = selectedTab == FriendsTab.REQUESTS,
             onClick = { onTabSelected(FriendsTab.REQUESTS) },
@@ -338,7 +331,7 @@ private fun FriendsTabBar(
                 }
             }
         )
-        // Blocked tab
+        
         Tab(
             selected = selectedTab == FriendsTab.BLOCKED,
             onClick = { onTabSelected(FriendsTab.BLOCKED) },
@@ -405,7 +398,7 @@ private fun FriendCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            
             UserAvatar(
                 username = friend.friendUsername,
                 avatarUrl = friend.friendAvatar,
@@ -414,7 +407,7 @@ private fun FriendCard(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = friend.friendUsername,
@@ -431,7 +424,7 @@ private fun FriendCard(
                 )
             }
             
-            // Chat button
+            
             IconButton(onClick = onChat) {
                 Icon(
                     Icons.AutoMirrored.Filled.Chat,
@@ -440,7 +433,7 @@ private fun FriendCard(
                 )
             }
             
-            // More options
+            
             Box {
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
@@ -552,7 +545,7 @@ private fun FriendRequestCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            
             val displayName = if (isReceived) request.senderUsername else request.receiverUsername
             val avatarUrl = if (isReceived) request.senderAvatar else request.receiverAvatar
             
@@ -564,7 +557,7 @@ private fun FriendRequestCard(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = displayName,
@@ -579,7 +572,7 @@ private fun FriendRequestCard(
                 )
             }
             
-            // Actions
+            
             if (isReceived) {
                 IconButton(onClick = onReject) {
                     Icon(
@@ -722,7 +715,6 @@ private fun EmptyState(
     }
 }
 
-// =============== DISCOVER LIST ===============
 
 @Composable
 private fun DiscoverList(
@@ -736,7 +728,7 @@ private fun DiscoverList(
     onRefresh: () -> Unit,
     onUserClick: (String) -> Unit
 ) {
-    // Pre-compute lookup sets for O(1) checks
+    
     val friendIds = remember(friends) { friends.map { it.friendId }.toSet() }
     val sentRequestUserIds = remember(sentRequests) { sentRequests.map { it.receiverId }.toSet() }
     val pendingRequestMap = remember(pendingRequests) { pendingRequests.associateBy { it.senderId } }
@@ -753,7 +745,7 @@ private fun DiscoverList(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header with count and refresh
+            
             item {
                 Row(
                     modifier = Modifier
@@ -786,7 +778,7 @@ private fun DiscoverList(
             }
             
             items(users, key = { it.id }) { user ->
-                // Determine relationship status
+                
                 val isFriend = user.id in friendIds
                 val isRequestSent = user.id in sentRequestUserIds
                 val pendingRequest = pendingRequestMap[user.id]
@@ -838,7 +830,7 @@ private fun DiscoverUserCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar with gradient border
+            
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -875,7 +867,7 @@ private fun DiscoverUserCard(
             
             Spacer(modifier = Modifier.width(14.dp))
             
-            // User info
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.username,
@@ -894,10 +886,10 @@ private fun DiscoverUserCard(
                 }
             }
             
-            // Action button - Priority: Friend > Received Request > Sent Request > Add
+            
             when {
                 isFriend -> {
-                    // Already friends - show disabled "Friends" indicator
+                    
                     OutlinedButton(
                         onClick = onClick,
                         shape = RoundedCornerShape(20.dp),
@@ -920,7 +912,7 @@ private fun DiscoverUserCard(
                     }
                 }
                 hasReceivedRequest -> {
-                    // They sent us a request - show Accept button
+                    
                     FilledTonalButton(
                         onClick = onAcceptRequest,
                         colors = ButtonDefaults.filledTonalButtonColors(
@@ -944,7 +936,7 @@ private fun DiscoverUserCard(
                     }
                 }
                 isBlocked -> {
-                    // User is blocked - show "Blocked" indicator
+                    
                     OutlinedButton(
                         onClick = onClick,
                         shape = RoundedCornerShape(20.dp),
@@ -967,7 +959,7 @@ private fun DiscoverUserCard(
                     }
                 }
                 hasSentRequest -> {
-                    // We sent them a request - show "Sent" / "View"
+                    
                     OutlinedButton(
                         onClick = onClick,
                         shape = RoundedCornerShape(20.dp),
@@ -983,7 +975,7 @@ private fun DiscoverUserCard(
                     }
                 }
                 else -> {
-                    // No relationship - show Add button
+                    
                     FilledTonalButton(
                         onClick = {
                             onSendRequest()

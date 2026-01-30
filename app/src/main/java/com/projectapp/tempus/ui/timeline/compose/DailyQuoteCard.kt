@@ -36,9 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.data.quote.dto.QuoteDto
 
-/**
- * Premium Daily Quote Card - Aurora UI inspired with collapsible feature
- */
+
 @Composable
 fun DailyQuoteCard(
     quote: QuoteDto?,
@@ -46,10 +44,10 @@ fun DailyQuoteCard(
 ) {
     if (quote == null) return
     
-    // Collapsible state - default expanded to show quote on first load
+    
     var isExpanded by remember { mutableStateOf(true) }
     
-    // Subtle shimmer animation
+    
     val infiniteTransition = rememberInfiniteTransition(label = "quote_shimmer")
     val shimmerAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -89,7 +87,7 @@ fun DailyQuoteCard(
                     )
                 )
         ) {
-            // Decorative circles (smaller)
+            
             if (isExpanded) {
                 Box(
                     modifier = Modifier
@@ -110,7 +108,7 @@ fun DailyQuoteCard(
                 )
             }
             
-            // Content
+            
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -120,7 +118,7 @@ fun DailyQuoteCard(
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header row with expand/collapse indicator
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -156,7 +154,7 @@ fun DailyQuoteCard(
                     )
                 }
                 
-                // Collapsed view - show truncated quote
+                
                 if (!isExpanded) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -170,7 +168,7 @@ fun DailyQuoteCard(
                     )
                 }
                 
-                // Expanded view - show full quote
+                
                 AnimatedVisibility(
                     visible = isExpanded,
                     enter = expandVertically(),
@@ -179,7 +177,7 @@ fun DailyQuoteCard(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        // Quote text with elegant typography
+                        
                         Text(
                             text = "\"${quote.text}\"",
                             fontSize = 13.sp,
@@ -191,7 +189,7 @@ fun DailyQuoteCard(
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
                         
-                        // Author attribution
+                        
                         if (!quote.author.isNullOrBlank()) {
                             Spacer(modifier = Modifier.height(8.dp))
                             

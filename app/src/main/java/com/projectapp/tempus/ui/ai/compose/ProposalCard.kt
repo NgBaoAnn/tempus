@@ -34,9 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.domain.model.AgentProposal
 import com.projectapp.tempus.domain.model.ProposedAction
 
-/**
- * Card displaying AI proposal with Accept/Cancel buttons
- */
+
 @Composable
 fun ProposalCard(
     proposal: AgentProposal,
@@ -56,7 +54,7 @@ fun ProposalCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header
+            
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -77,7 +75,7 @@ fun ProposalCard(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Intent
+            
             SectionHeader(title = "Ý định", icon = "🎯")
             Text(
                 text = proposal.intent,
@@ -88,7 +86,7 @@ fun ProposalCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Preview Actions
+            
             SectionHeader(title = "Kế hoạch", icon = "📋")
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -99,7 +97,7 @@ fun ProposalCard(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Impact
+            
             SectionHeader(title = "Ảnh hưởng", icon = "⚡")
             Surface(
                 shape = RoundedCornerShape(8.dp),
@@ -121,7 +119,7 @@ fun ProposalCard(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Action buttons
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -193,7 +191,7 @@ private fun ActionPreviewItem(
             .fillMaxWidth()
             .padding(start = 24.dp)
     ) {
-        // Bullet
+        
         Box(
             modifier = Modifier
                 .size(6.dp)
@@ -204,7 +202,7 @@ private fun ActionPreviewItem(
         Spacer(modifier = Modifier.width(12.dp))
         
         if (scheduleData != null) {
-            // Schedule action with time
+            
             Text(
                 text = scheduleData.startTime,
                 style = MaterialTheme.typography.bodyMedium,
@@ -232,7 +230,7 @@ private fun ActionPreviewItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
-            // Generic action
+            
             Text(
                 text = action.description,
                 style = MaterialTheme.typography.bodyMedium,
@@ -242,9 +240,7 @@ private fun ActionPreviewItem(
     }
 }
 
-/**
- * Animated wrapper for proposal card
- */
+
 @Composable
 fun AnimatedProposalCard(
     proposal: AgentProposal?,

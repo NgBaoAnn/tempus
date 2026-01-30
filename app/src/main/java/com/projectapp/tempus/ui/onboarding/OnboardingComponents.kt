@@ -21,9 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Onboarding page data
- */
+
 data class OnboardingPageData(
     val icon: ImageVector,
     val title: String,
@@ -31,17 +29,14 @@ data class OnboardingPageData(
     val gradientColors: List<Color>
 )
 
-/**
- * Single onboarding page with floating icon
- * Designed to fit in upper portion, leaving room for buttons below
- */
+
 @Composable
 fun OnboardingPage(
     pageData: OnboardingPageData,
     modifier: Modifier = Modifier,
     isVisible: Boolean = true
 ) {
-    // Bounce animation
+    
     val animatedScale by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0.85f,
         animationSpec = spring(
@@ -51,7 +46,7 @@ fun OnboardingPage(
         label = "iconScale"
     )
     
-    // Floating animation
+    
     val infiniteTransition = rememberInfiniteTransition(label = "float")
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -67,11 +62,11 @@ fun OnboardingPage(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 40.dp)
-            .padding(top = 80.dp),  // Top padding for status bar
+            .padding(top = 80.dp),  
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        // === FLOATING ICON ===
+        
         Box(
             modifier = Modifier
                 .size(160.dp)
@@ -79,7 +74,7 @@ fun OnboardingPage(
                 .scale(animatedScale),
             contentAlignment = Alignment.Center
         ) {
-            // Glow effect
+            
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -94,7 +89,7 @@ fun OnboardingPage(
                     )
             )
             
-            // Icon container
+            
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -125,7 +120,7 @@ fun OnboardingPage(
         
         Spacer(modifier = Modifier.height(40.dp))
         
-        // === TITLE ===
+        
         Text(
             text = pageData.title,
             fontSize = 28.sp,
@@ -137,7 +132,7 @@ fun OnboardingPage(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // === DESCRIPTION ===
+        
         Text(
             text = pageData.description,
             fontSize = 16.sp,
@@ -150,9 +145,7 @@ fun OnboardingPage(
     }
 }
 
-/**
- * Animated page indicator
- */
+
 @Composable
 fun OnboardingPageIndicator(
     pageCount: Int,
@@ -187,9 +180,7 @@ fun OnboardingPageIndicator(
     }
 }
 
-/**
- * Styled button
- */
+
 @Composable
 fun OnboardingButton(
     text: String,
@@ -241,6 +232,6 @@ fun OnboardingButton(
     }
 }
 
-// Easing functions
+
 private val EaseInOutCubic = CubicBezierEasing(0.65f, 0f, 0.35f, 1f)
 private val EaseOutCubic = CubicBezierEasing(0.33f, 1f, 0.68f, 1f)

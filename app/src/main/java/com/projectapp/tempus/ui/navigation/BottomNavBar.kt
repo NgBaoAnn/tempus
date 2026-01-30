@@ -26,13 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 
-/**
- * Navigation items for bottom bar
- */
+
 sealed class NavItem(
     val route: String,
-    val titleResId: Int, // Use resource ID
-    val icon: Int, // Giữ lại để tương thích với code cũ
+    val titleResId: Int, 
+    val icon: Int, 
     val fragmentId: Int,
     val activeIcon: ImageVector,
     val inactiveIcon: ImageVector
@@ -72,16 +70,7 @@ val navItems = listOf(
     NavItem.Settings
 )
 
-/**
- * Modern Bottom Navigation Colors
- */
-/**
- * Modern Premium Bottom Navigation Bar
- * - Floating design with rounded corners
- * - Gradient indicator for active item
- * - Smooth animations
- * - Material 3 icons
- */
+
 @Composable
 fun BottomNavBar(
     currentRoute: String,
@@ -127,7 +116,7 @@ private fun RowScope.ModernNavItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     
-    // Animations
+    
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
         animationSpec = spring(
@@ -137,7 +126,7 @@ private fun RowScope.ModernNavItem(
         label = "scale"
     )
     
-    // Use Primary color for active icon
+    
     val activeColor = MaterialTheme.colorScheme.primary
     val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
     
@@ -167,11 +156,11 @@ private fun RowScope.ModernNavItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
-            // Icon with indicator
+            
             Box(
                 contentAlignment = Alignment.Center
             ) {
-                // Active indicator (gradient pill behind icon)
+                
                 androidx.compose.animation.AnimatedVisibility(
                     visible = isSelected,
                     enter = fadeIn() + scaleIn(initialScale = 0.8f),
@@ -192,7 +181,7 @@ private fun RowScope.ModernNavItem(
                     )
                 }
                 
-                // Icon
+                
                 Icon(
                     imageVector = if (isSelected) item.activeIcon else item.inactiveIcon,
                     contentDescription = stringResource(id = item.titleResId),
@@ -203,7 +192,7 @@ private fun RowScope.ModernNavItem(
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            // Label with animated visibility
+            
             Text(
                 text = stringResource(id = item.titleResId),
                 color = textColor,

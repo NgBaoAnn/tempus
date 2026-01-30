@@ -26,17 +26,17 @@ data class EditState(
     val title: String = "",
     val description: String = "",
     val date: LocalDate = LocalDate.now(),
-    val selectedDate: LocalDate = LocalDate.now(), // Ngày user đang xem trên timeline (dùng cho delete)
+    val selectedDate: LocalDate = LocalDate.now(), 
     val time: LocalTime = LocalTime.now(),
     val color: String = "#FFA726",
     val iconLabel: ScheduleLabel = ScheduleLabel.book,
     val repeat: RepeatType = RepeatType.daily,
-    val repeatDays: List<Int> = listOf(1, 2, 3, 4, 5), // Các thứ lặp lại (1=Mon, 7=Sun), mặc định Thứ 2-6
+    val repeatDays: List<Int> = listOf(1, 2, 3, 4, 5), 
     val duration: String = "00:30:00",
     val priority: PriorityType = PriorityType.medium,
     val loading: Boolean = false,
     val errorMessage: String? = null,
-    val subtasks: List<String> = emptyList() // Subtask titles
+    val subtasks: List<String> = emptyList() 
 )
 
 class EditScheduleViewModel(
@@ -55,7 +55,7 @@ class EditScheduleViewModel(
 
 
     fun initialize(taskId: String?, initialDateString: String? = null) {
-        // Parse ngày đang xem từ timeline
+        
         val viewingDate = if (initialDateString != null) {
             try { LocalDate.parse(initialDateString) } catch (e: Exception) { LocalDate.now() }
         } else {
@@ -75,7 +75,7 @@ class EditScheduleViewModel(
                         )
                         val localZdt = odt.atZoneSameInstant(ZoneId.systemDefault())
 
-                        // Load existing subtasks
+                        
                         val existingSubtasks = repo.getSubTasks(taskId)
                         val subtaskTitles = existingSubtasks.map { it.title }
                         
@@ -85,7 +85,7 @@ class EditScheduleViewModel(
                             title = t.name,
                             description = t.description ?: "",
                             date = localZdt.toLocalDate(),
-                            selectedDate = viewingDate, // Ngày user đang xem (cho delete)
+                            selectedDate = viewingDate, 
                             time = localZdt.toLocalTime(),
                             color = t.color ?: "#FFA726",
                             iconLabel = t.label ?: ScheduleLabel.book,
@@ -108,9 +108,7 @@ class EditScheduleViewModel(
             try {
                 val s = _state.value
 
-                // When editing, use selectedDate (the date user clicked on timeline)
-                // so that repeat starts from that date
-                // For new tasks, use the date field
+                
                 val dateToUse = if (s.isEditMode) s.selectedDate else s.date
 
                 val localDT = LocalDateTime.of(dateToUse, s.time)
@@ -133,9 +131,9 @@ class EditScheduleViewModel(
                 )
 
                 if (!s.isEditMode || s.id == null) {
-                    // Create new schedule
+                    
                     val newSchedule = repo.insertSchedule(mapData)
-                    // Insert subtasks for the new schedule
+                    
                     if (subtaskTitles.isNotEmpty()) {
                         repo.insertSubTasks(newSchedule.id, subtaskTitles)
                     }
@@ -146,34 +144,33 @@ class EditScheduleViewModel(
                 val taskId = s.id
 
                 if (!s.applyTodayOnly) {
-                    // Check if we're editing from a different date than the original start date
-                    // If so, we need to SPLIT: keep original task until day before selectedDate,
-                    // then create a NEW task starting from selectedDate
+                    
+                    
                     val isEditingFromDifferentDate = s.selectedDate != s.date
                     
                     if (isEditingFromDifferentDate && s.repeat != RepeatType.once) {
-                        // SPLIT: Set end_date on original task (day before user clicked)
+                        
                         val endDateForOriginal = s.selectedDate.minusDays(1).toString()
                         repo.updateSchedule(taskId, mapOf("end_date" to endDateForOriginal))
                         
-                        // CREATE NEW task starting from selectedDate with new settings
+                        
                         val newSchedule = repo.insertSchedule(mapData)
-                        // Copy subtasks to new schedule
+                        
                         if (subtaskTitles.isNotEmpty()) {
                             repo.insertSubTasks(newSchedule.id, subtaskTitles)
                         }
                     } else {
-                        // Same date edit OR non-repeating task: just update normally
+                        
                         repo.updateSchedule(taskId, mapData)
-                        // Update subtasks: delete old ones, insert new ones
+                        
                         repo.deleteSubTasksByScheduleId(taskId)
                         if (subtaskTitles.isNotEmpty()) {
                             repo.insertSubTasks(taskId, subtaskTitles)
                         }
                     }
                 } else {
-                    // Apply changes only for this specific day (selectedDate)
-                    // Create an edited version with all changed fields
+                    
+                    
                     val editedFields = mapOf(
                         "name_schedule" to title,
                         "description" to desc.ifBlank { null },
@@ -184,7 +181,7 @@ class EditScheduleViewModel(
                         "priority" to s.priority.name
                     )
                     val ev = repo.insertEditedVersion(editedFields)
-                    // Use selectedDate (the date user clicked on timeline) not the original date
+                    
                     repo.attachEditedVersionToDate(taskId, s.selectedDate.toString(), ev.id)
                 }
 
@@ -209,15 +206,12 @@ class EditScheduleViewModel(
         }
     }
 
-    /**
-     * Xóa chỉ cho ngày đang xem - đặt status = delete trong schedule_items
-     * Tác vụ vẫn sẽ hiện ở các ngày khác
-     */
+    
     fun deleteForToday() {
         viewModelScope.launch {
             try {
                 val taskId = _state.value.id ?: return@launch
-                val dateStr = _state.value.selectedDate.toString() // Dùng selectedDate - ngày user đang xem
+                val dateStr = _state.value.selectedDate.toString() 
                 repo.upsertScheduleItem(taskId, dateStr, com.projectapp.tempus.data.schedule.dto.StatusType.delete)
                 Log.d("EditViewModel", "Deleted task for date: $taskId date=$dateStr")
                 _saveSuccessEvent.send(Unit)
@@ -228,15 +222,12 @@ class EditScheduleViewModel(
         }
     }
 
-    /**
-     * Xóa từ ngày đang xem trở đi - đặt end_date cho schedule
-     * Tác vụ vẫn sẽ hiện ở các ngày trước đó
-     */
+    
     fun deleteFromToday() {
         viewModelScope.launch {
             try {
                 val taskId = _state.value.id ?: return@launch
-                val endDateStr = _state.value.selectedDate.toString() // Dùng selectedDate - ngày user đang xem
+                val endDateStr = _state.value.selectedDate.toString() 
                 repo.updateSchedule(taskId, mapOf("end_date" to endDateStr))
                 Log.d("EditViewModel", "Set end_date for task: $taskId endDate=$endDateStr")
                 _saveSuccessEvent.send(Unit)
@@ -247,9 +238,7 @@ class EditScheduleViewModel(
         }
     }
 
-    /**
-     * Kiểm tra xem tác vụ có phải là tác vụ lặp lại không
-     */
+    
     fun isRecurringTask(): Boolean {
         return _state.value.repeat != RepeatType.once
     }
@@ -280,7 +269,7 @@ class EditScheduleViewModel(
     fun toggleRepeatDay(day: Int) {
         val currentDays = _state.value.repeatDays.toMutableList()
         if (currentDays.contains(day)) {
-            if (currentDays.size > 1) { // Giữ ít nhất 1 ngày
+            if (currentDays.size > 1) { 
                 currentDays.remove(day)
             }
         } else {

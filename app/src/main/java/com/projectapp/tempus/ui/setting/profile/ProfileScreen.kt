@@ -52,9 +52,6 @@ fun ProfileScreen(
     val context = LocalContext.current
     val application = context.applicationContext as android.app.Application
     
-    // IMPORT R to resolve resource IDs
-    // We can rely on import com.projectapp.tempus.R if it exists, otherwise manual import logic might be needed if package differs.
-    // However, stringResource(R.string...) needs R.
     
     val viewModel: ProfileViewModel = viewModel(
         factory = object : androidx.lifecycle.ViewModelProvider.Factory {
@@ -68,7 +65,7 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showEditDialog by remember { mutableStateOf(false) }
     
-    // Show success message
+    
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
             Toast.makeText(context, context.getString(R.string.msg_update_success), Toast.LENGTH_SHORT).show()
@@ -76,7 +73,7 @@ fun ProfileScreen(
         }
     }
 
-    // Show error message
+    
     LaunchedEffect(uiState.error) {
         if (uiState.error != null) {
             Toast.makeText(context, uiState.error, Toast.LENGTH_LONG).show()
@@ -119,7 +116,7 @@ fun ProfileScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                // Modern Header with Gradient
+                
                 ProfileHeader(
                     avatarUrl = uiState.avatarUrl,
                     name = uiState.fullName,
@@ -130,7 +127,7 @@ fun ProfileScreen(
                     onEditNameClick = { showEditDialog = true }
                 )
                 
-                // Content Section
+                
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -138,7 +135,7 @@ fun ProfileScreen(
                 ) {
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    // Stats Section Title
+                    
                     Text(
                         text = stringResource(R.string.profile_stats),
                         style = MaterialTheme.typography.titleMedium,
@@ -148,7 +145,7 @@ fun ProfileScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Modern Stats Grid
+                    
                     ModernStatsGrid(
                         points = uiState.totalPoints,
                         streak = uiState.currentStreak,
@@ -157,7 +154,7 @@ fun ProfileScreen(
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    // Quick Actions Section
+                    
                     Text(
                         text = stringResource(R.string.profile_quick_access),
                         style = MaterialTheme.typography.titleMedium,
@@ -167,7 +164,7 @@ fun ProfileScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Garden Link Card - Modern Style
+                    
                     ModernActionCard(
                         emoji = "🌳",
                         title = stringResource(R.string.profile_garden_title),
@@ -181,7 +178,7 @@ fun ProfileScreen(
         }
     }
     
-    // Edit Name Dialog
+    
     if (showEditDialog) {
         ModernEditNameDialog(
             currentName = uiState.fullName,
@@ -195,7 +192,6 @@ fun ProfileScreen(
     }
 }
 
-// ======================== MODERN HEADER ========================
 
 @Composable
 private fun ProfileHeader(
@@ -225,7 +221,7 @@ private fun ProfileHeader(
                 .padding(top = 48.dp, bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Back button row
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,7 +239,7 @@ private fun ProfileHeader(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Avatar with glow effect
+            
             ModernAvatar(
                 avatarUrl = avatarUrl,
                 onAvatarClick = onAvatarClick
@@ -251,7 +247,7 @@ private fun ProfileHeader(
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Name with edit
+            
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -276,14 +272,14 @@ private fun ProfileHeader(
                 }
             }
             
-            // Email
+            
             Text(
                 text = email,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.85f)
             )
             
-            // Member since badge
+            
             if (memberSince.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
@@ -343,7 +339,7 @@ private fun ModernAvatar(
             placeholder = rememberVectorPainter(Icons.Default.Person)
         )
         
-        // Camera overlay
+        
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -363,7 +359,6 @@ private fun ModernAvatar(
     }
 }
 
-// ======================== MODERN STATS ========================
 
 @Composable
 private fun ModernStatsGrid(
@@ -421,7 +416,7 @@ private fun ModernStatCard(
                 .padding(vertical = 20.dp, horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Emoji with background
+            
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -459,7 +454,6 @@ private fun ModernStatCard(
     }
 }
 
-// ======================== ACTION CARD ========================
 
 @Composable
 private fun ModernActionCard(
@@ -499,7 +493,7 @@ private fun ModernActionCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Emoji container
+                
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -536,7 +530,6 @@ private fun ModernActionCard(
     }
 }
 
-// ======================== EDIT DIALOG ========================
 
 @Composable
 private fun ModernEditNameDialog(

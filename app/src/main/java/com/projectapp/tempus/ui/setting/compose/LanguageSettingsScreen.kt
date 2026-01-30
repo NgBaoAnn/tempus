@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-// import androidx.compose.ui.res.stateListResource removed
+
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,9 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-/**
- * Language Settings Screen
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageSettingsScreen(
@@ -64,7 +62,7 @@ fun LanguageSettingsScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Section header
+            
             Text(
                 text = stringResource(R.string.language_select_title),
                 fontSize = 14.sp,
@@ -73,7 +71,7 @@ fun LanguageSettingsScreen(
                 modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
             )
             
-            // Language options
+            
             LanguageOptionCard(
                 title = stringResource(R.string.language_vi),
                 subtitle = stringResource(R.string.language_vi_desc),
@@ -133,7 +131,7 @@ private fun LanguageOptionCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Flag/Icon container
+            
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -154,7 +152,7 @@ private fun LanguageOptionCard(
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            // Text content
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -170,7 +168,7 @@ private fun LanguageOptionCard(
                 )
             }
             
-            // Checkmark
+            
             if (isSelected) {
                 Box(
                     modifier = Modifier

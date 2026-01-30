@@ -13,9 +13,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.projectapp.tempus.R
 
-/**
- * Custom View hiển thị điểm và streak của user
- */
+
 class PointsDisplayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -33,17 +31,17 @@ class PointsDisplayView @JvmOverloads constructor(
         gravity = Gravity.CENTER_VERTICAL
         setPadding(16, 8, 16, 8)
         
-        // Points icon
+        
         ivPointsIcon = ImageView(context).apply {
             layoutParams = LayoutParams(48, 48).apply {
                 marginEnd = 8
             }
             setImageResource(R.drawable.ic_points_star)
-            setColorFilter(Color.parseColor("#FFD700"))  // Gold color
+            setColorFilter(Color.parseColor("#FFD700"))  
         }
         addView(ivPointsIcon)
         
-        // Points text
+        
         tvPoints = TextView(context).apply {
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
                 marginEnd = 16
@@ -54,19 +52,17 @@ class PointsDisplayView @JvmOverloads constructor(
         }
         addView(tvPoints)
         
-        // Streak text
+        
         tvStreak = TextView(context).apply {
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             textSize = 16f
-            setTextColor(Color.parseColor("#FF6B35"))  // Fire color
+            setTextColor(Color.parseColor("#FF6B35"))  
             visibility = View.GONE
         }
         addView(tvStreak)
     }
     
-    /**
-     * Set số điểm với animation đếm
-     */
+    
     fun setPoints(points: Int, animate: Boolean = true) {
         if (animate && currentPoints != points) {
             ValueAnimator.ofInt(currentPoints, points).apply {
@@ -83,9 +79,7 @@ class PointsDisplayView @JvmOverloads constructor(
         currentPoints = points
     }
     
-    /**
-     * Set streak days
-     */
+    
     fun setStreak(days: Int) {
         if (days > 0) {
             tvStreak.text = "🔥 $days"
@@ -95,9 +89,7 @@ class PointsDisplayView @JvmOverloads constructor(
         }
     }
     
-    /**
-     * Hiển thị animation "+X points" floating lên
-     */
+    
     fun showEarnedPoints(points: Int) {
         val floatingText = TextView(context).apply {
             text = if (points > 0) "+$points" else "$points"
@@ -117,9 +109,7 @@ class PointsDisplayView @JvmOverloads constructor(
             .start()
     }
     
-    /**
-     * Play animation pulse khi đạt milestone
-     */
+    
     fun playMilestoneAnimation() {
         this.animate()
             .scaleX(1.2f)

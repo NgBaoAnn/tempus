@@ -50,14 +50,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// ============================================
-// COLORS - Modern iOS Style
-// ============================================
-// EditColors object removed - using MaterialTheme directly
 
-// ============================================
-// MAIN SCREEN
-// ============================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScheduleScreen(
@@ -71,7 +64,7 @@ fun EditScheduleScreen(
     var titleText by remember { mutableStateOf("") }
     var descriptionText by remember { mutableStateOf("") }
     
-    // Subtasks state
+    
     var subtasks by remember { mutableStateOf(listOf<String>()) }
     var newSubtaskText by remember { mutableStateOf("") }
     
@@ -89,14 +82,14 @@ fun EditScheduleScreen(
         }
     }
     
-    // Sync description from state (for edit mode)
+    
     LaunchedEffect(state.description) {
         if (descriptionText.isEmpty() && state.description.isNotEmpty()) {
             descriptionText = state.description
         }
     }
     
-    // Sync subtasks from state (for edit mode)
+    
     LaunchedEffect(state.subtasks) {
         subtasks = state.subtasks
     }
@@ -110,7 +103,7 @@ fun EditScheduleScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ============ TOP BAR ============
+        
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surface,
@@ -152,7 +145,7 @@ fun EditScheduleScreen(
             }
         }
         
-        // ============ SCROLLABLE CONTENT ============
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -160,16 +153,16 @@ fun EditScheduleScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ============ CARD 1: Title + Description + Colors ============
+            
             ModernCard {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Icon + Title
+                    
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         val iconColor = try {
                             Color(android.graphics.Color.parseColor(state.color))
                         } catch (e: Exception) { MaterialTheme.colorScheme.primary }
                         
-                        // Clickable Icon
+                        
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
@@ -192,7 +185,7 @@ fun EditScheduleScreen(
                             value = titleText,
                             onValueChange = { titleText = it },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = !state.isEditMode, // Disable title editing in edit mode
+                            enabled = !state.isEditMode, 
                             textStyle = TextStyle(
                                 color = if (state.isEditMode) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                                 fontSize = 20.sp,
@@ -210,7 +203,7 @@ fun EditScheduleScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Description
+                    
                     BasicTextField(
                         value = descriptionText,
                         onValueChange = { descriptionText = it },
@@ -229,7 +222,7 @@ fun EditScheduleScreen(
                     
                     HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     
-                    // Color Palette
+                    
                     ModernColorRow(
                         selectedColor = state.color,
                         onColorSelected = { viewModel.setColor(it) }
@@ -237,22 +230,22 @@ fun EditScheduleScreen(
                 }
             }
             
-            // ============ CARD 2: Settings ============
+            
             ModernCard {
                 Column {
-                    // Date - In edit mode, show the date user clicked on timeline and disable picker
+                    
                     val displayDate = if (state.isEditMode) state.selectedDate else state.date
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Ngày",
                         value = displayDate.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy", Locale.forLanguageTag("vi-VN"))),
-                        enabled = !state.isEditMode, // Disable date change in edit mode
+                        enabled = !state.isEditMode, 
                         onClick = { if (!state.isEditMode) showDatePicker = true }
                     )
                     
                     ModernDivider()
                     
-                    // Time
+                    
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Thời gian",
@@ -262,7 +255,7 @@ fun EditScheduleScreen(
                     
                     ModernDivider()
                     
-                    // Duration
+                    
                     val durationLabel = durationToLabel(state.duration)
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
@@ -273,7 +266,7 @@ fun EditScheduleScreen(
                     
                     ModernDivider()
                     
-                    // Repeat
+                    
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
                         label = "Lặp lại",
@@ -284,7 +277,7 @@ fun EditScheduleScreen(
                     
                     ModernDivider()
                     
-                    // Priority
+                    
                     val priorityInfo = priorityToInfo(state.priority)
                     ModernSettingRow(
                         icon = R.drawable.ic_points_star,
@@ -294,7 +287,7 @@ fun EditScheduleScreen(
                         onClick = { showPrioritySheet = true }
                     )
                     
-                    // Today Only Switch (Edit mode)
+                    
                     if (state.isEditMode) {
                         ModernDivider()
                         Row(
@@ -318,7 +311,7 @@ fun EditScheduleScreen(
                 }
             }
             
-            // ============ SUBTASKS ============
+            
             ModernCard {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -330,7 +323,7 @@ fun EditScheduleScreen(
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    // List of subtasks
+                    
                     subtasks.forEachIndexed { index, subtask ->
                         SubtaskItem(
                             text = subtask,
@@ -338,12 +331,12 @@ fun EditScheduleScreen(
                         )
                     }
                     
-                    // Add new subtask input
+                    
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Clickable Add icon
+                        
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
@@ -391,7 +384,7 @@ fun EditScheduleScreen(
                             singleLine = true
                         )
                         
-                        // Add button (visible when there's text)
+                        
                         if (newSubtaskText.isNotBlank()) {
                             Spacer(modifier = Modifier.width(8.dp))
                             IconButton(
@@ -413,7 +406,7 @@ fun EditScheduleScreen(
                 }
             }
             
-            // ============ DELETE (Edit mode) ============
+            
             if (state.isEditMode) {
                 ModernCard {
                     Text(
@@ -421,11 +414,11 @@ fun EditScheduleScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { 
-                                // Nếu là tác vụ lặp lại, hiển thị dialog
+                                
                                 if (viewModel.isRecurringTask()) {
                                     showDeleteDialog = true
                                 } else {
-                                    // Tác vụ một lần - xóa trực tiếp
+                                    
                                     viewModel.deleteTask()
                                 }
                             }
@@ -442,9 +435,7 @@ fun EditScheduleScreen(
         }
     }
     
-    // ============ BOTTOM SHEETS ============
     
-    // Icon Picker Sheet
     if (showIconSheet) {
         IconPickerSheet(
             currentLabel = state.iconLabel,
@@ -453,7 +444,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Duration Picker Sheet
+    
     if (showDurationSheet) {
         DurationPickerSheet(
             currentDuration = state.duration,
@@ -462,7 +453,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Repeat Picker Sheet
+    
     if (showRepeatSheet) {
         RepeatPickerSheet(
             currentRepeat = state.repeat,
@@ -473,7 +464,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Priority Picker Sheet
+    
     if (showPrioritySheet) {
         PriorityPickerSheet(
             currentPriority = state.priority,
@@ -482,7 +473,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Date Picker
+    
     if (showDatePicker) {
         ModernDatePicker(
             currentDate = state.date,
@@ -491,7 +482,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Time Picker
+    
     if (showTimePicker) {
         ModernTimePicker(
             currentTime = state.time,
@@ -500,7 +491,7 @@ fun EditScheduleScreen(
         )
     }
     
-    // Delete Options Dialog for recurring tasks
+    
     if (showDeleteDialog) {
         DeleteOptionsDialog(
             onDeleteForToday = {
@@ -520,9 +511,7 @@ fun EditScheduleScreen(
     }
 }
 
-// ============================================
-// MODERN CARD
-// ============================================
+
 @Composable
 private fun ModernCard(content: @Composable () -> Unit) {
     Surface(
@@ -544,9 +533,7 @@ private fun ModernDivider() {
     )
 }
 
-// ============================================
-// MODERN SETTING ROW
-// ============================================
+
 @Composable
 private fun ModernSettingRow(
     icon: Int,
@@ -588,9 +575,7 @@ private fun ModernSettingRow(
     }
 }
 
-// ============================================
-// MODERN COLOR ROW
-// ============================================
+
 @Composable
 private fun ModernColorRow(
     selectedColor: String,
@@ -635,9 +620,7 @@ private fun ModernColorRow(
     }
 }
 
-// ============================================
-// SUBTASK ITEM
-// ============================================
+
 @Composable
 private fun SubtaskItem(
     text: String,
@@ -679,9 +662,7 @@ private fun SubtaskItem(
     }
 }
 
-// ============================================
-// ICON PICKER SHEET
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun IconPickerSheet(
@@ -766,9 +747,7 @@ private fun IconPickerSheet(
     }
 }
 
-// ============================================
-// DURATION PICKER SHEET
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DurationPickerSheet(
@@ -820,9 +799,7 @@ private fun DurationPickerSheet(
     }
 }
 
-// ============================================
-// REPEAT PICKER SHEET
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RepeatPickerSheet(
@@ -866,7 +843,7 @@ private fun RepeatPickerSheet(
                 )
             }
             
-            // Hiển thị weekday selector nếu chọn "Tùy chỉnh"
+            
             if (currentRepeat == RepeatType.custom) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -917,9 +894,7 @@ private fun RepeatPickerSheet(
     }
 }
 
-// ============================================
-// PRIORITY PICKER SHEET
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PriorityPickerSheet(
@@ -982,9 +957,7 @@ private fun PriorityPickerSheet(
     }
 }
 
-// ============================================
-// SHEET OPTION
-// ============================================
+
 @Composable
 private fun SheetOption(
     label: String,
@@ -1014,9 +987,7 @@ private fun SheetOption(
     }
 }
 
-// ============================================
-// MODERN DATE PICKER
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModernDatePicker(
@@ -1050,9 +1021,7 @@ private fun ModernDatePicker(
     }
 }
 
-// ============================================
-// MODERN TIME PICKER
-// ============================================
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModernTimePicker(
@@ -1087,9 +1056,7 @@ private fun ModernTimePicker(
     )
 }
 
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
+
 private fun durationToLabel(hhmmss: String): String {
     val parts = hhmmss.split(":")
     val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
@@ -1120,9 +1087,7 @@ private fun priorityToInfo(p: PriorityType): Pair<String, Color> = when (p) {
     PriorityType.low -> "Thấp" to Color(0xFF34C759)
 }
 
-// ============================================
-// DELETE OPTIONS DIALOG
-// ============================================
+
 @Composable
 private fun DeleteOptionsDialog(
     onDeleteForToday: () -> Unit,
@@ -1151,7 +1116,7 @@ private fun DeleteOptionsDialog(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Option 1: Delete for today only
+                
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1187,7 +1152,7 @@ private fun DeleteOptionsDialog(
                 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
-                // Option 2: Delete from today onwards
+                
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1223,7 +1188,7 @@ private fun DeleteOptionsDialog(
                 
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 
-                // Option 3: Delete completely
+                
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()

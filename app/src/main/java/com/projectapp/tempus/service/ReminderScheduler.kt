@@ -8,25 +8,17 @@ import android.os.Build
 import android.util.Log
 import java.time.format.DateTimeFormatter
 
-/**
- * Schedules reminders for tasks
- * Uses multiple fallback strategies for reliability across different Android versions and ROMs
- */
+
 class ReminderScheduler(private val context: Context) {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    /**
-     * Schedule reminder with basic info (backward compatible)
-     */
+    
     fun scheduleReminder(taskId: String, title: String, startDateTime: String, endDateTime: String) {
         scheduleReminderWithDetails(taskId, title, startDateTime, endDateTime, "medium", "", "#2196F3")
     }
 
-    /**
-     * Schedule reminder with full task details for enhanced notification
-     * @param isSnooze if true, uses a different request code so it won't be overwritten by normal scheduling
-     */
+    
     fun scheduleReminderWithDetails(
         taskId: String,
         title: String,
@@ -55,9 +47,9 @@ class ReminderScheduler(private val context: Context) {
             putExtra("COLOR", color)
         }
 
-        // Use different request code for snooze so it won't be overwritten by Timeline sync
+        
         val requestCode = if (isSnooze) {
-            taskId.hashCode() + 2000  // Different request code for snooze
+            taskId.hashCode() + 2000  
         } else {
             taskId.hashCode()
         }
@@ -82,20 +74,20 @@ class ReminderScheduler(private val context: Context) {
             return
         }
 
-        // Try different alarm APIs with fallback chain
+        
         var success = false
         
-        // Strategy 1: Try AlarmClock (best for reminders, bypasses Doze completely)
+        
         if (!success) {
             success = tryAlarmClock(triggerTime, pendingIntent)
         }
         
-        // Strategy 2: Try exact alarm with permission check
+        
         if (!success) {
             success = tryExactAlarm(triggerTime, pendingIntent)
         }
         
-        // Strategy 3: Fallback to inexact alarm (least reliable but always works)
+        
         if (!success) {
             success = tryInexactAlarm(triggerTime, pendingIntent)
         }
@@ -121,7 +113,7 @@ class ReminderScheduler(private val context: Context) {
     }
     
     private fun tryExactAlarm(triggerTime: Long, pendingIntent: PendingIntent): Boolean {
-        // Check permission first on Android 12+
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
                 Log.w("ReminderScheduler", "Exact alarm permission not granted")
@@ -148,8 +140,8 @@ class ReminderScheduler(private val context: Context) {
     
     private fun tryInexactAlarm(triggerTime: Long, pendingIntent: PendingIntent): Boolean {
         return try {
-            // setAndAllowWhileIdle - works without special permissions
-            // May have ~10-15 minute delay due to batching
+            
+            
             alarmManager.setAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 triggerTime,

@@ -12,7 +12,7 @@
         android:padding="32dp"
         android:gravity="center">
 
-        <!-- Focus Icon -->
+        
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -20,7 +20,7 @@
             android:contentDescription="Focus Mode"
             android:layout_marginBottom="24dp" />
 
-        <!-- Title -->
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
-        <!-- Blocked App Info -->
+        
         <TextView
             android:id="@+id/tvBlockedAppName"
             android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
             android:textSize="18sp"
             android:layout_marginBottom="8dp" />
 
-        <!-- Motivational Message -->
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
             android:lineSpacingExtra="4dp"
             android:layout_marginBottom="24dp" />
 
-        <!-- Remaining Time -->
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
 
         </LinearLayout>
 
-        <!-- Return to App Button -->
+        
         <Button
             android:id="@+id/btnReturnToApp"
             android:layout_width="wrap_content"
@@ -93,7 +93,7 @@
             android:background="@drawable/bg_button_primary"
             android:layout_marginBottom="12dp" />
 
-        <!-- Dismiss Button (small, less prominent) -->
+        
         <Button
             android:id="@+id/btnDismiss"
             android:layout_width="wrap_content"

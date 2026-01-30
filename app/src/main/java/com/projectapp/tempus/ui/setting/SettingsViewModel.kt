@@ -17,12 +17,12 @@ class SettingsViewModel : ViewModel() {
     fun loadUser() {
         viewModelScope.launch {
             try {
-                // First try to load from cache for instant display (offline support)
+                
                 val cachedProfile = com.projectapp.tempus.data.user.UserProfileCache.getProfile()
                 if (cachedProfile != null) {
-                    // Use cached data immediately
+                    
                     _user.value = User(
-                        id = "", // ID not needed for display
+                        id = "", 
                         username = cachedProfile.username,
                         email = cachedProfile.email,
                         avatar = cachedProfile.avatarUrl,
@@ -31,19 +31,18 @@ class SettingsViewModel : ViewModel() {
                     )
                 }
                 
-                // Then try to fetch fresh data from network
-                // This will update the cache and refresh the UI if successful
+                
                 val fetchedUser = userUseCases.getCurrentUser()
                 _user.value = fetchedUser
                 
-                // Update theme from fetched user data
+                
                 fetchedUser.themeColor?.takeIf { it.isNotEmpty() }?.let { themeColor ->
                     val mode = com.projectapp.tempus.ui.theme.ThemeMode.fromValue(themeColor)
                     com.projectapp.tempus.ui.theme.ThemeManager.updateThemeLocally(mode)
                 }
             } catch (e: Exception) {
-                // If network fetch fails, keep showing cached data (already set above)
-                // Only log error, don't crash
+                
+                
                 e.printStackTrace()
             }
         }

@@ -15,9 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/**
- * UI State cho Garden Screen
- */
+
 data class GardenUiState(
     val trees: List<TreeUiModel> = emptyList(),
     val totalTrees: Int = 0,
@@ -31,9 +29,7 @@ data class GardenUiState(
     val affordableTrees: List<TreeType> = emptyList()
 )
 
-/**
- * UI Model cho mỗi cây
- */
+
 data class TreeUiModel(
     val id: Long,
     val name: String,
@@ -46,12 +42,10 @@ data class TreeUiModel(
     val entity: TreeEntity
 )
 
-/**
- * ViewModel cho Garden Screen với Compose - Offline-First
- */
+
 class GardenViewModel(application: Application) : AndroidViewModel(application) {
     
-    // Use OfflineFirstGamificationRepository for offline-first functionality
+    
     private val repository = RepositoryProvider.getGamificationRepository(application)
     private val pointsManager = PointsManager(repository)
     private val treeCalculator = TreeGrowthCalculator()
@@ -65,10 +59,10 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
     
     private fun loadData() {
         viewModelScope.launch {
-            // Check dead trees first
+            
             pointsManager.checkAndUpdateDeadTrees()
             
-            // Observe points
+            
             launch {
                 pointsManager.getUserPoints().collectLatest { userPoints ->
                     userPoints?.let {
@@ -80,7 +74,7 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
             
-            // Observe trees
+            
             launch {
                 pointsManager.getAliveTrees().collectLatest { trees ->
                     val treeModels = trees.map { tree ->

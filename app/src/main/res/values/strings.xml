@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Tiramisu Plan</string>
     
-    <!-- Navigation -->
-    <string name="title_timer">Gà chua nướng</string> <!-- Assuming "Timer" was localized or specialized name -->
+    
+    <string name="title_timer">Gà chua nướng</string> 
     <string name="title_timeline">Lịch trình</string>
     <string name="title_ai">Trợ lý AI</string>
     <string name="title_statistics">Thống kê</string>
     <string name="title_settings">Cài đặt</string>
     
-    <!-- Common -->
+    
     <string name="ok">Đồng ý</string>
     <string name="cancel">Hủy</string>
     <string name="save">Lưu</string>
@@ -20,7 +20,7 @@
     <string name="loading">Đang tải...</string>
     <string name="error_generic">Đã xảy ra lỗi</string>
     
-    <!-- Settings Screen -->
+    
     <string name="settings_title">Cài đặt</string>
     <string name="settings_profile_user_default">Người dùng</string>
     <string name="settings_section_general">CHUNG</string>
@@ -48,7 +48,7 @@
     
     <string name="settings_logout">Đăng xuất</string>
 
-    <!-- Theme Settings -->
+    
     <string name="theme_title">Giao diện</string>
     <string name="theme_select_title">Chọn giao diện</string>
     <string name="theme_light">Sáng</string>
@@ -59,7 +59,7 @@
     <string name="theme_system_desc">Tự động theo cài đặt thiết bị</string>
     <string name="theme_selected_content_desc">Đã chọn</string>
     
-    <!-- Language Settings -->
+    
     <string name="language_title">Ngôn ngữ</string>
     <string name="language_select_title">Chọn ngôn ngữ</string>
     <string name="language_vi">Tiếng Việt</string>
@@ -67,18 +67,18 @@
     <string name="language_en">English</string>
     <string name="language_en_desc">United States</string>
     
-    <!-- Login/Auth -->
+    
     <string name="login_title">Đăng nhập</string>
     <string name="register_title">Đăng ký</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Mật khẩu</string>
 
-    <!-- Statistics -->
+    
     <string name="statis_title">Thống kê</string>
     <string name="chart_title">Thống kê hoàn thành</string>
     <string name="category_title">Danh mục tác vụ hàng đầu</string>
     
-    <!-- Additional existing strings preserved/mapped -->
+    
     <string name="week">Tuần</string>
     <string name="month">Tháng</string>
     <string name="tag">Nhãn</string>
@@ -92,7 +92,7 @@
     <string name="widget_description">Hiển thị công việc hôm nay</string>
     <string name="google_web_client_id">1033092420951-61vs9de72uhs85rqfc3dgop9uv0getu3.apps.googleusercontent.com</string>
 
-    <!-- Timer -->
+    
     <string name="timer_setup_title">Hẹn giờ</string>
     <string name="timer_countdown_title">Đếm ngược</string>
     <string name="timer_quick_notes">Ghi chú nhanh</string>
@@ -108,7 +108,7 @@
     <string name="timer_paused">Đã tạm dừng</string>
     <string name="timer_end_at">Kết thúc lúc %1$s</string>
 
-    <!-- Timeline -->
+    
     <string name="timeline_voice_command">Điều khiển giọng nói</string>
     <string name="timeline_add_task">Thêm công việc</string>
     <string name="timeline_garden">Khu vườn</string>
@@ -120,7 +120,7 @@
     <string name="day_sat">T7</string>
     <string name="day_sun">CN</string>
 
-    <!-- AI Chat -->
+    
     <string name="ai_placeholder_ask">Hỏi điều gì đó...</string>
     <string name="ai_placeholder_agent">Yêu cầu một hành động...</string>
     <string name="ai_placeholder_planner">Chia sẻ mục tiêu của bạn...</string>
@@ -149,7 +149,7 @@
     <string name="ai_creating_schedule">Đang tạo lịch từ kế hoạch...</string>
     <string name="ai_avatar_description">AI Avatar</string>
     
-    <!-- AI History -->
+    
     <string name="ai_history_title">Lịch sử chat</string>
     <string name="ai_history_clear_all">Xóa tất cả</string>
     <string name="ai_history_empty">Chưa có lịch sử chat</string>
@@ -161,7 +161,7 @@
     <string name="ai_history_today">Hôm nay</string>
     <string name="ai_history_yesterday">Hôm qua</string>
 
-    <!-- Garden -->
+    
     <string name="garden_title">Khu vườn của tôi</string>
     <string name="garden_back">Quay lại Timeline</string>
     <string name="garden_refresh">Làm mới</string>
@@ -177,7 +177,7 @@
     <string name="garden_dying">⚠️ Sắp héo!</string>
     <string name="garden_close">Đóng</string>
 
-    <!-- Statistics -->
+    
     <string name="stats_title">Thống kê</string>
     <string name="stats_week">Tuần</string>
     <string name="stats_month">Tháng</string>
@@ -197,7 +197,7 @@
     <string name="stats_best_day">Ngày tốt nhất</string>
     <string name="stats_improve">Cần cải thiện</string>
 
-    <!-- Social Friends -->
+    
     <string name="social_connect">Kết nối</string>
     <string name="social_new_invites_fmt">%d lời mời mới</string>
     <string name="social_online">Đang trực tuyến</string>
@@ -237,12 +237,12 @@
     <string name="social_search_no_results">Không tìm thấy người dùng nào</string>
     <string name="social_send_request">Gửi lời mời</string>
 
-    <!-- Social Conversations -->
+    
     <string name="chat_title">Tin nhắn</string>
     <string name="chat_no_messages">Chưa có tin nhắn</string>
     <string name="chat_start_hint">Nhấn vào bạn bè để bắt đầu trò chuyện</string>
     <string name="chat_start_conversation">Bắt đầu cuộc trò chuyện</string>
-    <!-- Navigation -->
+    
     <string name="nav_timer">Hẹn giờ</string>
     <string name="nav_timeline">Lịch</string>
     <string name="nav_ai">AI</string>
@@ -250,7 +250,7 @@
     <string name="nav_stats">Thống kê</string>
     <string name="nav_settings">Cài đặt</string>
 
-    <!-- Statistics Categories & Trends -->
+    
     <string name="stats_by_category">Theo danh mục</string>
     <string name="stats_trend_label">Xu hướng</string>
     <string name="stats_trend_up">Đang tăng</string>
@@ -268,11 +268,11 @@
     <string name="cat_cook">Nấu ăn</string>
     <string name="cat_garden">Làm vườn</string>
 
-    <!-- Heatmap -->
+    
     <string name="heatmap_title">Heatmap Năng suất</string>
     <string name="heatmap_desc">Xem bức tranh tổng quan theo tháng</string>
     <string name="heatmap_open_desc">Mở Heatmap</string>
-    <!-- Focus Mode Settings -->
+    
     <string name="focus_settings_title_screen">Chế độ Tập trung</string>
     <string name="focus_settings_desc_screen">Chặn phân tâm, tăng hiệu suất</string>
     <string name="focus_stats_total_time">Thời gian</string>
@@ -297,7 +297,7 @@
     <string name="focus_no_apps_title">Chưa có ứng dụng bị chặn</string>
     <string name="focus_no_apps_desc">Thêm ứng dụng gây phân tâm để tập trung</string>
     
-    <!-- Timeline Extras -->
+    
     <string name="timeline_overlap_warning">Các tác vụ đang chồng chéo</string>
     <string name="timeline_free_time_title">thời gian rảnh!</string>
     <string name="timeline_free_time_desc">Khung giờ đó đã qua—hãy nắm bắt cái tiếp theo.</string>
@@ -305,18 +305,18 @@
     <string name="timeline_empty_desc">Nhấn + để thêm task mới</string>
     <string name="timeline_add_task_label">Thêm Task</string>
     
-    <!-- General -->
+    
     <string name="content_desc_back">Quay lại</string>
     <string name="content_desc_open">Mở</string>
     <string name="content_desc_delete">Xoá</string>
     <string name="content_desc_avatar">Avatar</string>
     
-    <!-- Daily Quote -->
+    
     <string name="daily_quote_title">Câu nói hôm nay</string>
     <string name="quote_expand">Mở rộng</string>
     <string name="quote_collapse">Thu gọn</string>
     
-    <!-- AI Chat System Messages -->
+    
     <string name="ai_welcome_message">Xin chào! 👋 Tôi là Tiramisu AI.\n\n💬 **Ask Mode**: Hỏi đáp, tư vấn\n🤖 **Agent Mode**: Đề xuất và thực hiện hành động\n🎯 **Life Planner**: Lên kế hoạch dài hạn\n\nChuyển đổi chế độ bằng toggle ở trên!</string>
     <string name="ai_mode_switch_ask">Đã chuyển sang chế độ Ask. Tôi sẽ trả lời câu hỏi của bạn.</string>
     <string name="ai_mode_switch_agent">Đã chuyển sang chế độ Agent. Tôi sẽ đề xuất hành động và chờ bạn xác nhận.</string>
@@ -333,7 +333,7 @@
     <string name="ai_context_no_schedule">Không có lịch trình nào.</string>
     <string name="ai_context_intro">Hôm nay: %1$s\nLƯU Ý: Schedule có lặp (daily/weekly) SẼ xuất hiện hôm nay.\nDanh sách lịch trình:\n%2$s</string>
     
-    <!-- Common Toasts -->
+    
     <string name="msg_success">Thành công</string>
     <string name="msg_error">Đã xảy ra lỗi</string>
     <string name="msg_saved">Đã lưu</string>
@@ -341,7 +341,7 @@
     <string name="msg_deleted">Đã xóa</string>
     <string name="msg_coming_soon">Tính năng đang phát triển</string>
     
-    <!-- Auth -->
+    
     <string name="error_empty_input">Vui lòng nhập email và mật khẩu</string>
     <string name="error_invalid_email">Email không hợp lệ</string>
     <string name="msg_syncing_data">Đang đồng bộ dữ liệu...</string>
@@ -359,7 +359,7 @@
     <string name="error_email_taken">Email này đã được sử dụng</string>
     <string name="error_network">Lỗi kết nối mạng</string>
 
-    <!-- Settings & Timeline -->
+    
     <string name="error_mic_permission">Cần cấp quyền micro để sử dụng Voice Command</string>
     <string name="msg_notification_settings">Cài đặt thông báo</string>
     <string name="error_relogin">Vui lòng đăng nhập lại</string>
@@ -378,7 +378,7 @@
     <string name="error_delete_all_failed">❌ Lỗi khi xóa dữ liệu</string>
     <string name="msg_logout_success">Đã đăng xuất</string>
 
-    <!-- Onboarding -->
+    
     <string name="onboarding_title_1">Quản lý công việc\nthông minh</string>
     <string name="onboarding_desc_1">Tạo, tổ chức và theo dõi tất cả nhiệm vụ hàng ngày với giao diện trực quan và đơn giản.</string>
     <string name="onboarding_title_2">Không bao giờ\nbỏ lỡ deadline</string>
@@ -391,10 +391,10 @@
     <string name="onboarding_continue">Tiếp tục</string>
     <string name="onboarding_skip">Bỏ qua</string>
 
-    <!-- Statistics -->
+    
     <string name="stats_month_label">Tháng %s</string>
 
-    <!-- Profile -->
+    
     <string name="msg_update_success">Cập nhật thành công!</string>
     <string name="error_read_image">Lỗi đọc ảnh</string>
     <string name="profile_stats">Thống kê</string>
@@ -416,14 +416,14 @@
     <string name="profile_streak">Ngày streak</string>
     <string name="profile_trees">Cây đã trồng</string>
 
-    <!-- Notification Settings -->
+    
     <string name="notif_settings_title">TÙY CHỈNH THÔNG BÁO</string>
     <string name="notif_timer_title">Hẹn giờ</string>
     <string name="notif_timer_desc">Hiển thị thông báo khi hẹn giờ đang chạy</string>
     <string name="notif_timeline_title">Dòng thời gian</string>
     <string name="notif_timeline_desc">Nhắc nhở công việc theo lịch trình</string>
 
-    <!-- Personalization Settings -->
+    
     <string name="pers_section_lifestyle">LỐI SỐNG</string>
     <string name="pers_section_days">NGÀY ÁP DỤNG</string>
     <string name="pers_section_sleep">NGỦ &amp; THỨC DẬY</string>
@@ -438,7 +438,7 @@
     <string name="pers_add_activity">Thêm hoạt động</string>
     <string name="pers_reset_plan">Đặt lại kế hoạch</string>
     
-    <!-- Time Picker Dialog -->
+    
     <string name="picker_title_wake">Chọn giờ thức</string>
     <string name="picker_title_sleep">Chọn giờ ngủ</string>
     <string name="picker_title_work_start">Chọn giờ bắt đầu làm việc</string>
@@ -447,7 +447,7 @@
     <string name="picker_title_start">Chọn giờ bắt đầu</string>
     <string name="picker_title_end">Chọn giờ kết thúc</string>
 
-    <!-- Add Custom Period -->
+    
     <string name="custom_period_title">Thêm hoạt động</string>
     <string name="custom_period_name_hint">Tên hoạt động</string>
     <string name="custom_period_desc_hint">Thêm mô tả...</string>
@@ -459,12 +459,12 @@
     <string name="custom_period_minute">phút</string>
     <string name="custom_period_sheet_label">Chọn nhãn</string>
 
-    <!-- Legal -->
+    
     <string name="legal_privacy_policy">Chính sách quyền riêng tư</string>
     <string name="legal_terms_service">Điều khoản dịch vụ</string>
     <string name="legal_last_updated">Cập nhật lần cuối: %s</string>
     
-    <!-- Privacy Policy Content -->
+    
     <string name="privacy_intro_title">1. Giới thiệu</string>
     <string name="privacy_intro_content">Chào mừng bạn đến với Tempus - Ứng dụng Quản lý Thời gian Thông minh. Chúng tôi cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của bạn. Chính sách này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.</string>
     
@@ -494,7 +494,7 @@
     <string name="privacy_contact_title">8. Liên hệ</string>
     <string name="privacy_contact_content">Nếu có câu hỏi về chính sách quyền riêng tư, vui lòng liên hệ:\n\n📧 Email: support@tempus-app.com\n🌐 Website: https://tempus-app.com</string>
 
-    <!-- Terms of Service Content -->
+    
     <string name="terms_accept_title">1. Chấp nhận điều khoản</string>
     <string name="terms_accept_content">Bằng việc tải xuống, cài đặt hoặc sử dụng ứng dụng Tempus, bạn đồng ý tuân thủ các điều khoản và điều kiện được quy định trong tài liệu này.</string>
     
@@ -525,7 +525,7 @@
     <string name="terms_contact_title">10. Liên hệ</string>
     <string name="terms_contact_content">Thắc mắc về điều khoản dịch vụ:\n\n📧 Email: legal@tempus-app.com\n🌐 Website: https://tempus-app.com/terms</string>
 
-    <!-- Missing Personalization Strings -->
+    
     <string name="pers_title">Cá nhân hóa</string>
     <string name="pers_delete">Xóa</string>
     <string name="pers_add_period">Thêm khoảng thời gian</string>
@@ -546,7 +546,7 @@
     <string name="pers_lifestyle">Lối sống</string>
     <string name="more_options">Tùy chọn khác</string>
     
-    <!-- Days of Week -->
+    
     <string name="day_mon_short">T2</string>
     <string name="day_tue_short">T3</string>
     <string name="day_wed_short">T4</string>
@@ -555,7 +555,7 @@
     <string name="day_sat_short">T7</string>
     <string name="day_sun_short">CN</string>
     
-    <!-- Contact Screen -->
+    
     <string name="contact_title">Liên hệ &amp; Hỗ trợ</string>
     <string name="contact_channels_title">KÊNH LIÊN HỆ</string>
     <string name="contact_fb_title">Facebook Fanpage</string>

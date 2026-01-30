@@ -8,10 +8,7 @@ import com.projectapp.tempus.service.ReminderScheduler
 import com.projectapp.tempus.util.NotificationPreferences
 import java.time.LocalDate
 
-/**
- * Handles notification snooze action
- * Reschedules the alarm to fire again in 5 minutes
- */
+
 class NotificationSnoozeReceiver : BroadcastReceiver() {
 
     companion object {
@@ -32,16 +29,16 @@ class NotificationSnoozeReceiver : BroadcastReceiver() {
 
         Log.d("SnoozeReceiver", "⏰ Snoozing task '$title' for $SNOOZE_DURATION_MINUTES minutes")
 
-        // Cancel current notification
+        
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         notificationManager.cancel(taskId.hashCode())
 
-        // IMPORTANT: Clear the "notified" status so the snoozed alarm won't be skipped
+        
         val today = LocalDate.now().toString()
         NotificationPreferences.clearTaskNotified(context, taskId, today)
         Log.d("SnoozeReceiver", "Cleared notification status for reschedule")
 
-        // Schedule a new alarm in 5 minutes
+        
         val snoozeTime = java.time.OffsetDateTime.now().plusMinutes(SNOOZE_DURATION_MINUTES)
         val snoozeTimeStr = snoozeTime.format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)
 
@@ -54,7 +51,7 @@ class NotificationSnoozeReceiver : BroadcastReceiver() {
             priority = priority,
             categoryLabel = categoryLabel,
             color = color,
-            isSnooze = true  // Use different request code to avoid being overwritten
+            isSnooze = true  
         )
 
         Log.d("SnoozeReceiver", "✅ Snoozed until ${snoozeTime.toLocalTime()}")

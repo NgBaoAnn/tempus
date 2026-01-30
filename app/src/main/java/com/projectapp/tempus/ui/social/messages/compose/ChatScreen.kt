@@ -43,9 +43,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/**
- * Màn hình chat với một người
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -63,19 +61,19 @@ fun ChatScreen(
     }
     val context = LocalContext.current
     
-    // Full screen image viewer state
+    
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
     
-    // Image picker launcher
+    
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let { selectedUri ->
-            // Read and compress image
+            
             context.contentResolver.openInputStream(selectedUri)?.use { inputStream ->
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 val outputStream = ByteArrayOutputStream()
-                // Compress to JPEG with 80% quality
+                
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
                 val imageBytes = outputStream.toByteArray()
                 viewModel.sendImageMessage(imageBytes)
@@ -83,12 +81,12 @@ fun ChatScreen(
         }
     }
 
-    // Open chat when screen loads
+    
     LaunchedEffect(friendId) {
         viewModel.openChat(friendId, friendUsername, friendAvatar)
     }
 
-    // Scroll to bottom when new messages arrive
+    
     LaunchedEffect(uiState.currentMessages.size) {
         if (uiState.currentMessages.isNotEmpty()) {
             listState.animateScrollToItem(uiState.currentMessages.size - 1)
@@ -100,7 +98,7 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Avatar
+                        
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -148,7 +146,7 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            // Message input
+            
             Surface(
                 color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 8.dp
@@ -174,7 +172,7 @@ fun ChatScreen(
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    // Image picker button
+                    
                     IconButton(
                         onClick = {
                             imagePickerLauncher.launch(
@@ -231,7 +229,7 @@ fun ChatScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
             } else if (uiState.currentMessages.isEmpty()) {
-                // Empty chat
+                
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -261,7 +259,7 @@ fun ChatScreen(
         }
     }
     
-    // Full screen image viewer dialog
+    
     fullScreenImageUrl?.let { imageUrl ->
         FullScreenImageViewer(
             imageUrl = imageUrl,
@@ -293,9 +291,9 @@ private fun MessageBubble(
             Column(
                 modifier = Modifier.padding(if (message.messageType == "image") 4.dp else 12.dp)
             ) {
-                // Check message type
+                
                 if (message.messageType == "image") {
-                    // Image message - clickable
+                    
                     AsyncImage(
                         model = message.content,
                         contentDescription = "Hình ảnh",
@@ -307,7 +305,7 @@ private fun MessageBubble(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Text message
+                    
                     Text(
                         text = message.content,
                         color = if (isMe) Color.White else MaterialTheme.colorScheme.onBackground,

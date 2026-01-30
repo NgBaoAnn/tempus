@@ -13,14 +13,7 @@ import com.projectapp.tempus.ui.garden.compose.stableRandom
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Oak Tree Renderer - Modern Flat Illustration Style
- * Multi-layer cloud canopy with gradients, highlights, and visible depth
- */
 
-/**
- * Draw an oak-style canopy with 3 layers of cloud clusters for beautiful depth
- */
 fun DrawScope.drawOakCanopy(
     center: Offset,
     radiusX: Float,
@@ -31,14 +24,14 @@ fun DrawScope.drawOakCanopy(
     seed: Int
 ) {
     rotate(sway, pivot = center) {
-        // Color palette
+        
         val darkGreen = Color(0xFF1B5E20).copy(alpha = opacity)
         val midGreen = Color(0xFF2E7D32).copy(alpha = opacity)
         val lightGreen = Color(0xFF4CAF50).copy(alpha = opacity)
         val highlightGreen = Color(0xFF81C784).copy(alpha = opacity)
         val paleGreen = Color(0xFFC8E6C9).copy(alpha = opacity * 0.8f)
         
-        // ============= LAYER 1: Back shadow layer (darkest, largest) =============
+        
         val backClusters = listOf(
             Offset(-0.55f, 0.1f) to 0.55f,
             Offset(0.55f, 0.1f) to 0.52f,
@@ -59,7 +52,7 @@ fun DrawScope.drawOakCanopy(
             )
         }
         
-        // ============= LAYER 2: Mid layer (medium green, 9 clusters) =============
+        
         val midClusters = listOf(
             Offset(-0.65f, 0.05f) to 0.40f,
             Offset(0.65f, 0.05f) to 0.38f,
@@ -84,7 +77,7 @@ fun DrawScope.drawOakCanopy(
             )
         }
         
-        // ============= LAYER 3: Front layer (with radial gradients for 3D) =============
+        
         val frontClusters = listOf(
             Offset(-0.48f, 0f) to 0.35f,
             Offset(0.48f, 0f) to 0.35f,
@@ -101,7 +94,7 @@ fun DrawScope.drawOakCanopy(
             val cy = center.y + radiusY * offset.y
             val r = radiusX * sizeFactor
             
-            // Radial gradient for 3D ball effect
+            
             val gradient = Brush.radialGradient(
                 colors = listOf(highlightGreen, lightGreen, midGreen),
                 center = Offset(cx - r * 0.3f, cy - r * 0.3f),
@@ -115,7 +108,7 @@ fun DrawScope.drawOakCanopy(
             )
         }
         
-        // ============= HIGHLIGHT SPOTS (top light reflections) =============
+        
         val highlights = listOf(
             Offset(-0.35f, -0.48f) to 0.10f,
             Offset(0.30f, -0.55f) to 0.08f,
@@ -142,7 +135,7 @@ fun DrawScope.drawOakCanopy(
             )
         }
         
-        // ============= SMALL LEAF TEXTURE DOTS =============
+        
         for (i in 0 until 12) {
             val angle = (30f * i + stableRandom(seed, i) * 20f)
             val angleRad = Math.toRadians(angle.toDouble()).toFloat()

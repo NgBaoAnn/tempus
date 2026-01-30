@@ -17,22 +17,17 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/**
- * ViewModel for Voice Input functionality
- * 
- * Flow: Voice → Speech-to-Text → AI API (Gemini) → ParsedTask → Create Schedule
- */
+
 class VoiceViewModel(
     application: Application,
     private val scheduleRepository: ScheduleRepository,
     private val userId: String
 ) : AndroidViewModel(application) {
     
-    // Reuse existing AI infrastructure
+    
     private val aiRepository = AIRepository(scheduleRepository, userId)
     private val speechManager = SpeechRecognitionManager(application)
-    // Legacy parser no longer needed for new flow, but keeping if we need fallback logic later
-    // private val taskParser = TaskParserService(aiRepository) 
+    
     
     private val _state = MutableStateFlow<VoiceInputState>(VoiceInputState.Idle)
     val state: StateFlow<VoiceInputState> = _state.asStateFlow()
@@ -42,14 +37,10 @@ class VoiceViewModel(
     
     private var currentProposal: com.projectapp.tempus.domain.model.AgentProposal? = null
     
-    /**
-     * Check if speech recognition is available
-     */
+    
     fun isAvailable(): Boolean = speechManager.isAvailable()
     
-    /**
-     * Start voice recognition
-     */
+    
     fun startListening() {
         _state.value = VoiceInputState.Listening
         _partialText.value = ""
@@ -58,8 +49,8 @@ class VoiceViewModel(
             speechManager.startListening().collect { result ->
                 when (result) {
                     is SpeechResult.Listening -> _state.value = VoiceInputState.Listening
-                    is SpeechResult.Speaking -> { /* Keep listening state */ }
-                    is SpeechResult.RmsChanged -> { /* Could update waveform */ }
+                    is SpeechResult.Speaking -> {  }
+                    is SpeechResult.RmsChanged -> {  }
                     is SpeechResult.Partial -> _partialText.value = result.text
                     is SpeechResult.Processing -> _state.value = VoiceInputState.Processing
                     is SpeechResult.Success -> processVoiceInput(result.text)
@@ -69,9 +60,7 @@ class VoiceViewModel(
         }
     }
     
-    /**
-     * Stop voice recognition
-     */
+    
     fun stopListening() {
         speechManager.stopListening()
         if (_partialText.value.isNotEmpty()) {
@@ -81,14 +70,12 @@ class VoiceViewModel(
         }
     }
     
-    /**
-     * Process voice input text using AI Agent
-     */
+    
     private fun processVoiceInput(text: String) {
         viewModelScope.launch {
             _state.value = VoiceInputState.Processing
             
-            // Use AI Repository to get a full proposal (Add/Edit/Delete supported)
+            
             val result = aiRepository.requestProposal(text)
             
             result.onSuccess { response ->
@@ -98,7 +85,7 @@ class VoiceViewModel(
                         _state.value = VoiceInputState.ProposalReady(response.proposal)
                     }
                     is AIRepository.AgentResponse.TextOnly -> {
-                        // For voice, if it's text only, we treat it as an error/info
+                        
                         _state.value = VoiceInputState.Error("AI: ${response.text}")
                     }
                 }
@@ -108,9 +95,7 @@ class VoiceViewModel(
         }
     }
     
-    /**
-     * Confirm and execute the current proposal
-     */
+    
     fun confirmProposal() {
         val proposal = currentProposal ?: return
         
@@ -121,7 +106,7 @@ class VoiceViewModel(
                 val result = aiRepository.executeProposal(proposal)
                 
                 result.onSuccess {
-                    // Success - reset state
+                    
                     reset()
                 }.onFailure { e ->
                     _state.value = VoiceInputState.Error("Không thể thực hiện: ${e.message}")
@@ -133,21 +118,15 @@ class VoiceViewModel(
         }
     }
     
-    /**
-     * Legacy support method - not used in new flow but kept for interface compatibility if needed
-     */
+    
     fun createTask(task: ParsedTask) {
-        // Redirect to new flow if possible, or just ignore
+        
     }
     
-    /**
-     * Get final task for creation - Legacy
-     */
-    fun getFinalTask(): ParsedTask? = null // Deprecated
     
-    /**
-     * Reset state
-     */
+    fun getFinalTask(): ParsedTask? = null 
+    
+    
     fun reset() {
         _state.value = VoiceInputState.Idle
         _partialText.value = ""

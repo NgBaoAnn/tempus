@@ -15,8 +15,8 @@ object SupabaseClientProvider {
         supabaseKey = SUPABASE_KEY
     ) {
         install(Auth) {
-            // Auto save/restore session - sessionManager uses default MemorySessionManager
-            // which keeps session in memory, good for app lifecycle
+            
+            
             autoLoadFromStorage = true
             autoSaveToStorage = true
         }
