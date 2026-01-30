@@ -40,6 +40,8 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +51,11 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as android.app.Application
+    
+    // IMPORT R to resolve resource IDs
+    // We can rely on import com.projectapp.tempus.R if it exists, otherwise manual import logic might be needed if package differs.
+    // However, stringResource(R.string...) needs R.
+    
     val viewModel: ProfileViewModel = viewModel(
         factory = object : androidx.lifecycle.ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -64,7 +71,7 @@ fun ProfileScreen(
     // Show success message
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
-            Toast.makeText(context, "Cập nhật thành công!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.msg_update_success), Toast.LENGTH_SHORT).show()
             viewModel.clearSaveSuccess()
         }
     }
@@ -89,7 +96,7 @@ fun ProfileScreen(
                     viewModel.uploadAvatar(bytes)
                 }
             } catch (e: Exception) {
-                Toast.makeText(context, "Lỗi đọc ảnh", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.error_read_image), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -133,7 +140,7 @@ fun ProfileScreen(
                     
                     // Stats Section Title
                     Text(
-                        text = "Thống kê",
+                        text = stringResource(R.string.profile_stats),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -152,7 +159,7 @@ fun ProfileScreen(
                     
                     // Quick Actions Section
                     Text(
-                        text = "Truy cập nhanh",
+                        text = stringResource(R.string.profile_quick_access),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -163,8 +170,8 @@ fun ProfileScreen(
                     // Garden Link Card - Modern Style
                     ModernActionCard(
                         emoji = "🌳",
-                        title = "Vườn cây của tôi",
-                        subtitle = "Xem bộ sưu tập cây",
+                        title = stringResource(R.string.profile_garden_title),
+                        subtitle = stringResource(R.string.profile_garden_subtitle),
                         onClick = onNavigateToGarden
                     )
                     
@@ -228,7 +235,7 @@ private fun ProfileHeader(
                 IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Quay lại",
+                        contentDescription = stringResource(R.string.action_back),
                         tint = Color.White
                     )
                 }
@@ -250,7 +257,7 @@ private fun ProfileHeader(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = name.ifEmpty { "Chưa đặt tên" },
+                    text = name.ifEmpty { stringResource(R.string.profile_no_name) },
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -262,7 +269,7 @@ private fun ProfileHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Chỉnh sửa",
+                        contentDescription = stringResource(R.string.action_edit),
                         modifier = Modifier.size(18.dp),
                         tint = Color.White.copy(alpha = 0.9f)
                     )
@@ -284,7 +291,7 @@ private fun ProfileHeader(
                     color = Color.White.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = "📅 Thành viên từ $memberSince",
+                        text = stringResource(R.string.profile_member_since, memberSince),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.9f),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -348,7 +355,7 @@ private fun ModernAvatar(
         ) {
             Icon(
                 imageVector = Icons.Default.CameraAlt,
-                contentDescription = "Đổi ảnh",
+                contentDescription = stringResource(R.string.profile_change_avatar),
                 modifier = Modifier.size(18.dp),
                 tint = Color.White
             )
@@ -371,21 +378,21 @@ private fun ModernStatsGrid(
         ModernStatCard(
             emoji = "🎯",
             value = points.toString(),
-            label = "Điểm tích lũy",
+            label = stringResource(R.string.profile_points),
             accentColor = Color(0xFF3B82F6),
             modifier = Modifier.weight(1f)
         )
         ModernStatCard(
             emoji = "🔥",
             value = streak.toString(),
-            label = "Ngày streak",
+            label = stringResource(R.string.profile_streak),
             accentColor = Color(0xFFF59E0B),
             modifier = Modifier.weight(1f)
         )
         ModernStatCard(
             emoji = "🌳",
             value = trees.toString(),
-            label = "Cây đã trồng",
+            label = stringResource(R.string.profile_trees),
             accentColor = Color(0xFF10B981),
             modifier = Modifier.weight(1f)
         )
@@ -546,7 +553,7 @@ private fun ModernEditNameDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         title = { 
             Text(
-                "Chỉnh sửa tên",
+                stringResource(R.string.profile_edit_name_title),
                 fontWeight = FontWeight.Bold
             ) 
         },
@@ -554,7 +561,7 @@ private fun ModernEditNameDialog(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Tên của bạn") },
+                label = { Text(stringResource(R.string.profile_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -577,7 +584,7 @@ private fun ModernEditNameDialog(
                         color = Color.White
                     )
                 } else {
-                    Text("Lưu")
+                    Text(stringResource(R.string.action_save))
                 }
             }
         },
@@ -586,7 +593,7 @@ private fun ModernEditNameDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Hủy")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

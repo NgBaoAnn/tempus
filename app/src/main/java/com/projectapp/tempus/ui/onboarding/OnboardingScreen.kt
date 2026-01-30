@@ -7,6 +7,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,27 +35,28 @@ fun OnboardingScreen(
 ) {
     val pages = listOf(
         OnboardingPageData(
+
             icon = Icons.Rounded.CheckCircle,
-            title = "Quản lý công việc\nthông minh",
-            description = "Tạo, tổ chức và theo dõi tất cả nhiệm vụ hàng ngày với giao diện trực quan và đơn giản.",
+            title = stringResource(R.string.onboarding_title_1),
+            description = stringResource(R.string.onboarding_desc_1),
             gradientColors = OnboardingColors.Page1Gradient
         ),
         OnboardingPageData(
             icon = Icons.Rounded.Notifications,
-            title = "Không bao giờ\nbỏ lỡ deadline",
-            description = "Hệ thống nhắc nhở thông minh giúp bạn luôn on-track với các mục tiêu quan trọng.",
+            title = stringResource(R.string.onboarding_title_2),
+            description = stringResource(R.string.onboarding_desc_2),
             gradientColors = OnboardingColors.Page2Gradient
         ),
         OnboardingPageData(
             icon = Icons.Rounded.TrendingUp,
-            title = "Theo dõi\ntiến độ",
-            description = "Xem thống kê chi tiết về streak, điểm số và năng suất để luôn có động lực.",
+            title = stringResource(R.string.onboarding_title_3),
+            description = stringResource(R.string.onboarding_desc_3),
             gradientColors = OnboardingColors.Page3Gradient
         ),
         OnboardingPageData(
             icon = Icons.Rounded.Spa,
-            title = "Sẵn sàng\nbắt đầu?",
-            description = "Biến năng suất thành thói quen với TEMPUS. Trồng cây, kiếm điểm và chinh phục mục tiêu!",
+            title = stringResource(R.string.onboarding_title_4),
+            description = stringResource(R.string.onboarding_desc_4),
             gradientColors = OnboardingColors.Page4Gradient
         )
     )
@@ -98,7 +101,7 @@ fun OnboardingScreen(
             
             // Primary button
             OnboardingButton(
-                text = if (isLastPage) "Bắt đầu ngay" else "Tiếp tục",
+                text = if (isLastPage) stringResource(R.string.onboarding_start_now) else stringResource(R.string.onboarding_continue),
                 onClick = {
                     if (isLastPage) {
                         onFinish()
@@ -119,7 +122,7 @@ fun OnboardingScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 OnboardingButton(
-                    text = "Bỏ qua",
+                    text = stringResource(R.string.onboarding_skip),
                     onClick = onFinish,
                     isPrimary = false
                 )
