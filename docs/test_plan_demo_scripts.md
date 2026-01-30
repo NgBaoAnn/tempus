@@ -1,462 +1,263 @@
 # 📋 TEMPUS - Test Plan & Demo Scripts
 
-> **Ngày tạo:** 2026-01-26  
-> **Tổng Use Cases:** 62  
-> **Số Tester:** 4 người
+> **Ngày cập nhật:** 2026-01-31  
+> **Tổng Use Cases:** 73  
+> **Người Demo:** 1 người
 
 ---
 
-## 📊 Phân Chia Công Việc
+## 📊 Tổng Quan Demo
 
-| Tester | Module phụ trách | Số UC | Use Cases |
-|--------|------------------|-------|-----------|
-| **Tester 1** | Authentication + Settings + Onboarding | 15 | UC01-UC05, UC48-UC57 |
-| **Tester 2** | Timer/Focus + Gamification/Garden | 18 | UC06-UC12, UC22-UC27, UC58-UC62 |
-| **Tester 3** | Timeline/Schedule + Notes + Voice | 16 | UC13-UC21, UC33-UC38, UC56 |
-| **Tester 4** | AI Chat + Social | 15 | UC28-UC32, UC39-UC47, UC63 |
-
----
-
-# 👤 TESTER 1: Authentication + Settings + Onboarding + Statistics
-
-## Modules phụ trách:
-- Onboarding
-- Authentication (Đăng ký/Đăng nhập/Đăng xuất)
-- Settings (Profile, Export, Privacy)
-- Statistics
-
-## Use Cases: UC01-UC05, UC48-UC57 (15 Use Cases)
+| Module | Use Cases | Thời gian |
+|--------|-----------|-----------|
+| Onboarding & Authentication | UC01-UC05, UC72-UC73 | 8 phút |
+| Timer & Focus | UC06-UC12 | 7 phút |
+| Timeline & Schedule | UC13-UC21 | 10 phút |
+| Gamification & Garden | UC22-UC27 | 6 phút |
+| AI Chat | UC28-UC32 | 6 phút |
+| Notes | UC33-UC38 | 5 phút |
+| Social | UC39-UC47 | 8 phút |
+| Settings | UC48-UC55 | 5 phút |
+| Statistics & Heatmap | UC57, UC64-UC65 | 4 phút |
+| Sync & Notification | UC66-UC71 | 5 phút |
+| Voice | UC56 | 2 phút |
+| **Tổng** | **73 UC** | **~66 phút** |
 
 ---
 
-### 📝 Demo Script #1: Onboarding Flow
-**UC01 - Xem Onboarding**
+# 🎬 DEMO SCRIPTS
+
+## 📝 Script #1: Onboarding & Authentication (8 phút)
+**UC01-UC05, UC72-UC73**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Cài đặt app mới (hoặc xóa data) | App khởi động |
-| 2 | Mở app lần đầu | Màn hình Onboarding hiển thị |
-| 3 | Swipe qua các slides | Slides chuyển tuần tự |
-| 4 | Nhấn "Bắt đầu" | Chuyển đến màn hình Login |
-
-**⏱️ Thời gian:** 2 phút
-
----
-
-### 📝 Demo Script #2: Đăng Ký & Đăng Nhập
-**UC02, UC03, UC04 - Register, Login, Forgot Password**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Nhấn "Đăng ký" | Mở RegisterActivity |
-| 2 | Để trống email, nhấn Đăng ký | Lỗi validation |
-| 3 | Nhập email không hợp lệ | Lỗi "Email không hợp lệ" |
-| 4 | Nhập thông tin hợp lệ, nhấn Đăng ký | Tài khoản được tạo |
-| 5 | Đăng xuất | Về Login screen |
-| 6 | Nhập sai password | Lỗi "Sai email hoặc mật khẩu" |
-| 7 | Nhập đúng thông tin | Đăng nhập thành công |
-| 8 | Nhấn "Quên mật khẩu", nhập email | Toast "Kiểm tra email" |
-
-**⏱️ Thời gian:** 5 phút
+| 1 | Xóa data app, mở app | Màn hình Onboarding hiển thị |
+| 2 | Swipe qua các slides | Slides chuyển tuần tự |
+| 3 | Nhấn "Bắt đầu" | Chuyển đến màn hình Login |
+| 4 | Nhấn "Đăng ký" | Mở RegisterActivity |
+| 5 | Để trống email, nhấn Đăng ký | Lỗi validation |
+| 6 | Nhập email không hợp lệ | Lỗi "Email không hợp lệ" |
+| 7 | Nhập thông tin hợp lệ, nhấn Đăng ký | Tài khoản được tạo, sync data |
+| 8 | Đăng xuất | Về Login screen |
+| 9 | Nhập sai password | Lỗi "Sai email hoặc mật khẩu" |
+| 10 | Nhập đúng thông tin | Đăng nhập thành công |
+| 11 | Đăng xuất, nhấn "Quên mật khẩu" | Mở ResetPasswordActivity |
+| 12 | Nhập email, gửi | Toast "Kiểm tra email", mở OTP screen |
+| 13 | Nhập OTP (nếu có) | Xác thực thành công |
+| 14 | Nhấn "Đăng nhập Google" | Google OAuth flow mở |
+| 15 | Chọn tài khoản Google | Đăng nhập thành công |
 
 ---
 
-### 📝 Demo Script #3: Profile & Personalization
-**UC48, UC49 - Profile, Personalization**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở Settings → Profile | ProfileActivity mở |
-| 2 | Sửa username | Username được cập nhật |
-| 3 | Nhấn Lưu | Toast xác nhận |
-| 4 | Mở Personalization | PersonalizationActivity mở |
-| 5 | Đặt wake_time, sleep_time | Thời gian được set |
-| 6 | Chọn persona_type | Persona được lưu |
-
-**⏱️ Thời gian:** 4 phút
-
----
-
-### 📝 Demo Script #4: Theme & Privacy
-**UC50, UC54, UC55 - Theme, Privacy, Terms**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở Settings → Theme | Options hiển thị |
-| 2 | Chọn Dark mode | App đổi theme |
-| 3 | Nhấn Privacy Policy | Browser mở URL |
-| 4 | Nhấn Terms of Service | Browser mở URL |
-
-**⏱️ Thời gian:** 2 phút
-
----
-
-### 📝 Demo Script #5: Export Data
-**UC51, UC52 - Export JSON, CSV**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở Settings | SettingsFragment |
-| 2 | Nhấn "Export to JSON" | Share dialog mở |
-| 3 | Lưu/Share file | File JSON được tạo |
-| 4 | Nhấn "Export to CSV" | Share dialog mở |
-| 5 | Verify file content | Data đúng format |
-
-**⏱️ Thời gian:** 3 phút
-
----
-
-### 📝 Demo Script #6: Delete Data & Logout
-**UC53, UC05 - Delete All Data, Logout**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Nhấn "Xóa toàn bộ dữ liệu" | Dialog cảnh báo |
-| 2 | Nhấn Tiếp tục | Yêu cầu Biometric |
-| 3 | Xác thực thành công | Dialog nhập "DELETE" |
-| 4 | Nhập sai | Nút disable |
-| 5 | Nhập đúng "DELETE" | Data bị xóa |
-| 6 | (Hoặc) Nhấn Đăng xuất | Về LoginActivity |
-
-**⏱️ Thời gian:** 3 phút
-
----
-
-### 📝 Demo Script #7: Statistics
-**UC57 - Xem thống kê**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở StatisticsFragment | Chart hiển thị |
-| 2 | Xem biểu đồ tuần | 7 ngày data |
-| 3 | Xem completion rate | % hiển thị |
-
-**⏱️ Thời gian:** 2 phút
-
----
-
-## ✅ Tổng kết Tester 1: ~21 phút, 15 UC, 7 scripts
-
----
-
-# 👤 TESTER 2: Timer/Focus + Gamification/Garden + System
-
-## Modules phụ trách:
-- Timer/Pomodoro
-- Focus Lock
-- Gamification (Points, Trees)
-- System automation
-
-## Use Cases: UC06-UC12, UC22-UC27, UC58-UC62 (18 Use Cases)
-
----
-
-### 📝 Demo Script #1: Pomodoro Full Flow
-**UC06-UC10 - Start, Pause, Resume, Cancel, Complete Timer**
+## 📝 Script #2: Timer & Focus (7 phút)
+**UC06-UC12**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
 | 1 | Mở TimerFragment | Timer UI hiển thị |
-| 2 | Chọn 5 phút, nhấn Start | Timer đếm ngược |
-| 3 | Notification bar | Notification hiển thị |
+| 2 | Chọn 5 phút | Thời gian được set |
+| 3 | Nhấn Start | Timer đếm ngược, notification hiển thị |
 | 4 | Nhấn Pause | Timer dừng |
 | 5 | Nhấn Resume | Timer tiếp tục |
 | 6 | Nhấn Cancel | Timer reset |
-| 7 | Start lại, để hết | Âm thanh/rung, +5 điểm |
-
-**⏱️ Thời gian:** 7 phút
+| 7 | Start lại với 2 phút | Timer bắt đầu |
+| 8 | Bật Focus Lock | FocusLockActivity mở toàn màn hình |
+| 9 | Nhấn Back | Không thoát được |
+| 10 | Nhấn Unlock → xác nhận | Thoát Focus Lock |
+| 11 | Để timer chạy hết | Âm thanh/rung, +2 điểm được cộng |
+| 12 | Xem notification | Thông báo "Hoàn thành Pomodoro" |
 
 ---
 
-### 📝 Demo Script #2: Focus Lock
-**UC11, UC12 - Focus Lock Mode**
+## 📝 Script #3: Timeline & Schedule (10 phút)
+**UC13-UC21**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Start Timer, bật Focus Lock | FocusLockActivity mở |
-| 2 | Xem UI | Animation, motivational text |
-| 3 | Nhấn Back | Không thoát được |
-| 4 | Nhấn Unlock | Dialog xác nhận |
-| 5 | Confirm unlock | Thoát Focus Lock |
-
-**⏱️ Thời gian:** 5 phút
-
----
-
-### 📝 Demo Script #3: Points System
-**UC22, UC23 - Xem điểm, Lịch sử điểm**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Xem header/Settings | Điểm hiện tại hiển thị |
-| 2 | Hoàn thành task | +10 điểm |
-| 3 | Hoàn thành Pomodoro | +5 điểm (1đ/phút) |
-| 4 | Xem Point History | Lịch sử hiển thị |
-
-**⏱️ Thời gian:** 4 phút
-
----
-
-### 📝 Demo Script #4: Garden & Trees
-**UC24, UC25, UC26, UC27 - Plant, Water, View Trees**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở GardenFragment | Grid vườn cây |
-| 2 | Nhấn "Trồng cây mới" | Dialog chọn loại |
-| 3 | Chọn Oak, đặt tên | Cây được tạo, -50 điểm |
-| 4 | Xem cây state = SEED | Cây mới hiển thị |
-| 5 | Tap vào cây | TreeDetailActivity |
-| 6 | Nhấn "Tưới cây" 10 điểm | invested_points tăng |
-| 7 | Tưới đến 100 điểm | State → SPROUT |
-
-**⏱️ Thời gian:** 6 phút
-
----
-
-### 📝 Demo Script #5: System Automation
-**UC58-UC62 - Streak, Dead Trees, Session Logging**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Xem streak | current_streak hiển thị |
-| 2 | Complete task | Streak tăng (nếu liên tiếp) |
-| 3 | (Simulate) Cây không tưới 3 ngày | is_alive = false |
-| 4 | Mở app | Dead trees được update |
-| 5 | Complete Pomodoro | Session được log vào DB |
-
-**⏱️ Thời gian:** 4 phút
-
----
-
-## ✅ Tổng kết Tester 2: ~26 phút, 18 UC, 5 scripts
-
----
-
-# 👤 TESTER 3: Timeline/Schedule + Notes + Voice
-
-## Modules phụ trách:
-- Timeline view
-- Schedule CRUD
-- Sub-tasks
-- Notes
-- Voice input
-
-## Use Cases: UC13-UC21, UC33-UC38, UC56 (16 Use Cases)
-
----
-
-### 📝 Demo Script #1: Timeline Navigation
-**UC13, UC14 - Week/Month View**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở TimelineFragment | Tuần hiện tại |
+| 1 | Mở TimelineFragment | Tuần hiện tại hiển thị |
 | 2 | Swipe trái/phải | Chuyển tuần |
-| 3 | Tap header tháng | MonthCalendarDialog |
-| 4 | Chọn tháng khác | Timeline nhảy đến |
-
-**⏱️ Thời gian:** 3 phút
+| 3 | Tap header tháng | MonthCalendarDialog mở |
+| 4 | Chọn tháng khác | Timeline nhảy đến tháng đó |
+| 5 | Nhấn FAB (+) | EditScheduleFragment mở |
+| 6 | Để trống tên, nhấn Lưu | Lỗi validation |
+| 7 | Nhập: "Họp team", 14:00-15:00 | - |
+| 8 | Thêm sub-task: "Chuẩn bị slides" | Sub-task được add |
+| 9 | Thêm sub-task: "Review báo cáo" | Sub-task được add |
+| 10 | Bật Reminder | Reminder được set |
+| 11 | Nhấn Lưu | Task được tạo, xuất hiện trong timeline |
+| 12 | Tap vào task → Sửa tên | Task được update |
+| 13 | Tap checkbox sub-task | Sub-task done |
+| 14 | Tap checkbox task chính | Task done, +10 điểm, streak tăng |
+| 15 | Tạo task mới, chọn Skip | Status → skipped |
+| 16 | Tạo task, nhấn Xóa | Dialog xác nhận, task bị xóa |
 
 ---
 
-### 📝 Demo Script #2: Task CRUD
-**UC15, UC16, UC17 - Create, Update, Delete Task**
+## 📝 Script #4: Gamification & Garden (6 phút)
+**UC22-UC27, UC58-UC59**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Nhấn FAB (+) | EditScheduleFragment |
-| 2 | Để trống tên, Lưu | Lỗi validation |
-| 3 | Nhập đầy đủ thông tin | Task được tạo |
-| 4 | Tap task → Sửa | Data được update |
-| 5 | Nhấn Xóa | Task bị xóa |
-
-**⏱️ Thời gian:** 5 phút
+| 1 | Xem điểm trên header | Điểm hiện tại, streak hiển thị |
+| 2 | Mở Timeline → Garden icon | GardenFragment mở |
+| 3 | Xem vườn cây | Grid các cây hiển thị |
+| 4 | Nhấn "Trồng cây mới" | Dialog chọn loại cây |
+| 5 | Chọn Oak, đặt tên "My Tree" | Cây được tạo, -50 điểm |
+| 6 | Xem cây state = SEED | Cây mới hiển thị trong garden |
+| 7 | Tap vào cây | TreeDetailActivity mở |
+| 8 | Nhấn "Tưới cây" 10 điểm | invested_points tăng |
+| 9 | Tưới thêm vài lần | Cây phát triển, state có thể đổi |
+| 10 | Mở Point History | Lịch sử cộng/trừ điểm hiển thị |
 
 ---
 
-### 📝 Demo Script #3: Task Status
-**UC18, UC19 - Complete, Skip Task**
+## 📝 Script #5: AI Chat (6 phút)
+**UC28-UC32, UC63**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Tạo task mới | Status = planned |
-| 2 | Tap checkbox | Status → done, +10 điểm |
-| 3 | Tạo task khác | Task mới |
-| 4 | Chọn Skip | Status → skipped |
-
-**⏱️ Thời gian:** 3 phút
-
----
-
-### 📝 Demo Script #4: Sub-tasks
-**UC20, UC21 - Create, Complete Sub-task**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Tạo task "Dự án" | EditScheduleFragment |
-| 2 | Thêm 3 sub-tasks | Sub-tasks được add |
-| 3 | Lưu task | Task với sub-tasks |
-| 4 | Tick sub-task 1 | is_done = true |
-
-**⏱️ Thời gian:** 4 phút
-
----
-
-### 📝 Demo Script #5: Notes Full Flow
-**UC33-UC38 - CRUD Notes, Search, Pin**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở NotesFragment | List notes |
-| 2 | Nhấn + | Editor mở |
-| 3 | Nhập title, content, Save | Note được lưu |
-| 4 | Tạo thêm 2 notes | 3 notes trong list |
-| 5 | Search text | List được filter |
-| 6 | Toggle pin | Note lên đầu |
-| 7 | Edit note | Content updated |
-| 8 | Delete note | Note bị xóa |
-
-**⏱️ Thời gian:** 5 phút
-
----
-
-### 📝 Demo Script #6: Voice Input
-**UC56 - Tạo task bằng giọng nói**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Nhấn nút microphone | Request permission |
-| 2 | Cấp quyền | Mic bắt đầu nghe |
-| 3 | Nói "Họp lúc 2 giờ chiều" | Speech-to-text |
-| 4 | Xác nhận | Task được tạo lúc 14:00 |
-
-**⏱️ Thời gian:** 3 phút
-
----
-
-## ✅ Tổng kết Tester 3: ~23 phút, 16 UC, 6 scripts
-
----
-
-# 👤 TESTER 4: AI Chat + Social
-
-## Modules phụ trách:
-- AI Chat (Ask, Agent, Life Planner)
-- Social (Friends, Messages)
-- AI History (System)
-
-## Use Cases: UC28-UC32, UC39-UC47, UC63 (15 Use Cases)
-
----
-
-### 📝 Demo Script #1: AI Ask Mode
-**UC28, UC32 - Chat Ask Mode, Clear Chat**
-
-| Bước | Hành động | Kết quả mong đợi |
-|------|-----------|------------------|
-| 1 | Mở AIFragment | Welcome message |
+| 1 | Mở AIFragment | Welcome message hiển thị |
 | 2 | Mode = "Ask" | Indicator hiển thị |
-| 3 | Gõ câu hỏi | Message gửi đi |
+| 3 | Gõ "Cho tôi mẹo quản lý thời gian" | Message gửi đi |
 | 4 | Xem typing indicator | Loading animation |
-| 5 | Nhận AI response | Bubble hiển thị |
-| 6 | Nhấn Clear Chat | Chat reset |
-
-**⏱️ Thời gian:** 4 phút
+| 5 | Nhận AI response | Bubble hiển thị với câu trả lời |
+| 6 | Chuyển mode "Agent" | Mode changed |
+| 7 | Gõ "Lên lịch học bài cho tuần này" | AI phân tích và đề xuất |
+| 8 | Xem proposals | Schedule suggestions hiển thị |
+| 9 | Accept 1 suggestion | Task được tạo tự động |
+| 10 | Nhấn Clear Chat | Chat reset, welcome message mới |
 
 ---
 
-### 📝 Demo Script #2: AI Agent Mode
-**UC29, UC30, UC31 - Agent Mode, Life Planner, Accept Suggestions**
+## 📝 Script #6: Notes (5 phút)
+**UC33-UC38**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Chuyển mode "Agent" | Mode changed |
-| 2 | Mô tả lịch cần lên | AI phân tích |
-| 3 | Xem proposals | Suggestions hiển thị |
-| 4 | Accept 1 suggestion | Task được tạo |
-| 5 | Reject suggestion khác | Removed from list |
-| 6 | Chuyển "Life Planner" | Mode changed |
-| 7 | Mô tả mục tiêu dài hạn | AI đề xuất plan |
-| 8 | Accept plan | Schedules được tạo |
-
-**⏱️ Thời gian:** 6 phút
+| 1 | Mở Timer → Notes icon | NotesFragment mở |
+| 2 | Nhấn + | Editor mở |
+| 3 | Nhập title "Ghi chú quan trọng", content | - |
+| 4 | Nhấn Save | Note được lưu |
+| 5 | Tạo thêm 2 notes | 3 notes trong list |
+| 6 | Search "quan trọng" | List được filter |
+| 7 | Toggle pin note đầu | Note lên đầu danh sách |
+| 8 | Edit note | Content updated |
+| 9 | Delete 1 note | Note bị xóa |
 
 ---
 
-### 📝 Demo Script #3: Friends Management
-**UC39-UC45 - Friends List, Search, Request, Accept, Block**
+## 📝 Script #7: Social (8 phút)
+**UC39-UC47**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Mở SocialFragment | Tab Friends |
-| 2 | Xem friends list | Danh sách hiển thị |
-| 3 | Tab Discover | Search users |
-| 4 | Tìm username | Results hiển thị |
-| 5 | Add Friend | Request gửi đi |
-| 6 | (Acc khác) Accept | Thành bạn |
-| 7 | Unfriend | Friendship hủy |
-| 8 | Block user | User bị block |
-| 9 | Unblock | User được unblock |
-
-**⏱️ Thời gian:** 6 phút
+| 1 | Mở SocialFragment | Tab Friends hiển thị |
+| 2 | Xem friends list | Danh sách bạn bè |
+| 3 | Tab Discover | Search users UI |
+| 4 | Tìm username "testuser" | Kết quả hiển thị |
+| 5 | Nhấn Add Friend | Request gửi đi, status "Pending" |
+| 6 | Tab Requests | Xem pending requests |
+| 7 | Accept 1 request | Thành bạn bè |
+| 8 | Reject 1 request | Request bị xóa |
+| 9 | Tap friend → View Profile | Profile hiển thị |
+| 10 | Tap conversation | ChatScreen mở |
+| 11 | Xem message history | Tin nhắn cũ hiển thị |
+| 12 | Nhập và gửi message | Message gửi thành công |
+| 13 | Nhấn Unfriend | Friendship bị hủy |
 
 ---
 
-### 📝 Demo Script #4: Messaging
-**UC46, UC47 - Conversations, Send Message**
+## 📝 Script #8: Settings (5 phút)
+**UC48-UC55**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Mở Conversations tab | List conversations |
-| 2 | Tap conversation | ChatScreen mở |
-| 3 | Xem history | Messages cũ hiển thị |
-| 4 | Nhập message | Input field |
-| 5 | Nhấn Send | Message gửi |
-| 6 | Real-time update | Message hiển thị |
-
-**⏱️ Thời gian:** 4 phút
+| 1 | Mở SettingsFragment | Settings UI hiển thị |
+| 2 | Mở Profile | ProfileActivity mở |
+| 3 | Sửa username, nhấn Lưu | Username updated |
+| 4 | Đổi avatar | Avatar được upload |
+| 5 | Mở Personalization | PersonalizationActivity mở |
+| 6 | Đặt wake_time, sleep_time | Thời gian được set |
+| 7 | Mở Theme → chọn Dark | App đổi theme tối |
+| 8 | Nhấn Privacy Policy | Browser mở URL |
+| 9 | Nhấn "Export to JSON" | Share dialog mở, file được tạo |
+| 10 | Nhấn "Delete All Data" | Dialog cảnh báo → Biometric → nhập "DELETE" |
 
 ---
 
-### 📝 Demo Script #5: AI History (System)
-**UC63 - Auto-save AI History**
+## 📝 Script #9: Statistics & Heatmap (4 phút)
+**UC57, UC64-UC65**
 
 | Bước | Hành động | Kết quả mong đợi |
 |------|-----------|------------------|
-| 1 | Chat với AI | Conversation |
-| 2 | (Backend verify) | ai_history table có record |
-
-**⏱️ Thời gian:** 2 phút
+| 1 | Mở StatisticsFragment | Charts hiển thị |
+| 2 | Xem biểu đồ tuần | 7 ngày data, tasks done/skipped |
+| 3 | Xem completion rate | % hoàn thành hiển thị |
+| 4 | Nhấn Heatmap | HeatmapFragment mở |
+| 5 | Xem lưới ngày theo tháng | Màu sắc thể hiện năng suất |
+| 6 | Vuốt xem tháng khác | Tháng trước/sau hiển thị |
+| 7 | Tap vào một ngày | Chuyển đến EditSchedule với ngày đó |
 
 ---
 
-## ✅ Tổng kết Tester 4: ~22 phút, 15 UC, 5 scripts
+## 📝 Script #10: Sync & Notification (5 phút)
+**UC66-UC71**
+
+| Bước | Hành động | Kết quả mong đợi |
+|------|-----------|------------------|
+| 1 | Đăng xuất | Data được push lên Supabase |
+| 2 | Đăng nhập lại | Data được pull từ Supabase (schedules, points, trees, history) |
+| 3 | Xem Statistics | Pomodoro history hiển thị đúng |
+| 4 | Mở Settings → Sync Now | Progress indicator, sync thành công |
+| 5 | Tạo task với Reminder | Alarm được đặt |
+| 6 | Chờ đến giờ reminder | Notification nhắc nhở hiển thị |
+| 7 | Start Pomodoro, để hết | Notification "Hoàn thành" hiển thị |
 
 ---
 
-# 📊 BẢNG TỔNG HỢP
+## 📝 Script #11: Voice Input (2 phút)
+**UC56**
 
-## Thời Gian Demo
+| Bước | Hành động | Kết quả mong đợi |
+|------|-----------|------------------|
+| 1 | Mở Timeline, nhấn microphone | Request permission (nếu chưa có) |
+| 2 | Cấp quyền | Mic bắt đầu nghe |
+| 3 | Nói "Họp nhóm lúc 3 giờ chiều" | Speech-to-text chuyển đổi |
+| 4 | Xác nhận | Task được tạo với thời gian 15:00 |
 
-| Tester | Module | Thời gian | Scripts | UC |
-|--------|--------|-----------|---------|-----|
-| Tester 1 | Auth + Settings + Stats | ~21 phút | 7 | 15 |
-| Tester 2 | Timer + Garden + System | ~26 phút | 5 | 18 |
-| Tester 3 | Timeline + Notes + Voice | ~23 phút | 6 | 16 |
-| Tester 4 | AI + Social | ~22 phút | 5 | 15 |
-| **Tổng** | | **~92 phút** | **23** | **64** |
+---
+
+# 📊 TỔNG KẾT
+
+## Thời gian Demo
+
+| Script | Module | Thời gian |
+|--------|--------|-----------|
+| #1 | Onboarding & Auth | 8 phút |
+| #2 | Timer & Focus | 7 phút |
+| #3 | Timeline & Schedule | 10 phút |
+| #4 | Gamification & Garden | 6 phút |
+| #5 | AI Chat | 6 phút |
+| #6 | Notes | 5 phút |
+| #7 | Social | 8 phút |
+| #8 | Settings | 5 phút |
+| #9 | Statistics & Heatmap | 4 phút |
+| #10 | Sync & Notification | 5 phút |
+| #11 | Voice | 2 phút |
+| **Tổng** | **11 Scripts, 73 UC** | **~66 phút** |
 
 ---
 
 ## ✅ Checklist Chuẩn Bị
 
-### Trước khi test:
-- [ ] Cài đặt app trên thiết bị test
-- [ ] Tạo ít nhất 2 tài khoản test
+### Trước khi demo:
+- [ ] Cài đặt app trên thiết bị
+- [ ] Tạo ít nhất 2 tài khoản test (cho Social demo)
 - [ ] Đảm bảo kết nối internet ổn định
-- [ ] Tool quay màn hình để demo
-- [ ] Reset data nếu cần test fresh
+- [ ] Tool quay màn hình
+- [ ] Reset data app nếu demo fresh
+- [ ] Có sẵn 1 tài khoản Google
 
 ### Thiết bị cần:
 - [ ] Android phone (API 26+)
@@ -470,7 +271,6 @@
 ```markdown
 ## Bug ID: BUG-XXX
 ### Use Case: UC##
-### Tester: Tester X
 ### Ngày: YYYY-MM-DD
 
 **Mô tả:** [Mô tả ngắn gọn]
@@ -488,9 +288,14 @@
 
 ---
 
-## 📅 Lịch Trình Đề Xuất
+## 📅 Lịch Trình Demo Đề Xuất
 
-| Ngày | Buổi sáng | Buổi chiều |
-|------|-----------|------------|
-| Ngày 1 | Tester 1, Tester 2 demo | Tester 3, Tester 4 demo |
-| Ngày 2 | Tổng hợp bugs | Re-test & báo cáo |
+| Phần | Nội dung | Thời gian |
+|------|----------|-----------|
+| Phần 1 | Scripts #1-#4 (Auth, Timer, Timeline, Gamification) | ~31 phút |
+| Nghỉ giữa giờ | - | 5 phút |
+| Phần 2 | Scripts #5-#8 (AI, Notes, Social, Settings) | ~24 phút |
+| Nghỉ | - | 5 phút |
+| Phần 3 | Scripts #9-#11 (Stats, Sync, Voice) | ~11 phút |
+| Q&A | Hỏi đáp | 10 phút |
+| **Tổng** | | **~86 phút** |
