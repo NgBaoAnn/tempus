@@ -1,0 +1,28 @@
+
+> Task :app:signingReport
+Variant: debug
+Config: shared
+Store: C:\Workspace\Dev For Mobile\Tempus\tempus\app\keystore\debug.keystore
+Alias: AndroidDebugKey
+MD5: 1D:92:A3:5E:F9:91:D9:2F:F8:04:F3:91:92:CD:B5:08
+SHA1: AC:3D:D0:29:88:FB:59:1E:A8:E8:96:8B:E8:A7:DF:8B:EE:32:9A:45
+SHA-256: 7C:2E:21:4C:EE:FD:88:F5:E9:8D:6C:E4:6A:20:4B:32:9F:6E:13:91:49:4E:95:14:CD:A1:4F:AF:F7:FD:AD:FB
+Valid until: Thursday, August 12, 2055
+----------
+Variant: release
+Config: null
+Store: null
+Alias: null
+----------
+Variant: debugAndroidTest
+Config: shared
+Store: C:\Workspace\Dev For Mobile\Tempus\tempus\app\keystore\debug.keystore
+Alias: AndroidDebugKey
+MD5: 1D:92:A3:5E:F9:91:D9:2F:F8:04:F3:91:92:CD:B5:08
+SHA1: AC:3D:D0:29:88:FB:59:1E:A8:E8:96:8B:E8:A7:DF:8B:EE:32:9A:45
+SHA-256: 7C:2E:21:4C:EE:FD:88:F5:E9:8D:6C:E4:6A:20:4B:32:9F:6E:13:91:49:4E:95:14:CD:A1:4F:AF:F7:FD:AD:FB
+Valid until: Thursday, August 12, 2055
+----------
+
+BUILD SUCCESSFUL in 1s
+1 actionable task: 1 executed
