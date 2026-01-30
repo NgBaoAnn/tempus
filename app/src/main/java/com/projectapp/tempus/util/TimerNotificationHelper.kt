@@ -38,6 +38,9 @@ object TimerNotificationHelper {
         timeRemaining: String,
         isPaused: Boolean
     ) {
+        NotificationPreferences.init(context)
+        if (!NotificationPreferences.isTimerEnabled()) return
+
         createNotificationChannel(context)
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {

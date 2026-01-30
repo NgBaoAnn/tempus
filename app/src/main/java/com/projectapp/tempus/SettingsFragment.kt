@@ -127,7 +127,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun onNotificationsClick() {
-        Toast.makeText(requireContext(), "Cài đặt thông báo", Toast.LENGTH_SHORT).show()
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.NotificationSettingsActivity::class.java)
+        startActivity(intent)
     }
 
     private fun onThemeClick() {

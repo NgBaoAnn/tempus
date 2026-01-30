@@ -69,6 +69,9 @@ object TimelineNotificationHelper {
         categoryLabel: String = "",
         color: String = "#2196F3"
     ) {
+        NotificationPreferences.init(context)
+        if (!NotificationPreferences.isTimelineEnabled()) return
+
         createNotificationChannel(context)
 
         // Intent to open MainActivity and navigate to Timeline
