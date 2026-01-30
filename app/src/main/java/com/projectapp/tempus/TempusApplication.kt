@@ -20,6 +20,8 @@ class TempusApplication : Application(), ImageLoaderFactory {
         UserProfileCache.init(this)
         // Initialize ThemeManager (loads saved theme preference)
         com.projectapp.tempus.ui.theme.ThemeManager.init(this)
+        // Initialize LanguageManager
+        com.projectapp.tempus.ui.language.LanguageManager.init(this)
     }
     
     /**
