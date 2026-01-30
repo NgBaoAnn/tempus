@@ -296,4 +296,107 @@
     <string name="content_desc_open">Open</string>
     <string name="content_desc_delete">Delete</string>
     <string name="content_desc_avatar">Avatar</string>
+
+    <!-- Daily Quote -->
+    <string name="daily_quote_title">Daily Quote</string>
+    <string name="quote_expand">Expand</string>
+    <string name="quote_collapse">Collapse</string>
+
+    <!-- AI Chat System Messages -->
+    <string name="ai_welcome_message">Hello! 👋 I\'m Tiramisu AI.\n\n💬 **Ask Mode**: Q&amp;A, advice\n🤖 **Agent Mode**: Propose and execute actions\n🎯 **Life Planner**: Long-term planning\n\nSwitch modes using the toggle above!</string>
+    <string name="ai_mode_switch_ask">Switched to Ask Mode. I will answer your questions.</string>
+    <string name="ai_mode_switch_agent">Switched to Agent Mode. I will propose actions and wait for your confirmation.</string>
+    <string name="ai_mode_switch_planner">Switched to Life Planner Mode. Please share your long-term goals!</string>
+    <string name="ai_proposal_ready">📋 I\'ve prepared a proposal for you. Please review and Accept or Cancel.</string>
+    <string name="ai_proposal_executed_success">✅ Executed successfully!\n\n%1$s\n\n⏱️ %2$dms</string>
+    <string name="ai_proposal_failed">❌ Execution failed: %1$s</string>
+    <string name="ai_proposal_cancelled">🚫 Proposal cancelled.</string>
+    <string name="ai_planner_analyzing">🔍 Analyzing your goals...</string>
+    <string name="ai_planner_success">✅ **Plan created successfully!**\n\n📋 Added **%1$d** tasks to schedule\n\n💡 **Tips:**\n%2$s\n\n🌱 Good luck!</string>
+    <string name="ai_planner_failed">❌ Cannot create schedule: %1$s</string>
+    <string name="ai_planner_cancelled">🚫 Plan cancelled. Share another goal if you like!</string>
+    <string name="ai_context_empty">Cannot load schedule context. Please try again.</string>
+    <string name="ai_context_no_schedule">No schedules found.</string>
+    <string name="ai_context_intro">Today: %1$s\nNOTE: Recurring schedules (daily/weekly) will appear today.\nSchedule list:\n%2$s</string>
+
+    <!-- Common Toasts -->
+    <string name="msg_success">Success</string>
+    <string name="msg_error">An error occurred</string>
+    <string name="msg_saved">Saved</string>
+    <string name="msg_updated">Updated</string>
+    <string name="msg_deleted">Deleted</string>
+    <string name="msg_coming_soon">Feature coming soon</string>
+
+    <!-- Auth -->
+    <string name="error_empty_input">Please enter email and password</string>
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="msg_syncing_data">Syncing data...</string>
+    <string name="msg_login_success">Login successful</string>
+    <string name="error_login_failed_credentials">Incorrect email or password</string>
+    <string name="error_no_google_account">Google account not found</string>
+    <string name="error_server_auth">Server authentication error</string>
+    <string name="error_empty_email">Please enter email</string>
+    <string name="msg_reset_email_sent">Confirmation code sent to your email</string>
+    <string name="error_reset_email_failed">Error: Could not send recovery email</string>
+    <string name="error_empty_fields">Please fill in all fields</string>
+    <string name="error_password_length">Password must be at least 6 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="msg_register_success">Registration successful! Please check your email.</string>
+    <string name="error_email_taken">Email already in use</string>
+    <string name="error_network">Network error</string>
+
+    <!-- Settings & Timeline -->
+    <string name="error_mic_permission">Microphone permission required for Voice Command</string>
+    <string name="msg_notification_settings">Notification settings</string>
+    <string name="error_relogin">Please login again</string>
+    <string name="msg_sync_success">✅ Sync successful!</string>
+    <string name="error_sync_failed">❌ Sync failed: %s</string>
+    <string name="msg_exporting">Exporting data...</string>
+    <string name="error_export">Export error</string>
+    <string name="title_share_data">Share data</string>
+    <string name="msg_saved_to">Saved to %s</string>
+    <string name="error_share_failed">Share failed: %s</string>
+    <string name="error_biometric_auth">Authentication error: %s</string>
+    <string name="error_biometric_failed">Authentication failed</string>
+    <string name="error_wrong_confirmation">Incorrect input. Delete cancelled.</string>
+    <string name="msg_deleting_data">Deleting data...</string>
+    <string name="msg_delete_all_success">✅ All data deleted</string>
+    <string name="error_delete_all_failed">❌ Failed to delete data</string>
+    <string name="msg_logout_success">Logged out</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Smart Task\nManagement</string>
+    <string name="onboarding_desc_1">Create, organize and track all daily tasks with a simple and intuitive interface.</string>
+    <string name="onboarding_title_2">Never miss\na deadline</string>
+    <string name="onboarding_desc_2">Smart reminder system helps you stay on track with important goals.</string>
+    <string name="onboarding_title_3">Track your\nprogress</string>
+    <string name="onboarding_desc_3">View detailed statistics on streaks, points and productivity to stay motivated.</string>
+    <string name="onboarding_title_4">Ready to\nstart?</string>
+    <string name="onboarding_desc_4">Turn productivity into a habit with TEMPUS. Plant trees, earn points and conquer goals!</string>
+    <string name="onboarding_start_now">Start Now</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_skip">Skip</string>
+
+    <!-- Statistics -->
+    <string name="stats_month_label">Month %s</string>
+
+    <!-- Profile -->
+    <string name="msg_update_success">Update successful!</string>
+    <string name="error_read_image">Error reading image</string>
+    <string name="profile_stats">Statistics</string>
+    <string name="profile_quick_access">Quick Access</string>
+    <string name="profile_garden_title">My Garden</string>
+    <string name="profile_garden_subtitle">View tree collection</string>
+    <string name="profile_edit_name_title">Edit Name</string>
+    <string name="profile_name_label">Your Name</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="profile_change_avatar">Change Avatar</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_back">Back</string>
+    <string name="profile_no_name">Unnamed</string>
+    <string name="profile_member_since">Member since %s</string>
+    <string name="profile_points">Total Points</string>
+    <string name="profile_streak">Streak Days</string>
+    <string name="profile_trees">Planted Trees</string>
 </resources>

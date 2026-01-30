@@ -296,4 +296,107 @@
     <string name="content_desc_open">Mở</string>
     <string name="content_desc_delete">Xoá</string>
     <string name="content_desc_avatar">Avatar</string>
+    
+    <!-- Daily Quote -->
+    <string name="daily_quote_title">Câu nói hôm nay</string>
+    <string name="quote_expand">Mở rộng</string>
+    <string name="quote_collapse">Thu gọn</string>
+    
+    <!-- AI Chat System Messages -->
+    <string name="ai_welcome_message">Xin chào! 👋 Tôi là Tiramisu AI.\n\n💬 **Ask Mode**: Hỏi đáp, tư vấn\n🤖 **Agent Mode**: Đề xuất và thực hiện hành động\n🎯 **Life Planner**: Lên kế hoạch dài hạn\n\nChuyển đổi chế độ bằng toggle ở trên!</string>
+    <string name="ai_mode_switch_ask">Đã chuyển sang chế độ Ask. Tôi sẽ trả lời câu hỏi của bạn.</string>
+    <string name="ai_mode_switch_agent">Đã chuyển sang chế độ Agent. Tôi sẽ đề xuất hành động và chờ bạn xác nhận.</string>
+    <string name="ai_mode_switch_planner">Đã chuyển sang chế độ Life Planner. Hãy chia sẻ mục tiêu dài hạn của bạn!</string>
+    <string name="ai_proposal_ready">📋 Tôi đã chuẩn bị một đề xuất cho bạn. Vui lòng xem xét và Accept hoặc Cancel.</string>
+    <string name="ai_proposal_executed_success">✅ Đã thực hiện thành công!\n\n%1$s\n\n⏱️ %2$dms</string>
+    <string name="ai_proposal_failed">❌ Thực hiện thất bại: %1$s</string>
+    <string name="ai_proposal_cancelled">🚫 Đã hủy đề xuất.</string>
+    <string name="ai_planner_analyzing">🔍 Đang phân tích mục tiêu của bạn...</string>
+    <string name="ai_planner_success">✅ **Đã tạo kế hoạch thành công!**\n\n📋 Đã thêm **%1$d** công việc vào lịch\n\n💡 **Tips:**\n%2$s\n\n🌱 Chúc bạn thành công!</string>
+    <string name="ai_planner_failed">❌ Không thể tạo lịch: %1$s</string>
+    <string name="ai_planner_cancelled">🚫 Đã hủy kế hoạch. Hãy chia sẻ mục tiêu khác nếu bạn muốn!</string>
+    <string name="ai_context_empty">Không thể tải lịch trình. Vui lòng thử lại.</string>
+    <string name="ai_context_no_schedule">Không có lịch trình nào.</string>
+    <string name="ai_context_intro">Hôm nay: %1$s\nLƯU Ý: Schedule có lặp (daily/weekly) SẼ xuất hiện hôm nay.\nDanh sách lịch trình:\n%2$s</string>
+    
+    <!-- Common Toasts -->
+    <string name="msg_success">Thành công</string>
+    <string name="msg_error">Đã xảy ra lỗi</string>
+    <string name="msg_saved">Đã lưu</string>
+    <string name="msg_updated">Đã cập nhật</string>
+    <string name="msg_deleted">Đã xóa</string>
+    <string name="msg_coming_soon">Tính năng đang phát triển</string>
+    
+    <!-- Auth -->
+    <string name="error_empty_input">Vui lòng nhập email và mật khẩu</string>
+    <string name="error_invalid_email">Email không hợp lệ</string>
+    <string name="msg_syncing_data">Đang đồng bộ dữ liệu...</string>
+    <string name="msg_login_success">Đăng nhập thành công</string>
+    <string name="error_login_failed_credentials">Sai email hoặc mật khẩu</string>
+    <string name="error_no_google_account">Không tìm thấy tài khoản Google</string>
+    <string name="error_server_auth">Lỗi xác thực với server</string>
+    <string name="error_empty_email">Vui lòng nhập email</string>
+    <string name="msg_reset_email_sent">Mã xác nhận đã được gửi tới email</string>
+    <string name="error_reset_email_failed">Lỗi: Không thể gửi email khôi phục</string>
+    <string name="error_empty_fields">Vui lòng điền đầy đủ thông tin</string>
+    <string name="error_password_length">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="msg_register_success">Đăng ký thành công! Vui lòng kiểm tra email.</string>
+    <string name="error_email_taken">Email này đã được sử dụng</string>
+    <string name="error_network">Lỗi kết nối mạng</string>
+
+    <!-- Settings & Timeline -->
+    <string name="error_mic_permission">Cần cấp quyền micro để sử dụng Voice Command</string>
+    <string name="msg_notification_settings">Cài đặt thông báo</string>
+    <string name="error_relogin">Vui lòng đăng nhập lại</string>
+    <string name="msg_sync_success">✅ Đồng bộ thành công!</string>
+    <string name="error_sync_failed">❌ Đồng bộ thất bại: %s</string>
+    <string name="msg_exporting">Đang xuất dữ liệu...</string>
+    <string name="error_export">Lỗi xuất dữ liệu</string>
+    <string name="title_share_data">Chia sẻ dữ liệu</string>
+    <string name="msg_saved_to">Đã lưu vào %s</string>
+    <string name="error_share_failed">Lỗi chia sẻ file: %s</string>
+    <string name="error_biometric_auth">Lỗi xác thực: %s</string>
+    <string name="error_biometric_failed">Xác thực thất bại</string>
+    <string name="error_wrong_confirmation">Nhập không đúng. Hủy xóa.</string>
+    <string name="msg_deleting_data">Đang xóa dữ liệu...</string>
+    <string name="msg_delete_all_success">✅ Đã xóa tất cả dữ liệu</string>
+    <string name="error_delete_all_failed">❌ Lỗi khi xóa dữ liệu</string>
+    <string name="msg_logout_success">Đã đăng xuất</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Quản lý công việc\nthông minh</string>
+    <string name="onboarding_desc_1">Tạo, tổ chức và theo dõi tất cả nhiệm vụ hàng ngày với giao diện trực quan và đơn giản.</string>
+    <string name="onboarding_title_2">Không bao giờ\nbỏ lỡ deadline</string>
+    <string name="onboarding_desc_2">Hệ thống nhắc nhở thông minh giúp bạn luôn on-track với các mục tiêu quan trọng.</string>
+    <string name="onboarding_title_3">Theo dõi\ntiến độ</string>
+    <string name="onboarding_desc_3">Xem thống kê chi tiết về streak, điểm số và năng suất để luôn có động lực.</string>
+    <string name="onboarding_title_4">Sẵn sàng\nbắt đầu?</string>
+    <string name="onboarding_desc_4">Biến năng suất thành thói quen với TEMPUS. Trồng cây, kiếm điểm và chinh phục mục tiêu!</string>
+    <string name="onboarding_start_now">Bắt đầu ngay</string>
+    <string name="onboarding_continue">Tiếp tục</string>
+    <string name="onboarding_skip">Bỏ qua</string>
+
+    <!-- Statistics -->
+    <string name="stats_month_label">Tháng %s</string>
+
+    <!-- Profile -->
+    <string name="msg_update_success">Cập nhật thành công!</string>
+    <string name="error_read_image">Lỗi đọc ảnh</string>
+    <string name="profile_stats">Thống kê</string>
+    <string name="profile_quick_access">Truy cập nhanh</string>
+    <string name="profile_garden_title">Vườn cây của tôi</string>
+    <string name="profile_garden_subtitle">Xem bộ sưu tập cây</string>
+    <string name="profile_edit_name_title">Chỉnh sửa tên</string>
+    <string name="profile_name_label">Tên của bạn</string>
+    <string name="action_save">Lưu</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="profile_change_avatar">Đổi ảnh</string>
+    <string name="action_edit">Chỉnh sửa</string>
+    <string name="action_back">Quay lại</string>
+    <string name="profile_no_name">Chưa đặt tên</string>
+    <string name="profile_member_since">Thành viên từ %s</string>
+    <string name="profile_points">Điểm tích lũy</string>
+    <string name="profile_streak">Ngày streak</string>
+    <string name="profile_trees">Cây đã trồng</string>
 </resources>
