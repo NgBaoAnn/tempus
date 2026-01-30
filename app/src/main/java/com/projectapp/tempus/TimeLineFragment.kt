@@ -85,7 +85,7 @@ class TimelineFragment : Fragment() {
         } else {
             Toast.makeText(
                 requireContext(),
-                "Cần cấp quyền micro để sử dụng Voice Command",
+                getString(R.string.error_mic_permission),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -122,7 +122,11 @@ class TimelineFragment : Fragment() {
                 com.projectapp.tempus.ui.theme.TempusTheme {
                     val uiState by viewModel.ui.collectAsState()
                 val weeks = buildWeeksAround(uiState.date)
-                val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("vi"))
+                // Use current locale based on language setting for proper month name display
+                val currentLocale = com.projectapp.tempus.ui.language.LanguageManager.getCurrentLanguage().let {
+                    if (it == "en") Locale.ENGLISH else Locale("vi")
+                }
+                val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", currentLocale)
                 
                 // Voice sheet state - controlled by Fragment for permission handling
                 var showVoiceSheet by remember { mutableStateOf(false) }
@@ -282,6 +286,9 @@ class TimelineFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.onRefresh()
+        
+        // Reload daily quote in case language setting changed
+        viewModel.reloadDailyQuote()
         
         // Sync all timeline alarms when timeline loads
         // At this point, user auth is guaranteed to be ready

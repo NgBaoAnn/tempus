@@ -1,6 +1,7 @@
 package com.projectapp.tempus.data.quote
 
 import com.projectapp.tempus.data.quote.dto.QuoteDto
+import com.projectapp.tempus.data.user.UserProfileCache
 import kotlin.random.Random
 
 /**
@@ -8,7 +9,7 @@ import kotlin.random.Random
  */
 object LocalQuotesProvider {
     
-    private val quotes = listOf(
+    private val quotesVi = listOf(
         QuoteDto("Hành trình ngàn dặm bắt đầu từ một bước chân.", "Lão Tử"),
         QuoteDto("Thành công là tổng của những nỗ lực nhỏ, lặp đi lặp lại ngày này qua ngày khác.", "Robert Collier"),
         QuoteDto("Đừng chờ đợi. Thời điểm sẽ không bao giờ hoàn hảo.", "Napoleon Hill"),
@@ -41,23 +42,62 @@ object LocalQuotesProvider {
         QuoteDto("Hãy bắt đầu từ nơi bạn đang đứng. Sử dụng những gì bạn có. Làm những gì bạn có thể.", "Arthur Ashe")
     )
     
+    private val quotesEn = listOf(
+        QuoteDto("The journey of a thousand miles begins with one step.", "Lao Tzu"),
+        QuoteDto("Success is the sum of small efforts, repeated day in and day out.", "Robert Collier"),
+        QuoteDto("Do not wait. The time will never be just right.", "Napoleon Hill"),
+        QuoteDto("The best way to predict the future is to create it.", "Peter Drucker"),
+        QuoteDto("Every day is a new opportunity to change your life.", null),
+        QuoteDto("Believe in yourself and all that you are.", null),
+        QuoteDto("Difficulties cannot stop you, only giving up can.", null),
+        QuoteDto("Persistence is the key to all success.", null),
+        QuoteDto("Make each day your masterpiece.", "John Wooden"),
+        QuoteDto("Focus on the journey, not just the destination.", null),
+        QuoteDto("You are braver than you believe, stronger than you seem, and smarter than you think.", "A.A. Milne"),
+        QuoteDto("Be the best version of yourself.", null),
+        QuoteDto("Every small step counts.", null),
+        QuoteDto("Today is a gift, cherish it.", null),
+        QuoteDto("Failure is simply the opportunity to begin again, this time more intelligently.", "Henry Ford"),
+        QuoteDto("Don't compare yourself to others, compare yourself to the person you were yesterday.", null),
+        QuoteDto("Everything you want is on the other side of fear.", "Jack Canfield"),
+        QuoteDto("Do what you can, with what you have, where you are.", "Theodore Roosevelt"),
+        QuoteDto("The future belongs to those who believe in the beauty of their dreams.", "Eleanor Roosevelt"),
+        QuoteDto("Change begins with a decision.", null),
+        QuoteDto("Learn to rest, not to quit.", "Banksy"),
+        QuoteDto("Every new day is a blank page.", null),
+        QuoteDto("Don't let yesterday take up too much of today.", "Will Rogers"),
+        QuoteDto("It does not matter how many times you fall, but how many times you rise.", null),
+        QuoteDto("Opportunities don't happen, you create them.", "Chris Grosser"),
+        QuoteDto("Live every day as if it were an adventure.", null),
+        QuoteDto("Success is not a destination, but a journey.", null),
+        QuoteDto("Be your own inspiration.", null),
+        QuoteDto("Faith is taking the first step even when you don't see the whole staircase.", "Martin Luther King Jr."),
+        QuoteDto("Start where you are. Use what you have. Do what you can.", "Arthur Ashe")
+    )
+    
+    private fun getQuotes(languageCode: String): List<QuoteDto> {
+        return if (languageCode == "en") quotesEn else quotesVi
+    }
+    
     /**
      * Lấy quote ngẫu nhiên dựa trên seed (thường là ngày)
      */
-    fun getQuoteForSeed(seed: Int): QuoteDto {
+    fun getQuoteForSeed(seed: Int, languageCode: String): QuoteDto {
+        val list = getQuotes(languageCode)
         val random = Random(seed)
-        return quotes[random.nextInt(quotes.size)]
+        return list[random.nextInt(list.size)]
     }
     
     /**
      * Lấy quote theo index
      */
-    fun getQuoteByIndex(index: Int): QuoteDto {
-        return quotes[index % quotes.size]
+    fun getQuoteByIndex(index: Int, languageCode: String): QuoteDto {
+        val list = getQuotes(languageCode)
+        return list[index % list.size]
     }
     
     /**
      * Tổng số quotes
      */
-    val totalQuotes: Int get() = quotes.size
+    fun getTotalQuotes(languageCode: String): Int = getQuotes(languageCode).size
 }

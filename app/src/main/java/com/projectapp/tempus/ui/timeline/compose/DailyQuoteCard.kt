@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -133,7 +134,7 @@ fun DailyQuoteCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Câu nói hôm nay",
+                        text = stringResource(R.string.daily_quote_title),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White.copy(alpha = 0.8f),
@@ -149,7 +150,7 @@ fun DailyQuoteCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Thu gọn" else "Mở rộng",
+                        contentDescription = if (isExpanded) stringResource(R.string.quote_collapse) else stringResource(R.string.quote_expand),
                         tint = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.size(16.dp)
                     )

@@ -104,6 +104,16 @@ class TimelineViewModel(
         val quote = quoteRepository.getTodayQuote()
         _ui.value = _ui.value.copy(dailyQuote = quote)
     }
+    
+    /**
+     * Public function to reload daily quote
+     * Call this when language setting changes to update quote to correct language
+     */
+    fun reloadDailyQuote() {
+        // Clear cache and reload to get quote in current language
+        quoteRepository.refreshQuote()
+        loadDailyQuote()
+    }
 
     fun onSelectDate(date: LocalDate) {
         Log.d("Timeline", "onSelectDate: $date")
