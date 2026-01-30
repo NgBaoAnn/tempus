@@ -20,14 +20,19 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.projectapp.tempus.R
+
 /**
  * ViewModel for AI Chat with Ask/Agent modes
  * Implements state machine for Agent Mode flow
  */
 class AIViewModel(
+    application: Application,
     scheduleRepository: ScheduleRepository? = null,
     userId: String? = null
-) : ViewModel() {
+) : AndroidViewModel(application) {
     
     private val aiRepository = AIRepository(scheduleRepository, userId)
     private val parseScheduleUseCase = ParseScheduleSuggestionUseCase()
@@ -106,9 +111,9 @@ class AIViewModel(
         
         // Add mode switch message
         val modeMessage = when (mode) {
-            ChatMode.ASK -> " Đã chuyển sang chế độ Ask. Tôi sẽ trả lời câu hỏi của bạn."
-            ChatMode.AGENT -> " Đã chuyển sang chế độ Agent. Tôi sẽ đề xuất hành động và chờ bạn xác nhận."
-            ChatMode.LIFE_PLANNER -> " Đã chuyển sang chế độ Life Planner. Hãy chia sẻ mục tiêu dài hạn của bạn!"
+            ChatMode.ASK -> getApplication<Application>().getString(R.string.ai_mode_switch_ask)
+            ChatMode.AGENT -> getApplication<Application>().getString(R.string.ai_mode_switch_agent)
+            ChatMode.LIFE_PLANNER -> getApplication<Application>().getString(R.string.ai_mode_switch_planner)
         }
         
         addSystemMessage(modeMessage)
@@ -166,7 +171,7 @@ class AIViewModel(
                 is AIRepository.AgentResponse.Proposal -> {
                     // Got a structured proposal - show proposal card
                     _agentState.value = AgentState.AwaitingAccept(response.proposal)
-                    addAIMessage("📋 Tôi đã chuẩn bị một đề xuất cho bạn. Vui lòng xem xét và Accept hoặc Cancel.")
+                    addAIMessage(getApplication<Application>().getString(R.string.ai_proposal_ready))
                 }
                 is AIRepository.AgentResponse.TextOnly -> {
                     // AI responded with text (not an action request)
@@ -200,14 +205,15 @@ class AIViewModel(
                 
                 // Add success message to chat
                 val changesText = executionResult.changesApplied.joinToString("\n") { "• $it" }
-                addAIMessage("✅ Đã thực hiện thành công!\n\n$changesText\n\n⏱️ ${executionResult.executionTimeMs}ms")
+                val context = getApplication<Application>()
+                addAIMessage(context.getString(R.string.ai_proposal_executed_success, changesText, executionResult.executionTimeMs))
                 
             }.onFailure { exception ->
                 _agentState.value = AgentState.Error(
-                    exception.message ?: "Lỗi khi thực hiện",
+                    exception.message ?: getApplication<Application>().getString(R.string.msg_error),
                     proposal
                 )
-                addAIMessage("❌ Thực hiện thất bại: ${exception.message}")
+                addAIMessage(getApplication<Application>().getString(R.string.ai_proposal_failed, exception.message))
             }
             
             _isLoading.value = false
@@ -219,7 +225,7 @@ class AIViewModel(
      */
     fun cancelProposal() {
         _agentState.value = AgentState.Idle
-        addSystemMessage("🚫 Đã hủy đề xuất.")
+        addSystemMessage(getApplication<Application>().getString(R.string.ai_proposal_cancelled))
     }
     
     /**
@@ -238,7 +244,7 @@ class AIViewModel(
      */
     private suspend fun handleLifePlannerMode(text: String) {
         _lifePlanState.value = LifePlanState.Analyzing
-        addAIMessage("🔍 Đang phân tích mục tiêu của bạn...")
+        addAIMessage(getApplication<Application>().getString(R.string.ai_planner_analyzing))
         
         val result = aiRepository.requestLifePlan(text)
         
@@ -251,19 +257,17 @@ class AIViewModel(
                 |
                 |📝 ${plan.description}
                 |
-                |📅 **Thời gian:** ${plan.milestones.size} milestones trong ${plan.endDate.toEpochDay() - plan.startDate.toEpochDay()} ngày
-                |⏰ **Mỗi tuần:** ~${plan.estimatedHoursPerWeek} giờ
-                |📋 **Tổng tasks:** ~${proposal.totalTasksToCreate} tasks sẽ được tạo
+                |📅 **Milestones:** ${plan.milestones.size}
+                |⏰ **Est:** ~${plan.estimatedHoursPerWeek}h/week
+                |📋 **Tasks:** ~${proposal.totalTasksToCreate}
                 |
                 |${if (plan.warnings.isNotEmpty()) "⚠️ " + plan.warnings.joinToString("\n") else ""}
-                |
-                |Xem preview bên dưới và nhấn **Bắt đầu** để tạo lịch!
             """.trimMargin()
             
             addAIMessage(summaryMessage)
         }.onFailure { exception ->
-            _lifePlanState.value = LifePlanState.Error(exception.message ?: "Không thể tạo kế hoạch")
-            addAIMessage("❌ Xin lỗi, tôi không thể tạo kế hoạch. Vui lòng thử lại với mục tiêu cụ thể hơn.\n\n${exception.message}")
+            _lifePlanState.value = LifePlanState.Error(exception.message ?: getApplication<Application>().getString(R.string.ai_planner_failed, ""))
+            addAIMessage(getApplication<Application>().getString(R.string.ai_planner_failed, exception.message))
         }
     }
     
@@ -288,16 +292,13 @@ class AIViewModel(
                     schedulesCreated = schedulesCreated
                 )
                 
+                val tips = proposal.plan.tips.joinToString("\n") { "• $it" }
                 addAIMessage(
-                    "✅ **Đã tạo kế hoạch thành công!**\n\n" +
-                    "📋 Đã thêm **$schedulesCreated** công việc vào lịch\n\n" +
-                    "💡 **Tips:**\n" + 
-                    proposal.plan.tips.joinToString("\n") { "• $it" } +
-                    "\n\n🌱 Chúc bạn thành công!"
+                    getApplication<Application>().getString(R.string.ai_planner_success, schedulesCreated, tips)
                 )
             }.onFailure { exception ->
-                _lifePlanState.value = LifePlanState.Error(exception.message ?: "Lỗi khi tạo lịch")
-                addAIMessage("❌ Không thể tạo lịch: ${exception.message}")
+                _lifePlanState.value = LifePlanState.Error(exception.message ?: getApplication<Application>().getString(R.string.ai_planner_failed, ""))
+                addAIMessage(getApplication<Application>().getString(R.string.ai_planner_failed, exception.message))
             }
             
             _isLoading.value = false
@@ -309,7 +310,7 @@ class AIViewModel(
      */
     fun rejectLifePlan() {
         _lifePlanState.value = LifePlanState.Idle
-        addSystemMessage("🚫 Đã hủy kế hoạch. Hãy chia sẻ mục tiêu khác nếu bạn muốn!")
+        addSystemMessage(getApplication<Application>().getString(R.string.ai_planner_cancelled))
     }
     
     /**
@@ -326,11 +327,7 @@ class AIViewModel(
     private fun showWelcomeMessage() {
         if (!welcomeMessageShown) {
             val welcomeMessage = ChatMessage(
-                text = "Xin chào! 👋 Tôi là Tiramisu AI.\n\n" +
-                       "💬 **Ask Mode**: Hỏi đáp, tư vấn\n" +
-                       "🤖 **Agent Mode**: Đề xuất và thực hiện hành động\n" +
-                       "🎯 **Life Planner**: Lên kế hoạch dài hạn\n\n" +
-                       "Chuyển đổi chế độ bằng toggle ở trên!",
+                text = getApplication<Application>().getString(R.string.ai_welcome_message),
                 isFromUser = false
             )
             _messages.value = listOf(welcomeMessage)
@@ -357,8 +354,8 @@ class AIViewModel(
     }
     
     private fun handleError(exception: Throwable) {
-        _error.value = exception.message ?: "Đã xảy ra lỗi"
-        addAIMessage("❌ Xin lỗi, tôi không thể xử lý yêu cầu của bạn lúc này. Vui lòng thử lại sau.")
+        _error.value = exception.message ?: getApplication<Application>().getString(R.string.msg_error)
+        addAIMessage(getApplication<Application>().getString(R.string.msg_error))
     }
     
     // ============================================
