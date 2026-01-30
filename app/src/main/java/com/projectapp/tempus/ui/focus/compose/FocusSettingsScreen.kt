@@ -31,17 +31,11 @@ import com.projectapp.tempus.data.focus.BlockedAppEntity
 import com.projectapp.tempus.ui.focus.FocusUiState
 import com.projectapp.tempus.ui.focus.InstalledApp
 
-// ===== DESIGN TOKENS =====
-// SettingsDesignTokens removed in favor of MaterialTheme.colorScheme
 
 import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
 
-// ===== DESIGN TOKENS =====
 
-/**
- * Premium Focus Mode Settings Screen
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusSettingsScreen(
@@ -79,12 +73,12 @@ fun FocusSettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
+            
             item {
                 PremiumHeader(onBackClick = onBackClick)
             }
             
-            // Stats Card
+            
             item {
                 StatsCard(
                     totalMinutes = uiState.totalFocusTime,
@@ -93,7 +87,7 @@ fun FocusSettingsScreen(
                 )
             }
             
-            // Permissions Card
+            
             if (!uiState.hasUsagePermission || !uiState.hasOverlayPermission) {
                 item {
                     PermissionsCard(
@@ -105,7 +99,7 @@ fun FocusSettingsScreen(
                 }
             }
             
-            // Settings Section
+            
             item {
                 SectionTitle(text = stringResource(R.string.nav_settings))
             }
@@ -121,7 +115,7 @@ fun FocusSettingsScreen(
                 )
             }
             
-            // Blocked Apps Section
+            
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -139,12 +133,12 @@ fun FocusSettingsScreen(
                 }
             }
             
-            // Add App Button
+            
             item {
                 AddAppButton(onClick = onShowAppPicker)
             }
             
-            // Blocked Apps List
+            
             if (uiState.blockedApps.isEmpty()) {
                 item {
                     EmptyAppsCard()
@@ -161,7 +155,6 @@ fun FocusSettingsScreen(
     }
 }
 
-// ===== COMPONENTS =====
 
 @Composable
 private fun PremiumHeader(onBackClick: () -> Unit) {
@@ -263,7 +256,7 @@ private fun StatsCard(
                 value = if (isEnabled) stringResource(R.string.focus_status_on) else stringResource(R.string.focus_status_off),
                 label = stringResource(R.string.focus_stats_status),
                 icon = Icons.Outlined.PowerSettingsNew,
-                color = if (isEnabled) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant, // Green still makes sense as status
+                color = if (isEnabled) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant, 
                 showPulse = isEnabled,
                 pulseAlpha = glowAlpha
             )
@@ -327,7 +320,7 @@ private fun PermissionsCard(
 ) {
     GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) // Changed from warning orange to secondary for cleaner look, or maybe warning if critical
+        borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) 
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -447,7 +440,7 @@ private fun SettingsCard(
                 description = stringResource(R.string.focus_mode_enable_desc),
                 checked = focusModeEnabled,
                 onCheckedChange = onToggleFocusMode,
-                accentColor = Color(0xFF10B981) // Keep Green for ON state
+                accentColor = Color(0xFF10B981) 
             )
             
             SettingsDivider()
@@ -586,7 +579,7 @@ private fun AddAppButton(onClick: () -> Unit) {
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary
         )
-        // ...
+        
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.focus_add_app_button),
@@ -708,7 +701,6 @@ private fun BlockedAppCard(
     }
 }
 
-// ===== SHARED COMPONENTS =====
 
 @Composable
 private fun GlassCard(
@@ -724,14 +716,13 @@ private fun GlassCard(
                 color = borderColor,
                 shape = RoundedCornerShape(20.dp)
             ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), // Semi-transparent surface
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), 
         shape = RoundedCornerShape(20.dp)
     ) {
         content()
     }
 }
 
-// ===== UTILITIES =====
 
 private fun formatFocusTime(minutes: Long): String {
     val hours = minutes / 60

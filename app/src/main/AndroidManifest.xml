@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     
-    <!-- Focus Mode permissions -->
+    
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -74,12 +74,12 @@
             android:name=".ui.auth.LoginActivity"
             android:exported="false">
         </activity>
-        <!-- Reset Password Activity - handles new password entry -->
+        
         <activity
             android:name=".ui.auth.ResetPasswordActivity"
             android:exported="false" />
             
-        <!-- Verify OTP Activity -->
+        
         <activity
             android:name=".ui.auth.VerifyOtpActivity"
             android:exported="false" />
@@ -97,7 +97,7 @@
             android:exported="true">
         </activity>
 
-        <!-- Timer Action Receiver -->
+        
         <receiver
             android:name=".receiver.TimerActionReceiver"
             android:enabled="true"
@@ -109,7 +109,7 @@
             </intent-filter>
         </receiver>
         
-        <!-- Focus Mode Receiver -->
+        
         <receiver
             android:name=".receiver.FocusActionReceiver"
             android:enabled="true"
@@ -121,13 +121,13 @@
             </intent-filter>
         </receiver>
 
-        <!-- Timeline Reminder Receiver -->
+        
         <receiver
             android:name=".service.ReminderReceiver"
             android:enabled="true"
             android:exported="false" />
 
-        <!-- Notification Snooze Receiver -->
+        
         <receiver
             android:name=".receiver.NotificationSnoozeReceiver"
             android:enabled="true"
@@ -137,7 +137,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- Tasks Widget Provider -->
+        
         <receiver
             android:name=".widget.TasksWidgetProvider"
             android:exported="true">
@@ -149,13 +149,13 @@
                 android:resource="@xml/tasks_widget_info" />
         </receiver>
 
-        <!-- Widget Remote Views Service -->
+        
         <service
             android:name=".widget.TasksWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported="false" />
 
-        <!-- Focus Mode Service -->
+        
         <service
             android:name=".service.focus.FocusModeService"
             android:foregroundServiceType="specialUse"
@@ -165,7 +165,7 @@
                 android:value="Focus Mode - monitors app usage to block distracting apps" />
         </service>
 
-        <!-- FileProvider for sharing exported files -->
+        
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

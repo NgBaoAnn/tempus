@@ -1,14 +1,14 @@
 <resources>
     <string name="app_name">Tiramisu Plan</string>
     
-    <!-- Navigation -->
+    
     <string name="title_timer">Timer</string>
     <string name="title_timeline">Timeline</string>
     <string name="title_ai">AI Assistant</string>
     <string name="title_statistics">Statistics</string>
     <string name="title_settings">Settings</string>
     
-    <!-- Common -->
+    
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -20,7 +20,7 @@
     <string name="loading">Loading...</string>
     <string name="error_generic">Something went wrong</string>
     
-    <!-- Settings Screen -->
+    
     <string name="settings_title">Settings</string>
     <string name="settings_profile_user_default">User</string>
     <string name="settings_section_general">GENERAL</string>
@@ -48,7 +48,7 @@
     
     <string name="settings_logout">Log Out</string>
 
-    <!-- Theme Settings -->
+    
     <string name="theme_title">Appearance</string>
     <string name="theme_select_title">Choose Appearance</string>
     <string name="theme_light">Light</string>
@@ -59,7 +59,7 @@
     <string name="theme_system_desc">Follow system settings</string>
     <string name="theme_selected_content_desc">Selected</string>
     
-    <!-- Language Settings -->
+    
     <string name="language_title">Language</string>
     <string name="language_select_title">Choose Language</string>
     <string name="language_vi">Tiếng Việt</string>
@@ -67,18 +67,18 @@
     <string name="language_en">English</string>
     <string name="language_en_desc">United States</string>
     
-    <!-- Login/Auth -->
+    
     <string name="login_title">Log In</string>
     <string name="register_title">Sign Up</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
 
-    <!-- Statistics -->
+    
     <string name="statis_title">Statistics</string>
     <string name="chart_title">Completion Stats</string>
     <string name="category_title">Top Categories</string>
     
-    <!-- Additional existing strings preserved/mapped -->
+    
     <string name="week">Week</string>
     <string name="month">Month</string>
     <string name="tag">Tag</string>
@@ -92,7 +92,7 @@
     <string name="widget_description">Show today\'s tasks</string>
     <string name="google_web_client_id">1033092420951-61vs9de72uhs85rqfc3dgop9uv0getu3.apps.googleusercontent.com</string>
 
-    <!-- Timer -->
+    
     <string name="timer_setup_title">Timer</string>
     <string name="timer_countdown_title">Countdown</string>
     <string name="timer_quick_notes">Quick Notes</string>
@@ -108,7 +108,7 @@
     <string name="timer_paused">Paused</string>
     <string name="timer_end_at">Ends at %1$s</string>
 
-    <!-- Timeline -->
+    
     <string name="timeline_voice_command">Voice Command</string>
     <string name="timeline_add_task">Add Task</string>
     <string name="timeline_garden">Garden</string>
@@ -120,7 +120,7 @@
     <string name="day_sat">S</string>
     <string name="day_sun">S</string>
 
-    <!-- AI Chat -->
+    
     <string name="ai_placeholder_ask">Ask something...</string>
     <string name="ai_placeholder_agent">Request an action...</string>
     <string name="ai_placeholder_planner">Share your goals...</string>
@@ -149,7 +149,7 @@
     <string name="ai_creating_schedule">Creating schedule from plan...</string>
     <string name="ai_avatar_description">AI Avatar</string>
     
-    <!-- AI History -->
+    
     <string name="ai_history_title">Chat History</string>
     <string name="ai_history_clear_all">Clear All</string>
     <string name="ai_history_empty">No chat history</string>
@@ -161,7 +161,7 @@
     <string name="ai_history_today">Today</string>
     <string name="ai_history_yesterday">Yesterday</string>
 
-    <!-- Garden -->
+    
     <string name="garden_title">My Garden</string>
     <string name="garden_back">Back to Timeline</string>
     <string name="garden_refresh">Refresh</string>
@@ -177,7 +177,7 @@
     <string name="garden_dying">⚠️ Dying!</string>
     <string name="garden_close">Close</string>
 
-    <!-- Statistics -->
+    
     <string name="stats_title">Statistics</string>
     <string name="stats_week">Week</string>
     <string name="stats_month">Month</string>
@@ -197,7 +197,7 @@
     <string name="stats_best_day">Best Day</string>
     <string name="stats_improve">Needs Improvement</string>
 
-    <!-- Social Friends -->
+    
     <string name="social_connect">Connect</string>
     <string name="social_new_invites_fmt">%d new invites</string>
     <string name="social_online">Online</string>
@@ -237,12 +237,12 @@
     <string name="social_search_no_results">No users found</string>
     <string name="social_send_request">Send Request</string>
 
-    <!-- Social Conversations -->
+    
     <string name="chat_title">Messages</string>
     <string name="chat_no_messages">No messages yet</string>
     <string name="chat_start_hint">Tap on a friend to start chatting</string>
     <string name="chat_start_conversation">Start conversation</string>
-    <!-- Navigation -->
+    
     <string name="nav_timer">Timer</string>
     <string name="nav_timeline">Timeline</string>
     <string name="nav_ai">AI</string>
@@ -250,7 +250,7 @@
     <string name="nav_stats">Stats</string>
     <string name="nav_settings">Settings</string>
 
-    <!-- Statistics Categories & Trends -->
+    
     <string name="stats_by_category">By Category</string>
     <string name="stats_trend_label">Trend</string>
     <string name="stats_trend_up">Increasing</string>
@@ -268,11 +268,11 @@
     <string name="cat_cook">Cook</string>
     <string name="cat_garden">Garden</string>
 
-    <!-- Heatmap -->
+    
     <string name="heatmap_title">Productivity Heatmap</string>
     <string name="heatmap_desc">View monthly overview</string>
     <string name="heatmap_open_desc">Open Heatmap</string>
-    <!-- Focus Mode Settings -->
+    
     <string name="focus_settings_title_screen">Focus Mode</string>
     <string name="focus_settings_desc_screen">Block distractions, boost productivity</string>
     <string name="focus_stats_total_time">Time</string>
@@ -297,7 +297,7 @@
     <string name="focus_no_apps_title">No Blocked Apps</string>
     <string name="focus_no_apps_desc">Add distracting apps to focus better</string>
     
-    <!-- Timeline Extras -->
+    
     <string name="timeline_overlap_warning">Tasks are overlapping</string>
     <string name="timeline_free_time_title">free time!</string>
     <string name="timeline_free_time_desc">That slot has passed—seize the next one.</string>
@@ -305,18 +305,18 @@
     <string name="timeline_empty_desc">Tap + to add a new task</string>
     <string name="timeline_add_task_label">Add Task</string>
     
-    <!-- General -->
+    
     <string name="content_desc_back">Back</string>
     <string name="content_desc_open">Open</string>
     <string name="content_desc_delete">Delete</string>
     <string name="content_desc_avatar">Avatar</string>
 
-    <!-- Daily Quote -->
+    
     <string name="daily_quote_title">Daily Quote</string>
     <string name="quote_expand">Expand</string>
     <string name="quote_collapse">Collapse</string>
 
-    <!-- AI Chat System Messages -->
+    
     <string name="ai_welcome_message">Hello! 👋 I\'m Tiramisu AI.\n\n💬 **Ask Mode**: Q&amp;A, advice\n🤖 **Agent Mode**: Propose and execute actions\n🎯 **Life Planner**: Long-term planning\n\nSwitch modes using the toggle above!</string>
     <string name="ai_mode_switch_ask">Switched to Ask Mode. I will answer your questions.</string>
     <string name="ai_mode_switch_agent">Switched to Agent Mode. I will propose actions and wait for your confirmation.</string>
@@ -333,7 +333,7 @@
     <string name="ai_context_no_schedule">No schedules found.</string>
     <string name="ai_context_intro">Today: %1$s\nNOTE: Recurring schedules (daily/weekly) will appear today.\nSchedule list:\n%2$s</string>
 
-    <!-- Common Toasts -->
+    
     <string name="msg_success">Success</string>
     <string name="msg_error">An error occurred</string>
     <string name="msg_saved">Saved</string>
@@ -341,7 +341,7 @@
     <string name="msg_deleted">Deleted</string>
     <string name="msg_coming_soon">Feature coming soon</string>
 
-    <!-- Auth -->
+    
     <string name="error_empty_input">Please enter email and password</string>
     <string name="error_invalid_email">Invalid email</string>
     <string name="msg_syncing_data">Syncing data...</string>
@@ -359,7 +359,7 @@
     <string name="error_email_taken">Email already in use</string>
     <string name="error_network">Network error</string>
 
-    <!-- Settings & Timeline -->
+    
     <string name="error_mic_permission">Microphone permission required for Voice Command</string>
     <string name="msg_notification_settings">Notification settings</string>
     <string name="error_relogin">Please login again</string>
@@ -378,7 +378,7 @@
     <string name="error_delete_all_failed">❌ Failed to delete data</string>
     <string name="msg_logout_success">Logged out</string>
 
-    <!-- Onboarding -->
+    
     <string name="onboarding_title_1">Smart Task\nManagement</string>
     <string name="onboarding_desc_1">Create, organize and track all daily tasks with a simple and intuitive interface.</string>
     <string name="onboarding_title_2">Never miss\na deadline</string>
@@ -391,10 +391,10 @@
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_skip">Skip</string>
 
-    <!-- Statistics -->
+    
     <string name="stats_month_label">Month %s</string>
 
-    <!-- Profile -->
+    
     <string name="msg_update_success">Update successful!</string>
     <string name="error_read_image">Error reading image</string>
     <string name="profile_stats">Statistics</string>
@@ -416,14 +416,14 @@
     <string name="profile_streak">Streak Days</string>
     <string name="profile_trees">Planted Trees</string>
 
-    <!-- Notification Settings -->
+    
     <string name="notif_settings_title">NOTIFICATION SETTINGS</string>
     <string name="notif_timer_title">Timer</string>
     <string name="notif_timer_desc">Show notification when timer is running</string>
     <string name="notif_timeline_title">Timeline</string>
     <string name="notif_timeline_desc">Schedule reminders for tasks</string>
 
-    <!-- Personalization Settings -->
+    
     <string name="pers_section_lifestyle">LIFESTYLE</string>
     <string name="pers_section_days">ACTIVE DAYS</string>
     <string name="pers_section_sleep">SLEEP &amp; WAKE UP</string>
@@ -438,7 +438,7 @@
     <string name="pers_add_activity">Add Activity</string>
     <string name="pers_reset_plan">Reset Plan</string>
     
-    <!-- Time Picker Dialog -->
+    
     <string name="picker_title_wake">Select wake up time</string>
     <string name="picker_title_sleep">Select sleep time</string>
     <string name="picker_title_work_start">Select work start time</string>
@@ -447,7 +447,7 @@
     <string name="picker_title_start">Select start time</string>
     <string name="picker_title_end">Select end time</string>
 
-    <!-- Add Custom Period -->
+    
     <string name="custom_period_title">Add Activity</string>
     <string name="custom_period_name_hint">Activity Name</string>
     <string name="custom_period_desc_hint">Add description...</string>
@@ -459,12 +459,12 @@
     <string name="custom_period_minute">minutes</string>
     <string name="custom_period_sheet_label">Select Label</string>
 
-    <!-- Legal -->
+    
     <string name="legal_privacy_policy">Privacy Policy</string>
     <string name="legal_terms_service">Terms of Service</string>
     <string name="legal_last_updated">Last updated: %s</string>
     
-    <!-- Privacy Policy Content -->
+    
     <string name="privacy_intro_title">1. Introduction</string>
     <string name="privacy_intro_content">Welcome to Tempus - Smart Time Management App. We are committed to protecting your privacy and personal data. This policy describes how we collect, use, and protect your information.</string>
     
@@ -494,7 +494,7 @@
     <string name="privacy_contact_title">8. Contact Us</string>
     <string name="privacy_contact_content">If you have questions about privacy policy, please contact:\n\n📧 Email: support@tempus-app.com\n🌐 Website: https://tempus-app.com</string>
 
-    <!-- Terms of Service Content -->
+    
     <string name="terms_accept_title">1. Acceptance of Terms</string>
     <string name="terms_accept_content">By downloading, installing, or using the Tempus app, you agree to comply with the terms and conditions set forth in this document.</string>
     
@@ -525,7 +525,7 @@
     <string name="terms_contact_title">10. Contact</string>
     <string name="terms_contact_content">Questions about terms of service:\n\n📧 Email: legal@tempus-app.com\n🌐 Website: https://tempus-app.com/terms</string>
 
-    <!-- Missing Personalization Strings -->
+    
     <string name="pers_title">Personalization</string>
     <string name="pers_delete">Delete</string>
     <string name="pers_add_period">Add Period</string>
@@ -546,7 +546,7 @@
     <string name="pers_lifestyle">Lifestyle</string>
     <string name="more_options">More options</string>
     
-    <!-- Days of Week -->
+    
     <string name="day_mon_short">Mon</string>
     <string name="day_tue_short">Tue</string>
     <string name="day_wed_short">Wed</string>
@@ -555,7 +555,7 @@
     <string name="day_sat_short">Sat</string>
     <string name="day_sun_short">Sun</string>
     
-    <!-- Contact Screen -->
+    
     <string name="contact_title">Contact &amp; Support</string>
     <string name="contact_channels_title">CONTACT CHANNELS</string>
     <string name="contact_fb_title">Facebook Fanpage</string>

@@ -28,7 +28,7 @@ class SupabaseUserRepository(
         val userDto = list.firstOrNull() ?: throw IllegalStateException("User data not found in database")
         val user = userDto.toDomain()
         
-        // Cache profile data for offline use
+        
         val email = supabase.auth.currentUserOrNull()?.email ?: ""
         UserProfileCache.saveProfile(user.username, email, user.avatar, user.themeColor)
         
@@ -55,34 +55,32 @@ class SupabaseUserRepository(
         val userId = supabase.auth.currentUserOrNull()?.id
             ?: throw IllegalStateException("User not logged in")
 
-        // Use a unique name to avoid caching issues or collisions
+        
         val fileName = "$userId/${System.currentTimeMillis()}.jpg"
         val bucket = supabase.storage.from("avatars")
 
-        // Upload file
+        
         bucket.upload(fileName, byteArray)
 
-        // Get public URL
+        
         val publicUrl = bucket.publicUrl(fileName)
 
-        // Update user profile with new avatar URL
+        
         val user = getCurrentUser()
         val updatedUser = user.copy(avatar = publicUrl)
         updateUser(updatedUser)
         
-        // Update cache with new avatar URL
+        
         val email = supabase.auth.currentUserOrNull()?.email ?: ""
         UserProfileCache.saveProfile(user.username, email, publicUrl)
 
         return publicUrl
     }
     
-    /**
-     * Update only the theme_color for current user
-     */
+    
     override suspend fun updateThemeColor(themeColor: String) {
         val userId = supabase.auth.currentUserOrNull()?.id
-            ?: return // Silently fail if not logged in
+            ?: return 
         
         supabase.from("users")
             .update(

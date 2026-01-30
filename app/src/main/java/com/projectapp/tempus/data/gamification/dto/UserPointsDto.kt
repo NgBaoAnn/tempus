@@ -4,9 +4,7 @@ import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * DTO để map với bảng user_points trên Supabase
- */
+
 @Serializable
 data class UserPointsDto(
     val id: String? = null,
@@ -27,9 +25,7 @@ data class UserPointsDto(
     val updatedAt: String? = null
 )
 
-/**
- * Convert DTO sang Entity để sử dụng trong app
- */
+
 fun UserPointsDto.toEntity(): UserPointsEntity {
     return UserPointsEntity(
         id = "current_user",
@@ -41,9 +37,7 @@ fun UserPointsDto.toEntity(): UserPointsEntity {
     )
 }
 
-/**
- * Convert Entity sang DTO để lưu lên Supabase
- */
+
 fun UserPointsEntity.toDto(userId: String): UserPointsDto {
     return UserPointsDto(
         userId = userId,
@@ -55,9 +49,7 @@ fun UserPointsEntity.toDto(userId: String): UserPointsDto {
     )
 }
 
-/**
- * DTO riêng cho update request (không có id, user_id, created_at)
- */
+
 @Serializable
 data class UserPointsUpdateDto(
     @SerialName("total_points")

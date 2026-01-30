@@ -35,43 +35,41 @@ import com.projectapp.tempus.data.notes.entity.NoteEntity
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Modern Design System Colors - Flat Design with Premium Feel
- */
+
 object NotesDesignSystem {
-    // Primary Palette
-    val Primary = Color(0xFF3B82F6)        // Blue 500
-    val PrimaryLight = Color(0xFF60A5FA)    // Blue 400
-    val PrimaryDark = Color(0xFF1D4ED8)     // Blue 700
     
-    // Accent Colors
-    val Accent = Color(0xFF60A5FA)          // Blue 400 (was Violet)
-    val AccentLight = Color(0xFF93C5FD)     // Blue 300
-    val Success = Color(0xFF10B981)         // Emerald 500
-    val Warning = Color(0xFFF59E0B)         // Amber 500
+    val Primary = Color(0xFF3B82F6)        
+    val PrimaryLight = Color(0xFF60A5FA)    
+    val PrimaryDark = Color(0xFF1D4ED8)     
     
-    // Backgrounds
-    val Background = Color(0xFFF8FAFC)      // Slate 50
+    
+    val Accent = Color(0xFF60A5FA)          
+    val AccentLight = Color(0xFF93C5FD)     
+    val Success = Color(0xFF10B981)         
+    val Warning = Color(0xFFF59E0B)         
+    
+    
+    val Background = Color(0xFFF8FAFC)      
     val Surface = Color(0xFFFFFFFF)
-    val SurfaceElevated = Color(0xFFF1F5F9) // Slate 100
+    val SurfaceElevated = Color(0xFFF1F5F9) 
     
-    // Text Colors
-    val TextPrimary = Color(0xFF0F172A)     // Slate 900
-    val TextSecondary = Color(0xFF475569)   // Slate 600
-    val TextMuted = Color(0xFF94A3B8)       // Slate 400
     
-    // Note Card Colors - Soft pastels
-    val CardYellow = Color(0xFFFEF3C7)      // Amber 100
-    val CardBlue = Color(0xFFDBEAFE)        // Blue 100
-    val CardGreen = Color(0xFFD1FAE5)       // Emerald 100
-    val CardPink = Color(0xFFFCE7F3)        // Pink 100
-    val CardPurple = Color(0xFFEDE9FE)      // Violet 100
-    val CardOrange = Color(0xFFFFEDD5)      // Orange 100
+    val TextPrimary = Color(0xFF0F172A)     
+    val TextSecondary = Color(0xFF475569)   
+    val TextMuted = Color(0xFF94A3B8)       
+    
+    
+    val CardYellow = Color(0xFFFEF3C7)      
+    val CardBlue = Color(0xFFDBEAFE)        
+    val CardGreen = Color(0xFFD1FAE5)       
+    val CardPink = Color(0xFFFCE7F3)        
+    val CardPurple = Color(0xFFEDE9FE)      
+    val CardOrange = Color(0xFFFFEDD5)      
     val CardDefault = Color(0xFFFFFFFF)
     
-    // Gradients
+    
     val PrimaryGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF3B82F6), Color(0xFF60A5FA))  // Blue gradient
+        colors = listOf(Color(0xFF3B82F6), Color(0xFF60A5FA))  
     )
     val WarmGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFF97316), Color(0xFFEC4899))
@@ -81,9 +79,7 @@ object NotesDesignSystem {
     )
 }
 
-/**
- * Main Notes Screen - Modern Flat Design with Premium Feel
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
@@ -117,7 +113,7 @@ fun NotesScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Modern Search Bar with animation
+            
             AnimatedSearchBar(
                 query = searchQuery,
                 onQueryChange = onSearchQueryChange,
@@ -127,7 +123,7 @@ fun NotesScreen(
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             )
             
-            // Content with smooth transitions
+            
             AnimatedContent(
                 targetState = when {
                     isLoading -> "loading"
@@ -323,23 +319,7 @@ private fun ModernNoteCard(
     onClick: () -> Unit,
     onPinClick: () -> Unit
 ) {
-    // Determine card background color
-    // We can keep the pastel colors but ensure they work in dark mode or tone them down
-    // For now, let's map them to somewhat safe colors, or just ensure text is legible.
-    // Ideally, "yellow" etc. should perhaps map to surfaceContainerHigh + a tint in Dark Mode.
-    // For simplicity and "sync theme" goal, let's use surface colors but maybe tinted if feasible.
-    // Or, keep the specific colors but ensure text contrast.
     
-    // For now, I will map "default" to surface, and others I'll leave as custom but careful.
-    // However, if the user wants FULL theme, maybe colored notes are part of the feature?
-    // Let's keep the colored cards as they are likely a feature (color coding), 
-    // BUT we must ensure the text color is readable.
-    // In Dark Mode, these pastel colors might be too bright.
-    
-    // Strategy: Use the same colors but maybe alpha-blended with primaryContainer if dark?
-    // Or simply use them. Let's assume they are "sticky note" colors and intended to be light.
-    // BUT we must ensure the Text color on top is black/dark grey, NOT white (if app is dark theme).
-    // So for the CARD content, we unfortunately need dark text even in dark mode if the background is light pastel.
     
     val backgroundColor = when (note.color) {
         "yellow" -> Color(0xFFFEF3C7)
@@ -351,7 +331,7 @@ private fun ModernNoteCard(
         else -> MaterialTheme.colorScheme.surface
     }
     
-    // If background is specific color (not surface), force dark text
+    
     val contentColor = if (note.color != "default" && note.color != null) Color(0xFF0F172A) else MaterialTheme.colorScheme.onSurface
     val mutedColor = if (note.color != "default" && note.color != null) Color(0xFF64748B) else MaterialTheme.colorScheme.onSurfaceVariant
     
@@ -376,7 +356,7 @@ private fun ModernNoteCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header with Pin
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -418,12 +398,12 @@ private fun ModernNoteCard(
                 Spacer(modifier = Modifier.height(8.dp))
             }
             
-            // Content preview
+            
             if (note.content.isNotBlank()) {
                 Text(
                     text = note.content,
                     fontSize = 14.sp,
-                    color = convertToDarker(contentColor, 0.8f), // Slightly lighter than pure black
+                    color = convertToDarker(contentColor, 0.8f), 
                     maxLines = 8,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 21.sp
@@ -432,7 +412,7 @@ private fun ModernNoteCard(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Footer with date
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -455,7 +435,7 @@ private fun ModernNoteCard(
     }
 }
 
-// Helper to avoid heavy dependencies, just returning color as is for now or logic
+
 private fun convertToDarker(color: Color, alpha: Float): Color {
     return color.copy(alpha = alpha)
 }
@@ -486,7 +466,7 @@ private fun ModernEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Animated icon container
+        
         Box(
             modifier = Modifier
                 .size(120.dp)

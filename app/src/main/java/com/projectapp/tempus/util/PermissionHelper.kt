@@ -10,23 +10,18 @@ import androidx.appcompat.app.AlertDialog
 
 object PermissionHelper {
 
-    /**
-     * Check if the app has permission to schedule exact alarms
-     */
+    
     fun canScheduleExactAlarms(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.canScheduleExactAlarms()
         } else {
-            // Permission not required for Android 11 and below
+            
             true
         }
     }
 
-    /**
-     * Show dialog explaining the need for SCHEDULE_EXACT_ALARM permission
-     * and offer to open Settings
-     */
+    
     fun showAlarmPermissionDialog(context: Context, onPermissionGranted: () -> Unit) {
         AlertDialog.Builder(context)
             .setTitle("Cần cấp quyền thông báo")
@@ -40,16 +35,14 @@ object PermissionHelper {
             }
             .setNegativeButton("Để sau") { dialog, _ ->
                 dialog.dismiss()
-                // Still call the callback to save the task
+                
                 onPermissionGranted()
             }
             .setCancelable(false)
             .show()
     }
 
-    /**
-     * Open the alarm & reminders settings page for this app
-     */
+    
     private fun openAlarmSettings(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {

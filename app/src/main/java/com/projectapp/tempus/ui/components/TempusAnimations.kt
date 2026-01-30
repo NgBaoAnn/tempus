@@ -8,17 +8,14 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 
-/**
- * Tempus Animation Utilities
- * Premium micro-interactions for a modern, polished UI experience.
- */
+
 object TempusAnimations {
-    // Animation durations
+    
     const val FAST = 150
     const val NORMAL = 300
     const val SLOW = 500
     
-    // Spring specs
+    
     val BouncySpring = spring<Float>(
         dampingRatio = Spring.DampingRatioMediumBouncy,
         stiffness = Spring.StiffnessMedium
@@ -30,10 +27,7 @@ object TempusAnimations {
     )
 }
 
-/**
- * Scale press effect - Makes elements feel responsive when touched
- * Usage: Modifier.scalePressEffect()
- */
+
 fun Modifier.scalePressEffect(
     pressedScale: Float = 0.96f,
     enabled: Boolean = true
@@ -66,10 +60,7 @@ fun Modifier.scalePressEffect(
         }
 }
 
-/**
- * Fade in with slide up animation for list items
- * Usage: Modifier.fadeInSlideUp(index, visible)
- */
+
 fun Modifier.fadeInSlideUp(
     index: Int,
     visible: Boolean,
@@ -104,10 +95,7 @@ fun Modifier.fadeInSlideUp(
     }
 }
 
-/**
- * Pulse animation for attention-grabbing elements
- * Usage: Modifier.pulseEffect()
- */
+
 fun Modifier.pulseEffect(
     enabled: Boolean = true,
     minScale: Float = 0.95f,
@@ -135,9 +123,7 @@ fun Modifier.pulseEffect(
     }
 }
 
-/**
- * Shimmer effect brush generator
- */
+
 @Composable
 fun rememberShimmerBrush(): androidx.compose.ui.graphics.Brush {
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
@@ -165,9 +151,7 @@ fun rememberShimmerBrush(): androidx.compose.ui.graphics.Brush {
     )
 }
 
-/**
- * Glow effect for high-priority or important items
- */
+
 fun Modifier.glowEffect(
     color: androidx.compose.ui.graphics.Color,
     enabled: Boolean = true,
@@ -191,15 +175,13 @@ fun Modifier.glowEffect(
     
     this.graphicsLayer {
         shadowElevation = blurRadius
-        // Note: Custom glow color requires custom drawing
-        // This provides a subtle pulsing shadow effect
+        
+        
         this.alpha = 0.9f + (alpha * 0.1f)
     }
 }
 
-/**
- * Rotation animation for icons (e.g., FAB expand/collapse)
- */
+
 fun Modifier.rotateOnState(
     rotated: Boolean,
     degrees: Float = 45f

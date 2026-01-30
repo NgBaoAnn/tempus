@@ -6,21 +6,11 @@ import android.content.Context
 import android.util.Log
 import com.projectapp.tempus.R
 
-/**
- * Helper object để refresh Tasks Widget khi có thay đổi trong schedule data.
- * 
- * Gọi [refreshTasksWidget] mỗi khi có thay đổi CRUD trên schedule
- * để widget tự động cập nhật hiển thị.
- */
+
 object WidgetRefreshHelper {
     private const val TAG = "WidgetRefreshHelper"
     
-    /**
-     * Refresh tất cả Tasks Widget instances.
-     * Gọi hàm này mỗi khi có thay đổi trong schedule data.
-     * 
-     * @param context Application context
-     */
+    
     fun refreshTasksWidget(context: Context) {
         try {
             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -34,7 +24,7 @@ object WidgetRefreshHelper {
             
             Log.d(TAG, "Refreshing ${widgetIds.size} widget(s)")
             
-            // Notify widget để reload data từ database
+            
             widgetIds.forEach { widgetId ->
                 appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_tasks_list)
             }

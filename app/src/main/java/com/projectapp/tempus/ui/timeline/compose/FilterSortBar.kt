@@ -32,12 +32,7 @@ import com.projectapp.tempus.data.schedule.dto.StatusType
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.timeline.SortOption
 
-// Color definitions for filter UI - aligned with TempusDesignSystem
-// FilterColors object removed - using MaterialTheme directly
 
-/**
- * Filter and Sort Bar for Timeline
- */
 @Composable
 fun FilterSortBar(
     searchQuery: String,
@@ -62,14 +57,14 @@ fun FilterSortBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-        // Search Bar Row
+        
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Search TextField
+            
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -126,7 +121,7 @@ fun FilterSortBar(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Sort Button
+            
             Box {
                 IconButton(
                     onClick = { showSortMenu = true },
@@ -169,7 +164,7 @@ fun FilterSortBar(
             
             Spacer(modifier = Modifier.width(4.dp))
             
-            // Filter Toggle Button
+            
             IconButton(
                 onClick = { isExpanded = !isExpanded },
                 modifier = Modifier
@@ -188,7 +183,7 @@ fun FilterSortBar(
             }
         }
         
-        // Expandable Filter Section
+        
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically(),
@@ -200,7 +195,7 @@ fun FilterSortBar(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 12.dp)
             ) {
-                // Priority Chips
+                
                 Text(
                     text = "Mức ưu tiên",
                     fontSize = 12.sp,
@@ -241,7 +236,7 @@ fun FilterSortBar(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Label Chips
+                
                 Text(
                     text = "Danh mục",
                     fontSize = 12.sp,
@@ -255,7 +250,7 @@ fun FilterSortBar(
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
                 ) {
-                    // Show common labels
+                    
                     val commonLabels = listOf(
                         ScheduleLabel.wakeup to "⏰ Thức dậy",
                         ScheduleLabel.eat to "🍽️ Ăn uống",
@@ -279,7 +274,7 @@ fun FilterSortBar(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Status Chips
+                
                 Text(
                     text = "Trạng thái",
                     fontSize = 12.sp,
@@ -316,7 +311,7 @@ fun FilterSortBar(
                     )
                 }
                 
-                // Clear All Button
+                
                 if (isFilterActive) {
                     Spacer(modifier = Modifier.height(12.dp))
                     TextButton(
@@ -335,7 +330,7 @@ fun FilterSortBar(
             }
         }
         
-        // Divider
+        
         HorizontalDivider(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             thickness = 1.dp

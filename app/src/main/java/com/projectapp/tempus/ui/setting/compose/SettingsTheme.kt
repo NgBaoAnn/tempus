@@ -5,25 +5,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-/**
- * Settings screen color palette - Aligned with TempusDesignSystem
- */
+
 object SettingsColors {
-    // Background
+    
     val Background = TempusDesignSystem.Slate50
     val Surface = TempusDesignSystem.White
     
-    // Pro/Premium gradient - coral to pink (keep for visual distinction)
+    
     val ProGradient = Brush.linearGradient(
         colors = listOf(Color(0xFFFF6B6B), Color(0xFFFF8E53))
     )
     
-    // Profile gradient - using primary blue
+    
     val ProfileGradient = Brush.linearGradient(
         colors = listOf(TempusDesignSystem.Primary, TempusDesignSystem.PrimaryLight)
     )
     
-    // Icon colors - aligned with TempusDesignSystem
+    
     val IconBgBlue = TempusDesignSystem.Primary.copy(alpha = 0.12f)
     val IconBlue = TempusDesignSystem.Primary
     
@@ -42,7 +40,7 @@ object SettingsColors {
     val IconBgPink = TempusDesignSystem.Error.copy(alpha = 0.12f)
     val IconPink = TempusDesignSystem.Error
     
-    val IconBgYellow = Color(0xFFFFCC00).copy(alpha = 0.12f)  // Keep yellow for star/rating
+    val IconBgYellow = Color(0xFFFFCC00).copy(alpha = 0.12f)  
     val IconYellow = Color(0xFFFFCC00)
     
     val IconBgGray = TempusDesignSystem.Slate400.copy(alpha = 0.12f)
@@ -54,21 +52,19 @@ object SettingsColors {
     val IconBgCyan = TempusDesignSystem.Secondary.copy(alpha = 0.12f)
     val IconCyan = TempusDesignSystem.Secondary
     
-    // Text
+    
     val TextPrimary = TempusDesignSystem.TextPrimary
     val TextSecondary = TempusDesignSystem.TextSecondary
     val TextMuted = TempusDesignSystem.Slate300
     
-    // Divider
+    
     val Divider = TempusDesignSystem.Slate200
     
-    // Logout button
+    
     val LogoutBackground = TempusDesignSystem.Slate900
 }
 
-/**
- * Settings screen dimensions - iOS-inspired
- */
+
 object SettingsDimens {
     val ScreenPadding = 16.dp
     val CardCornerRadius = 12.dp

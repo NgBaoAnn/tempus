@@ -1,8 +1,6 @@
 package com.projectapp.tempus.domain.model
 
-/**
- * Các loại cây có thể trồng
- */
+
 enum class TreeType(
     val displayName: String,
     val costToPlant: Int,
@@ -22,9 +20,7 @@ enum class TreeType(
             return entries.firstOrNull { it.name == type } ?: OAK
         }
         
-        /**
-         * Lấy danh sách cây có thể trồng với số điểm hiện tại
-         */
+        
         fun getAffordableTrees(currentPoints: Int): List<TreeType> {
             return entries.filter { currentPoints >= it.costToPlant }
         }

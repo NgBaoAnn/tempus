@@ -19,10 +19,7 @@ import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/**
- * RemoteViewsService cung cấp data cho widget ListView
- * Sử dụng ScheduleRepository (giống Timeline) để lấy dữ liệu
- */
+
 class TasksWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
         return TasksRemoteViewsFactory(applicationContext)
@@ -57,7 +54,7 @@ class TasksRemoteViewsFactory(
             Log.d("TasksWidget", "=== Loading tasks via ScheduleRepository ===")
             
             runBlocking {
-                // Get user ID from Supabase session
+                
                 try {
                     Log.d("TasksWidget", "Attempting to restore session from storage...")
                     supabase.auth.loadFromStorage()
@@ -82,7 +79,7 @@ class TasksRemoteViewsFactory(
                 val dateStr = today.toString()
                 Log.d("TasksWidget", "Loading tasks for date: $dateStr")
 
-                // Use ScheduleRepository (same as Timeline)
+                
                 val schedules = scheduleRepository.getAllSchedules(userId)
                 Log.d("TasksWidget", "Got ${schedules.size} schedules from repository")
                 
@@ -94,27 +91,27 @@ class TasksRemoteViewsFactory(
                 
                 val taskIds = schedules.map { it.id }
                 
-                // Get schedule items for today
+                
                 val scheduleItems = scheduleRepository.getScheduleItemsByDate(dateStr, taskIds)
                 Log.d("TasksWidget", "Got ${scheduleItems.size} schedule items for today")
                 
-                // Get edited versions if any
+                
                 val editedIds = scheduleItems.mapNotNull { it.editedVersion }.distinct()
                 val editedMap = scheduleRepository.getEditedVersions(editedIds).associateBy { it.id }
                 
-                // Get subtasks
+                
                 val allSubtasks = scheduleRepository.getSubTasksBatch(taskIds)
                 val subtasksMap = allSubtasks.groupBy { it.scheduleId }
                 
-                // Build timeline blocks (same logic as Timeline)
+                
                 val blocks = builder.build(today, schedules, scheduleItems, editedMap, subtasksMap)
                 Log.d("TasksWidget", "Built ${blocks.size} timeline blocks for today")
                 
-                // Filter out completed tasks and take max 5 sorted by start time
+                
                 tasks.clear()
                 tasks.addAll(
                     blocks
-                        .filter { it.status != StatusType.done } // Không hiển thị task đã hoàn thành
+                        .filter { it.status != StatusType.done } 
                         .sortedBy { it.startTime }
                         .take(5)
                 )
@@ -151,7 +148,7 @@ class TasksRemoteViewsFactory(
             Log.d("TasksWidget", "Rendering task: ${task.title}")
             val views = RemoteViews(context.packageName, R.layout.widget_task_item)
 
-            // Set task icon based on label and tint with task color
+            
             val iconRes = getLabelIconResource(task.labelEnum)
             views.setImageViewResource(R.id.widget_task_icon, iconRes)
             try {
@@ -161,19 +158,19 @@ class TasksRemoteViewsFactory(
                 Log.w("TasksWidget", "Invalid color: ${task.color}, using default")
             }
 
-            // Set priority color for circle dot (use setColorFilter for ImageView)
+            
             val priorityColor = when (task.priority) {
-                PriorityType.high -> android.graphics.Color.parseColor("#F44336") // Red
-                PriorityType.medium -> android.graphics.Color.parseColor("#FFC107") // Amber
-                PriorityType.low -> android.graphics.Color.parseColor("#4CAF50") // Green
-                else -> android.graphics.Color.parseColor("#9E9E9E") // Gray
+                PriorityType.high -> android.graphics.Color.parseColor("#F44336") 
+                PriorityType.medium -> android.graphics.Color.parseColor("#FFC107") 
+                PriorityType.low -> android.graphics.Color.parseColor("#4CAF50") 
+                else -> android.graphics.Color.parseColor("#9E9E9E") 
             }
             views.setInt(R.id.widget_task_priority_dot, "setColorFilter", priorityColor)
 
-            // Set task name
+            
             views.setTextViewText(R.id.widget_task_name, task.title)
 
-            // Format time range
+            
             try {
                 val startTime = task.startTime
                 val endTime = startTime.plus(task.duration)
@@ -184,13 +181,13 @@ class TasksRemoteViewsFactory(
                 views.setTextViewText(R.id.widget_task_time, "--:--")
             }
 
-            // Setup container click - navigate to timeline
+            
             val containerFillIntent = Intent().apply {
                 action = TasksWidgetProvider.ACTION_TASK_CLICK
             }
             views.setOnClickFillInIntent(R.id.widget_task_item_container, containerFillIntent)
 
-            // Setup complete button click - mark task as done
+            
             val completeFillIntent = Intent().apply {
                 action = TasksWidgetProvider.ACTION_COMPLETE_TASK
                 putExtra(TasksWidgetProvider.EXTRA_TASK_ID, task.taskId)
@@ -198,24 +195,24 @@ class TasksRemoteViewsFactory(
             }
             views.setOnClickFillInIntent(R.id.widget_task_complete_btn, completeFillIntent)
             
-            // Check if task is pending completion (show check icon with background)
+            
             val isPendingComplete = TasksWidgetProvider.pendingCompleteTasks.contains(task.taskId)
             
             try {
                 val taskColorInt = android.graphics.Color.parseColor(task.color)
                 
                 if (isPendingComplete) {
-                    // Show check circle icon (completed state) - use bitmap drawable directly
-                    // Note: setBackgroundTintList doesn't work with RemoteViews int parameter
+                    
+                    
                     views.setImageViewResource(R.id.widget_task_complete_btn, R.drawable.ic_check_circle)
                     views.setInt(R.id.widget_task_complete_btn, "setColorFilter", taskColorInt)
                 } else {
-                    // Show circle outline with task color tint (incomplete state)
+                    
                     views.setImageViewResource(R.id.widget_task_complete_btn, R.drawable.shape_circle_outline_gray)
                     views.setInt(R.id.widget_task_complete_btn, "setColorFilter", taskColorInt)
                 }
             } catch (e: Exception) {
-                // Default gray if color is invalid
+                
                 views.setImageViewResource(R.id.widget_task_complete_btn, R.drawable.shape_circle_outline_gray)
                 views.setInt(R.id.widget_task_complete_btn, "setColorFilter", android.graphics.Color.parseColor("#757575"))
             }
@@ -227,9 +224,7 @@ class TasksRemoteViewsFactory(
         }
     }
 
-    /**
-     * Map ScheduleLabel to drawable resource
-     */
+    
     private fun getLabelIconResource(label: ScheduleLabel): Int {
         return when (label) {
             ScheduleLabel.wakeup -> R.drawable.wakeup

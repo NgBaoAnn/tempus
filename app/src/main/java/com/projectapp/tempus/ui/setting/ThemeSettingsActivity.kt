@@ -9,10 +9,7 @@ import com.projectapp.tempus.ui.setting.compose.ThemeSettingsScreen
 import com.projectapp.tempus.ui.theme.ThemeManager
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Activity for Theme Settings screen
- * Allows user to select Light, Dark, or System theme mode
- */
+
 class ThemeSettingsActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -53,7 +53,7 @@ fun RegisterScreen(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
         
-        // Title
+        
         Text(
             "Tạo tài khoản mới",
             fontSize = 30.sp,
@@ -65,14 +65,14 @@ fun RegisterScreen(
         
         Spacer(modifier = Modifier.height(50.dp))
         
-        // Form Card
+        
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = AuthColors.CardBackground)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Full Name
+                
                 RegisterField(
                     label = "Họ và tên",
                     value = fullName,
@@ -86,7 +86,7 @@ fun RegisterScreen(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Email
+                
                 RegisterField(
                     label = "Email",
                     value = email,
@@ -100,7 +100,7 @@ fun RegisterScreen(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Password
+                
                 RegisterPasswordFieldComp(
                     label = "Mật khẩu",
                     value = password,
@@ -114,7 +114,7 @@ fun RegisterScreen(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Confirm Password
+                
                 RegisterPasswordFieldComp(
                     label = "Nhập lại mật khẩu",
                     value = confirmPassword,
@@ -130,7 +130,7 @@ fun RegisterScreen(
         
         Spacer(modifier = Modifier.height(10.dp))
         
-        // Register Button
+        
         Button(
             onClick = { onRegisterClick(fullName, email, password, confirmPassword) },
             modifier = Modifier.fillMaxWidth().height(55.dp),
@@ -140,7 +140,7 @@ fun RegisterScreen(
             Text("Đăng ký", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         
-        // Login Link
+        
         TextButton(onClick = onLoginClick, modifier = Modifier.fillMaxWidth()) {
             Text("Đã có tài khoản? Đăng nhập", fontSize = 16.sp, color = AuthColors.PrimaryBlue)
         }

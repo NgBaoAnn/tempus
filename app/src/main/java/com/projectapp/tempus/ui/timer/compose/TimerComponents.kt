@@ -45,12 +45,10 @@ import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.R
 import java.util.Locale
 
-/**
- * Animated circular progress indicator for timer
- */
+
 @Composable
 fun CircularCountdown(
-    progress: Float, // 0f to 1f
+    progress: Float, 
     timerColor: Color,
     timeText: String,
     statusText: String,
@@ -74,7 +72,7 @@ fun CircularCountdown(
         modifier = modifier.size(TimerDimens.ProgressSize),
         contentAlignment = Alignment.Center
     ) {
-        // Background track
+        
         Canvas(modifier = Modifier.size(TimerDimens.ProgressSize)) {
             drawArc(
                 color = TimerColors.TrackBackground,
@@ -88,7 +86,7 @@ fun CircularCountdown(
             )
         }
         
-        // Progress arc
+        
         Canvas(modifier = Modifier.size(TimerDimens.ProgressSize)) {
             drawArc(
                 color = timerColor,
@@ -102,11 +100,11 @@ fun CircularCountdown(
             )
         }
         
-        // Center content
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Time display
+            
             Text(
                 text = timeText,
                 style = TimerTypography.TimeDisplay,
@@ -115,7 +113,7 @@ fun CircularCountdown(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Status row
+            
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -137,7 +135,7 @@ fun CircularCountdown(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // End time
+            
             Text(
                 text = endTimeText,
                 style = TimerTypography.BodyMedium
@@ -146,9 +144,7 @@ fun CircularCountdown(
     }
 }
 
-/**
- * Quick time selection buttons
- */
+
 @Composable
 fun QuickSelectButtons(
     selectedIndex: Int,
@@ -201,9 +197,7 @@ fun QuickSelectButtons(
     }
 }
 
-/**
- * Scrollable wheel-style time picker
- */
+
 @Composable
 fun TimePickerDisplay(
     hours: Int,
@@ -217,7 +211,7 @@ fun TimePickerDisplay(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Hours wheel
+        
         WheelPicker(
             value = hours,
             range = 0..23,
@@ -225,7 +219,7 @@ fun TimePickerDisplay(
             onValueChange = onHoursChange
         )
         
-        // Colon separator
+        
         Text(
             text = ":",
             style = TimerTypography.TimeDisplay.copy(fontSize = 40.sp),
@@ -233,7 +227,7 @@ fun TimePickerDisplay(
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         
-        // Minutes wheel
+        
         WheelPicker(
             value = minutes,
             range = 0..59,
@@ -255,14 +249,14 @@ private fun WheelPicker(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = value.coerceIn(range))
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
     
-    // Sync scroll position to value changes from outside
+    
     LaunchedEffect(value) {
         if (listState.firstVisibleItemIndex != value) {
             listState.animateScrollToItem(value.coerceIn(range))
         }
     }
     
-    // Update value when scroll settles
+    
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             val centerIndex = listState.firstVisibleItemIndex
@@ -283,7 +277,7 @@ private fun WheelPicker(
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
-            // Selection indicator
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -334,9 +328,7 @@ private fun WheelPicker(
     }
 }
 
-/**
- * Color selector for timer theme
- */
+
 @Composable
 fun ColorSelector(
     selectedColor: Color,
@@ -385,9 +377,7 @@ fun ColorSelector(
     }
 }
 
-/**
- * Control button (circular)
- */
+
 @Composable
 fun ControlButton(
     iconResId: Int,
@@ -419,9 +409,7 @@ fun ControlButton(
     }
 }
 
-/**
- * Action button (rectangular)
- */
+
 @Composable
 fun ActionButton(
     iconResId: Int,

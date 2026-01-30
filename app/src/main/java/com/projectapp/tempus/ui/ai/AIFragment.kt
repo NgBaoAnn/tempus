@@ -15,10 +15,7 @@ import com.projectapp.tempus.ui.ai.compose.ChatScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
 import io.github.jan.supabase.gotrue.auth
 
-/**
- * AI Chat Fragment
- * Provides Jetpack Compose chat interface for interacting with Tiramisu AI
- */
+
 class AIFragment : Fragment() {
 
     private lateinit var viewModel: AIViewModel
@@ -28,7 +25,7 @@ class AIFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize ViewModel with dependencies - use OfflineFirstScheduleRepository
+        
         val scheduleRepository = RepositoryProvider.getScheduleRepository(requireContext())
         val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
         
@@ -41,7 +38,7 @@ class AIFragment : Fragment() {
         viewModel = ViewModelProvider(this, factory)[AIViewModel::class.java]
         
         return ComposeView(requireContext()).apply {
-            // Dispose composition when fragment's view is destroyed
+            
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
             )

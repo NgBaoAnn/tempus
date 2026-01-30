@@ -47,18 +47,14 @@ import com.projectapp.tempus.ui.components.TempusCard
 import java.util.Calendar
 import java.util.Locale
 
-/**
- * Timer states
- */
+
 enum class TimerState {
     SETUP,
     RUNNING,
     PAUSED
 }
 
-/**
- * Main Timer Screen composable
- */
+
 @Composable
 fun TimerScreen(
     timerState: TimerState,
@@ -88,7 +84,7 @@ fun TimerScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        // Header
+        
         Text(
             text = if (timerState == TimerState.SETUP) stringResource(R.string.timer_setup_title) else stringResource(R.string.timer_countdown_title),
             style = MaterialTheme.typography.headlineLarge,
@@ -98,7 +94,7 @@ fun TimerScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Animated content switch between setup and running
+        
         AnimatedContent(
             targetState = timerState,
             transitionSpec = {
@@ -155,8 +151,8 @@ private fun SetupContent(
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        // Setup Card
-        // Setup Card
+        
+        
         TempusCard(
             modifier = Modifier.fillMaxWidth(),
             backgroundColor = MaterialTheme.colorScheme.surface,
@@ -166,7 +162,7 @@ private fun SetupContent(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Quick select buttons
+                
                 QuickSelectButtons(
                     selectedIndex = selectedQuickIndex,
                     onSelect = onQuickSelect
@@ -174,7 +170,7 @@ private fun SetupContent(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Time picker
+                
                 TimePickerDisplay(
                     hours = hours,
                     minutes = minutes,
@@ -184,12 +180,12 @@ private fun SetupContent(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Action buttons
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Reset button
+                    
                     ActionButton(
                         iconResId = R.drawable.ic_close,
                         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -198,7 +194,7 @@ private fun SetupContent(
                         modifier = Modifier.weight(1f)
                     )
                     
-                    // Start button
+                    
                     ActionButton(
                         iconResId = R.drawable.ic_play,
                         backgroundColor = selectedColor,
@@ -217,7 +213,7 @@ private fun SetupContent(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Quick Notes button - prominent position
+                
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -261,7 +257,7 @@ private fun SetupContent(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Focus Mode button
+                
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -318,8 +314,7 @@ private fun SetupContent(
         
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Settings Card
-        // Settings Card
+        
         TempusCard(
             modifier = Modifier.fillMaxWidth(),
             backgroundColor = MaterialTheme.colorScheme.surface,
@@ -328,7 +323,7 @@ private fun SetupContent(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                // Tag row
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -352,7 +347,7 @@ private fun SetupContent(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                // Color selector
+                
                 ColorSelector(
                     selectedColor = selectedColor,
                     onColorSelect = onColorSelect
@@ -394,7 +389,7 @@ private fun RunningContent(
         ) {
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Circular countdown
+            
             CircularCountdown(
                 progress = progress,
                 timerColor = timerColor,
@@ -406,14 +401,14 @@ private fun RunningContent(
             
             Spacer(modifier = Modifier.weight(1f))
             
-            // Control buttons
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Cancel button
+                
                 ControlButton(
                     iconResId = R.drawable.ic_close,
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -421,7 +416,7 @@ private fun RunningContent(
                     onClick = onCancel
                 )
                 
-                // Pause/Resume button
+                
                 ControlButton(
                     iconResId = if (isRunning) R.drawable.ic_pause else R.drawable.ic_play,
                     backgroundColor = timerColor,

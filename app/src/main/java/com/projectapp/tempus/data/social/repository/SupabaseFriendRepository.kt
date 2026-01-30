@@ -12,9 +12,7 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import java.time.Instant
 
-/**
- * Implementation của FriendRepository sử dụng Supabase
- */
+
 class SupabaseFriendRepository(
     private val supabase: SupabaseClient = SupabaseClientProvider.client
 ) : FriendRepository {
@@ -24,13 +22,12 @@ class SupabaseFriendRepository(
             ?: throw IllegalStateException("User not logged in")
     }
 
-    // =============== FRIEND REQUESTS ===============
-
+    
     override suspend fun sendFriendRequest(receiverId: String): Result<FriendRequest> {
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Kiểm tra không gửi cho chính mình
+            
             if (currentUserId == receiverId) {
                 throw IllegalArgumentException("Cannot send friend request to yourself")
             }
@@ -40,14 +37,14 @@ class SupabaseFriendRepository(
                 receiverId = receiverId
             )
             
-            // Use simple DTO without FK joins to avoid parsing issues
+            
             val result = supabase.from("friend_requests")
                 .insert(dto) {
                     select(Columns.raw("id, sender_id, receiver_id, status, created_at, updated_at"))
                 }
                 .decodeSingle<FriendRequestSimpleDto>()
             
-            // Fix: Fetch receiver details to return full object for UI
+            
             val receiverProfile = fetchUsersDetails(listOf(receiverId))[receiverId]
             
             FriendRequest(
@@ -82,7 +79,7 @@ class SupabaseFriendRepository(
         )
     }
 
-    // Helper to fetch user details manually
+    
     private suspend fun fetchUsersDetails(userIds: List<String>): Map<String, UserBasicDto> {
         if (userIds.isEmpty()) return emptyMap()
         
@@ -102,7 +99,7 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // 1. Get simple requests
+            
             val requests = supabase.from("friend_requests")
                 .select(Columns.raw("id, sender_id, receiver_id, status, created_at, updated_at")) {
                     filter {
@@ -114,11 +111,11 @@ class SupabaseFriendRepository(
             
             if (requests.isEmpty()) return@runCatching emptyList()
 
-            // 2. Fetch sender details
+            
             val senderIds = requests.map { it.senderId }.distinct()
             val sendersMap = fetchUsersDetails(senderIds)
 
-            // 3. Map to domain
+            
             requests.map { dto ->
                 val sender = sendersMap[dto.senderId]
                 FriendRequest(
@@ -145,7 +142,7 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // 1. Get simple requests
+            
             val requests = supabase.from("friend_requests")
                 .select(Columns.raw("id, sender_id, receiver_id, status, created_at, updated_at")) {
                     filter {
@@ -157,11 +154,11 @@ class SupabaseFriendRepository(
             
             if (requests.isEmpty()) return@runCatching emptyList()
 
-            // 2. Fetch receiver details
+            
             val receiverIds = requests.map { it.receiverId }.distinct()
             val receiversMap = fetchUsersDetails(receiverIds)
 
-            // 3. Map to domain
+            
             requests.map { dto ->
                 val receiver = receiversMap[dto.receiverId]
                 FriendRequest(
@@ -188,7 +185,7 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Get the request details first
+            
             val request = supabase.from("friend_requests")
                 .select(Columns.raw("id, sender_id, receiver_id, status")) {
                     filter {
@@ -200,7 +197,7 @@ class SupabaseFriendRepository(
                 .decodeSingleOrNull<FriendRequestSimpleDto>()
                 ?: throw IllegalStateException("Friend request not found")
             
-            // Update request status
+            
             supabase.from("friend_requests")
                 .update(
                     UpdateFriendRequestDto(
@@ -213,7 +210,7 @@ class SupabaseFriendRepository(
                     }
                 }
             
-            // Create friendship (order IDs for constraint)
+            
             val orderedIds = listOf(request.senderId, request.receiverId).sorted()
             supabase.from("friendships")
                 .insert(
@@ -260,13 +257,12 @@ class SupabaseFriendRepository(
         }
     }
 
-    // =============== FRIENDSHIPS ===============
-
+    
     override suspend fun getFriends(): Result<List<Friendship>> {
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // 1. Get simple friendships
+            
             val results = supabase.from("friendships")
                 .select(Columns.raw("id, user1_id, user2_id, created_at")) {
                     filter {
@@ -280,15 +276,15 @@ class SupabaseFriendRepository(
             
             if (results.isEmpty()) return@runCatching emptyList()
 
-            // 2. Identify friend IDs
+            
             val friendIds = results.map { 
                 if (it.user1Id == currentUserId) it.user2Id else it.user1Id 
             }.distinct()
 
-            // 3. Keep Fetching friend details
+            
             val friendsMap = fetchUsersDetails(friendIds)
             
-            // 4. Map to domain
+            
             results.map { dto ->
                 val friendId = if (dto.user1Id == currentUserId) dto.user2Id else dto.user1Id
                 val friend = friendsMap[friendId]
@@ -320,14 +316,12 @@ class SupabaseFriendRepository(
         }
     }
 
-    // =============== BLOCKED USERS ===============
-
+    
     override suspend fun blockUser(userId: String): Result<Unit> {
     return runCatching {
         val currentUserId = getCurrentUserId()
         
-        // 1. Remove any existing friendship (auto-unfriend)
-        // Try to delete where current user is user1 or user2
+        
         try {
             supabase.from("friendships")
                 .delete {
@@ -345,10 +339,10 @@ class SupabaseFriendRepository(
                     }
                 }
         } catch (e: Exception) {
-            // Ignore if no friendship exists
+            
         }
         
-        // 2. Also delete any pending friend requests between the two users
+        
         try {
             supabase.from("friend_requests")
                 .delete {
@@ -366,10 +360,10 @@ class SupabaseFriendRepository(
                     }
                 }
         } catch (e: Exception) {
-            // Ignore if no requests exist
+            
         }
         
-        // 3. Add to blocked users
+        
         val dto = CreateBlockedUserDto(
             blockerId = currentUserId,
             blockedId = userId
@@ -396,7 +390,7 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // 1. Get blocked list
+            
             val results = supabase.from("blocked_users")
                 .select(Columns.raw("id, blocker_id, blocked_id, created_at")) {
                     filter {
@@ -407,29 +401,25 @@ class SupabaseFriendRepository(
             
             if (results.isEmpty()) return@runCatching emptyList()
             
-            // 2. Fetch blocked users details
+            
             val blockedIds = results.map { it.blockedId }.distinct()
             val blockedUsersMap = fetchUsersDetails(blockedIds)
 
-            // 3. Map to DTOs
+            
             results.mapNotNull { dto ->
                 val user = blockedUsersMap[dto.blockedId]
-                user // We return the UserBasicDto directly as per return type
+                user 
             }
         }
     }
 
-    /**
-     * Get all blocked user IDs (both directions)
-     * - Users I have blocked
-     * - Users who have blocked me
-     */
+    
     override suspend fun getAllBlockedUserIds(): Result<List<String>> {
         return runCatching {
             val currentUserId = getCurrentUserId()
             val blockedIds = mutableSetOf<String>()
             
-            // 1. Users I have blocked - Try/Catch independently
+            
             try {
                 val iBlocked = supabase.from("blocked_users")
                     .select(Columns.raw("blocked_id")) {
@@ -440,11 +430,11 @@ class SupabaseFriendRepository(
                     .decodeList<BlockedIdDto>()
                 blockedIds.addAll(iBlocked.map { it.blockedId })
             } catch (e: Exception) {
-                // Log error but continue
+                
                 e.printStackTrace()
             }
             
-            // 2. Users who have blocked me - Try/Catch independently
+            
             try {
                 val blockedMe = supabase.from("blocked_users")
                     .select(Columns.raw("blocker_id")) {
@@ -455,7 +445,7 @@ class SupabaseFriendRepository(
                     .decodeList<BlockerIdDto>()
                 blockedIds.addAll(blockedMe.map { it.blockerId })
             } catch (e: Exception) {
-                // Log error but continue
+                
                 e.printStackTrace()
             }
             
@@ -463,14 +453,12 @@ class SupabaseFriendRepository(
         }
     }
 
-    /**
-     * Check if a user is blocked (either direction)
-     */
+    
     override suspend fun isUserBlocked(userId: String): Result<Boolean> {
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Check if I blocked them
+            
             val iBlocked = supabase.from("blocked_users")
                 .select(Columns.raw("id")) {
                     filter {
@@ -483,7 +471,7 @@ class SupabaseFriendRepository(
             
             if (iBlocked.isNotEmpty()) return@runCatching true
             
-            // Check if they blocked me
+            
             val theyBlocked = supabase.from("blocked_users")
                 .select(Columns.raw("id")) {
                     filter {
@@ -498,8 +486,7 @@ class SupabaseFriendRepository(
         }
     }
 
-    // =============== USER SEARCH ===============
-
+    
     override suspend fun searchUsers(query: String): Result<List<UserBasicDto>> {
         return runCatching {
             val currentUserId = getCurrentUserId()
@@ -520,7 +507,7 @@ class SupabaseFriendRepository(
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Check if blocked
+            
             val blocked = supabase.from("blocked_users")
                 .select(Columns.raw("id, blocker_id, blocked_id")) {
                     filter {
@@ -534,7 +521,7 @@ class SupabaseFriendRepository(
                 return@runCatching RelationshipStatus.Blocked
             }
             
-            // Check if blocked by
+            
             val blockedBy = supabase.from("blocked_users")
                 .select(Columns.raw("id, blocker_id, blocked_id")) {
                     filter {
@@ -548,7 +535,7 @@ class SupabaseFriendRepository(
                 return@runCatching RelationshipStatus.BlockedBy
             }
             
-            // Check friendships
+            
             val orderedIds = listOf(currentUserId, userId).sorted()
             val friendship = supabase.from("friendships")
                 .select(Columns.raw("id, user1_id, user2_id")) {
@@ -563,7 +550,7 @@ class SupabaseFriendRepository(
                 return@runCatching RelationshipStatus.Friends
             }
             
-            // Check pending requests (sent)
+            
             val sentRequest = supabase.from("friend_requests")
                 .select(Columns.raw("id, sender_id, receiver_id, status")) {
                     filter {
@@ -578,7 +565,7 @@ class SupabaseFriendRepository(
                 return@runCatching RelationshipStatus.RequestSent
             }
             
-            // Check pending requests (received)
+            
             val receivedRequest = supabase.from("friend_requests")
                 .select(Columns.raw("id, sender_id, receiver_id, status")) {
                     filter {
@@ -597,19 +584,17 @@ class SupabaseFriendRepository(
         }
     }
 
-    // =============== USER PROFILE ===============
-
+    
     override suspend fun getUserProfile(userId: String): Result<UserProfile> {
         return runCatching {
-            // 1. Fetch User Basic Info
+            
             val userDto = supabase.from("users")
                 .select(Columns.raw("id, username, avatar, email, created_at")) {
                     filter { eq("id", userId) }
                 }
                 .decodeSingle<UserProfileDto>()
             
-            // 2. Fetch Stats
-            // Friends count
+            
             val friendsCount = supabase.from("friendships")
                 .select(Columns.raw("count")) {
                     filter {
@@ -621,7 +606,7 @@ class SupabaseFriendRepository(
                     count(io.github.jan.supabase.postgrest.query.Count.EXACT)
                 }.countOrNull() ?: 0
 
-            // Trees count - Count alive trees only
+            
             val treesCount = supabase.from("trees")
                 .select(Columns.raw("count")) {
                     filter {
@@ -631,10 +616,10 @@ class SupabaseFriendRepository(
                     count(io.github.jan.supabase.postgrest.query.Count.EXACT)
                 }.countOrNull() ?: 0
                 
-            // 3. Get relationship status (reuse existing)
+            
             val relationship = getRelationshipStatus(userId).getOrDefault(RelationshipStatus.None)
             
-            // 4. Map to Domain
+            
             UserProfile(
                 id = userDto.id,
                 username = userDto.username,
@@ -644,39 +629,35 @@ class SupabaseFriendRepository(
                     Instant.parse(userDto.createdAt).toString()
                 } catch (e: Exception) { "" },
                 friendsCount = friendsCount.toInt(),
-                treesCount = treesCount.toInt(), // Real value
+                treesCount = treesCount.toInt(), 
                 relationshipStatus = relationship
             )
         }
     }
 
-    // =============== DISCOVER / ALL USERS ===============
-
+    
     override suspend fun getAllUsers(excludedIds: List<String>): Result<List<UserBasicDto>> {
         return runCatching {
             val currentUserId = getCurrentUserId()
             
-            // Lấy tất cả users trừ current user và excludedIds
-            // Sort theo username để dễ duyệt
+            
             supabase.from("users")
                 .select(Columns.raw("id, username, avatar, email")) {
                     filter {
                         neq("id", currentUserId)
                         
-                            // Filter out excluded IDs using loop of neq (safe fallback)
+                            
                             excludedIds.forEach { neq("id", it) }
                     }
                     order("username", Order.ASCENDING)
-                    limit(50) // Limit để tránh load quá nhiều
+                    limit(50) 
                 }
                 .decodeList<UserBasicDto>()
         }
     }
 }
 
-/**
- * DTO helper for friendship query with both user joins
- */
+
 @kotlinx.serialization.Serializable
 private data class FriendshipWithBothUsersDto(
     val id: String,

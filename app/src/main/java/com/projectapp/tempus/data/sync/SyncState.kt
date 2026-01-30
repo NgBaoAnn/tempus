@@ -5,9 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * State của quá trình sync
- */
+
 data class SyncState(
     val pendingChanges: Int = 0,
     val isSyncing: Boolean = false,
@@ -16,18 +14,14 @@ data class SyncState(
     val progress: SyncProgress? = null
 )
 
-/**
- * Progress của sync (cho UI hiển thị)
- */
+
 data class SyncProgress(
-    val phase: String,           // "Uploading", "Downloading", etc.
+    val phase: String,           
     val current: Int,
     val total: Int
 )
 
-/**
- * Kết quả của một lần sync
- */
+
 data class SyncResult(
     var schedulesCreated: Int = 0,
     var schedulesUpdated: Int = 0,

@@ -45,7 +45,7 @@ fun TempusButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
-    // Scale animation on press
+    
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
         label = "buttonScale"
@@ -53,7 +53,7 @@ fun TempusButton(
 
     val shape = RoundedCornerShape(14.dp)
     
-    // Determine colors/modifier based on variant
+    
     val buttonModifier = modifier
         .height(52.dp)
         .scale(scale)
@@ -80,7 +80,7 @@ fun TempusButton(
         )
         .padding(horizontal = 24.dp)
 
-    // Content color logic
+    
     val actualContentColor = when (variant) {
         ButtonVariant.Solid, ButtonVariant.Gradient -> contentColor
         ButtonVariant.Outline, ButtonVariant.Ghost -> containerColor

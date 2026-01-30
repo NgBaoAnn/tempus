@@ -32,10 +32,7 @@ import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 
-/**
- * Fragment for Productivity Heatmap Calendar.
- * Displays a monthly calendar with color-coded completion rates.
- */
+
 class HeatmapFragment : Fragment() {
 
     private val viewModel: HeatmapViewModel by viewModels {
@@ -55,13 +52,13 @@ class HeatmapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Handle initial month from arguments
+        
         arguments?.getString("initialMonth")?.let { monthStr ->
             try {
                 val yearMonth = YearMonth.parse(monthStr)
                 viewModel.loadMonth(yearMonth)
             } catch (e: Exception) {
-                // Use default (current month)
+                
             }
         }
 
@@ -74,7 +71,7 @@ class HeatmapFragment : Fragment() {
                     val scope = rememberCoroutineScope()
                     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-                    // Main Heatmap Calendar Screen
+                    
                     HeatmapCalendarScreen(
                         monthData = state.monthData,
                         selectedDate = state.selectedDate,
@@ -86,13 +83,13 @@ class HeatmapFragment : Fragment() {
                         modifier = Modifier.fillMaxSize()
                     )
 
-                    // Day Detail Bottom Sheet
+                    
                     if (state.showDayDetailSheet) {
                         ModalBottomSheet(
                             onDismissRequest = { viewModel.dismissDayDetail() },
                             sheetState = sheetState
                         ) {
-                            // Find day data for selected date
+                            
                             val dayData = state.monthData?.days?.find { 
                                 it.date == state.selectedDate 
                             }
@@ -108,7 +105,7 @@ class HeatmapFragment : Fragment() {
                                     }
                                 },
                                 onViewTimeline = {
-                                    // Navigate to Timeline with selected date
+                                    
                                     viewModel.dismissDayDetail()
                                     navigateToTimeline(state.selectedDate.toString())
                                 },
@@ -116,7 +113,7 @@ class HeatmapFragment : Fragment() {
                                     viewModel.toggleTaskStatus(task)
                                 },
                                 onAddTask = {
-                                    // Navigate to add task
+                                    
                                     viewModel.dismissDayDetail()
                                     navigateToAddTask(state.selectedDate.toString())
                                 }
@@ -130,38 +127,34 @@ class HeatmapFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh data when returning to this screen
+        
         viewModel.refresh()
     }
 
-    /**
-     * Navigate to Timeline Fragment with selected date.
-     */
+    
     private fun navigateToTimeline(dateStr: String) {
         try {
             findNavController().navigate(
                 R.id.timelineFragment,
                 bundleOf("date" to dateStr),
                 navOptions {
-                    // Pop up to the start destination of the graph to avoid building a huge stack
+                    
                     popUpTo(findNavController().graph.findStartDestination().id) {
                         saveState = true
                     }
-                    // Avoid multiple copies
+                    
                     launchSingleTop = true
-                    // Restore state when reselecting a previously selected item
+                    
                     restoreState = true
                 }
             )
         } catch (e: Exception) {
-            // Fallback
+            
             findNavController().popBackStack()
         }
     }
 
-    /**
-     * Navigate to add task screen with pre-selected date.
-     */
+    
     private fun navigateToAddTask(dateStr: String) {
         try {
             findNavController().navigate(

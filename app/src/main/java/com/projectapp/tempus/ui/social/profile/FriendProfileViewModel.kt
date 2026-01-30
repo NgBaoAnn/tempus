@@ -53,11 +53,11 @@ class FriendProfileViewModel(
             friendRepository.sendFriendRequest(userId)
                 .onSuccess {
                     _uiState.update { it.copy(isActionLoading = false, successMessage = "Đã gửi lời mời!") }
-                    // Reload profile to update relationship status
+                    
                     _uiState.value.profile?.id?.let { loadProfile(it) }
                 }
                 .onFailure { e ->
-                    // User requested specific friendly error message for blocked/failed cases
+                    
                     val errorMessage = "Kết bạn không thành công"
                     _uiState.update { 
                         it.copy(
@@ -70,13 +70,11 @@ class FriendProfileViewModel(
     }
     
     fun unfriend(friendshipId: String?) {
-        // Since we only have userId in profile, we might need to find friendshipId
-        // But for now let's assume the UI or Repository can handle it, or we rely on the repository to find friendship by users
-        // Note: Repository.unfriend requires friendshipId. 
-        // We'll skip implementation for now or need a new method unfriendByUser(userId)
+        
+        
     }
     
-    // For simplicity, let's implement block/unblock which uses userId
+    
     fun blockUser(userId: String) {
         performAction {
             friendRepository.blockUser(userId)
@@ -90,11 +88,11 @@ class FriendProfileViewModel(
             action()
                 .onSuccess {
                     _uiState.update { it.copy(isActionLoading = false, successMessage = "Thành công!") }
-                    // Reload profile to update relationship status
+                    
                     _uiState.value.profile?.id?.let { loadProfile(it) }
                 }
                 .onFailure { e ->
-                    // User-friendly error message
+                    
                     _uiState.update { 
                         it.copy(
                             isActionLoading = false, 

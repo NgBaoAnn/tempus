@@ -64,7 +64,7 @@ class VerifyOtpActivity : ComponentActivity() {
             try {
                 authService.verifyRecoveryOtp(userEmail, token)
                 Toast.makeText(this@VerifyOtpActivity, "Xác thực thành công", Toast.LENGTH_SHORT).show()
-                // Navigate to Reset Password
+                
                 val intent = Intent(this@VerifyOtpActivity, ResetPasswordActivity::class.java)
                 startActivity(intent)
                 finish()

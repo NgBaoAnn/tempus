@@ -30,9 +30,7 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import io.github.jan.supabase.gotrue.auth
 
-/**
- * Login Activity using Jetpack Compose
- */
+
 class LoginActivity : ComponentActivity() {
     
     private lateinit var authService: AuthService
@@ -75,34 +73,34 @@ class LoginActivity : ComponentActivity() {
             try {
                 authService.login(email, password)
                 
-                // Auto-sync: Pull data from Supabase to local Room
+                
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     try {
                         Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
                         
-                        // 1. Pull Schedule data
+                        
                         val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
                         val scheduleResult = syncManager.pullFromServer(userId)
                         Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
                         
-                        // 2. Pull Gamification data
+                        
                         val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
                         val gamificationResult = gamificationSyncManager.pullFromServer()
                         Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
                         
-                        // 3. Pull Notes data
+                        
                         val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
                         val notesResult = notesSyncManager.pullFromServer(userId)
                         Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
                         
                     } catch (e: Exception) {
                         Log.e("LoginActivity", "Auto-sync failed, continuing anyway", e)
-                        // Continue to main screen even if sync fails
+                        
                     }
                 }
                 
-                // Fetch user profile to update cache and theme (from master)
+                
                 val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
                 val user = userRepo.getCurrentUser()
                 
@@ -129,30 +127,29 @@ class LoginActivity : ComponentActivity() {
     private fun handleGoogleLogin() {
         lifecycleScope.launch {
             try {
-                // Khởi tạo Credential Manager
+                
                 val credentialManager = CredentialManager.create(this@LoginActivity)
                 
-                // Tạo Google ID Option với Web Client ID
+                
                 val googleIdOption = GetSignInWithGoogleOption.Builder(
                     getString(R.string.google_web_client_id)
                 ).build()
 
 
-                // Tạo request để lấy credential
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
                 
-                // Lấy credential từ Google
+                
                 val result = credentialManager.getCredential(
                     request = request,
                     context = this@LoginActivity,
                 )
                 
-                // Xử lý credential nhận được
+                
                 val credential = result.credential
                 
-                // Kiểm tra xem có phải Google ID Token không
+                
                 if (credential is androidx.credentials.CustomCredential && 
                     credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     
@@ -161,27 +158,26 @@ class LoginActivity : ComponentActivity() {
                     
                     Log.d("LoginActivity", "Google Sign-In successful, authenticating with Supabase...")
                     
-                    // Đăng nhập với Supabase sử dụng ID Token
-                    // Đăng nhập với Supabase sử dụng ID Token
+                    
                     authService.signInWithGoogle(idToken)
                     
-                    // Auto-sync: Pull data from Supabase to local Room
+                    
                     val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
                         try {
                             Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
                             
-                            // 1. Pull Schedule data
+                            
                             val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
                             val scheduleResult = syncManager.pullFromServer(userId)
                             Log.d("LoginActivity", "Schedule sync: ${scheduleResult.getOrNull()} items")
                             
-                            // 2. Pull Gamification data
+                            
                             val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(this@LoginActivity)
                             val gamificationResult = gamificationSyncManager.pullFromServer()
                             Log.d("LoginActivity", "Gamification sync: ${gamificationResult.getOrNull()?.summary()}")
                             
-                            // 3. Pull Notes data
+                            
                             val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(this@LoginActivity)
                             val notesResult = notesSyncManager.pullFromServer(userId)
                             Log.d("LoginActivity", "Notes sync: ${notesResult.getOrNull()?.summary()}")
@@ -191,7 +187,7 @@ class LoginActivity : ComponentActivity() {
                         }
                     }
                     
-                    // Fetch user profile to update cache and theme (from master)
+                    
                     val userRepo = com.projectapp.tempus.data.user.SupabaseUserRepository()
                     try {
                         val user = userRepo.getCurrentUser()
@@ -201,7 +197,7 @@ class LoginActivity : ComponentActivity() {
                         }
                     } catch (e: Exception) {
                         Log.e("LoginActivity", "Failed to fetch user profile after Google login", e)
-                        // Continue anyway, just theme might be wrong initially
+                        
                     }
                     
                     
@@ -215,7 +211,7 @@ class LoginActivity : ComponentActivity() {
                 
             } catch (e: GetCredentialCancellationException) {
                 Log.d("LoginActivity", "User cancelled Google Sign-In")
-                // Người dùng hủy, không cần hiển thị lỗi
+                
             } catch (e: NoCredentialException) {
                 Log.e("LoginActivity", "No Google account found", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.error_no_google_account), Toast.LENGTH_SHORT).show()
@@ -240,7 +236,7 @@ class LoginActivity : ComponentActivity() {
                 authService.resetPassword(email)
                 Toast.makeText(this@LoginActivity, getString(R.string.msg_reset_email_sent), Toast.LENGTH_LONG).show()
                 
-                // Navigate to VerifyOtpActivity
+                
                 val intent = Intent(this@LoginActivity, VerifyOtpActivity::class.java)
                 intent.putExtra("EMAIL", email)
                 startActivity(intent)
@@ -257,9 +253,7 @@ class LoginActivity : ComponentActivity() {
     }
 }
 
-/**
- * Auth color scheme
- */
+
 object AuthColors {
     val Background = Color(0xFFF5F5F5)
     val CardBackground = Color.White
@@ -271,9 +265,7 @@ object AuthColors {
     val BorderGray = Color(0xFFCCCCCC)
 }
 
-/**
- * Auth Theme
- */
+
 @Composable
 fun AuthTheme(content: @Composable () -> Unit) {
     MaterialTheme(

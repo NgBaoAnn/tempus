@@ -14,9 +14,7 @@ import com.projectapp.tempus.ui.focus.compose.BlockedAppsSheet
 import com.projectapp.tempus.ui.focus.compose.FocusSettingsScreen
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Activity for Focus Mode settings
- */
+
 class FocusSettingsActivity : ComponentActivity() {
     
     private val viewModel: FocusViewModel by viewModels()
@@ -43,7 +41,7 @@ class FocusSettingsActivity : ComponentActivity() {
                         modifier = Modifier.padding(paddingValues)
                     )
                     
-                    // App picker bottom sheet
+                    
                     if (uiState.showAppPicker) {
                         BlockedAppsSheet(
                             installedApps = uiState.installedApps,
@@ -60,7 +58,7 @@ class FocusSettingsActivity : ComponentActivity() {
     
     override fun onResume() {
         super.onResume()
-        // Refresh permission status when returning from settings
+        
         viewModel.toggleFocusMode(viewModel.uiState.value.focusModeEnabled)
     }
 }

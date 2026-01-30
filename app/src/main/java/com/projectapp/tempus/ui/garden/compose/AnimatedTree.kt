@@ -11,10 +11,7 @@ import androidx.compose.material3.Text
 import com.projectapp.tempus.domain.model.TreeState
 import com.projectapp.tempus.domain.model.TreeType
 
-/**
- * Animated Tree với hiệu ứng đung đưa như gió thổi
- * Animation rõ ràng hơn với rotation lớn và translation
- */
+
 @Composable
 fun AnimatedTree(
     state: TreeState,
@@ -23,10 +20,10 @@ fun AnimatedTree(
     size: TreeSize = TreeSize.MEDIUM,
     enableAnimation: Boolean = true
 ) {
-    // Sway animation - đung đưa như gió thổi
+    
     val infiniteTransition = rememberInfiniteTransition(label = "treeSway")
     
-    // Rotation animation: -8° to +8°
+    
     val swayRotation by infiniteTransition.animateFloat(
         initialValue = -8f,
         targetValue = 8f,
@@ -40,7 +37,7 @@ fun AnimatedTree(
         label = "rotation"
     )
     
-    // Horizontal translation: -10 to +10 (thêm hiệu ứng lắc)
+    
     val swayTranslation by infiniteTransition.animateFloat(
         initialValue = -10f,
         targetValue = 10f,
@@ -54,7 +51,7 @@ fun AnimatedTree(
         label = "translation"
     )
     
-    // Scale pulse cho cây khỏe mạnh
+    
     val swayScale by infiniteTransition.animateFloat(
         initialValue = 0.95f,
         targetValue = 1.05f,
@@ -97,10 +94,10 @@ fun AnimatedTree(
 }
 
 enum class TreeSize {
-    SMALL,   // 40sp - for cards
-    MEDIUM,  // 60sp - for cards detail
-    LARGE,   // 120sp - for detail screen
-    XLARGE   // 180sp - for full screen
+    SMALL,   
+    MEDIUM,  
+    LARGE,   
+    XLARGE   
 }
 
 private fun getTreeEmoji(state: TreeState, type: TreeType): String {

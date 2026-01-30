@@ -6,9 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
-/**
- * DTO cho friend_requests table từ Supabase
- */
+
 @Serializable
 data class FriendRequestDto(
     val id: String,
@@ -21,14 +19,12 @@ data class FriendRequestDto(
     val createdAt: String,
     @SerialName("updated_at")
     val updatedAt: String,
-    // Joined user data
+    
     val sender: UserBasicDto? = null,
     val receiver: UserBasicDto? = null
 )
 
-/**
- * DTO cơ bản cho user info trong các join queries
- */
+
 @Serializable
 data class UserBasicDto(
     val id: String,
@@ -37,9 +33,7 @@ data class UserBasicDto(
     val email: String? = null
 )
 
-/**
- * DTO để tạo friend request mới
- */
+
 @Serializable
 data class CreateFriendRequestDto(
     @SerialName("sender_id")
@@ -48,9 +42,7 @@ data class CreateFriendRequestDto(
     val receiverId: String
 )
 
-/**
- * DTO để update status
- */
+
 @Serializable
 data class UpdateFriendRequestDto(
     val status: String,
@@ -58,9 +50,7 @@ data class UpdateFriendRequestDto(
     val updatedAt: String
 )
 
-/**
- * Convert DTO to Domain model
- */
+
 fun FriendRequestDto.toDomain(): FriendRequest {
     return FriendRequest(
         id = id,

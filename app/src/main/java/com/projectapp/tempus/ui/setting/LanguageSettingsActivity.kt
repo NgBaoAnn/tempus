@@ -18,8 +18,8 @@ class LanguageSettingsActivity : ComponentActivity() {
                     currentLanguageCode = LanguageManager.getCurrentLanguage(),
                     onLanguageSelected = { code ->
                         LanguageManager.setLanguage(code)
-                        // Activity recreation is handled automatically by AppCompatDelegate 
-                        // but sometimes needs a little nudge or just finish/restart for clean statel
+                        
+                        
                     },
                     onBackClick = { finish() }
                 )

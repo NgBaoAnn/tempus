@@ -4,9 +4,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-/**
- * Parsed task from voice input
- */
+
 data class ParsedTask(
     val rawText: String,
     val taskName: String?,
@@ -15,14 +13,12 @@ data class ParsedTask(
     val duration: Duration?,
     val confidence: Float = 0f
 ) {
-    // Valid if we have at least a task name - date/time have fallback defaults
+    
     val isValid: Boolean
         get() = !taskName.isNullOrBlank()
 }
 
-/**
- * Time slot for suggestions
- */
+
 data class TimeSlot(
     val startTime: LocalTime,
     val date: LocalDate,

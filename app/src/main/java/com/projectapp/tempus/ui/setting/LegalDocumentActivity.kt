@@ -23,9 +23,7 @@ import com.projectapp.tempus.R
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.theme.TempusTheme
 
-/**
- * Activity hiển thị các tài liệu pháp lý (Privacy Policy, Terms of Service)
- */
+
 class LegalDocumentActivity : ComponentActivity() {
 
     companion object {
@@ -59,9 +57,6 @@ class LegalDocumentActivity : ComponentActivity() {
     }
 }
 
-// Colors are now provided by MaterialTheme.colorScheme for proper theme support
-
-// ======================== PRIVACY POLICY SCREEN ========================
 
 @Composable
 private fun PrivacyPolicyScreen(
@@ -73,13 +68,13 @@ private fun PrivacyPolicyScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Header
+        
         LegalHeader(
             title = stringResource(R.string.legal_privacy_policy),
             onBackClick = onBackClick
         )
         
-        // Content
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -141,7 +136,6 @@ private fun PrivacyPolicyScreen(
     }
 }
 
-// ======================== TERMS OF SERVICE SCREEN ========================
 
 @Composable
 private fun TermsOfServiceScreen(
@@ -153,13 +147,13 @@ private fun TermsOfServiceScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Header
+        
         LegalHeader(
             title = stringResource(R.string.legal_terms_service),
             onBackClick = onBackClick
         )
         
-        // Content
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -224,7 +218,6 @@ private fun TermsOfServiceScreen(
     }
 }
 
-// ======================== COMMON COMPONENTS ========================
 
 @Composable
 private fun LegalHeader(

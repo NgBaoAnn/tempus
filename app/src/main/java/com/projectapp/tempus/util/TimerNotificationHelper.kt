@@ -55,35 +55,35 @@ object TimerNotificationHelper {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(timeRemaining) // Show time in Title (larger)
-            .setContentText("Focus Timer")  // Show label in Text
+            .setContentTitle(timeRemaining) 
+            .setContentText("Focus Timer")  
             .setSmallIcon(R.drawable.ic_timer)
             .setOngoing(true)
             .setContentIntent(openAppPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setColor(0xFF34C759.toInt()) // TimerGreen
+            .setColor(0xFF34C759.toInt()) 
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
-                    .setShowActionsInCompactView(0, 1) // Show both actions in collapsed view
+                    .setShowActionsInCompactView(0, 1) 
             )
 
-        // Add action buttons
+        
         if (isPaused) {
             builder.addAction(
-                R.drawable.ic_notification_play, // Vector Play icon
+                R.drawable.ic_notification_play, 
                 "Resume",
                 createActionPendingIntent(context, TimerActionReceiver.ACTION_RESUME)
             )
         } else {
             builder.addAction(
-                R.drawable.ic_notification_pause, // Vector Pause icon
+                R.drawable.ic_notification_pause, 
                 "Pause",
                 createActionPendingIntent(context, TimerActionReceiver.ACTION_PAUSE)
             )
         }
 
         builder.addAction(
-            R.drawable.ic_notification_stop, // Vector Stop icon
+            R.drawable.ic_notification_stop, 
             "Stop",
             createActionPendingIntent(context, TimerActionReceiver.ACTION_STOP)
         )

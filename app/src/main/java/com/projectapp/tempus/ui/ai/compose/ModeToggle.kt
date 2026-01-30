@@ -22,9 +22,7 @@ import com.projectapp.tempus.domain.model.ChatMode
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 
-/**
- * Toggle switch for Ask/Agent modes
- */
+
 @Composable
 fun ModeToggle(
     currentMode: ChatMode,
@@ -128,9 +126,7 @@ private fun ModeButton(
     }
 }
 
-/**
- * Compact mode indicator for input area
- */
+
 @Composable
 fun ModeIndicator(
     mode: ChatMode,

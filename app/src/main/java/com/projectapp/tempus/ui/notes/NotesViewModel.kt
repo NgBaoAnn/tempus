@@ -9,9 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-/**
- * UI State cho Notes screen
- */
+
 data class NotesUiState(
     val notes: List<NoteEntity> = emptyList(),
     val searchQuery: String = "",
@@ -20,9 +18,7 @@ data class NotesUiState(
     val error: String? = null
 )
 
-/**
- * UI State cho Note Editor
- */
+
 data class NoteEditorState(
     val noteId: String? = null,
     val title: String = "",
@@ -31,27 +27,25 @@ data class NoteEditorState(
     val isSaving: Boolean = false
 )
 
-/**
- * ViewModel cho Notes feature
- */
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = NotesRepository(application)
     
-    // Search query
+    
     private val _searchQuery = MutableStateFlow("")
     
-    // Main UI state
+    
     private val _uiState = MutableStateFlow(NotesUiState(isLoading = true))
     val uiState: StateFlow<NotesUiState> = _uiState.asStateFlow()
     
-    // Editor state
+    
     private val _editorState = MutableStateFlow(NoteEditorState())
     val editorState: StateFlow<NoteEditorState> = _editorState.asStateFlow()
     
     init {
-        // Collect notes based on search query
+        
         viewModelScope.launch {
             _searchQuery.flatMapLatest { query ->
                 if (query.isBlank()) {
@@ -67,24 +61,18 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
-    /**
-     * Cập nhật search query
-     */
+    
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
         _uiState.update { it.copy(searchQuery = query) }
     }
     
-    /**
-     * Xóa search query
-     */
+    
     fun clearSearch() {
         onSearchQueryChange("")
     }
     
-    /**
-     * Bắt đầu tạo ghi chú mới
-     */
+    
     fun startNewNote() {
         _editorState.value = NoteEditorState(
             noteId = null,
@@ -95,9 +83,7 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
     
-    /**
-     * Bắt đầu chỉnh sửa ghi chú
-     */
+    
     fun startEditNote(noteId: String) {
         viewModelScope.launch {
             val note = repository.getNoteById(noteId)
@@ -113,27 +99,21 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
-    /**
-     * Cập nhật title trong editor
-     */
+    
     fun onTitleChange(title: String) {
         _editorState.update { it.copy(title = title) }
     }
     
-    /**
-     * Cập nhật content trong editor
-     */
+    
     fun onContentChange(content: String) {
         _editorState.update { it.copy(content = content) }
     }
     
-    /**
-     * Lưu ghi chú (tạo mới hoặc cập nhật)
-     */
+    
     fun saveNote(onComplete: () -> Unit) {
         val state = _editorState.value
         
-        // Không lưu nếu cả title và content đều rỗng
+        
         if (state.title.isBlank() && state.content.isBlank()) {
             onComplete()
             return
@@ -157,27 +137,21 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     
-    /**
-     * Xóa ghi chú
-     */
+    
     fun deleteNote(noteId: String) {
         viewModelScope.launch {
             repository.deleteNote(noteId)
         }
     }
     
-    /**
-     * Toggle pin ghi chú
-     */
+    
     fun togglePin(noteId: String) {
         viewModelScope.launch {
             repository.togglePin(noteId)
         }
     }
     
-    /**
-     * Clear error
-     */
+    
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

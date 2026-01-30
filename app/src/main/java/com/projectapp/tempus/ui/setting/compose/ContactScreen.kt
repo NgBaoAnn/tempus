@@ -65,7 +65,7 @@ fun ContactScreen(
                 .padding(16.dp)
         ) {
             
-            // ================== SOCIAL CHANNELS ==================
+            
             Text(
                 text = stringResource(R.string.contact_channels_title),
                 fontSize = 13.sp,
@@ -81,12 +81,12 @@ fun ContactScreen(
                 elevation = 0.dp
             ) {
                 Column {
-                    // Facebook
+                    
                     ContactActionItem(
                         icon = painterResource(id = R.drawable.ic_social),
                         iconVector = null,
                         fallbackIcon = Icons.Default.Public,
-                        iconBgColor = Color(0xFF1877F2), // Facebook Blue
+                        iconBgColor = Color(0xFF1877F2), 
                         iconTint = Color.White,
                         title = stringResource(R.string.contact_fb_title),
                         subtitle = stringResource(R.string.contact_fb_desc),
@@ -99,12 +99,12 @@ fun ContactScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
 
-                    // Email
+                    
                     ContactActionItem(
                         icon = null,
                         iconVector = null,
                         fallbackIcon = Icons.Default.Email,
-                        iconBgColor = Color(0xFFEA4335), // Gmail Red
+                        iconBgColor = Color(0xFFEA4335), 
                         iconTint = Color.White,
                         title = stringResource(R.string.contact_email_title),
                         subtitle = "hvo6471@gmail.com",
@@ -115,7 +115,7 @@ fun ContactScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ================== CONTACT INFO ==================
+            
             Text(
                 text = stringResource(R.string.contact_info_title),
                 fontSize = 13.sp,
@@ -131,7 +131,7 @@ fun ContactScreen(
                 elevation = 0.dp
             ) {
                 Column {
-                    // Address
+                    
                     ContactInfoItem(
                         icon = Icons.Default.Map,
                         title = stringResource(R.string.contact_address_title),
@@ -141,17 +141,17 @@ fun ContactScreen(
 
                     HorizontalDivider(modifier = Modifier.padding(start = 56.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.surfaceVariant)
 
-                    // Working Hours
+                    
                     ContactInfoItem(
                         icon = Icons.Default.Schedule,
                         title = stringResource(R.string.contact_hours_title),
                         value = stringResource(R.string.contact_hours_value),
-                        onClick = null // Not clickable
+                        onClick = null 
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(start = 56.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.surfaceVariant)
 
-                    // Hotline
+                    
                     ContactInfoItem(
                         icon = Icons.Default.Call,
                         title = stringResource(R.string.contact_hotline_title),
@@ -182,7 +182,7 @@ private fun ContactActionItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon container
+        
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -224,7 +224,7 @@ private fun ContactActionItem(
             )
         }
 
-        // Chevron
+        
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
@@ -249,7 +249,7 @@ private fun ContactInfoItem(
             .padding(16.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Icon container
+        
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -283,7 +283,7 @@ private fun ContactInfoItem(
             )
         }
         
-        // Show chevron if clickable
+        
         if (onClick != null) {
             Spacer(modifier = Modifier.width(8.dp))
             Icon(

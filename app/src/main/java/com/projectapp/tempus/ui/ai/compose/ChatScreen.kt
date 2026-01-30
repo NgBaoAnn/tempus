@@ -62,9 +62,7 @@ import com.projectapp.tempus.domain.model.AgentState
 import com.projectapp.tempus.domain.model.LifePlanState
 import com.projectapp.tempus.ui.ai.AIViewModel
 
-/**
- * Main Chat Screen composable with Ask/Agent modes
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -77,26 +75,26 @@ fun ChatScreen(
     val agentState by viewModel.agentState.observeAsState(AgentState.Idle)
     val lifePlanState by viewModel.lifePlanState.observeAsState(LifePlanState.Idle)
     
-    // History sheet state
+    
     val showHistorySheet by viewModel.showHistorySheet.observeAsState(false)
     val historySessions by viewModel.historySessions.observeAsState(emptyList())
     val isLoadingHistory by viewModel.isLoadingHistory.observeAsState(false)
     
-    // Legacy support
+    
     val suggestions by viewModel.suggestions.observeAsState(emptyList())
     val showSuggestionSheet by viewModel.showSuggestionSheet.observeAsState(false)
     
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     
-    // Auto-scroll to bottom when new message arrives
+    
     LaunchedEffect(messages.size, isLoading, agentState, lifePlanState) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
     }
     
-    // History Bottom Sheet
+    
     if (showHistorySheet) {
         androidx.compose.material3.ModalBottomSheet(
             onDismissRequest = { viewModel.closeHistorySheet() },
@@ -130,7 +128,7 @@ fun ChatScreen(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                // Mode Toggle
+                
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -144,7 +142,7 @@ fun ChatScreen(
                     )
                 }
                 
-                // Chat Input
+                
                 ChatInput(
                     value = inputText,
                     onValueChange = { inputText = it },
@@ -171,7 +169,7 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // Empty state
+                
                 AnimatedVisibility(
                     visible = messages.isEmpty(),
                     enter = fadeIn(),
@@ -183,7 +181,7 @@ fun ChatScreen(
                     )
                 }
                 
-                // Messages list with Proposal Card
+                
                 AnimatedVisibility(
                     visible = messages.isNotEmpty(),
                     enter = fadeIn(),
@@ -201,21 +199,21 @@ fun ChatScreen(
                             MessageBubble(message = message)
                         }
                         
-                        // Typing indicator
+                        
                         if (isLoading && agentState !is AgentState.Proposing) {
                             item(key = "typing") {
                                 TypingIndicator(visible = true)
                             }
                         }
                         
-                        // Proposing indicator
+                        
                         if (agentState is AgentState.Proposing) {
                             item(key = "proposing") {
                                 ProposingIndicator()
                             }
                         }
                         
-                        // Proposal Card (AwaitingAccept state)
+                        
                         if (agentState is AgentState.AwaitingAccept) {
                             item(key = "proposal") {
                                 val proposal = (agentState as AgentState.AwaitingAccept).proposal
@@ -228,14 +226,14 @@ fun ChatScreen(
                             }
                         }
                         
-                        // Executing state
+                        
                         if (agentState is AgentState.Executing) {
                             item(key = "executing") {
                                 ExecutingIndicator()
                             }
                         }
                         
-                        // Execution result (Done state)
+                        
                         if (agentState is AgentState.Done) {
                             item(key = "result") {
                                 val result = (agentState as AgentState.Done).result
@@ -243,14 +241,14 @@ fun ChatScreen(
                             }
                         }
                         
-                        // Life Planner: Analyzing indicator
+                        
                         if (lifePlanState is LifePlanState.Analyzing) {
                             item(key = "lifePlanAnalyzing") {
                                 LifePlanAnalyzingIndicator()
                             }
                         }
                         
-                        // Life Planner: Preview Card
+                        
                         if (lifePlanState is LifePlanState.AwaitingApproval) {
                             item(key = "lifePlanPreview") {
                                 val proposal = (lifePlanState as LifePlanState.AwaitingApproval).proposal
@@ -264,7 +262,7 @@ fun ChatScreen(
                             }
                         }
                         
-                        // Life Planner: Creating indicator
+                        
                         if (lifePlanState is LifePlanState.Creating) {
                             item(key = "lifePlanCreating") {
                                 LifePlanCreatingIndicator()
@@ -274,7 +272,7 @@ fun ChatScreen(
                 }
             }
         
-        // Legacy Schedule Suggestion Sheet
+        
         if (showSuggestionSheet && suggestions.isNotEmpty()) {
             ScheduleSuggestionSheet(
                 suggestions = suggestions,
@@ -285,9 +283,7 @@ fun ChatScreen(
     }
 }
 
-/**
- * Proposing indicator for Agent Mode
- */
+
 @Composable
 private fun ProposingIndicator(
     modifier: Modifier = Modifier
@@ -308,9 +304,7 @@ private fun ProposingIndicator(
     }
 }
 
-/**
- * Executing indicator for Agent Mode
- */
+
 @Composable
 private fun ExecutingIndicator(
     modifier: Modifier = Modifier
@@ -331,9 +325,7 @@ private fun ExecutingIndicator(
     }
 }
 
-/**
- * Premium Chat Header with gradient and glow effects
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumChatHeader(
@@ -348,7 +340,7 @@ private fun PremiumChatHeader(
     val historyInteractionSource = remember { MutableInteractionSource() }
     val newChatInteractionSource = remember { MutableInteractionSource() }
     
-    // Animated status glow
+    
     val infiniteTransition = rememberInfiniteTransition(label = "statusGlow")
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.5f,
@@ -378,7 +370,7 @@ private fun PremiumChatHeader(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // AI Avatar with glow
+            
             Box {
                 if (isLoading) {
                     Box(
@@ -441,7 +433,7 @@ private fun PremiumChatHeader(
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Animated status dot
+                    
                     Box(
                         modifier = Modifier
                             .size(8.dp)
@@ -462,12 +454,12 @@ private fun PremiumChatHeader(
                 }
             }
             
-            // Premium Mode badge
+            
             PremiumModeIndicator(mode = chatMode)
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // New Chat button
+            
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -495,7 +487,7 @@ private fun PremiumChatHeader(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // History button
+            
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -523,7 +515,7 @@ private fun PremiumChatHeader(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Clear button with glass effect
+            
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -552,9 +544,7 @@ private fun PremiumChatHeader(
     }
 }
 
-/**
- * Premium mode indicator badge
- */
+
 @Composable
 private fun PremiumModeIndicator(
     mode: ChatMode,
@@ -585,9 +575,7 @@ private fun PremiumModeIndicator(
     }
 }
 
-/**
- * Premium Empty state with gradient and suggestions
- */
+
 @Composable
 private fun PremiumEmptyState(
     chatMode: ChatMode,
@@ -598,9 +586,9 @@ private fun PremiumEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Glowing AI avatar
+        
         Box {
-            // Glow
+            
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -645,7 +633,7 @@ private fun PremiumEmptyState(
         
         Spacer(modifier = Modifier.height(28.dp))
         
-        // Mode title
+        
         val (title, icon) = when (chatMode) {
             ChatMode.ASK -> stringResource(R.string.ai_mode_ask) to "💬"
             ChatMode.AGENT -> stringResource(R.string.ai_mode_agent) to "🤖"
@@ -681,7 +669,7 @@ private fun PremiumEmptyState(
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Quick suggestions
+        
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -711,9 +699,7 @@ private fun PremiumEmptyState(
     }
 }
 
-/**
- * Premium suggestion chip with glass effect
- */
+
 @Composable
 private fun PremiumSuggestionChip(
     text: String,
@@ -739,10 +725,6 @@ private fun PremiumSuggestionChip(
 }
 
 
-
-/**
- * Analyzing indicator for Life Planner Mode
- */
 @Composable
 private fun LifePlanAnalyzingIndicator(
     modifier: Modifier = Modifier
@@ -763,9 +745,7 @@ private fun LifePlanAnalyzingIndicator(
     }
 }
 
-/**
- * Creating indicator for Life Planner Mode
- */
+
 @Composable
 private fun LifePlanCreatingIndicator(
     modifier: Modifier = Modifier

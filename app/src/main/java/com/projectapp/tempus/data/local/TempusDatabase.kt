@@ -11,23 +11,17 @@ import com.projectapp.tempus.data.gamification.entity.PointHistoryEntity
 import com.projectapp.tempus.data.gamification.entity.TreeEntity
 import com.projectapp.tempus.data.gamification.entity.UserPointsEntity
 
-/**
- * Unified Room Database cho Tempus App
- * 
- * Bao gồm:
- * - Schedule entities (mới cho offline-first)
- * - Gamification entities (migrate từ GamificationDatabase)
- */
+
 @Database(
     entities = [
-        // Schedule entities
+        
         ScheduleEntity::class,
         ScheduleItemEntity::class,
         SubTaskEntity::class,
         CategoryEntity::class,
         EditedVersionEntity::class,
         
-        // Gamification entities (migrate từ GamificationDatabase)
+        
         UserPointsEntity::class,
         PointHistoryEntity::class,
         TreeEntity::class
@@ -51,7 +45,7 @@ abstract class TempusDatabase : RoomDatabase() {
                     TempusDatabase::class.java,
                     "tempus_database"
                 )
-                    // Cho development, production cần proper migration
+                    
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
@@ -59,9 +53,7 @@ abstract class TempusDatabase : RoomDatabase() {
             }
         }
         
-        /**
-         * Clear instance (for testing or logout)
-         */
+        
         fun clearInstance() {
             INSTANCE = null
         }

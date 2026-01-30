@@ -13,7 +13,7 @@ class NotificationSettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Ensure prefs are initialized
+        
         NotificationPreferences.init(this)
         
         setContent {

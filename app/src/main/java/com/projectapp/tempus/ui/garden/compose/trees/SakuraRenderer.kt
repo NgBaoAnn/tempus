@@ -14,14 +14,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Sakura (Cherry Blossom) Tree Renderer - Modern Flat Illustration Style
- * Beautiful cloud-like pink blossom clusters with individual 5-petal flowers
- */
 
-/**
- * Draw a single 5-petal sakura flower
- */
 private fun DrawScope.drawSingleFlower(
     center: Offset,
     size: Float,
@@ -40,14 +33,14 @@ private fun DrawScope.drawSingleFlower(
         val petalCenterX = center.x + cos(angleRad) * petalDist
         val petalCenterY = center.y + sin(angleRad) * petalDist
         
-        // Petal with gradient (white center → pink edge)
+        
         val petalGradient = Brush.radialGradient(
             colors = listOf(pinkLight, pinkMid, pinkDark),
             center = Offset(petalCenterX - size * 0.1f, petalCenterY - size * 0.1f),
             radius = size * 0.5f
         )
         
-        // Elliptical petal shape
+        
         rotate(angle, pivot = Offset(petalCenterX, petalCenterY)) {
             drawOval(
                 brush = petalGradient,
@@ -57,7 +50,7 @@ private fun DrawScope.drawSingleFlower(
         }
     }
     
-    // Yellow center
+    
     drawCircle(
         brush = Brush.radialGradient(
             colors = listOf(Color(0xFFFFF9C4), Color(0xFFFFEB3B), Color(0xFFFFC107)),
@@ -69,9 +62,7 @@ private fun DrawScope.drawSingleFlower(
     )
 }
 
-/**
- * Draw a cloud-like sakura blossom cluster with multiple layers
- */
+
 fun DrawScope.drawSakuraBlossomCluster(
     center: Offset,
     radius: Float,
@@ -81,13 +72,13 @@ fun DrawScope.drawSakuraBlossomCluster(
     seed: Int
 ) {
     rotate(sway, pivot = center) {
-        // Color palette
+        
         val pinkDark = Color(0xFFF48FB1).copy(alpha = opacity)
         val pinkMid = Color(0xFFF8BBD9).copy(alpha = opacity) 
         val pinkLight = Color(0xFFFCE4EC).copy(alpha = opacity)
         val white = Color.White.copy(alpha = opacity * 0.9f)
         
-        // ============= LAYER 1: Back layer (darker pink) =============
+        
         val backCount = 5
         for (i in 0 until backCount) {
             val angle = (360f / backCount) * i + stableRandom(seed, i) * 20f
@@ -104,7 +95,7 @@ fun DrawScope.drawSakuraBlossomCluster(
             )
         }
         
-        // ============= LAYER 2: Mid layer (gradient pink clouds) =============
+        
         val midCount = 7
         for (i in 0 until midCount) {
             val angle = (360f / midCount) * i + 25f + stableRandom(seed, i + 10) * 15f
@@ -127,7 +118,7 @@ fun DrawScope.drawSakuraBlossomCluster(
             )
         }
         
-        // ============= LAYER 3: Individual 5-petal flowers on top =============
+        
         val flowerCount = 5
         for (i in 0 until flowerCount) {
             val angle = (360f / flowerCount) * i + stableRandom(seed, i + 30) * 40f
@@ -145,7 +136,7 @@ fun DrawScope.drawSakuraBlossomCluster(
             )
         }
         
-        // ============= CENTER BRIGHT SPOT =============
+        
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(white, pinkLight, Color.Transparent),
@@ -156,7 +147,7 @@ fun DrawScope.drawSakuraBlossomCluster(
             center = center
         )
         
-        // ============= HIGHLIGHT REFLECTION =============
+        
         drawOval(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -172,9 +163,7 @@ fun DrawScope.drawSakuraBlossomCluster(
     }
 }
 
-/**
- * Draw a single fallen petal on the ground
- */
+
 fun DrawScope.drawFallenPetal(
     center: Offset,
     size: Float,
@@ -186,7 +175,7 @@ fun DrawScope.drawFallenPetal(
         val pinkLight = Color(0xFFFCE4EC).copy(alpha = opacity)
         val pinkMid = Color(0xFFF8BBD9).copy(alpha = opacity)
         
-        // Elliptical petal shape
+        
         val petalGradient = Brush.radialGradient(
             colors = listOf(pinkLight, pinkMid),
             center = Offset(center.x - size * 0.1f, center.y - size * 0.1f),

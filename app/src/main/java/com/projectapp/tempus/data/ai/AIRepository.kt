@@ -29,13 +29,7 @@ import java.time.format.DateTimeFormatter
 
 import com.projectapp.tempus.data.user.UserProfileCache
 
-/**
- * Repository for AI operations using Gemini API
- * 
- * Supports two modes:
- * - ASK MODE: Q&A only, no database writes
- * - AGENT MODE: Proposals with Accept/Cancel flow
- */
+
 class AIRepository(
     private val scheduleRepository: ScheduleRepository? = null,
     private val userId: String? = null
@@ -44,17 +38,13 @@ class AIRepository(
     private val geminiService = GeminiClientProvider.service
     private val apiKeyManager = GeminiApiKeyManager
     
-    // Conversation history for multi-turn chat
+    
     private val conversationHistory = mutableListOf<Content>()
     
-    // Maximum retry attempts when hitting rate limits
-    private val maxRetries = 8  // Try all keys once
     
-    // ============================================
-    // SYSTEM INSTRUCTIONS
-    // ============================================
+    private val maxRetries = 8  
     
-    // Ask Mode: Q&A only, no actions
+    
     private fun getAskModeInstruction(): Content {
         val lang = UserProfileCache.getLanguage() ?: "vi"
         val text = if (lang == "en") {
@@ -111,7 +101,7 @@ class AIRepository(
         )
     )
     
-    // Agent Mode: Proposes actions in JSON format
+    
     private fun getAgentModeInstruction(): Content {
         val lang = UserProfileCache.getLanguage() ?: "vi"
         val text = if (lang == "en") {
@@ -359,7 +349,7 @@ class AIRepository(
         )
     )
     
-    // Life Planner Mode: Creates long-term plans with milestones
+    
     private fun getLifePlannerInstruction(): Content {
         val lang = UserProfileCache.getLanguage() ?: "vi"
         val text = if (lang == "en") {
@@ -569,16 +559,7 @@ class AIRepository(
         )
     )
     
-    // ============================================
-    // VOICE COMMAND PARSING (STATELESS)
-    // ============================================
     
-    /**
-     * Helper function to execute API calls with automatic retry on rate limit
-     * 
-     * @param apiCall Lambda that takes an API key and returns the response
-     * @return Result with the response or error
-     */
     private suspend fun <T> executeWithRetry(
         apiCall: suspend (apiKey: String) -> T
     ): Result<T> {
@@ -599,7 +580,7 @@ class AIRepository(
                 lastException = e
                 val errorMessage = e.message?.lowercase() ?: ""
                 
-                // Check if it's a rate limit error
+                
                 val isRateLimitError = errorMessage.contains("429") || 
                                       errorMessage.contains("rate limit") ||
                                       errorMessage.contains("quota exceeded") ||
@@ -607,25 +588,22 @@ class AIRepository(
                 
                 if (isRateLimitError) {
                     android.util.Log.w("AIRepository", "Rate limit hit on attempt ${attempt + 1}, rotating key...")
-                    // Continue to next iteration to try with next key
+                    
                 } else {
-                    // Not a rate limit error, fail immediately
+                    
                     android.util.Log.e("AIRepository", "Non-rate-limit error: ${e.message}")
                     return Result.failure(e)
                 }
             }
         }
         
-        // All retries exhausted
+        
         return Result.failure(
             lastException ?: Exception("All API keys exhausted due to rate limits")
         )
     }
     
-    /**
-     * Parse voice command to JSON - stateless, no conversation history
-     * Lower temperature for more consistent JSON output
-     */
+    
     suspend fun parseVoiceCommand(prompt: String): Result<String> = withContext(Dispatchers.IO) {
         executeWithRetry { apiKey ->
             val request = GeminiRequest(
@@ -645,7 +623,7 @@ class AIRepository(
                     )
                 ),
                 generationConfig = GenerationConfig(
-                    temperature = 0.3f,  // Lower temperature for consistent output
+                    temperature = 0.3f,  
                     maxOutputTokens = 512
                 )
             )
@@ -658,13 +636,7 @@ class AIRepository(
         }
     }
     
-    // ============================================
-    // ASK MODE METHODS
-    // ============================================
     
-    /**
-     * Send message in Ask Mode (Q&A only)
-     */
     suspend fun sendAskModeMessage(message: String): Result<String> = withContext(Dispatchers.IO) {
         val userContent = Content(
             role = "user",
@@ -696,7 +668,7 @@ class AIRepository(
             )
             conversationHistory.add(aiContent)
         }.onFailure {
-            // Remove user message on failure
+            
             if (conversationHistory.isNotEmpty()) {
                 conversationHistory.removeAt(conversationHistory.size - 1)
             }
@@ -705,29 +677,19 @@ class AIRepository(
         result
     }
     
-    // ============================================
-    // AGENT MODE METHODS
-    // ============================================
     
-    /**
-     * Sealed class for Agent mode responses
-     * Can be either a structured proposal or just a text response
-     */
     sealed class AgentResponse {
         data class Proposal(val proposal: AgentProposal) : AgentResponse()
         data class TextOnly(val text: String) : AgentResponse()
     }
     
-    /**
-     * Request a proposal from AI (dry-run, no DB writes)
-     * Returns either a structured proposal or plain text response
-     */
+    
     suspend fun requestProposal(message: String): Result<AgentResponse> = withContext(Dispatchers.IO) {
         try {
-            // Build context with user's current schedules for today
+            
             val scheduleContext = buildScheduleContext()
             
-            // DEBUG: Log the context being sent
+            
             android.util.Log.d("AIRepository", "Schedule context: $scheduleContext")
             android.util.Log.d("AIRepository", "userId: $userId, repo: ${scheduleRepository != null}")
             
@@ -738,7 +700,7 @@ class AIRepository(
 $scheduleContext
 [END CONTEXT]"""
             } else {
-                // If no context, still inform AI
+                
                 """$message
 
 [CONTEXT - Lịch trình hiện tại của người dùng]
@@ -760,7 +722,7 @@ Không thể tải lịch trình. Vui lòng thử lại.
                     contents = contents,
                     systemInstruction = getAgentModeInstruction(),
                     generationConfig = GenerationConfig(
-                        temperature = 0.5f,  // Lower for structured output
+                        temperature = 0.5f,  
                         maxOutputTokens = 4096
                     )
                 )
@@ -777,14 +739,14 @@ Không thể tải lịch trình. Vui lòng thử lại.
             
             android.util.Log.d("AIRepository", "AI response: $responseText")
             
-            // Try to parse JSON response into AgentProposal
+            
             val proposal = parseProposal(responseText)
             
             if (proposal != null && proposal.actions.isNotEmpty()) {
-                // Successfully parsed a proposal with actions
+                
                 Result.success(AgentResponse.Proposal(proposal))
             } else {
-                // AI responded with text (not an action request)
+                
                 Result.success(AgentResponse.TextOnly(responseText))
             }
         } catch (e: Exception) {
@@ -793,10 +755,7 @@ Không thể tải lịch trình. Vui lòng thử lại.
         }
     }
     
-    /**
-     * Build context string with user's current schedules
-     * This allows AI to reference actual schedule IDs for delete/update
-     */
+    
     private suspend fun buildScheduleContext(): String {
         if (scheduleRepository == null || userId == null) return ""
         
@@ -807,8 +766,8 @@ Không thể tải lịch trình. Vui lòng thử lại.
             if (allSchedules.isEmpty()) return "Không có lịch trình nào."
             
             val scheduleLines = allSchedules.map { schedule ->
-                // Parse date/time from startTimeDate
-                // Format can be: "2025-12-21T07:00:00+07:00" or "2025-12-21 07:00:00+07"
+                
+                
                 val dateTimeStr = schedule.startTimeDate
                 val originalDate = try {
                     if (dateTimeStr.contains("T")) {
@@ -830,11 +789,11 @@ Không thể tải lịch trình. Vui lòng thử lại.
                     "?"
                 }
                 
-                // Check repeat type to determine if applies to today
+                
                 val repeatType = schedule.repeat.name
                 val appliesToday = when (repeatType) {
                     "daily" -> true
-                    "weekly" -> true  // Simplified - could check day of week
+                    "weekly" -> true  
                     "once" -> originalDate == today
                     else -> true
                 }
@@ -854,14 +813,12 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Parse AI response into AgentProposal
-     */
+    
     private fun parseProposal(responseText: String): AgentProposal? {
         return try {
             android.util.Log.d("AIRepository", "parseProposal input: $responseText")
             
-            // Find JSON object in response
+            
             val jsonStart = responseText.indexOf("{")
             val jsonEnd = responseText.lastIndexOf("}") + 1
             
@@ -925,15 +882,12 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Execute a proposal (Step 2 of Agent Mode flow)
-     * This is where database writes happen
-     */
+    
     suspend fun executeProposal(proposal: AgentProposal): Result<ExecutionResult> = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
         val appliedChanges = mutableListOf<String>()
         
-        // Validate that we have the required dependencies
+        
         if (scheduleRepository == null || userId == null) {
             return@withContext Result.failure(
                 IllegalStateException("ScheduleRepository or userId not configured for Agent Mode")
@@ -946,19 +900,18 @@ ${scheduleLines.joinToString("\n")}"""
                     ActionType.CREATE_SCHEDULE -> {
                         val scheduleData = action.getScheduleData()
                         if (scheduleData != null) {
-                            // Parse date or use today
+                            
                             val dateStr = scheduleData.date ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                             
-                            // Build start_time_date as ISO timestamp
-                            // Format: "2025-12-21T07:00:00+07:00"
+                            
                             val startTimeDate = "${dateStr}T${scheduleData.startTime}:00+07:00"
                             
-                            // Convert duration to interval format (HH:MM:SS)
+                            
                             val hours = scheduleData.durationMinutes / 60
                             val minutes = scheduleData.durationMinutes % 60
                             val implementationTime = String.format("%02d:%02d:00", hours, minutes)
                             
-                            // Ưu tiên label/color từ AI JSON, fallback về ActivityClassifier
+                            
                             val aiLabel = action.data["label"] as? String
                             val aiColor = action.data["color"] as? String
                             
@@ -967,19 +920,19 @@ ${scheduleLines.joinToString("\n")}"""
                             val finalLabel = if (!aiLabel.isNullOrBlank()) aiLabel else fallbackLabel.name
                             val finalColor = if (!aiColor.isNullOrBlank() && aiColor.startsWith("#")) aiColor else fallbackColor
                             
-                            // Build schedule row matching database schema
+                            
                             val row = mapOf(
                                 "user_id" to userId,
                                 "name_schedule" to scheduleData.name,
                                 "start_time_date" to startTimeDate,
                                 "implementation_time" to implementationTime,
-                                "repeat" to "once",  // Default repeat type
-                                "label" to finalLabel,  // AI-assigned or auto-classified icon
-                                "color" to finalColor,  // AI-assigned or auto-classified color
-                                "source" to "ai"        // Mark as AI-generated
+                                "repeat" to "once",  
+                                "label" to finalLabel,  
+                                "color" to finalColor,  
+                                "source" to "ai"        
                             )
                             
-                            // Actually insert to database
+                            
                             val inserted = scheduleRepository.insertSchedule(row)
                             appliedChanges.add("✅ Tạo: ${scheduleData.name} (${scheduleData.startTime}) - ID: ${inserted.id}")
                         }
@@ -989,19 +942,19 @@ ${scheduleLines.joinToString("\n")}"""
                         if (taskId != null) {
                             val dbFields = mutableMapOf<String, Any?>()
                             
-                            // Map AI field names to database column names
+                            
                             action.data.forEach { (key, value) ->
                                 when (key) {
                                     "name" -> dbFields["name_schedule"] = value
                                     "startTime" -> {
-                                        // Need to build full datetime - get existing date or use today
+                                        
                                         val time = value as? String ?: return@forEach
                                         val date = action.data["date"] as? String 
                                             ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                                         dbFields["start_time_date"] = "${date}T${time}:00+07:00"
                                     }
                                     "duration" -> {
-                                        // Convert minutes to HH:MM:SS format
+                                        
                                         val minutes = (value as? Number)?.toInt() ?: return@forEach
                                         val hours = minutes / 60
                                         val mins = minutes % 60
@@ -1010,16 +963,16 @@ ${scheduleLines.joinToString("\n")}"""
                                     "label" -> dbFields["label"] = value
                                     "color" -> dbFields["color"] = value
                                     "date" -> {
-                                        // Date change - need to update start_time_date
-                                        // Only process if startTime wasn't already handled
+                                        
+                                        
                                         if (!dbFields.containsKey("start_time_date")) {
                                             val newDate = value as? String ?: return@forEach
-                                            // Use a default time if only date is changing
-                                            // The AI should provide startTime when changing date
+                                            
+                                            
                                             dbFields["start_time_date"] = "${newDate}T00:00:00+07:00"
                                         }
                                     }
-                                    // Skip id/taskId and unknown fields
+                                    
                                     "id", "taskId" -> { }
                                     else -> { 
                                         android.util.Log.d("AIRepository", "Unknown update field: $key")
@@ -1053,7 +1006,7 @@ ${scheduleLines.joinToString("\n")}"""
                             ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                         
                         if (taskId != null) {
-                            // Mark this instance as "delete" status for specific date
+                            
                             scheduleRepository.upsertScheduleItem(
                                 taskId = taskId,
                                 date = date,
@@ -1080,18 +1033,10 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    // ============================================
-    // LEGACY METHODS (for backward compatibility)
-    // ============================================
     
-    /**
-     * Send a single message (legacy - uses Ask Mode)
-     */
     suspend fun sendMessage(message: String): Result<String> = sendAskModeMessage(message)
     
-    /**
-     * Request schedule suggestions (legacy)
-     */
+    
     suspend fun requestScheduleSuggestions(userRequest: String): Result<String> = withContext(Dispatchers.IO) {
         requestProposal(userRequest).map { response ->
             when (response) {
@@ -1101,15 +1046,7 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    // ============================================
-    // CHAT TITLE GENERATION
-    // ============================================
     
-    /**
-     * Generate a short title for a chat conversation based on the first user message
-     * @param firstMessage The first message from the user
-     * @return A short title (max 30 characters)
-     */
     suspend fun generateChatTitle(firstMessage: String): Result<String> = withContext(Dispatchers.IO) {
         val lang = UserProfileCache.getLanguage() ?: "vi"
         val fallbackTitle = if (lang == "en") "New Chat" else "Cuộc trò chuyện mới"
@@ -1179,16 +1116,12 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Clear conversation history
-     */
+    
     fun clearHistory() {
         conversationHistory.clear()
     }
     
-    /**
-     * Get current conversation history
-     */
+    
     fun getHistory(): List<ChatMessage> {
         return conversationHistory.map { content ->
             ChatMessage(
@@ -1198,14 +1131,7 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    // ============================================
-    // LIFE PLANNER MODE METHODS
-    // ============================================
     
-    /**
-     * Request a life plan from AI based on user's goal
-     * Returns a structured LifePlanProposal for user approval
-     */
     suspend fun requestLifePlan(
         goal: String,
         energyContext: EnergyContext? = null
@@ -1213,7 +1139,7 @@ ${scheduleLines.joinToString("\n")}"""
         try {
             val today = LocalDate.now()
             
-            // Build context message with energy preferences if available
+            
             val contextPart = energyContext?.let {
                 """
                 |
@@ -1246,7 +1172,7 @@ ${scheduleLines.joinToString("\n")}"""
                     systemInstruction = getLifePlannerInstruction(),
                     generationConfig = GenerationConfig(
                         temperature = 0.6f,
-                        maxOutputTokens = 4096  // Longer for detailed plans
+                        maxOutputTokens = 4096  
                     )
                 )
                 
@@ -1272,12 +1198,10 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Parse AI response into LifePlanProposal
-     */
+    
     private fun parseLifePlanResponse(responseText: String, startDate: LocalDate): LifePlanProposal? {
         return try {
-            // Find JSON in response
+            
             val jsonStart = responseText.indexOf("{")
             val jsonEnd = responseText.lastIndexOf("}") + 1
             
@@ -1310,7 +1234,7 @@ ${scheduleLines.joinToString("\n")}"""
                     val dayOfWeekStr = taskJson.optString("dayOfWeek", "monday").uppercase()
                     val time = taskJson.optString("time", "09:00")
                     val duration = taskJson.optInt("duration", 60)
-                    val taskLabel = taskJson.optString("label", "star") // Get label from AI
+                    val taskLabel = taskJson.optString("label", "star") 
                     
                     val dayOfWeek = try {
                         DayOfWeek.valueOf(dayOfWeekStr)
@@ -1359,7 +1283,7 @@ ${scheduleLines.joinToString("\n")}"""
             
             LifePlanProposal(
                 plan = lifePlan,
-                totalTasksToCreate = totalTasks * durationWeeks, // Rough estimate
+                totalTasksToCreate = totalTasks * durationWeeks, 
                 rawResponse = responseText
             )
         } catch (e: Exception) {
@@ -1368,10 +1292,7 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Convert a life plan to actual schedule entries
-     * Call this after user approves the plan
-     */
+    
     suspend fun executeLifePlan(
         plan: LifePlan
     ): Result<Int> = withContext(Dispatchers.IO) {
@@ -1386,43 +1307,42 @@ ${scheduleLines.joinToString("\n")}"""
             val today = LocalDate.now()
             
             for (milestone in plan.milestones) {
-                // Track which day in the first week we're scheduling to distribute tasks
+                
                 var firstWeekDayOffset = 0
                 
                 for (task in milestone.scheduledTasks) {
-                    // Calculate weeks until milestone
+                    
                     val weeksUntilMilestone = milestone.weekNumber - 1
                     
-                    // Create task for each week until milestone
+                    
                     for (weekOffset in 0..weeksUntilMilestone) {
                         var taskDate: LocalDate
                         
                         if (weekOffset == 0) {
-                            // FIRST WEEK: Start from TODAY, distribute tasks across days starting from today
-                            // Don't wait for specific dayOfWeek - user wants plan to start TODAY
+                            
+                            
                             taskDate = today.plusDays(firstWeekDayOffset.toLong())
                             
-                            // Increment offset for next task in first week (distribute across days)
-                            // Skip to next day for variety, max 7 days
+                            
                             firstWeekDayOffset = (firstWeekDayOffset + 1) % 7
                         } else {
-                            // SUBSEQUENT WEEKS: Use the AI-specified dayOfWeek
-                            // Calculate the base date for this week (relative to today's week)
+                            
+                            
                             val weekStartDate = today.plusWeeks(weekOffset.toLong())
                             
-                            // Find the specified day of week in this week
+                            
                             taskDate = weekStartDate
-                            // Go back to the start of the week (Monday) first
+                            
                             while (taskDate.dayOfWeek != java.time.DayOfWeek.MONDAY) {
                                 taskDate = taskDate.minusDays(1)
                             }
-                            // Then find the task's day of week
+                            
                             while (taskDate.dayOfWeek != task.dayOfWeek) {
                                 taskDate = taskDate.plusDays(1)
                             }
                         }
                         
-                        // Skip if date is in the past (safety check)
+                        
                         if (taskDate.isBefore(today)) continue
                         
                         val startTimeDate = "${taskDate}T${task.preferredTime}:00+07:00"
@@ -1430,7 +1350,7 @@ ${scheduleLines.joinToString("\n")}"""
                         val minutes = task.durationMinutes % 60
                         val implementationTime = String.format("%02d:%02d:00", hours, minutes)
                         
-                        // Use label from AI, fallback to infer if empty
+                        
                         val label = if (task.label.isNotBlank() && task.label != "star") 
                             task.label 
                         else 
@@ -1460,56 +1380,53 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
-    /**
-     * Infer schedule label from task title using keyword matching
-     * Uses project's ScheduleLabel enum values: wakeup, eat, exercise, rest, water, book, sleep, clean, cook, garden
-     */
+    
     private fun inferLabelFromTitle(title: String): String {
         val lowerTitle = title.lowercase()
         return when {
-            // Wakeup - morning routine
+            
             lowerTitle.contains("thức dậy") || lowerTitle.contains("wake") ||
             lowerTitle.contains("dậy") || lowerTitle.contains("morning") ||
             lowerTitle.contains("báo thức") -> "wakeup"
             
-            // Eat - meals
+            
             lowerTitle.contains("ăn") || lowerTitle.contains("eat") ||
             lowerTitle.contains("bữa") || lowerTitle.contains("meal") ||
             lowerTitle.contains("sáng") || lowerTitle.contains("trưa") ||
             lowerTitle.contains("tối") || lowerTitle.contains("breakfast") ||
             lowerTitle.contains("lunch") || lowerTitle.contains("dinner") -> "eat"
             
-            // Exercise - physical activity
+            
             lowerTitle.contains("tập") || lowerTitle.contains("gym") ||
             lowerTitle.contains("chạy") || lowerTitle.contains("run") ||
             lowerTitle.contains("yoga") || lowerTitle.contains("thể dục") ||
             lowerTitle.contains("exercise") || lowerTitle.contains("workout") -> "exercise"
             
-            // Rest - relaxation
+            
             lowerTitle.contains("nghỉ") || lowerTitle.contains("rest") ||
             lowerTitle.contains("thư giãn") || lowerTitle.contains("relax") -> "rest"
             
-            // Water - hydration
+            
             lowerTitle.contains("uống nước") || lowerTitle.contains("water") ||
             lowerTitle.contains("hydrat") -> "water"
             
-            // Sleep - sleeping
+            
             lowerTitle.contains("ngủ") || lowerTitle.contains("sleep") ||
             lowerTitle.contains("đi ngủ") -> "sleep"
             
-            // Clean - cleaning
+            
             lowerTitle.contains("dọn") || lowerTitle.contains("clean") ||
             lowerTitle.contains("vệ sinh") || lowerTitle.contains("lau") -> "clean"
             
-            // Cook - cooking
+            
             lowerTitle.contains("nấu") || lowerTitle.contains("cook") ||
             lowerTitle.contains("chuẩn bị") -> "cook"
             
-            // Garden - gardening
+            
             lowerTitle.contains("vườn") || lowerTitle.contains("garden") ||
             lowerTitle.contains("cây") || lowerTitle.contains("plant") -> "garden"
             
-            // Book - study/reading/work/coding (default for learning activities)
+            
             lowerTitle.contains("học") || lowerTitle.contains("study") || 
             lowerTitle.contains("ôn") || lowerTitle.contains("đọc") ||
             lowerTitle.contains("nghiên cứu") || lowerTitle.contains("research") ||
@@ -1518,35 +1435,30 @@ ${scheduleLines.joinToString("\n")}"""
             lowerTitle.contains("làm") || lowerTitle.contains("work") ||
             lowerTitle.contains("tiếng") || lowerTitle.contains("english") -> "book"
             
-            // Default - use book for any learning/study task
+            
             else -> "book"
         }
     }
     
-    /**
-     * Get color for a label based on ScheduleLabel enum
-     */
+    
     private fun inferColorFromLabel(label: String): String {
         return when (label) {
-            "wakeup" -> "#FF9800"    // Orange
-            "eat" -> "#FFC107"       // Amber
-            "exercise" -> "#4CAF50"  // Green
-            "rest" -> "#9C27B0"      // Purple
-            "water" -> "#2196F3"     // Blue
-            "book" -> "#3F51B5"      // Indigo
-            "sleep" -> "#607D8B"     // Blue Grey
-            "clean" -> "#00BCD4"     // Cyan
-            "cook" -> "#E91E63"      // Pink
-            "garden" -> "#8BC34A"    // Light Green
-            else -> "#3F51B5"        // Indigo fallback
+            "wakeup" -> "#FF9800"    
+            "eat" -> "#FFC107"       
+            "exercise" -> "#4CAF50"  
+            "rest" -> "#9C27B0"      
+            "water" -> "#2196F3"     
+            "book" -> "#3F51B5"      
+            "sleep" -> "#607D8B"     
+            "clean" -> "#00BCD4"     
+            "cook" -> "#E91E63"      
+            "garden" -> "#8BC34A"    
+            else -> "#3F51B5"        
         }
     }
 }
 
-/**
- * Simple chat message model for UI layer
- * @param id Optional ID for persisted messages (from ai_history table)
- */
+
 data class ChatMessage(
     val text: String,
     val isFromUser: Boolean,

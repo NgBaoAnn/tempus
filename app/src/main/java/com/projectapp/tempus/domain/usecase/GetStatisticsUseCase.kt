@@ -21,17 +21,16 @@ data class CategoryStats(
     val percentage: Int
 )
 
-// ===== PRODUCTIVITY INSIGHTS =====
 
 enum class TrendType { UP, DOWN, STABLE }
 
 data class InsightsData(
-    val avgCompletionRate: Float,              // Tỷ lệ hoàn thành trung bình (%)
-    val bestDay: Pair<String, Float>?,         // (Tên ngày, %) 
-    val worstDay: Pair<String, Float>?,        // (Tên ngày, %)
-    val trend: TrendType,                      // Xu hướng so với kỳ trước
-    val suggestion: String,                    // Gợi ý thông minh
-    val comparisonToPrevious: Float?           // So với kỳ trước (+/- %)
+    val avgCompletionRate: Float,              
+    val bestDay: Pair<String, Float>?,         
+    val worstDay: Pair<String, Float>?,        
+    val trend: TrendType,                      
+    val suggestion: String,                    
+    val comparisonToPrevious: Float?           
 )
 
 data class StatisticsResult(
@@ -39,7 +38,7 @@ data class StatisticsResult(
     val topCategories: List<CategoryStats>,
     val totalTasksInRange: Int,
     val completedTasksInRange: Int,
-    val insights: InsightsData? = null          // NEW: Productivity insights
+    val insights: InsightsData? = null          
 )
 
 class GetStatisticsUseCase {
@@ -116,7 +115,7 @@ class GetStatisticsUseCase {
                 }
             }
 
-            // [SỬA QUAN TRỌNG] Đảm bảo không bị chia cho 0 và làm tròn đúng
+            
             val percentage = if (dayTotal > 0) {
                 (dayCompleted.toFloat() / dayTotal.toFloat()) * 100f
             } else {
@@ -140,7 +139,7 @@ class GetStatisticsUseCase {
             )
         }.sortedByDescending { it.completedCount }
 
-        // ===== CALCULATE INSIGHTS =====
+        
         val insights = calculateInsights(dailyStats, totalInRange, completedInRange)
 
         return StatisticsResult(
@@ -159,39 +158,38 @@ class GetStatisticsUseCase {
     ): InsightsData {
         val today = java.time.LocalDate.now()
         
-        // Lấy ngày cuối cùng của kỳ thống kê
+        
         val lastDayOfPeriod = dailyStats.maxByOrNull { it.date }?.date
         
-        // Kiểm tra xem kỳ này có chứa ngày hôm nay không (kỳ hiện tại)
+        
         val isCurrentPeriod = lastDayOfPeriod != null && !lastDayOfPeriod.isBefore(today)
         
-        // Nếu là kỳ hiện tại: chỉ xét đến hôm nay
-        // Nếu là kỳ đã qua: xét toàn bộ
+        
         val relevantDays = if (isCurrentPeriod) {
             dailyStats.filter { !it.date.isAfter(today) }
         } else {
             dailyStats
         }
         
-        // Tính total và completed cho các ngày được xét
+        
         val relevantTotalTasks = relevantDays.sumOf { it.totalTasks }
         val relevantCompletedTasks = relevantDays.sumOf { it.completedTasks }
         
-        // 1. Tỷ lệ hoàn thành trung bình
+        
         val avgRate = if (relevantTotalTasks > 0) {
             (relevantCompletedTasks.toFloat() / relevantTotalTasks.toFloat()) * 100f
         } else 0f
 
-        // 2. Tìm ngày tốt nhất / tệ nhất (xét TẤT CẢ các ngày, kể cả 0%)
+        
         val bestDayStats = relevantDays.maxByOrNull { it.completionPercentage }
         val worstDayStats = relevantDays.minByOrNull { it.completionPercentage }
 
-        // Kiểm tra xem là tuần hay tháng để format cho phù hợp
+        
         val isWeekMode = dailyStats.size <= 7
         val dayFormatter = if (isWeekMode) {
-            java.time.format.DateTimeFormatter.ofPattern("EEEE", java.util.Locale("vi")) // Thứ Hai, Thứ Ba...
+            java.time.format.DateTimeFormatter.ofPattern("EEEE", java.util.Locale("vi")) 
         } else {
-            java.time.format.DateTimeFormatter.ofPattern("'Ngày' d", java.util.Locale("vi")) // Ngày 1, Ngày 2...
+            java.time.format.DateTimeFormatter.ofPattern("'Ngày' d", java.util.Locale("vi")) 
         }
         
         val bestDay = bestDayStats?.let {
@@ -201,10 +199,10 @@ class GetStatisticsUseCase {
             Pair(it.date.format(dayFormatter), it.completionPercentage)
         }
 
-        // 3. Xu hướng (so sánh nửa đầu vs nửa cuối của kỳ được xét)
+        
         val trend = calculateTrend(relevantDays)
 
-        // 4. Gợi ý thông minh
+        
         val suggestion = generateSuggestion(avgRate, worstDay, trend)
 
         return InsightsData(
@@ -213,7 +211,7 @@ class GetStatisticsUseCase {
             worstDay = worstDay,
             trend = trend,
             suggestion = suggestion,
-            comparisonToPrevious = null // Sẽ được cập nhật bởi ViewModel khi fetch kỳ trước
+            comparisonToPrevious = null 
         )
     }
 

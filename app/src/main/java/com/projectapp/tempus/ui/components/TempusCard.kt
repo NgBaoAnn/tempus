@@ -21,19 +21,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
-/**
- * Card Variants for different use cases
- */
+
 enum class CardVariant {
-    Default,    // Standard elevated card
-    Elevated,   // Higher elevation with stronger shadow
-    Glass,      // Glassmorphism effect
-    Gradient    // Gradient border effect
+    Default,    
+    Elevated,   
+    Glass,      
+    Gradient    
 }
 
-/**
- * Premium TempusCard with multiple variants and animations
- */
+
 @Composable
 fun TempusCard(
     modifier: Modifier = Modifier,
@@ -46,7 +42,7 @@ fun TempusCard(
     cornerRadius: Dp = 16.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    // Press animation state
+    
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (isPressed && isPressable) 0.97f else 1f,
@@ -59,7 +55,7 @@ fun TempusCard(
     
     val shape = RoundedCornerShape(cornerRadius)
     
-    // Calculate elevation based on variant
+    
     val actualElevation = when (variant) {
         CardVariant.Default -> elevation
         CardVariant.Elevated -> elevation * 3
@@ -67,13 +63,13 @@ fun TempusCard(
         CardVariant.Gradient -> elevation
     }
     
-    // Calculate background based on variant
+    
     val actualBackground = when (variant) {
         CardVariant.Glass -> TempusDesignSystem.Glass.Background
         else -> backgroundColor
     }
     
-    // Base modifier with press animation
+    
     val baseModifier = modifier
         .graphicsLayer {
             scaleX = scale
@@ -104,7 +100,7 @@ fun TempusCard(
             } else Modifier
         )
     
-    // Glass variant border
+    
     val glassModifier = if (variant == CardVariant.Glass) {
         Modifier.border(
             width = 1.dp,
@@ -113,7 +109,7 @@ fun TempusCard(
         )
     } else Modifier
     
-    // Gradient variant inner padding
+    
     val gradientInnerModifier = if (variant == CardVariant.Gradient) {
         Modifier
             .clip(RoundedCornerShape(cornerRadius - 2.dp))
@@ -121,7 +117,7 @@ fun TempusCard(
     } else Modifier
     
     if (onClick != null && !isPressable) {
-        // Clickable without press animation (legacy support)
+        
         Card(
             onClick = onClick,
             modifier = baseModifier.then(glassModifier),
@@ -131,7 +127,7 @@ fun TempusCard(
             content = content
         )
     } else {
-        // New premium card with animations
+        
         Card(
             modifier = baseModifier.then(glassModifier),
             shape = shape,
@@ -142,9 +138,7 @@ fun TempusCard(
     }
 }
 
-/**
- * Gradient Border Card - Convenience wrapper
- */
+
 @Composable
 fun TempusGradientCard(
     modifier: Modifier = Modifier,
@@ -161,9 +155,7 @@ fun TempusGradientCard(
     )
 }
 
-/**
- * Glass Card - Convenience wrapper for glassmorphism effect
- */
+
 @Composable
 fun TempusGlassCard(
     modifier: Modifier = Modifier,

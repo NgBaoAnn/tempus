@@ -59,7 +59,7 @@ fun NotificationSettingsScreen(
                 .padding(16.dp)
         ) {
             
-            // Section Header
+            
             Text(
                 text = stringResource(R.string.notif_settings_title),
                 fontSize = 13.sp,
@@ -75,7 +75,7 @@ fun NotificationSettingsScreen(
                 elevation = 0.dp
             ) {
                 Column {
-                    // Timer Toggle
+                    
                     NotificationSwitchItem(
                         icon = Icons.Outlined.Timer,
                         iconBgColor = MaterialTheme.colorScheme.primaryContainer,
@@ -92,9 +92,9 @@ fun NotificationSettingsScreen(
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
 
-                    // Timeline Toggle
+                    
                     NotificationSwitchItem(
-                        icon = Icons.Outlined.ViewDay, // Timeline icon
+                        icon = Icons.Outlined.ViewDay, 
                         iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
                         iconTint = MaterialTheme.colorScheme.secondary,
                         title = stringResource(R.string.notif_timeline_title),
@@ -124,7 +124,7 @@ private fun NotificationSwitchItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icon container
+        
         Box(
             modifier = Modifier
                 .size(32.dp)

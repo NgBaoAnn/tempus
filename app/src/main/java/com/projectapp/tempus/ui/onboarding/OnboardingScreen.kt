@@ -20,14 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
-/**
- * Premium Light Onboarding Screen
- * 
- * Fixed layout:
- * - Content stays in upper portion
- * - Buttons are at bottom, separate from content
- * - No overlap between text and buttons
- */
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(
@@ -70,11 +63,11 @@ fun OnboardingScreen(
             .fillMaxSize()
             .background(OnboardingColors.BackgroundGradient)
     ) {
-        // === PAGER CONTENT (takes available space) ===
+        
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .weight(1f)  // Takes remaining space
+                .weight(1f)  
                 .fillMaxWidth()
         ) { pageIndex ->
             OnboardingPage(
@@ -83,7 +76,7 @@ fun OnboardingScreen(
             )
         }
         
-        // === BOTTOM CONTROLS (fixed height) ===
+        
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,7 +84,7 @@ fun OnboardingScreen(
                 .padding(bottom = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Page indicator
+            
             OnboardingPageIndicator(
                 pageCount = pages.size,
                 currentPage = pagerState.currentPage
@@ -99,7 +92,7 @@ fun OnboardingScreen(
             
             Spacer(modifier = Modifier.height(28.dp))
             
-            // Primary button
+            
             OnboardingButton(
                 text = if (isLastPage) stringResource(R.string.onboarding_start_now) else stringResource(R.string.onboarding_continue),
                 onClick = {
@@ -114,7 +107,7 @@ fun OnboardingScreen(
                 isPrimary = true
             )
             
-            // Skip button - hidden on last page
+            
             AnimatedVisibility(
                 visible = !isLastPage,
                 enter = fadeIn() + slideInVertically { it / 2 },

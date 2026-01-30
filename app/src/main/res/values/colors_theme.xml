@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Palette -->
+    
     <color name="primary">#3B82F6</color>
     <color name="primary_light">#60A5FA</color>
     <color name="primary_dark">#2563EB</color>
     
-    <!-- Accent/CTA -->
+    
     <color name="accent">#F97316</color>
     <color name="accent_light">#FB923C</color>
     
-    <!-- Background -->
+    
     <color name="background">#F8FAFC</color>
     <color name="surface">#FFFFFF</color>
     <color name="surface_variant">#F1F5F9</color>
     
-    <!-- Text -->
+    
     <color name="text_primary">#1E293B</color>
     <color name="text_secondary">#64748B</color>
     <color name="text_muted">#94A3B8</color>
     
-    <!-- Status -->
+    
     <color name="success">#22C55E</color>
     <color name="warning">#F59E0B</color>
     <color name="error">#EF4444</color>
     
-    <!-- Priority -->
+    
     <color name="priority_high">#EF4444</color>
     <color name="priority_medium">#F59E0B</color>
     <color name="priority_low">#22C55E</color>
     
-    <!-- Task Colors -->
+    
     <color name="task_blue">#3B82F6</color>
     <color name="task_orange">#F97316</color>
     <color name="task_green">#22C55E</color>

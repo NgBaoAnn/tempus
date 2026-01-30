@@ -3,20 +3,15 @@ package com.projectapp.tempus.data.user
 import android.content.Context
 import android.content.SharedPreferences
 
-/**
- * Cached profile data
- */
+
 data class CachedProfile(
     val username: String,
     val email: String,
     val avatarUrl: String?,
-    val themeMode: String? = null // "light", "dark", "system"
+    val themeMode: String? = null 
 )
 
-/**
- * Singleton cache for user profile data using SharedPreferences
- * Stores name, email, avatar URL, and theme preference offline
- */
+
 object UserProfileCache {
     
     private const val PREF_NAME = "user_profile_cache"
@@ -25,26 +20,21 @@ object UserProfileCache {
     private const val KEY_AVATAR_URL = "avatar_url"
     private const val KEY_THEME_MODE = "theme_mode"
     
-    // Default theme mode
+    
     const val THEME_SYSTEM = "system"
     const val THEME_LIGHT = "light"
     const val THEME_DARK = "dark"
     
     private var prefs: SharedPreferences? = null
     
-    /**
-     * Initialize the cache with application context
-     * Should be called once during app initialization
-     */
+    
     fun init(context: Context) {
         if (prefs == null) {
             prefs = context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         }
     }
     
-    /**
-     * Save profile data to cache
-     */
+    
     fun saveProfile(username: String, email: String, avatarUrl: String?, themeMode: String? = null) {
         prefs?.edit()?.apply {
             putString(KEY_USERNAME, username)
@@ -57,25 +47,17 @@ object UserProfileCache {
         }
     }
     
-    /**
-     * Save theme mode to cache
-     */
+    
     fun saveThemeMode(themeMode: String) {
         prefs?.edit()?.putString(KEY_THEME_MODE, themeMode)?.apply()
     }
     
-    /**
-     * Get cached theme mode
-     * Returns "system" as default if not set
-     */
+    
     fun getThemeMode(): String {
         return prefs?.getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
     }
     
-    /**
-     * Get cached profile data
-     * Returns null if cache is empty or not initialized
-     */
+    
     fun getProfile(): CachedProfile? {
         val prefs = prefs ?: return null
         
@@ -87,22 +69,17 @@ object UserProfileCache {
         return CachedProfile(username, email, avatarUrl, themeMode)
     }
     
-    /**
-     * Check if cache exists and has data
-     */
+    
     fun hasCache(): Boolean {
         return prefs?.contains(KEY_USERNAME) == true
     }
     
-    /**
-     * Clear all cached profile data
-     * Should be called on logout
-     */
+    
     fun clearCache() {
         prefs?.edit()?.clear()?.apply()
     }
 
-    // Language Preference
+    
     private const val KEY_LANGUAGE_CODE = "language_code"
     const val LANG_VI = "vi"
     const val LANG_EN = "en"
@@ -112,7 +89,7 @@ object UserProfileCache {
     }
 
     fun getLanguage(): String? {
-        // Return null if not set, so we can fallback to system default
+        
         return prefs?.getString(KEY_LANGUAGE_CODE, null)
     }
 }

@@ -37,19 +37,16 @@ object NotificationPreferences {
     }
 
     fun isTimerEnabled(): Boolean {
-        if (!::prefs.isInitialized) return true // Default safely
+        if (!::prefs.isInitialized) return true 
         return prefs.getBoolean(KEY_TIMER_ENABLED, true)
     }
 
     fun isTimelineEnabled(): Boolean {
-        if (!::prefs.isInitialized) return true // Default safely
+        if (!::prefs.isInitialized) return true 
         return prefs.getBoolean(KEY_TIMELINE_ENABLED, true)
     }
 
-    // ============================================================================================
-    // Notification History & Duplicate Prevention
-    // ============================================================================================
-
+    
     private const val PREFIX_NOTIFIED = "notified_"
 
     private fun getPrefs(context: Context): SharedPreferences {
@@ -80,36 +77,32 @@ object NotificationPreferences {
         val editor = prefs.edit()
         val today = java.time.LocalDate.now()
         
-        // Remove keys older than 2 days to keep prefs clean
+        
         try {
             allEntries.keys.filter { it.startsWith(PREFIX_NOTIFIED) }.forEach { key ->
-                // key format: notified_{taskId}_{date}
-                // We just check if it parses and is old. The simple date string usually fits ISO local date
+                
+                
                 val parts = key.split("_")
-                val dateStr = parts.lastOrNull() // Warning: if taskId contains _, this is risky. 
-                // Better approach: date is usually yyyy-MM-dd (10 chars) at the end if we use standard format.
-                // Or just keep it simple: clear everything > 7 days or just clear everything if we don't care about history too much.
-                // The original code comment said "older than 7 days".
+                val dateStr = parts.lastOrNull() 
+                
                 
                 if (!dateStr.isNullOrEmpty()) {
                     try {
-                        // Assuming date is correct. If strict parsing fails, ignore.
-                        // Simple cleanup: if we can parse the date and it's old, delete.
-                        // For now, let's just leave this empty or minimal if we don't know the exact date format used before, 
-                        // but ReminderReceiver uses LocalDate.now().toString() which is YYYY-MM-DD.
+                        
+                        
                         val entryDate = java.time.LocalDate.parse(dateStr)
                         if (entryDate.isBefore(today.minusDays(7))) {
                             editor.remove(key)
                         }
                     } catch (e: Exception) {
-                        // If date parse fails, maybe cleanup anyway if it looks like a notified key? 
-                        // Safer to leave it if unsure.
+                        
+                        
                     }
                 }
             }
             editor.apply()
         } catch (e: Exception) {
-            // Ignore errors during cleanup
+            
         }
     }
 }

@@ -7,10 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * Singleton provider for Gemini API client
- * Similar pattern to SupabaseClientProvider
- */
+
 object GeminiClientProvider {
     
     private const val BASE_URL = "https://generativelanguage.googleapis.com/"
@@ -37,9 +34,7 @@ object GeminiClientProvider {
             .build()
     }
     
-    /**
-     * Lazy-initialized Gemini service instance
-     */
+    
     val service: GeminiService by lazy {
         retrofit.create(GeminiService::class.java)
     }

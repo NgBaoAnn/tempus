@@ -16,9 +16,7 @@ import io.github.jan.supabase.exceptions.RestException
 import kotlinx.coroutines.launch
 import com.projectapp.tempus.R
 
-/**
- * Register Activity using Jetpack Compose
- */
+
 class RegisterActivity : ComponentActivity() {
     
     private lateinit var authService: AuthService
@@ -47,7 +45,7 @@ class RegisterActivity : ComponentActivity() {
     }
     
     private fun handleRegister(fullName: String, email: String, password: String, confirmPassword: String) {
-        // Validation
+        
         if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, getString(R.string.error_empty_fields), Toast.LENGTH_SHORT).show()
             return

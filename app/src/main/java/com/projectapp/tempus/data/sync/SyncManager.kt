@@ -9,14 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * SyncManager - Quản lý đồng bộ dữ liệu giữa Room (local) và Supabase (server)
- * 
- * Strategies:
- * - Pull: Lấy data từ server về local (khi login hoặc manual refresh)
- * - Push: Đẩy pending changes từ local lên server
- * - Conflict Resolution: Last-Write-Wins (dựa vào timestamp)
- */
+
 class SyncManager(
     private val localRepo: LocalScheduleRepository,
     private val remoteRepo: SupabaseScheduleRepository
@@ -28,25 +21,22 @@ class SyncManager(
     private val _syncState = MutableStateFlow(SyncState())
     val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
     
-    /**
-     * Pull tất cả data từ server về local
-     * Gọi khi login hoặc khi user muốn refresh toàn bộ
-     */
+    
     suspend fun pullFromServer(userId: String): Result<Int> {
         Log.d(TAG, "Starting pull from server for user: $userId")
         _syncState.update { it.copy(isSyncing = true, error = null, progress = SyncProgress("Đang tải dữ liệu...", 0, 3)) }
         
         return try {
-            // 1. Fetch schedules
+            
             _syncState.update { it.copy(progress = SyncProgress("Đang tải lịch trình...", 1, 3)) }
             val remoteSchedules = remoteRepo.getAllSchedules(userId)
             Log.d(TAG, "Fetched ${remoteSchedules.size} schedules from server")
             
-            // 2. Fetch schedule items for all schedules
+            
             _syncState.update { it.copy(progress = SyncProgress("Đang tải trạng thái...", 2, 3)) }
             val taskIds = remoteSchedules.map { it.id }
             val remoteItems = if (taskIds.isNotEmpty()) {
-                // Get items for last 30 days and next 30 days
+                
                 val today = java.time.LocalDate.now()
                 val startDate = today.minusDays(30).toString()
                 val endDate = today.plusDays(30).toString()
@@ -54,14 +44,14 @@ class SyncManager(
             } else emptyList()
             Log.d(TAG, "Fetched ${remoteItems.size} schedule items from server")
             
-            // 3. Fetch subtasks
+            
             _syncState.update { it.copy(progress = SyncProgress("Đang tải công việc con...", 3, 3)) }
             val remoteSubTasks = if (taskIds.isNotEmpty()) {
                 remoteRepo.getSubTasksBatch(taskIds)
             } else emptyList()
             Log.d(TAG, "Fetched ${remoteSubTasks.size} subtasks from server")
             
-            // 4. Convert to entities and replace local data
+            
             val scheduleEntities = remoteSchedules.map { ScheduleEntity.fromRow(it) }
             val itemEntities = remoteItems.map { ScheduleItemEntity.fromRow(it) }
             val subTaskEntities = remoteSubTasks.map { SubTaskEntity.fromRow(it) }
@@ -99,10 +89,7 @@ class SyncManager(
         }
     }
     
-    /**
-     * Push tất cả pending changes lên server
-     * Gọi khi user ấn nút Sync
-     */
+    
     suspend fun pushToServer(): Result<SyncResult> {
         Log.d(TAG, "Starting push to server")
         _syncState.update { it.copy(isSyncing = true, error = null) }
@@ -110,7 +97,7 @@ class SyncManager(
         val result = SyncResult()
         
         return try {
-            // 1. Get all pending changes
+            
             val pendingSchedules = localRepo.getPendingSchedules()
             val pendingItems = localRepo.getPendingItems()
             val pendingSubTasks = localRepo.getPendingSubTasks()
@@ -130,7 +117,7 @@ class SyncManager(
             
             var processed = 0
             
-            // 2. Process pending schedules
+            
             for (schedule in pendingSchedules) {
                 processed++
                 _syncState.update { 
@@ -146,7 +133,7 @@ class SyncManager(
                             Log.d(TAG, "Created schedule: ${schedule.id}")
                         }
                         SyncStatus.PENDING_UPDATE.name -> {
-                            // Check for conflicts using Last-Write-Wins
+                            
                             val remote = remoteRepo.getScheduleById(schedule.id)
                             if (remote == null || shouldLocalWin(schedule, remote)) {
                                 remoteRepo.updateSchedule(schedule.id, schedule.toUpdateMap())
@@ -170,7 +157,7 @@ class SyncManager(
                 }
             }
             
-            // 3. Process pending items
+            
             for (item in pendingItems) {
                 processed++
                 _syncState.update { 
@@ -188,7 +175,7 @@ class SyncManager(
                             localRepo.markItemSynced(item.id)
                             result.itemsUpdated++
                         }
-                        // Items không có PENDING_DELETE vì delete qua schedule
+                        
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to sync item: ${item.id}", e)
@@ -196,7 +183,7 @@ class SyncManager(
                 }
             }
             
-            // 4. Process pending subtasks
+            
             for (subTask in pendingSubTasks) {
                 processed++
                 _syncState.update { 
@@ -206,8 +193,8 @@ class SyncManager(
                 try {
                     when (subTask.syncStatus) {
                         SyncStatus.PENDING_CREATE.name -> {
-                            // SubTask uses batch insert in original repo, we'll handle differently
-                            // For now, mark as synced (will be handled with schedule sync)
+                            
+                            
                             localRepo.markSubTaskSynced(subTask.id)
                             result.subTasksCreated++
                         }
@@ -249,19 +236,17 @@ class SyncManager(
         }
     }
     
-    /**
-     * Full bidirectional sync: Push first, then Pull
-     */
+    
     suspend fun fullSync(userId: String): Result<Unit> {
         Log.d(TAG, "Starting full sync for user: $userId")
         
-        // 1. Push local changes first
+        
         val pushResult = pushToServer()
         if (pushResult.isFailure) {
             return Result.failure(pushResult.exceptionOrNull() ?: Exception("Push failed"))
         }
         
-        // 2. Pull updates from server
+        
         val pullResult = pullFromServer(userId)
         if (pullResult.isFailure) {
             return Result.failure(pullResult.exceptionOrNull() ?: Exception("Pull failed"))
@@ -270,10 +255,7 @@ class SyncManager(
         return Result.success(Unit)
     }
     
-    /**
-     * Conflict resolution: Last-Write-Wins
-     * Local wins if localUpdatedAt > server's createdAt/updatedAt
-     */
+    
     private fun shouldLocalWin(local: ScheduleEntity, remote: com.projectapp.tempus.data.schedule.dto.ScheduleRow): Boolean {
         val remoteTime = remote.createdAt?.let { 
             try {
@@ -286,16 +268,12 @@ class SyncManager(
         return local.localUpdatedAt > remoteTime
     }
     
-    /**
-     * Update pending count (gọi từ repository khi có thay đổi)
-     */
+    
     fun updatePendingCount(count: Int) {
         _syncState.update { it.copy(pendingChanges = count) }
     }
     
-    /**
-     * Clear error state
-     */
+    
     fun clearError() {
         _syncState.update { it.copy(error = null) }
     }

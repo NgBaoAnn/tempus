@@ -25,9 +25,6 @@ import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
 
-/**
- * Theme Settings Screen - Modern design for theme selection
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +63,7 @@ fun ThemeSettingsScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Section header
+            
             Text(
                 text = stringResource(R.string.theme_select_title),
                 fontSize = 14.sp,
@@ -75,7 +72,7 @@ fun ThemeSettingsScreen(
                 modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
             )
             
-            // Theme options
+            
             ThemeOptionCard(
                 title = stringResource(R.string.theme_light),
                 subtitle = stringResource(R.string.theme_light_desc),
@@ -149,7 +146,7 @@ private fun ThemeOptionCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Preview box
+            
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -171,7 +168,7 @@ private fun ThemeOptionCard(
                 contentAlignment = Alignment.Center
             ) {
                 if (isGradientSplit) {
-                    // Split preview for system theme
+                    
                     Row(modifier = Modifier.fillMaxSize()) {
                         Box(
                             modifier = Modifier
@@ -201,7 +198,7 @@ private fun ThemeOptionCard(
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            // Text content
+            
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -217,7 +214,7 @@ private fun ThemeOptionCard(
                 )
             }
             
-            // Checkmark
+            
             if (isSelected) {
                 Box(
                     modifier = Modifier

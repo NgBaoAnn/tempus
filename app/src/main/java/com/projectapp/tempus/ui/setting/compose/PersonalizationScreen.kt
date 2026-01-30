@@ -44,11 +44,7 @@ import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
 import com.projectapp.tempus.ui.setting.PersonalizationUiState
 import com.projectapp.tempus.ui.setting.TimePickerTarget
 
-/**
- * Personalization Screen - Cá nhân hóa thói quen hằng ngày
- * All UI uses Jetpack Compose without icons as requested
- * Using Surface(onClick=) and Card(onClick=) to avoid clickable modifier issues
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalizationScreen(
@@ -78,7 +74,7 @@ fun PersonalizationScreen(
     getLabelDisplayName: (ScheduleLabel) -> String,
     modifier: Modifier = Modifier
 ) {
-    // Show Add Custom Period Screen if active
+    
     if (uiState.showAddCustomPeriodScreen) {
         AddCustomPeriodScreen(
             name = uiState.newPeriodName,
@@ -110,10 +106,10 @@ fun PersonalizationScreen(
             .fillMaxSize()
             .background(PersonalizationColors.Background)
     ) {
-        // Header
+        
         PersonalizationHeader(onBackClick = onBackClick)
 
-        // Content
+        
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,7 +118,7 @@ fun PersonalizationScreen(
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            // Section: LỐI SỐNG
+            
             item {
                 SectionTitle(text = stringResource(R.string.pers_section_lifestyle))
             }
@@ -134,7 +130,7 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Section: NGÀY ÁP DỤNG
+            
             item {
                 SectionTitle(text = stringResource(R.string.pers_section_days))
             }
@@ -147,7 +143,7 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Section: NGỦ & THỨC DẬY
+            
             item {
                 SectionTitle(text = stringResource(R.string.pers_section_sleep))
             }
@@ -162,7 +158,7 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Section: GIỜ LÀM VIỆC
+            
             item {
                 SectionTitle(text = stringResource(R.string.pers_section_work))
             }
@@ -177,12 +173,12 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Section: THỜI GIAN TÙY CHỈNH
+            
             item {
                 SectionTitle(text = stringResource(R.string.pers_section_custom))
             }
 
-            // Custom time periods list
+            
             if (uiState.customTimePeriods.isNotEmpty()) {
                 item {
                     CustomPeriodsCard(
@@ -192,7 +188,7 @@ fun PersonalizationScreen(
                 }
             }
 
-            // Add custom period button
+            
             item {
                 AddCustomPeriodCard(
                     onClick = onShowAddCustomPeriod,
@@ -200,10 +196,10 @@ fun PersonalizationScreen(
                 )
             }
 
-            // Spacer
+            
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // Reset button
+            
             item {
                 ResetPlanButton(
                     isLoading = uiState.isLoading,
@@ -215,7 +211,7 @@ fun PersonalizationScreen(
         }
     }
 
-    // Time Picker Dialog
+    
     if (uiState.showTimePickerFor != null && 
         uiState.showTimePickerFor != TimePickerTarget.NEW_PERIOD_START &&
         uiState.showTimePickerFor != TimePickerTarget.NEW_PERIOD_END) {
@@ -239,7 +235,7 @@ fun PersonalizationScreen(
         )
     }
 
-    // Lifestyle Sheet
+    
     if (uiState.showLifestyleSheet) {
         LifestylePickerSheet(
             currentLifestyle = uiState.lifestyle,
@@ -248,7 +244,7 @@ fun PersonalizationScreen(
         )
     }
 
-    // Reset Confirmation Dialog
+    
     if (uiState.showResetConfirmation) {
         ResetConfirmationDialog(
             wakeUpTime = uiState.wakeUpTime,
@@ -263,7 +259,6 @@ fun PersonalizationScreen(
     }
 }
 
-// ======================== DATA CLASSES ========================
 
 private data class TimeSettingData(
     val label: String,
@@ -272,7 +267,6 @@ private data class TimeSettingData(
     val target: TimePickerTarget
 )
 
-// ======================== ADD CUSTOM PERIOD SCREEN ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -303,7 +297,7 @@ private fun AddCustomPeriodScreen(
             .fillMaxSize()
             .background(PersonalizationColors.Background)
     ) {
-        // Top Bar
+        
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = Color.White,
@@ -341,7 +335,7 @@ private fun AddCustomPeriodScreen(
             }
         }
 
-        // Content
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -349,7 +343,7 @@ private fun AddCustomPeriodScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Card 1: Name + Description + Colors
+            
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -357,7 +351,7 @@ private fun AddCustomPeriodScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Color indicator + Name
+                    
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         val colorValue = try {
                             Color(android.graphics.Color.parseColor(color))
@@ -406,7 +400,7 @@ private fun AddCustomPeriodScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Description
+                    
                     BasicTextField(
                         value = description,
                         onValueChange = onDescriptionChange,
@@ -435,7 +429,7 @@ private fun AddCustomPeriodScreen(
                         color = PersonalizationColors.Divider
                     )
 
-                    // Color Palette
+                    
                     ColorPaletteRow(
                         selectedColor = color,
                         onColorSelected = onColorChange
@@ -443,7 +437,7 @@ private fun AddCustomPeriodScreen(
                 }
             }
 
-            // Card 2: Label Selection
+            
             Card(
                 onClick = onShowLabelSheet,
                 modifier = Modifier.fillMaxWidth(),
@@ -489,7 +483,7 @@ private fun AddCustomPeriodScreen(
                 }
             }
 
-            // Card 3: Time Settings
+            
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -497,7 +491,7 @@ private fun AddCustomPeriodScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column {
-                    // Start Time
+                    
                     Surface(
                         onClick = { onShowTimePicker(TimePickerTarget.NEW_PERIOD_START) },
                         color = Color.Transparent
@@ -528,7 +522,7 @@ private fun AddCustomPeriodScreen(
                         color = PersonalizationColors.Divider
                     )
 
-                    // End Time
+                    
                     Surface(
                         onClick = { onShowTimePicker(TimePickerTarget.NEW_PERIOD_END) },
                         color = Color.Transparent
@@ -555,7 +549,7 @@ private fun AddCustomPeriodScreen(
                 }
             }
 
-            // Duration preview
+            
             val duration = calculateDurationDisplay(startTime, endTime)
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -588,7 +582,7 @@ private fun AddCustomPeriodScreen(
         }
     }
 
-    // Time Picker Dialog for new period
+    
     if (showTimePickerFor == TimePickerTarget.NEW_PERIOD_START || 
         showTimePickerFor == TimePickerTarget.NEW_PERIOD_END) {
         TimePickerDialog(
@@ -600,7 +594,7 @@ private fun AddCustomPeriodScreen(
         )
     }
 
-    // Label Picker Sheet
+    
     if (showLabelSheet) {
         LabelPickerSheet(
             currentLabel = label,
@@ -640,7 +634,6 @@ private fun calculateDurationDisplay(startTime: String, endTime: String): String
     }
 }
 
-// ======================== LABEL PICKER SHEET ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -721,7 +714,6 @@ private fun LabelPickerSheet(
     }
 }
 
-// ======================== COLOR PALETTE ROW ========================
 
 @Composable
 private fun ColorPaletteRow(
@@ -771,7 +763,6 @@ private fun ColorPaletteRow(
     }
 }
 
-// ======================== HEADER ========================
 
 @Composable
 private fun PersonalizationHeader(onBackClick: () -> Unit) {
@@ -835,7 +826,6 @@ private fun PersonalizationHeader(onBackClick: () -> Unit) {
     }
 }
 
-// ======================== SECTION TITLE ========================
 
 @Composable
 private fun SectionTitle(text: String) {
@@ -868,7 +858,6 @@ private fun SectionTitle(text: String) {
     }
 }
 
-// ======================== LIFESTYLE CARD ========================
 
 @Composable
 private fun LifestyleCard(
@@ -903,7 +892,7 @@ private fun LifestyleCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon indicator
+            
             Icon(
                 imageVector = Icons.Filled.TrackChanges,
                 contentDescription = null,
@@ -939,7 +928,6 @@ private fun LifestyleCard(
     }
 }
 
-// ======================== DAYS CARD ========================
 
 @Composable
 private fun DaysCard(
@@ -1066,7 +1054,6 @@ private fun DayOfWeekSelector(
     }
 }
 
-// ======================== TIME SETTINGS CARD ========================
 
 @Composable
 private fun TimeSettingsCard(
@@ -1098,7 +1085,7 @@ private fun TimeSettingsCard(
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Icon based on type
+                        
                         val icon = when (item.target) {
                             TimePickerTarget.WAKE_UP -> Icons.Outlined.WbSunny
                             TimePickerTarget.SLEEP -> Icons.Outlined.Bedtime
@@ -1163,7 +1150,6 @@ private fun TimeSettingsCard(
     }
 }
 
-// ======================== CUSTOM PERIODS CARD ========================
 
 @Composable
 private fun CustomPeriodsCard(
@@ -1277,7 +1263,6 @@ private fun CustomPeriodsCard(
     }
 }
 
-// ======================== ADD CUSTOM PERIOD CARD ========================
 
 @Composable
 private fun AddCustomPeriodCard(
@@ -1326,7 +1311,6 @@ private fun AddCustomPeriodCard(
     }
 }
 
-// ======================== RESET PLAN BUTTON ========================
 
 @Composable
 private fun ResetPlanButton(
@@ -1393,7 +1377,6 @@ private fun ResetPlanButton(
     }
 }
 
-// ======================== TIME PICKER DIALOG ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1472,7 +1455,6 @@ private fun TimePickerDialog(
     }
 }
 
-// ======================== LIFESTYLE PICKER SHEET ========================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1547,7 +1529,6 @@ private fun LifestylePickerSheet(
     }
 }
 
-// ======================== RESET CONFIRMATION DIALOG ========================
 
 @Composable
 private fun ResetConfirmationDialog(
@@ -1663,17 +1644,10 @@ private fun ResetConfirmationDialog(
     }
 }
 
-// ======================== COLORS ========================
 
-/**
- * Personalization screen colors that adapt to current theme
- * Use PersonalizationColors inside @Composable functions
- */
 private object PersonalizationColors {
-    // These will be populated by the rememberPersonalizationColors() composable
-    // For now, they serve as fallback values matching light theme
     
-    // Base Colors - these should be accessed via MaterialTheme.colorScheme
+    
     val Background: Color
         @Composable get() = MaterialTheme.colorScheme.background
     val SurfaceCard: Color 
@@ -1681,13 +1655,13 @@ private object PersonalizationColors {
     val SurfaceDark: Color
         @Composable get() = MaterialTheme.colorScheme.surfaceVariant
     
-    // Glassmorphism
+    
     val GlassBackground: Color
         @Composable get() = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
     val GlassBorder: Color
         @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
     
-    // Text Colors
+    
     val TextPrimary: Color
         @Composable get() = MaterialTheme.colorScheme.onBackground
     val TextSecondary: Color
@@ -1695,7 +1669,7 @@ private object PersonalizationColors {
     val TextHint: Color
         @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     
-    // Accent Colors - use primary from theme
+    
     val AccentPrimary: Color
         @Composable get() = MaterialTheme.colorScheme.primary
     val AccentSecondary: Color
@@ -1703,7 +1677,7 @@ private object PersonalizationColors {
     val AccentTertiary: Color
         @Composable get() = MaterialTheme.colorScheme.tertiary
     
-    // Status Colors (semantic - stay consistent across themes)
+    
     val Blue = Color(0xFF3B82F6)
     val Orange = Color(0xFFF59E0B)
     val Purple = Color(0xFF8B5CF6)
@@ -1712,7 +1686,7 @@ private object PersonalizationColors {
     val Cyan = Color(0xFF06B6D4)
     val Pink = Color(0xFFEC4899)
     
-    // Utility Colors
+    
     val Divider: Color
         @Composable get() = MaterialTheme.colorScheme.outlineVariant
     val ChipBackground: Color
@@ -1722,7 +1696,7 @@ private object PersonalizationColors {
     val WarningBackground: Color
         @Composable get() = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
     
-    // Glow Effects
+    
     val GlowPrimary: Color
         @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     val GlowSecondary: Color

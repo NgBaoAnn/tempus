@@ -1,8 +1,6 @@
 package com.projectapp.tempus.domain.social.model
 
-/**
- * Trạng thái của lời mời kết bạn
- */
+
 enum class FriendRequestStatus {
     PENDING,
     ACCEPTED,

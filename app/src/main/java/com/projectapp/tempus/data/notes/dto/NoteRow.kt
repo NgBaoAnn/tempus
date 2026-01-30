@@ -3,9 +3,7 @@ package com.projectapp.tempus.data.notes.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * DTO cho Notes trên Supabase
- */
+
 @Serializable
 data class NoteRow(
     val id: String,
@@ -22,9 +20,7 @@ data class NoteRow(
     val updatedAt: String? = null
 )
 
-/**
- * DTO để insert note mới (không cần id vì DB tự generate)
- */
+
 @Serializable
 data class NoteInsert(
     @SerialName("user_id")
@@ -36,9 +32,7 @@ data class NoteInsert(
     val color: String? = null
 )
 
-/**
- * DTO để insert note với ID cụ thể (dùng để sync từ local)
- */
+
 @Serializable
 data class NoteInsertWithId(
     val id: String,
