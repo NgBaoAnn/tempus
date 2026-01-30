@@ -15,25 +15,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+// import androidx.compose.ui.res.stateListResource removed
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.projectapp.tempus.ui.theme.ThemeMode
-import com.projectapp.tempus.ui.theme.TempusDesignSystem
-import androidx.compose.ui.res.stringResource
 import com.projectapp.tempus.R
+import com.projectapp.tempus.ui.theme.TempusDesignSystem
 
 /**
- * Theme Settings Screen - Modern design for theme selection
+ * Language Settings Screen
  */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThemeSettingsScreen(
-    currentThemeMode: ThemeMode,
-    onThemeSelected: (ThemeMode) -> Unit,
+fun LanguageSettingsScreen(
+    currentLanguageCode: String,
+    onLanguageSelected: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -41,7 +39,7 @@ fun ThemeSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.theme_title),
+                        text = stringResource(R.string.language_title),
                         fontWeight = FontWeight.SemiBold
                     )
                 },
@@ -68,53 +66,39 @@ fun ThemeSettingsScreen(
         ) {
             // Section header
             Text(
-                text = stringResource(R.string.theme_select_title),
+                text = stringResource(R.string.language_select_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
             )
             
-            // Theme options
-            ThemeOptionCard(
-                title = stringResource(R.string.theme_light),
-                subtitle = stringResource(R.string.theme_light_desc),
-                emoji = "☀️",
-                isSelected = currentThemeMode == ThemeMode.LIGHT,
-                previewColors = listOf(Color.White, TempusDesignSystem.Slate100),
-                onClick = { onThemeSelected(ThemeMode.LIGHT) }
+            // Language options
+            LanguageOptionCard(
+                title = stringResource(R.string.language_vi),
+                subtitle = stringResource(R.string.language_vi_desc),
+                flagEmoji = "🇻🇳",
+                isSelected = currentLanguageCode == "vi",
+                onClick = { onLanguageSelected("vi") }
             )
             
-            ThemeOptionCard(
-                title = stringResource(R.string.theme_dark),
-                subtitle = stringResource(R.string.theme_dark_desc),
-                emoji = "🌙",
-                isSelected = currentThemeMode == ThemeMode.DARK,
-                previewColors = listOf(TempusDesignSystem.Slate900, TempusDesignSystem.Slate800),
-                onClick = { onThemeSelected(ThemeMode.DARK) }
-            )
-            
-            ThemeOptionCard(
-                title = stringResource(R.string.theme_system),
-                subtitle = stringResource(R.string.theme_system_desc),
-                emoji = "📱",
-                isSelected = currentThemeMode == ThemeMode.SYSTEM,
-                previewColors = listOf(Color.White, TempusDesignSystem.Slate900),
-                isGradientSplit = true,
-                onClick = { onThemeSelected(ThemeMode.SYSTEM) }
+            LanguageOptionCard(
+                title = stringResource(R.string.language_en),
+                subtitle = stringResource(R.string.language_en_desc),
+                flagEmoji = "🇺🇸",
+                isSelected = currentLanguageCode == "en",
+                onClick = { onLanguageSelected("en") }
             )
         }
     }
 }
 
 @Composable
-private fun ThemeOptionCard(
+private fun LanguageOptionCard(
     title: String,
     subtitle: String,
-    emoji: String,
+    flagEmoji: String,
     isSelected: Boolean,
-    previewColors: List<Color>,
-    isGradientSplit: Boolean = false,
     onClick: () -> Unit
 ) {
     val borderColor by animateColorAsState(
@@ -149,53 +133,22 @@ private fun ThemeOptionCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Preview box
+            // Flag/Icon container
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .then(
-                        if (isGradientSplit) {
-                            Modifier.background(Color.Transparent)
-                        } else {
-                            Modifier.background(
-                                Brush.linearGradient(previewColors)
-                            )
-                        }
-                    )
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (isGradientSplit) {
-                    // Split preview for system theme
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .background(
-                                    previewColors[0],
-                                    RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)
-                                )
-                        )
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .background(
-                                    previewColors[1],
-                                    RoundedCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
-                                )
-                        )
-                    }
-                }
                 Text(
-                    text = emoji,
-                    fontSize = 24.sp
+                    text = flagEmoji,
+                    fontSize = 28.sp
                 )
             }
             

@@ -6,9 +6,14 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+
 android {
     namespace = "com.projectapp.tempus"
     compileSdk = 36
+
 
     defaultConfig {
         applicationId = "com.projectapp.tempus"
@@ -18,6 +23,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Helper to read .env file
+        val envFile = rootProject.file(".env")
+        val envProperties = Properties()
+        if (envFile.exists()) {
+            envProperties.load(FileInputStream(envFile))
+        }
 
         // Supabase service
         buildConfigField(
@@ -32,13 +44,26 @@ android {
             "\"${project.findProperty("SUPABASE_KEY")}\""
         )
 
-        // Gemini AI service
+        // Gemini AI service - Fallback to first key if not set
+        val geminiKey1 = envProperties.getProperty("GEMINI_API_KEY_1") ?: ""
+        
         buildConfigField(
             "String",
             "GEMINI_API_KEY",
-            "\"${project.findProperty("GEMINI_API_KEY")}\""
+            "\"$geminiKey1\""
         )
+        
+        // Gemini API Keys Pool (from .env)
+        buildConfigField("String", "GEMINI_API_KEY_1", "\"${envProperties.getProperty("GEMINI_API_KEY_1") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_2", "\"${envProperties.getProperty("GEMINI_API_KEY_2") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_3", "\"${envProperties.getProperty("GEMINI_API_KEY_3") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_4", "\"${envProperties.getProperty("GEMINI_API_KEY_4") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_5", "\"${envProperties.getProperty("GEMINI_API_KEY_5") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_6", "\"${envProperties.getProperty("GEMINI_API_KEY_6") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_7", "\"${envProperties.getProperty("GEMINI_API_KEY_7") ?: ""}\"")
+        buildConfigField("String", "GEMINI_API_KEY_8", "\"${envProperties.getProperty("GEMINI_API_KEY_8") ?: ""}\"")
     }
+
 
     buildFeatures {
         viewBinding = true

@@ -66,9 +66,10 @@ class SettingsFragment : Fragment() {
                         onNotificationsClick = ::onNotificationsClick,
                         onPersonalizationClick = ::navigateToPersonalization,
                         onThemeClick = ::onThemeClick,
+                        onLanguageClick = ::navigateToLanguage,
                         onPrivacyClick = ::navigateToPrivacyPolicy,
                         onTermsClick = ::navigateToTermsOfService,
-                        onExportJsonClick = ::exportToJson,
+                        onExportJsonClick = ::performSync,
                         onExportCsvClick = ::exportToCsv,
                         onDeleteDataClick = ::showDeleteConfirmationStep1,
                         onLogoutClick = ::logout
@@ -133,6 +134,11 @@ class SettingsFragment : Fragment() {
         val intent = Intent(requireContext(), ThemeSettingsActivity::class.java)
         startActivity(intent)
     }
+
+    private fun navigateToLanguage() {
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.LanguageSettingsActivity::class.java)
+        startActivity(intent)
+    }
     
     private fun navigateToPrivacyPolicy() {
         val intent = Intent(requireContext(), LegalDocumentActivity::class.java)
@@ -144,6 +150,43 @@ class SettingsFragment : Fragment() {
         val intent = Intent(requireContext(), LegalDocumentActivity::class.java)
         intent.putExtra(LegalDocumentActivity.EXTRA_DOCUMENT_TYPE, LegalDocumentActivity.TYPE_TERMS_OF_SERVICE)
         startActivity(intent)
+    }
+
+    // ===== SYNC FUNCTION =====
+
+    private fun performSync() {
+        val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+        if (userId == null) {
+            Toast.makeText(requireContext(), "Vui lòng đăng nhập lại", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+            
+            try {
+                // 1. Sync Schedule data (push then pull)
+                val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(requireContext())
+                syncManager.pushToServer()
+                syncManager.pullFromServer(userId)
+                
+                // 2. Sync Gamification data
+                val gamificationSyncManager = com.projectapp.tempus.data.RepositoryProvider.getGamificationSyncManager(requireContext())
+                gamificationSyncManager.pushToServer()
+                gamificationSyncManager.pullFromServer()
+                
+                // 3. Sync Notes data
+                val notesSyncManager = com.projectapp.tempus.data.RepositoryProvider.getNotesSyncManager(requireContext())
+                notesSyncManager.pushToServer()
+                notesSyncManager.pullFromServer(userId)
+                
+                Toast.makeText(requireContext(), "✅ Đồng bộ thành công!", Toast.LENGTH_SHORT).show()
+                
+            } catch (e: Exception) {
+                android.util.Log.e("Settings", "Sync failed", e)
+                Toast.makeText(requireContext(), "❌ Đồng bộ thất bại: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // ===== EXPORT FUNCTIONS =====

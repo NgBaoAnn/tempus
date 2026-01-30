@@ -1,36 +1,299 @@
 <resources>
     <string name="app_name">Tiramisu Plan</string>
-    <string name="title_timer">Timer</string>
-    <string
-        name="title_timeline">Timeline</string>
-    <string name="title_ai">AI</string>
-    <string
-        name="title_statistics">Statistics</string>
-    <string name="title_settings">Settings</string>
-    <string
-        name="statis_title">Thống kê</string>
+    
+    <!-- Navigation -->
+    <string name="title_timer">Gà chua nướng</string> <!-- Assuming "Timer" was localized or specialized name -->
+    <string name="title_timeline">Lịch trình</string>
+    <string name="title_ai">Trợ lý AI</string>
+    <string name="title_statistics">Thống kê</string>
+    <string name="title_settings">Cài đặt</string>
+    
+    <!-- Common -->
+    <string name="ok">Đồng ý</string>
+    <string name="cancel">Hủy</string>
+    <string name="save">Lưu</string>
+    <string name="delete">Xóa</string>
+    <string name="edit">Chỉnh sửa</string>
+    <string name="back">Quay lại</string>
+    <string name="next">Tiếp theo</string>
+    <string name="done">Hoàn tất</string>
+    <string name="loading">Đang tải...</string>
+    <string name="error_generic">Đã xảy ra lỗi</string>
+    
+    <!-- Settings Screen -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_profile_user_default">Người dùng</string>
+    <string name="settings_section_general">CHUNG</string>
+    <string name="settings_item_theme">Giao diện</string>
+    <string name="settings_item_language">Ngôn ngữ</string>
+    <string name="settings_item_notifications">Thông báo</string>
+    <string name="settings_item_personalization">Cá nhân hóa</string>
+    <string name="settings_item_advanced">Nâng cao</string>
+    
+    <string name="settings_section_data">DỮ LIỆU &amp; QUYỀN RIÊNG TƯ</string>
+    <string name="settings_item_sync">Đồng bộ dữ liệu</string>
+    <string name="settings_item_delete_data">Xóa dữ liệu</string>
+    
+    <string name="settings_section_support">HỖ TRỢ</string>
+    <string name="settings_item_contact">Liên hệ</string>
+    <string name="settings_item_feedback">Gửi phản hồi</string>
+    <string name="settings_item_rate">Viết đánh giá ứng dụng</string>
+    
+    <string name="settings_section_legal">PHÁP LÝ</string>
+    <string name="settings_item_privacy">Chính sách quyền riêng tư</string>
+    <string name="settings_item_terms">Điều khoản dịch vụ</string>
+    
+    <string name="settings_section_info">THÔNG TIN</string>
+    <string name="settings_item_version">Phiên bản</string>
+    
+    <string name="settings_logout">Đăng xuất</string>
+
+    <!-- Theme Settings -->
+    <string name="theme_title">Giao diện</string>
+    <string name="theme_select_title">Chọn giao diện</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_light_desc">Giao diện màu sáng</string>
+    <string name="theme_dark">Tối</string>
+    <string name="theme_dark_desc">Giao diện màu tối</string>
+    <string name="theme_system">Theo hệ thống</string>
+    <string name="theme_system_desc">Tự động theo cài đặt thiết bị</string>
+    <string name="theme_selected_content_desc">Đã chọn</string>
+    
+    <!-- Language Settings -->
+    <string name="language_title">Ngôn ngữ</string>
+    <string name="language_select_title">Chọn ngôn ngữ</string>
+    <string name="language_vi">Tiếng Việt</string>
+    <string name="language_vi_desc">Việt Nam</string>
+    <string name="language_en">English</string>
+    <string name="language_en_desc">United States</string>
+    
+    <!-- Login/Auth -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="register_title">Đăng ký</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Mật khẩu</string>
+
+    <!-- Statistics -->
+    <string name="statis_title">Thống kê</string>
+    <string name="chart_title">Thống kê hoàn thành</string>
+    <string name="category_title">Danh mục tác vụ hàng đầu</string>
+    
+    <!-- Additional existing strings preserved/mapped -->
     <string name="week">Tuần</string>
-    <string name="month">
-    Tháng</string>" <string name="chart_title">Thống kê hoàn thành</string>
-    <string
-        name="category_title">Danh mục tác vụ hàng đầu</string>" <string name="tag">Nhãn</string>
-    <string
-        name="timer">Hẹn giờ</string>
+    <string name="month">Tháng</string>
+    <string name="tag">Nhãn</string>
+    <string name="timer">Hẹn giờ</string>
     <string name="customize">Tùy chỉnh</string>
-    <string name="hours">
-    Giờ</string>
+    <string name="hours">Giờ</string>
     <string name="minutes">Phút</string>
-
-    <!-- Insights -->
-    <string name="insights_title">💡 Phân tích hiệu
-    suất</string>
+    <string name="insights_title">💡 Phân tích hiệu suất</string>
     <string name="avg_completion">Tỷ lệ hoàn thành TB</string>
-    <string
-        name="trend_label">📊 Xu hướng</string>
-
-    <!-- Widget -->
+    <string name="trend_label">📊 Xu hướng</string>
     <string name="widget_description">Hiển thị công việc hôm nay</string>
-
-    <!-- Google Sign-In -->
     <string name="google_web_client_id">1033092420951-61vs9de72uhs85rqfc3dgop9uv0getu3.apps.googleusercontent.com</string>
+
+    <!-- Timer -->
+    <string name="timer_setup_title">Hẹn giờ</string>
+    <string name="timer_countdown_title">Đếm ngược</string>
+    <string name="timer_quick_notes">Ghi chú nhanh</string>
+    <string name="timer_quick_notes_desc">Ghi lại ý tưởng khi tập trung</string>
+    <string name="timer_focus_mode">Chế độ tập trung</string>
+    <string name="timer_focus_mode_on_desc">Đang bật - Chặn app phân tâm</string>
+    <string name="timer_focus_mode_off_desc">Chặn app phân tâm khi tập trung</string>
+    <string name="timer_on">ON</string>
+    <string name="timer_off">OFF</string>
+    <string name="timer_label">Nhãn</string>
+    <string name="timer_default_label">Hẹn giờ</string>
+    <string name="timer_running">Đang chạy</string>
+    <string name="timer_paused">Đã tạm dừng</string>
+    <string name="timer_end_at">Kết thúc lúc %1$s</string>
+
+    <!-- Timeline -->
+    <string name="timeline_voice_command">Điều khiển giọng nói</string>
+    <string name="timeline_add_task">Thêm công việc</string>
+    <string name="timeline_garden">Khu vườn</string>
+    <string name="day_mon">T2</string>
+    <string name="day_tue">T3</string>
+    <string name="day_wed">T4</string>
+    <string name="day_thu">T5</string>
+    <string name="day_fri">T6</string>
+    <string name="day_sat">T7</string>
+    <string name="day_sun">CN</string>
+
+    <!-- AI Chat -->
+    <string name="ai_placeholder_ask">Hỏi điều gì đó...</string>
+    <string name="ai_placeholder_agent">Yêu cầu một hành động...</string>
+    <string name="ai_placeholder_planner">Chia sẻ mục tiêu của bạn...</string>
+    <string name="ai_proposing">Đang phân tích và tạo đề xuất...</string>
+    <string name="ai_executing">Đang thực hiện các thay đổi...</string>
+    <string name="ai_processing">Đang xử lý...</string>
+    <string name="ai_ready">Sẵn sàng hỗ trợ</string>
+    <string name="ai_name">Tiramisu AI</string>
+    <string name="ai_clear_chat">Xóa cuộc trò chuyện</string>
+    <string name="ai_mode_ask">Chế độ Ask</string>
+    <string name="ai_mode_agent">Chế độ Agent</string>
+    <string name="ai_mode_planner">Life Planner</string>
+    <string name="ai_desc_ask">Hỏi đáp, tư vấn về quản lý thời gian.\nKhông thực hiện hành động.</string>
+    <string name="ai_desc_agent">Yêu cầu tạo, sửa, xóa lịch.\nXem trước và xác nhận trước khi thực hiện.</string>
+    <string name="ai_desc_planner">Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc.</string>
+    <string name="ai_try_ask">THỬ HỎI</string>
+    <string name="ai_suggestion_1">Làm sao để quản lý thời gian tốt hơn?</string>
+    <string name="ai_suggestion_2">Kỹ thuật Pomodoro là gì?</string>
+    <string name="ai_suggestion_3">Lên lịch học bài cho tôi</string>
+    <string name="ai_suggestion_4">Tạo lịch làm việc từ 8h-17h</string>
+    <string name="ai_suggestion_5">Tôi muốn học IELTS 7.0 trong 3 tháng</string>
+    <string name="ai_suggestion_6">Chuẩn bị thi cuối kỳ 5 môn trong 2 tuần</string>
+    <string name="ai_analyzing_plan">Đang phân tích mục tiêu và tạo kế hoạch...</string>
+    <string name="ai_creating_schedule">Đang tạo lịch từ kế hoạch...</string>
+    <string name="ai_avatar_description">AI Avatar</string>
+
+    <!-- Garden -->
+    <string name="garden_title">Khu vườn của tôi</string>
+    <string name="garden_back">Quay lại Timeline</string>
+    <string name="garden_refresh">Làm mới</string>
+    <string name="garden_plant_new">Trồng cây mới</string>
+    <string name="garden_empty_title">Khu vườn trống trơn</string>
+    <string name="garden_empty_desc">Hãy trồng cái cây đầu tiên của bạn!</string>
+    <string name="garden_plant_now">Trồng cây ngay</string>
+    <string name="garden_plant_dialog_title">Trồng cây mới</string>
+    <string name="garden_your_points">Bạn có %d 💰</string>
+    <string name="garden_error_points">❌ Cần ít nhất %d điểm để trồng cây!</string>
+    <string name="garden_cost">điểm</string>
+    <string name="garden_planted_success">🌱 Đã trồng %s!</string>
+    <string name="garden_dying">⚠️ Sắp héo!</string>
+    <string name="garden_close">Đóng</string>
+
+    <!-- Statistics -->
+    <string name="stats_title">Thống kê</string>
+    <string name="stats_week">Tuần</string>
+    <string name="stats_month">Tháng</string>
+    <string name="stats_pomodoro">Pomodoro</string>
+    <string name="stats_completed">Hoàn thành</string>
+    <string name="stats_tasks">tác vụ</string>
+    <string name="stats_minutes">phút</string>
+    <string name="stats_progress">Tiến độ</string>
+    <string name="stats_total">Tổng cộng</string>
+    <string name="stats_remaining">Còn lại</string>
+    <string name="stats_chart">Biểu đồ</string>
+    <string name="stats_no_data">Chưa có dữ liệu</string>
+    <string name="stats_prev">Trước</string>
+    <string name="stats_next">Sau</string>
+    <string name="stats_insight">Phân tích</string>
+    <string name="stats_completion_rate">Tỷ lệ hoàn thành TB</string>
+    <string name="stats_best_day">Ngày tốt nhất</string>
+    <string name="stats_improve">Cần cải thiện</string>
+
+    <!-- Social Friends -->
+    <string name="social_connect">Kết nối</string>
+    <string name="social_new_invites_fmt">%d lời mời mới</string>
+    <string name="social_online">Đang trực tuyến</string>
+    <string name="social_messages">Tin nhắn</string>
+    <string name="social_tab_discover">Khám phá</string>
+    <string name="social_tab_friends">Bạn bè</string>
+    <string name="social_tab_requests">Lời mời</string>
+    <string name="social_tab_blocked">Đã chặn</string>
+    <string name="social_no_friends">Chưa có bạn bè</string>
+    <string name="social_find_friends">Tìm và kết nối với bạn bè mới!</string>
+    <string name="social_unfriend">Huỷ kết bạn</string>
+    <string name="social_more">Thêm</string>
+    <string name="social_requests_received">Lời mời đã nhận</string>
+    <string name="social_requests_sent">Lời mời đã gửi</string>
+    <string name="social_cancel">Huỷ</string>
+    <string name="social_accept">Chấp nhận</string>
+    <string name="social_reject">Từ chối</string>
+    <string name="social_want_to_connect">Muốn kết bạn với bạn</string>
+    <string name="social_waiting">Đang chờ phản hồi</string>
+    <string name="social_no_requests">Không có lời mời</string>
+    <string name="social_requests_empty_desc">Các lời mời kết bạn sẽ hiện ở đây</string>
+    <string name="social_no_blocked">Không có ai bị chặn</string>
+    <string name="social_blocked_empty_desc">Người dùng bị chặn sẽ hiện ở đây</string>
+    <string name="social_unblock">Bỏ chặn</string>
+    <string name="social_discover_limit">Tìm bạn bè</string>
+    <string name="social_users_count">%d người dùng</string>
+    <string name="social_refresh">Làm mới</string>
+    <string name="social_no_users">Không có user nào</string>
+    <string name="social_no_users_desc">Hiện không có user nào để hiển thị</string>
+    <string name="social_search_friends">Tìm bạn bè</string>
+    <string name="social_add_friend">Tìm bạn bè</string>
+    <string name="social_back">Quay lại</string>
+    <string name="social_close">Đóng</string>
+    <string name="social_search_placeholder">Nhập username...</string>
+    <string name="social_clear">Xóa</string>
+    <string name="social_search_hint">Tìm kiếm theo username</string>
+    <string name="social_search_no_results">Không tìm thấy người dùng nào</string>
+    <string name="social_send_request">Gửi lời mời</string>
+
+    <!-- Social Conversations -->
+    <string name="chat_title">Tin nhắn</string>
+    <string name="chat_no_messages">Chưa có tin nhắn</string>
+    <string name="chat_start_hint">Nhấn vào bạn bè để bắt đầu trò chuyện</string>
+    <string name="chat_start_conversation">Bắt đầu cuộc trò chuyện</string>
+    <!-- Navigation -->
+    <string name="nav_timer">Hẹn giờ</string>
+    <string name="nav_timeline">Lịch</string>
+    <string name="nav_ai">AI</string>
+    <string name="nav_social">Bạn bè</string>
+    <string name="nav_stats">Thống kê</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- Statistics Categories & Trends -->
+    <string name="stats_by_category">Theo danh mục</string>
+    <string name="stats_trend_label">Xu hướng</string>
+    <string name="stats_trend_up">Đang tăng</string>
+    <string name="stats_trend_down">Đang giảm</string>
+    <string name="stats_trend_stable">Ổn định</string>
+
+    <string name="cat_wakeup">Thức dậy</string>
+    <string name="cat_eat">Ăn uống</string>
+    <string name="cat_exercise">Tập luyện</string>
+    <string name="cat_rest">Nghỉ ngơi</string>
+    <string name="cat_water">Uống nước</string>
+    <string name="cat_study">Học tập</string>
+    <string name="cat_sleep">Ngủ</string>
+    <string name="cat_clean">Dọn dẹp</string>
+    <string name="cat_cook">Nấu ăn</string>
+    <string name="cat_garden">Làm vườn</string>
+
+    <!-- Heatmap -->
+    <string name="heatmap_title">Heatmap Năng suất</string>
+    <string name="heatmap_desc">Xem bức tranh tổng quan theo tháng</string>
+    <string name="heatmap_open_desc">Mở Heatmap</string>
+    <!-- Focus Mode Settings -->
+    <string name="focus_settings_title_screen">Chế độ Tập trung</string>
+    <string name="focus_settings_desc_screen">Chặn phân tâm, tăng hiệu suất</string>
+    <string name="focus_stats_total_time">Thời gian</string>
+    <string name="focus_stats_blocked_attempts">Đã chặn</string>
+    <string name="focus_stats_status">Trạng thái</string>
+    <string name="focus_status_on">BẬT</string>
+    <string name="focus_status_off">TẮT</string>
+    <string name="focus_permissions_title">Cần cấp quyền</string>
+    <string name="focus_permission_usage_title">Quyền truy cập dữ liệu</string>
+    <string name="focus_permission_usage_desc">Phát hiện ứng dụng đang chạy</string>
+    <string name="focus_permission_overlay_title">Quyền hiển thị trên ứng dụng</string>
+    <string name="focus_permission_overlay_desc">Hiện màn hình khoá</string>
+    <string name="focus_mode_enable">Bật Chế độ Tập trung</string>
+    <string name="focus_mode_enable_desc">Chặn ứng dụng gây phân tâm</string>
+    <string name="focus_auto_start">Tự động bật cùng Timer</string>
+    <string name="focus_auto_start_desc">Kích hoạt khi bắt đầu đếm giờ</string>
+    <string name="focus_show_overlay">Hiện màn hình khoá</string>
+    <string name="focus_show_overlay_desc">Màn hình tập trung toàn màn hình</string>
+    <string name="focus_blocked_apps_title">Ứng dụng bị chặn</string>
+    <string name="focus_apps_count_suffix">ứng dụng</string>
+    <string name="focus_add_app_button">Thêm ứng dụng cần chặn</string>
+    <string name="focus_no_apps_title">Chưa có ứng dụng bị chặn</string>
+    <string name="focus_no_apps_desc">Thêm ứng dụng gây phân tâm để tập trung</string>
+    
+    <!-- Timeline Extras -->
+    <string name="timeline_overlap_warning">Các tác vụ đang chồng chéo</string>
+    <string name="timeline_free_time_title">thời gian rảnh!</string>
+    <string name="timeline_free_time_desc">Khung giờ đó đã qua—hãy nắm bắt cái tiếp theo.</string>
+    <string name="timeline_empty_title">Không có task nào</string>
+    <string name="timeline_empty_desc">Nhấn + để thêm task mới</string>
+    <string name="timeline_add_task_label">Thêm Task</string>
+    
+    <!-- General -->
+    <string name="content_desc_back">Quay lại</string>
+    <string name="content_desc_open">Mở</string>
+    <string name="content_desc_delete">Xoá</string>
+    <string name="content_desc_avatar">Avatar</string>
 </resources>

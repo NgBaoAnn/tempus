@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import com.projectapp.tempus.data.social.dto.UserBasicDto
 
 /**
@@ -68,7 +70,7 @@ fun SearchUserDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Tìm bạn bè",
+                        text = stringResource(R.string.social_find_friends),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -76,7 +78,7 @@ fun SearchUserDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "Đóng",
+                            contentDescription = stringResource(R.string.social_close),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -94,7 +96,7 @@ fun SearchUserDialog(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Nhập username...") },
+                    placeholder = { Text(stringResource(R.string.social_search_placeholder)) },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null)
                     },
@@ -104,7 +106,7 @@ fun SearchUserDialog(
                                 searchQuery = ""
                                 onSearch("")
                             }) {
-                                Icon(Icons.Default.Close, contentDescription = "Xóa")
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.social_clear))
                             }
                         }
                     },
@@ -153,7 +155,7 @@ fun SearchUserDialog(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "Tìm kiếm theo username",
+                                    text = stringResource(R.string.social_search_hint),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 14.sp
                                 )
@@ -168,7 +170,7 @@ fun SearchUserDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Không tìm thấy người dùng nào",
+                                text = stringResource(R.string.social_search_no_results),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -247,7 +249,7 @@ private fun SearchResultItem(
             // Add button
             if (requestSent) {
                 Text(
-                    text = "Đã gửi",
+                    text = stringResource(R.string.social_requests_sent),
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -261,7 +263,7 @@ private fun SearchResultItem(
                 ) {
                     Icon(
                         Icons.Default.PersonAdd,
-                        contentDescription = "Gửi lời mời",
+                        contentDescription = stringResource(R.string.social_send_request),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

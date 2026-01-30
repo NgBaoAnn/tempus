@@ -41,6 +41,9 @@ import com.projectapp.tempus.ui.social.friends.FriendsUiState
 
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.components.TempusCard
+
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import com.projectapp.tempus.ui.social.friends.FriendsViewModel
 
 /**
@@ -101,7 +104,7 @@ fun FriendsScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             ) {
-                Icon(Icons.Filled.PersonAdd, contentDescription = "Tìm bạn bè")
+                Icon(Icons.Filled.PersonAdd, contentDescription = stringResource(R.string.social_find_friends))
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -215,7 +218,7 @@ private fun FriendsHeader(
             ) {
                 Column {
                     Text(
-                        text = "Kết nối",
+                        text = stringResource(R.string.social_connect),
                         color = Color.White,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
@@ -232,7 +235,7 @@ private fun FriendsHeader(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (pendingCount > 0) "$pendingCount lời mời mới" else "Đang trực tuyến",
+                            text = if (pendingCount > 0) stringResource(R.string.social_new_invites_fmt, pendingCount) else stringResource(R.string.social_online),
                             color = Color.White.copy(alpha = 0.9f),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
@@ -254,7 +257,7 @@ private fun FriendsHeader(
                     ) {
                         Icon(
                             Icons.Filled.MailOutline,
-                            contentDescription = "Tin nhắn",
+                            contentDescription = stringResource(R.string.social_messages),
                             tint = Color.White,
                             modifier = Modifier.size(22.dp)
                         )
@@ -297,7 +300,7 @@ private fun FriendsTabBar(
             onClick = { onTabSelected(FriendsTab.DISCOVER) },
             text = { 
                 Text(
-                    "Khám phá",
+                    stringResource(R.string.social_tab_discover),
                     fontWeight = if (selectedTab == FriendsTab.DISCOVER) FontWeight.Bold else FontWeight.Medium
                 )
             }
@@ -308,7 +311,7 @@ private fun FriendsTabBar(
             onClick = { onTabSelected(FriendsTab.FRIENDS) },
             text = { 
                 Text(
-                    "Bạn bè",
+                    stringResource(R.string.social_tab_friends),
                     fontWeight = if (selectedTab == FriendsTab.FRIENDS) FontWeight.Bold else FontWeight.Medium
                 )
             }
@@ -320,7 +323,7 @@ private fun FriendsTabBar(
             text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Lời mời",
+                        stringResource(R.string.social_tab_requests),
                         fontWeight = if (selectedTab == FriendsTab.REQUESTS) FontWeight.Bold else FontWeight.Medium
                     )
                     if (pendingCount > 0) {
@@ -341,7 +344,7 @@ private fun FriendsTabBar(
             onClick = { onTabSelected(FriendsTab.BLOCKED) },
             text = { 
                 Text(
-                    "Đã chặn",
+                    stringResource(R.string.social_tab_blocked),
                     fontWeight = if (selectedTab == FriendsTab.BLOCKED) FontWeight.Bold else FontWeight.Medium
                 )
             }
@@ -359,8 +362,8 @@ private fun FriendsList(
     if (friends.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.People,
-            title = "Chưa có bạn bè",
-            subtitle = "Tìm và kết nối với bạn bè mới!"
+            title = stringResource(R.string.social_no_friends),
+            subtitle = stringResource(R.string.social_find_friends)
         )
     } else {
         LazyColumn(
@@ -432,7 +435,7 @@ private fun FriendCard(
             IconButton(onClick = onChat) {
                 Icon(
                     Icons.AutoMirrored.Filled.Chat,
-                    contentDescription = "Nhắn tin",
+                    contentDescription = stringResource(R.string.social_messages),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -442,7 +445,7 @@ private fun FriendCard(
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
                         Icons.Filled.MoreVert,
-                        contentDescription = "Thêm",
+                        contentDescription = stringResource(R.string.social_more),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -451,7 +454,7 @@ private fun FriendCard(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Huỷ kết bạn", color = TempusDesignSystem.Error) },
+                        text = { Text(stringResource(R.string.social_unfriend), color = TempusDesignSystem.Error) },
                         onClick = {
                             showMenu = false
                             onUnfriend()
@@ -477,8 +480,8 @@ private fun RequestsList(
     if (pendingRequests.isEmpty() && sentRequests.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.MailOutline,
-            title = "Không có lời mời",
-            subtitle = "Các lời mời kết bạn sẽ hiện ở đây"
+            title = stringResource(R.string.social_no_requests),
+            subtitle = stringResource(R.string.social_requests_empty_desc)
         )
     } else {
         LazyColumn(
@@ -488,7 +491,7 @@ private fun RequestsList(
             if (pendingRequests.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Lời mời đã nhận",
+                        text = stringResource(R.string.social_requests_received),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -509,7 +512,7 @@ private fun RequestsList(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Lời mời đã gửi",
+                        text = stringResource(R.string.social_requests_sent),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -570,7 +573,7 @@ private fun FriendRequestCard(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = if (isReceived) "Muốn kết bạn với bạn" else "Đang chờ phản hồi",
+                    text = if (isReceived) stringResource(R.string.social_want_to_connect) else stringResource(R.string.social_waiting),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -581,20 +584,20 @@ private fun FriendRequestCard(
                 IconButton(onClick = onReject) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = "Từ chối",
+                        contentDescription = stringResource(R.string.social_reject),
                         tint = TempusDesignSystem.Error
                     )
                 }
                 IconButton(onClick = onAccept) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = "Chấp nhận",
+                        contentDescription = stringResource(R.string.social_accept),
                         tint = SocialColors.Secondary
                     )
                 }
             } else {
                 TextButton(onClick = onCancel) {
-                    Text("Huỷ", color = TempusDesignSystem.Error)
+                    Text(stringResource(R.string.social_cancel), color = TempusDesignSystem.Error)
                 }
             }
         }
@@ -609,8 +612,8 @@ private fun BlockedList(
     if (blockedUsers.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.Block,
-            title = "Không có ai bị chặn",
-            subtitle = "Người dùng bị chặn sẽ hiện ở đây"
+            title = stringResource(R.string.social_no_blocked),
+            subtitle = stringResource(R.string.social_blocked_empty_desc)
         )
     } else {
         LazyColumn(
@@ -644,7 +647,7 @@ private fun BlockedList(
                         )
                         
                         TextButton(onClick = { onUnblock(user.id) }) {
-                            Text("Bỏ chặn", color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.social_unblock), color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -742,8 +745,8 @@ private fun DiscoverList(
     if (users.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.Explore,
-            title = "Không có user nào",
-            subtitle = "Hiện không có user nào để hiển thị"
+            title = stringResource(R.string.social_no_users),
+            subtitle = stringResource(R.string.social_no_users_desc)
         )
     } else {
         LazyColumn(
@@ -761,13 +764,13 @@ private fun DiscoverList(
                 ) {
                     Column {
                         Text(
-                            text = "Khám phá bạn bè",
+                            text = stringResource(R.string.social_discover_limit),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = "${users.size} người dùng",
+                            text = stringResource(R.string.social_users_count, users.size),
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -775,7 +778,7 @@ private fun DiscoverList(
                     IconButton(onClick = onRefresh) {
                         Icon(
                             Icons.Filled.Refresh,
-                            contentDescription = "Làm mới",
+                            contentDescription = stringResource(R.string.social_refresh),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -909,7 +912,7 @@ private fun DiscoverUserCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Bạn bè",
+                            stringResource(R.string.social_tab_friends),
                             color = SocialColors.Secondary,
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
@@ -929,12 +932,12 @@ private fun DiscoverUserCard(
                     ) {
                         Icon(
                             Icons.Filled.Check,
-                            contentDescription = "Chấp nhận",
+                            contentDescription = stringResource(R.string.social_accept),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Chấp nhận",
+                            stringResource(R.string.social_accept),
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
                         )
@@ -956,7 +959,7 @@ private fun DiscoverUserCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Đã chặn",
+                            stringResource(R.string.social_tab_blocked),
                             color = TempusDesignSystem.Error,
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
@@ -972,7 +975,7 @@ private fun DiscoverUserCard(
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                     ) {
                         Text(
-                            "Đã gửi",
+                            stringResource(R.string.social_requests_sent),
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
@@ -995,12 +998,12 @@ private fun DiscoverUserCard(
                     ) {
                         Icon(
                             Icons.Filled.PersonAdd,
-                            contentDescription = "Thêm bạn",
+                            contentDescription = stringResource(R.string.social_add_friend),
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Thêm",
+                            stringResource(R.string.social_more),
                             fontWeight = FontWeight.Medium,
                             fontSize = 13.sp
                         )

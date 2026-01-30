@@ -101,4 +101,18 @@ object UserProfileCache {
     fun clearCache() {
         prefs?.edit()?.clear()?.apply()
     }
+
+    // Language Preference
+    private const val KEY_LANGUAGE_CODE = "language_code"
+    const val LANG_VI = "vi"
+    const val LANG_EN = "en"
+
+    fun saveLanguage(languageCode: String) {
+        prefs?.edit()?.putString(KEY_LANGUAGE_CODE, languageCode)?.apply()
+    }
+
+    fun getLanguage(): String? {
+        // Return null if not set, so we can fallback to system default
+        return prefs?.getString(KEY_LANGUAGE_CODE, null)
+    }
 }

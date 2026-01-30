@@ -55,6 +55,9 @@
             android:name=".ui.setting.ThemeSettingsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.setting.LanguageSettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.garden.TreeDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Tempus" />

@@ -1,6 +1,7 @@
 package com.projectapp.tempus.data.ai
 
 import com.projectapp.tempus.BuildConfig
+import com.projectapp.tempus.core.gemini.GeminiApiKeyManager
 import com.projectapp.tempus.core.gemini.GeminiClientProvider
 import com.projectapp.tempus.data.ai.dto.Content
 import com.projectapp.tempus.data.ai.dto.GeminiRequest
@@ -39,10 +40,13 @@ class AIRepository(
 ) {
     
     private val geminiService = GeminiClientProvider.service
-    private val apiKey = BuildConfig.GEMINI_API_KEY
+    private val apiKeyManager = GeminiApiKeyManager
     
     // Conversation history for multi-turn chat
     private val conversationHistory = mutableListOf<Content>()
+    
+    // Maximum retry attempts when hitting rate limits
+    private val maxRetries = 8  // Try all keys once
     
     // ============================================
     // SYSTEM INSTRUCTIONS
@@ -253,11 +257,60 @@ class AIRepository(
     // ============================================
     
     /**
+     * Helper function to execute API calls with automatic retry on rate limit
+     * 
+     * @param apiCall Lambda that takes an API key and returns the response
+     * @return Result with the response or error
+     */
+    private suspend fun <T> executeWithRetry(
+        apiCall: suspend (apiKey: String) -> T
+    ): Result<T> {
+        var lastException: Exception? = null
+        
+        repeat(maxRetries) { attempt ->
+            try {
+                val apiKey = if (attempt == 0) {
+                    apiKeyManager.getCurrentKey()
+                } else {
+                    apiKeyManager.rotateToNextKey()
+                }
+                
+                val result = apiCall(apiKey)
+                return Result.success(result)
+                
+            } catch (e: Exception) {
+                lastException = e
+                val errorMessage = e.message?.lowercase() ?: ""
+                
+                // Check if it's a rate limit error
+                val isRateLimitError = errorMessage.contains("429") || 
+                                      errorMessage.contains("rate limit") ||
+                                      errorMessage.contains("quota exceeded") ||
+                                      errorMessage.contains("resource_exhausted")
+                
+                if (isRateLimitError) {
+                    android.util.Log.w("AIRepository", "Rate limit hit on attempt ${attempt + 1}, rotating key...")
+                    // Continue to next iteration to try with next key
+                } else {
+                    // Not a rate limit error, fail immediately
+                    android.util.Log.e("AIRepository", "Non-rate-limit error: ${e.message}")
+                    return Result.failure(e)
+                }
+            }
+        }
+        
+        // All retries exhausted
+        return Result.failure(
+            lastException ?: Exception("All API keys exhausted due to rate limits")
+        )
+    }
+    
+    /**
      * Parse voice command to JSON - stateless, no conversation history
      * Lower temperature for more consistent JSON output
      */
     suspend fun parseVoiceCommand(prompt: String): Result<String> = withContext(Dispatchers.IO) {
-        try {
+        executeWithRetry { apiKey ->
             val request = GeminiRequest(
                 contents = listOf(
                     Content(
@@ -282,13 +335,9 @@ class AIRepository(
             
             val response = geminiService.generateContent(apiKey, request)
             
-            val responseText = response.candidates?.firstOrNull()
+            response.candidates?.firstOrNull()
                 ?.content?.parts?.firstOrNull()?.text
-                ?: return@withContext Result.failure(Exception("Empty response from AI"))
-            
-            Result.success(responseText)
-        } catch (e: Exception) {
-            Result.failure(e)
+                ?: throw Exception("Empty response from AI")
         }
     }
     
@@ -300,13 +349,13 @@ class AIRepository(
      * Send message in Ask Mode (Q&A only)
      */
     suspend fun sendAskModeMessage(message: String): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val userContent = Content(
-                role = "user",
-                parts = listOf(Part(text = message))
-            )
-            conversationHistory.add(userContent)
-            
+        val userContent = Content(
+            role = "user",
+            parts = listOf(Part(text = message))
+        )
+        conversationHistory.add(userContent)
+        
+        val result = executeWithRetry { apiKey ->
             val request = GeminiRequest(
                 contents = conversationHistory.toList(),
                 systemInstruction = askModeInstruction,
@@ -318,23 +367,25 @@ class AIRepository(
             
             val response = geminiService.generateContent(apiKey, request)
             
-            val responseText = response.candidates?.firstOrNull()
+            response.candidates?.firstOrNull()
                 ?.content?.parts?.firstOrNull()?.text
-                ?: return@withContext Result.failure(Exception("Empty response from AI"))
-            
+                ?: throw Exception("Empty response from AI")
+        }
+        
+        result.onSuccess { responseText ->
             val aiContent = Content(
                 role = "model",
                 parts = listOf(Part(text = responseText))
             )
             conversationHistory.add(aiContent)
-            
-            Result.success(responseText)
-        } catch (e: Exception) {
+        }.onFailure {
+            // Remove user message on failure
             if (conversationHistory.isNotEmpty()) {
                 conversationHistory.removeAt(conversationHistory.size - 1)
             }
-            Result.failure(e)
         }
+        
+        result
     }
     
     // ============================================
@@ -380,27 +431,32 @@ Không thể tải lịch trình. Vui lòng thử lại.
             
             android.util.Log.d("AIRepository", "Final message to AI: $contextMessage")
             
-            val contents = listOf(
-                Content(
-                    role = "user",
-                    parts = listOf(Part(text = contextMessage))
+            val responseText = executeWithRetry { apiKey ->
+                val contents = listOf(
+                    Content(
+                        role = "user",
+                        parts = listOf(Part(text = contextMessage))
+                    )
                 )
-            )
-            
-            val request = GeminiRequest(
-                contents = contents,
-                systemInstruction = agentModeInstruction,
-                generationConfig = GenerationConfig(
-                    temperature = 0.5f,  // Lower for structured output
-                    maxOutputTokens = 4096
+                
+                val request = GeminiRequest(
+                    contents = contents,
+                    systemInstruction = agentModeInstruction,
+                    generationConfig = GenerationConfig(
+                        temperature = 0.5f,  // Lower for structured output
+                        maxOutputTokens = 4096
+                    )
                 )
-            )
-            
-            val response = geminiService.generateContent(apiKey, request)
-            
-            val responseText = response.candidates?.firstOrNull()
-                ?.content?.parts?.firstOrNull()?.text
-                ?: return@withContext Result.failure(Exception("Empty response from AI"))
+                
+                val response = geminiService.generateContent(apiKey, request)
+                
+                response.candidates?.firstOrNull()
+                    ?.content?.parts?.firstOrNull()?.text
+                    ?: throw Exception("Empty response from AI")
+            }.getOrElse { e ->
+                android.util.Log.e("AIRepository", "Error in requestProposal", e)
+                return@withContext Result.failure(e)
+            }
             
             android.util.Log.d("AIRepository", "AI response: $responseText")
             
@@ -780,29 +836,34 @@ ${scheduleLines.joinToString("\n")}"""
                 |Hãy tạo kế hoạch chi tiết cho mục tiêu này.
             """.trimMargin()
             
-            val contents = listOf(
-                Content(
-                    role = "user",
-                    parts = listOf(Part(text = fullMessage))
-                )
-            )
-            
-            val request = GeminiRequest(
-                contents = contents,
-                systemInstruction = lifePlannerInstruction,
-                generationConfig = GenerationConfig(
-                    temperature = 0.6f,
-                    maxOutputTokens = 4096  // Longer for detailed plans
-                )
-            )
-            
             android.util.Log.d("AIRepository", "Requesting life plan for: $goal")
             
-            val response = geminiService.generateContent(apiKey, request)
-            
-            val responseText = response.candidates?.firstOrNull()
-                ?.content?.parts?.firstOrNull()?.text
-                ?: return@withContext Result.failure(Exception("Empty response from AI"))
+            val responseText = executeWithRetry { apiKey ->
+                val contents = listOf(
+                    Content(
+                        role = "user",
+                        parts = listOf(Part(text = fullMessage))
+                    )
+                )
+                
+                val request = GeminiRequest(
+                    contents = contents,
+                    systemInstruction = lifePlannerInstruction,
+                    generationConfig = GenerationConfig(
+                        temperature = 0.6f,
+                        maxOutputTokens = 4096  // Longer for detailed plans
+                    )
+                )
+                
+                val response = geminiService.generateContent(apiKey, request)
+                
+                response.candidates?.firstOrNull()
+                    ?.content?.parts?.firstOrNull()?.text
+                    ?: throw Exception("Empty response from AI")
+            }.getOrElse { e ->
+                android.util.Log.e("AIRepository", "Error in requestLifePlan", e)
+                return@withContext Result.failure(e)
+            }
             
             android.util.Log.d("AIRepository", "Life plan response: $responseText")
             

@@ -1,5 +1,6 @@
 package com.projectapp.tempus.ui.timer.compose
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -89,7 +90,7 @@ fun TimerScreen(
     ) {
         // Header
         Text(
-            text = if (timerState == TimerState.SETUP) "Hẹn giờ" else "Đếm ngược",
+            text = if (timerState == TimerState.SETUP) stringResource(R.string.timer_setup_title) else stringResource(R.string.timer_countdown_title),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -239,12 +240,12 @@ private fun SetupContent(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Ghi chú nhanh",
+                                    text = stringResource(R.string.timer_quick_notes),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = "Ghi lại ý tưởng khi tập trung",
+                                    text = stringResource(R.string.timer_quick_notes_desc),
                                     fontSize = 12.sp,
                                     color = TempusDesignSystem.TextMuted
                                 )
@@ -283,13 +284,13 @@ private fun SetupContent(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Focus Mode",
+                                    text = stringResource(R.string.timer_focus_mode),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.Black
                                 )
                                 Text(
-                                    text = if (focusModeEnabled) "Đang bật - Chặn app phân tâm" else "Chặn app phân tâm khi tập trung",
+                                    text = if (focusModeEnabled) stringResource(R.string.timer_focus_mode_on_desc) else stringResource(R.string.timer_focus_mode_off_desc),
                                     fontSize = 12.sp,
                                     color = TempusDesignSystem.TextMuted
                                 )
@@ -304,7 +305,7 @@ private fun SetupContent(
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = if (focusModeEnabled) "ON" else "OFF",
+                                text = if (focusModeEnabled) stringResource(R.string.timer_on) else stringResource(R.string.timer_off),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -333,11 +334,11 @@ private fun SetupContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Nhãn",
+                        text = stringResource(R.string.timer_label),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "Hẹn giờ",
+                        text = stringResource(R.string.timer_default_label),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -375,8 +376,9 @@ private fun RunningContent(
     } else 0f
     
     val timeText = formatTime(secondsRemaining)
-    val statusText = if (isRunning) "Đang chạy" else "Đã tạm dừng"
-    val endTimeText = calculateEndTime(secondsRemaining)
+    val statusText = if (isRunning) stringResource(R.string.timer_running) else stringResource(R.string.timer_paused)
+    val endTime = calculateEndTime(secondsRemaining)
+    val endTimeText = stringResource(R.string.timer_end_at, endTime)
     
     TempusCard(
         modifier = Modifier.fillMaxSize(),
@@ -448,5 +450,5 @@ private fun calculateEndTime(secondsRemaining: Long): String {
     calendar.add(Calendar.SECOND, secondsRemaining.toInt())
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
-    return String.format(Locale.getDefault(), "Kết thúc lúc %02d:%02d", hour, minute)
+    return String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
 }

@@ -1,5 +1,6 @@
 package com.projectapp.tempus.ui.timeline.compose
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -132,7 +133,7 @@ fun TimelineScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_mic),
-                        contentDescription = "Voice Command",
+                        contentDescription = stringResource(R.string.timeline_voice_command),
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
@@ -154,7 +155,7 @@ fun TimelineScreen(
                 ) {
                     Icon(
                         Icons.Default.Add, 
-                        contentDescription = "Add Task",
+                        contentDescription = stringResource(R.string.timeline_add_task),
                         tint = Color.White
                     )
                 }
@@ -451,7 +452,15 @@ fun SwipeableWeekCalendarStrip(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
+            listOf(
+                stringResource(R.string.day_mon),
+                stringResource(R.string.day_tue),
+                stringResource(R.string.day_wed),
+                stringResource(R.string.day_thu),
+                stringResource(R.string.day_fri),
+                stringResource(R.string.day_sat),
+                stringResource(R.string.day_sun)
+            ).forEach { day ->
                 Text(
                     text = day,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -594,7 +603,7 @@ private fun TimelineTopBar(
             IconButton(onClick = onGardenClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_garden),
-                    contentDescription = "Garden",
+                    contentDescription = stringResource(R.string.timeline_garden),
                     tint = Color.Unspecified, // Giữ màu gốc từ drawable
                     modifier = Modifier.size(34.dp)
                 )
@@ -626,7 +635,15 @@ fun WeekCalendarStrip(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN").forEach { day ->
+            listOf(
+                stringResource(R.string.day_mon),
+                stringResource(R.string.day_tue),
+                stringResource(R.string.day_wed),
+                stringResource(R.string.day_thu),
+                stringResource(R.string.day_fri),
+                stringResource(R.string.day_sat),
+                stringResource(R.string.day_sun)
+            ).forEach { day ->
                 Text(
                     text = day,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1070,7 +1087,7 @@ fun OverlapWarning() {
             Spacer(modifier = Modifier.width(6.dp))
             
             Text(
-                text = "Các tác vụ đang chồng chéo",
+                text = stringResource(R.string.timeline_overlap_warning),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = warningColor
@@ -1151,8 +1168,9 @@ fun FreeTimeBlock(
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.width(6.dp))
+                val suffix = stringResource(R.string.timeline_free_time_title)
                 Text(
-                    text = "$durationText thời gian rảnh!",
+                    text = "$durationText $suffix",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
@@ -1160,7 +1178,7 @@ fun FreeTimeBlock(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Khung giờ đó đã qua—hãy nắm bắt cái tiếp theo.",
+                text = stringResource(R.string.timeline_free_time_desc),
                 fontSize = 13.sp,
                 color = TempusDesignSystem.TextMuted
             )
@@ -1187,7 +1205,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Không có task nào",
+            text = stringResource(R.string.timeline_empty_title),
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1195,7 +1213,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         Spacer(modifier = Modifier.height(4.dp))
         
         Text(
-            text = "Nhấn + để thêm task mới",
+            text = stringResource(R.string.timeline_empty_desc),
             fontSize = 14.sp,
             color = TempusDesignSystem.TextMuted
         )
@@ -1208,7 +1226,7 @@ fun EmptyState(onAddClick: () -> Unit) {
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Thêm Task")
+            Text(stringResource(R.string.timeline_add_task_label))
         }
     }
 }

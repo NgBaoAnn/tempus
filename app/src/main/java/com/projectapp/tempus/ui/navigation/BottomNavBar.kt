@@ -2,6 +2,7 @@ package com.projectapp.tempus.ui.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,34 +31,34 @@ import com.projectapp.tempus.R
  */
 sealed class NavItem(
     val route: String,
-    val title: String,
+    val titleResId: Int, // Use resource ID
     val icon: Int, // Giữ lại để tương thích với code cũ
     val fragmentId: Int,
     val activeIcon: ImageVector,
     val inactiveIcon: ImageVector
 ) {
     data object Timer : NavItem(
-        "timer", "Hẹn giờ", R.drawable.ic_timer, R.id.timerFragment,
+        "timer", R.string.nav_timer, R.drawable.ic_timer, R.id.timerFragment,
         Icons.Filled.Timer, Icons.Outlined.Timer
     )
     data object Timeline : NavItem(
-        "timeline", "Lịch", R.drawable.ic_timeline, R.id.timelineFragment,
+        "timeline", R.string.nav_timeline, R.drawable.ic_timeline, R.id.timelineFragment,
         Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth
     )
     data object AI : NavItem(
-        "ai", "AI", R.drawable.ic_ai, R.id.aiFragment,
+        "ai", R.string.nav_ai, R.drawable.ic_ai, R.id.aiFragment,
         Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome
     )
     data object Social : NavItem(
-        "social", "Bạn bè", R.drawable.ic_social, R.id.socialFragment,
+        "social", R.string.nav_social, R.drawable.ic_social, R.id.socialFragment,
         Icons.Filled.People, Icons.Outlined.People
     )
     data object Statistics : NavItem(
-        "statistics", "Thống kê", R.drawable.ic_statistics, R.id.statisticsFragment,
+        "statistics", R.string.nav_stats, R.drawable.ic_statistics, R.id.statisticsFragment,
         Icons.Filled.BarChart, Icons.Outlined.BarChart
     )
     data object Settings : NavItem(
-        "settings", "Cài đặt", R.drawable.ic_settings, R.id.settingsFragment,
+        "settings", R.string.nav_settings, R.drawable.ic_settings, R.id.settingsFragment,
         Icons.Filled.Settings, Icons.Outlined.Settings
     )
 }
@@ -194,7 +195,7 @@ private fun RowScope.ModernNavItem(
                 // Icon
                 Icon(
                     imageVector = if (isSelected) item.activeIcon else item.inactiveIcon,
-                    contentDescription = item.title,
+                    contentDescription = stringResource(id = item.titleResId),
                     tint = iconColor,
                     modifier = Modifier.size(24.dp)
                 )
@@ -204,7 +205,7 @@ private fun RowScope.ModernNavItem(
             
             // Label with animated visibility
             Text(
-                text = item.title,
+                text = stringResource(id = item.titleResId),
                 color = textColor,
                 fontSize = 10.sp,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,

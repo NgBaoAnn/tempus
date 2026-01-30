@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,7 @@ import coil.compose.AsyncImage
 
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.components.TempusCard
+import com.projectapp.tempus.R
 
 /**
  * User information data class for SettingsScreen
@@ -45,6 +47,7 @@ data class UserInfo(
 /**
  * Modern Settings Screen - iOS-inspired design
  */
+
 @Composable
 fun SettingsScreen(
     userInfo: UserInfo,
@@ -52,6 +55,7 @@ fun SettingsScreen(
     onNotificationsClick: () -> Unit,
     onPersonalizationClick: () -> Unit,
     onThemeClick: () -> Unit,
+    onLanguageClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     onTermsClick: () -> Unit,
     onExportJsonClick: () -> Unit,
@@ -73,7 +77,7 @@ fun SettingsScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Text(
-                text = "Cài đặt",
+                text = stringResource(R.string.settings_title),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -86,7 +90,7 @@ fun SettingsScreen(
         ) {
             // Profile Card
             ProfileCard(
-                userName = userInfo.name.ifEmpty { "Người dùng" },
+                userName = userInfo.name.ifEmpty { stringResource(R.string.settings_profile_user_default) },
                 userEmail = userInfo.email.ifEmpty { "user@email.com" },
                 avatarUrl = userInfo.avatar,
                 onClick = onProfileClick
@@ -95,22 +99,30 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Section: CHUNG
-            SectionHeader(text = "CHUNG")
+            SectionHeader(text = stringResource(R.string.settings_section_general))
             
             SettingsGroup {
                 SettingsItem(
                     icon = Icons.Default.Settings,
                     iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                     iconTint = MaterialTheme.colorScheme.primary,
-                    title = "Giao diện",
+                    title = stringResource(R.string.settings_item_theme),
                     onClick = onThemeClick
+                )
+                SettingsDivider()
+                SettingsItem(
+                    icon = Icons.Outlined.Info, // Using Info icon for Language temporarily or custom
+                    iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    title = stringResource(R.string.settings_item_language),
+                    onClick = onLanguageClick
                 )
                 SettingsDivider()
                 SettingsItem(
                     icon = Icons.Outlined.Notifications,
                     iconBgColor = TempusDesignSystem.WarningLight,
                     iconTint = TempusDesignSystem.Warning,
-                    title = "Thông báo",
+                    title = stringResource(R.string.settings_item_notifications),
                     onClick = onNotificationsClick
                 )
                 SettingsDivider()
@@ -118,7 +130,7 @@ fun SettingsScreen(
                     icon = Icons.Outlined.Face,
                     iconBgColor = TempusDesignSystem.AccentLight,
                     iconTint = MaterialTheme.colorScheme.tertiary,
-                    title = "Cá nhân hóa",
+                    title = stringResource(R.string.settings_item_personalization),
                     onClick = onPersonalizationClick
                 )
                 SettingsDivider()
@@ -126,7 +138,7 @@ fun SettingsScreen(
                     icon = Icons.Outlined.Settings,
                     iconBgColor = MaterialTheme.colorScheme.surfaceVariant,
                     iconTint = TempusDesignSystem.TextMuted,
-                    title = "Nâng cao",
+                    title = stringResource(R.string.settings_item_advanced),
                     onClick = {}
                 )
             }
@@ -134,14 +146,14 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Section: DỮ LIỆU & QUYỀN RIÊNG TƯ
-            SectionHeader(text = "DỮ LIỆU & QUYỀN RIÊNG TƯ")
+            SectionHeader(text = stringResource(R.string.settings_section_data))
             
             SettingsGroup {
                 SettingsItem(
                     icon = Icons.Default.Refresh,
                     iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
                     iconTint = MaterialTheme.colorScheme.secondary,
-                    title = "Đồng bộ dữ liệu",
+                    title = stringResource(R.string.settings_item_sync),
                     onClick = onExportJsonClick
                 )
                 SettingsDivider()
@@ -149,7 +161,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Delete,
                     iconBgColor = TempusDesignSystem.ErrorLight,
                     iconTint = TempusDesignSystem.Error,
-                    title = "Xóa dữ liệu",
+                    title = stringResource(R.string.settings_item_delete_data),
                     onClick = onDeleteDataClick
                 )
             }
@@ -157,14 +169,14 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Section: HỖ TRỢ
-            SectionHeader(text = "HỖ TRỢ")
+            SectionHeader(text = stringResource(R.string.settings_section_support))
             
             SettingsGroup {
                 SettingsItem(
                     icon = Icons.Outlined.Email,
                     iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                     iconTint = MaterialTheme.colorScheme.primary,
-                    title = "Liên hệ",
+                    title = stringResource(R.string.settings_item_contact),
                     onClick = {}
                 )
                 SettingsDivider()
@@ -172,7 +184,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Send,
                     iconBgColor = TempusDesignSystem.WarningLight,
                     iconTint = TempusDesignSystem.Warning,
-                    title = "Gửi phản hồi",
+                    title = stringResource(R.string.settings_item_feedback),
                     onClick = {}
                 )
                 SettingsDivider()
@@ -180,7 +192,7 @@ fun SettingsScreen(
                     icon = Icons.Outlined.Star,
                     iconBgColor = TempusDesignSystem.WarningLight,
                     iconTint = TempusDesignSystem.Warning,
-                    title = "Viết đánh giá ứng dụng",
+                    title = stringResource(R.string.settings_item_rate),
                     onClick = {}
                 )
             }
@@ -188,14 +200,14 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Section: PHÁP LÝ
-            SectionHeader(text = "PHÁP LÝ")
+            SectionHeader(text = stringResource(R.string.settings_section_legal))
             
             SettingsGroup {
                 SettingsItem(
                     icon = Icons.Default.Lock,
                     iconBgColor = TempusDesignSystem.AccentLight,
                     iconTint = MaterialTheme.colorScheme.tertiary,
-                    title = "Chính sách quyền riêng tư",
+                    title = stringResource(R.string.settings_item_privacy),
                     onClick = onPrivacyClick
                 )
                 SettingsDivider()
@@ -203,7 +215,7 @@ fun SettingsScreen(
                     icon = Icons.Default.Info,
                     iconBgColor = TempusDesignSystem.SuccessLight,
                     iconTint = TempusDesignSystem.Success,
-                    title = "Điều khoản dịch vụ",
+                    title = stringResource(R.string.settings_item_terms),
                     onClick = onTermsClick
                 )
             }
@@ -211,14 +223,14 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Section: THÔNG TIN
-            SectionHeader(text = "THÔNG TIN")
+            SectionHeader(text = stringResource(R.string.settings_section_info))
             
             SettingsGroup {
                 SettingsItemValue(
                     icon = Icons.Outlined.Info,
                     iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                     iconTint = MaterialTheme.colorScheme.primary,
-                    title = "Phiên bản",
+                    title = stringResource(R.string.settings_item_version),
                     value = "1.0.0"
                 )
             }
@@ -247,7 +259,7 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Đăng xuất",
+                    text = stringResource(R.string.settings_logout),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -458,7 +470,7 @@ private fun ProfileCard(
                         .data(avatarUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Avatar",
+                    contentDescription = stringResource(R.string.content_desc_avatar),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                     error = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Person),

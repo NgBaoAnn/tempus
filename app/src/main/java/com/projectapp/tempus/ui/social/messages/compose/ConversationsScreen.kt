@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.projectapp.tempus.domain.social.model.ConversationWithUser
 import com.projectapp.tempus.ui.social.messages.MessagesViewModel
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -60,13 +62,13 @@ fun ConversationsScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Tin nhắn",
+                        stringResource(R.string.social_messages),
                         fontWeight = FontWeight.Bold
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Quay lại")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.social_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -128,14 +130,14 @@ private fun EmptyConversationsState() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Chưa có tin nhắn",
+            text = stringResource(R.string.chat_no_messages),
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Nhấn vào bạn bè để bắt đầu trò chuyện",
+            text = stringResource(R.string.chat_start_hint),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -222,7 +224,7 @@ private fun ConversationCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Text(
-                    text = conversation.conversation.lastMessagePreview ?: "Bắt đầu cuộc trò chuyện",
+                    text = conversation.conversation.lastMessagePreview ?: stringResource(R.string.chat_start_conversation),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

@@ -1,5 +1,6 @@
 package com.projectapp.tempus.ui.ai.compose
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
@@ -128,9 +129,9 @@ fun ChatScreen(
                     },
                     enabled = !isLoading && agentState !is AgentState.AwaitingAccept && lifePlanState !is LifePlanState.AwaitingApproval,
                     placeholder = when (chatMode) {
-                        ChatMode.ASK -> "Hỏi điều gì đó..."
-                        ChatMode.AGENT -> "Yêu cầu một hành động..."
-                        ChatMode.LIFE_PLANNER -> "Chia sẻ mục tiêu của bạn..."
+                        ChatMode.ASK -> stringResource(R.string.ai_placeholder_ask)
+                        ChatMode.AGENT -> stringResource(R.string.ai_placeholder_agent)
+                        ChatMode.LIFE_PLANNER -> stringResource(R.string.ai_placeholder_planner)
                     },
                     modifier = Modifier.imePadding()
                 )
@@ -275,7 +276,7 @@ private fun ProposingIndicator(
         Text(text = "🤖", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Đang phân tích và tạo đề xuất...",
+            text = stringResource(R.string.ai_proposing),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.tertiary
         )
@@ -298,7 +299,7 @@ private fun ExecutingIndicator(
         Text(text = "⚡", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Đang thực hiện các thay đổi...",
+            text = stringResource(R.string.ai_executing),
             style = MaterialTheme.typography.bodyMedium,
             color = TempusDesignSystem.Success
         )
@@ -390,7 +391,7 @@ private fun PremiumChatHeader(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_ai),
-                        contentDescription = "AI Avatar",
+                        contentDescription = stringResource(R.string.ai_avatar_description),
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(2.dp)
@@ -404,7 +405,7 @@ private fun PremiumChatHeader(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Tiramisu AI",
+                        text = stringResource(R.string.ai_name),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -432,7 +433,7 @@ private fun PremiumChatHeader(
                     Spacer(modifier = Modifier.width(6.dp))
                     
                     Text(
-                        text = if (isLoading) "Đang xử lý..." else "Sẵn sàng hỗ trợ",
+                        text = if (isLoading) stringResource(R.string.ai_processing) else stringResource(R.string.ai_ready),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isLoading) MaterialTheme.colorScheme.secondary else TempusDesignSystem.Success
                     )
@@ -459,7 +460,7 @@ private fun PremiumChatHeader(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
-                    contentDescription = "Xóa cuộc trò chuyện",
+                    contentDescription = stringResource(R.string.ai_clear_chat),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     modifier = Modifier.size(20.dp)
                 )
@@ -477,9 +478,9 @@ private fun PremiumModeIndicator(
     modifier: Modifier = Modifier
 ) {
     val (text, color) = when (mode) {
-        ChatMode.ASK -> "Ask" to MaterialTheme.colorScheme.tertiary
-        ChatMode.AGENT -> "Agent" to MaterialTheme.colorScheme.primary
-        ChatMode.LIFE_PLANNER -> "Planner" to TempusDesignSystem.Success
+        ChatMode.ASK -> stringResource(R.string.ai_mode_ask) to MaterialTheme.colorScheme.tertiary
+        ChatMode.AGENT -> stringResource(R.string.ai_mode_agent) to MaterialTheme.colorScheme.primary
+        ChatMode.LIFE_PLANNER -> stringResource(R.string.ai_mode_planner) to TempusDesignSystem.Success
     }
     
     Box(
@@ -563,9 +564,9 @@ private fun PremiumEmptyState(
         
         // Mode title
         val (title, icon) = when (chatMode) {
-            ChatMode.ASK -> "Chế độ Ask" to "💬"
-            ChatMode.AGENT -> "Chế độ Agent" to "🤖"
-            ChatMode.LIFE_PLANNER -> "Life Planner" to "🎯"
+            ChatMode.ASK -> stringResource(R.string.ai_mode_ask) to "💬"
+            ChatMode.AGENT -> stringResource(R.string.ai_mode_agent) to "🤖"
+            ChatMode.LIFE_PLANNER -> stringResource(R.string.ai_mode_planner) to "🎯"
         }
         
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -585,9 +586,9 @@ private fun PremiumEmptyState(
         
         Text(
             text = when (chatMode) {
-                ChatMode.ASK -> "Hỏi đáp, tư vấn về quản lý thời gian.\nKhông thực hiện hành động."
-                ChatMode.AGENT -> "Yêu cầu tạo, sửa, xóa lịch.\nXem trước và xác nhận trước khi thực hiện."
-                ChatMode.LIFE_PLANNER -> "Lên kế hoạch dài hạn cho mục tiêu của bạn.\nAI sẽ tạo milestones và lịch học/làm việc."
+                ChatMode.ASK -> stringResource(R.string.ai_desc_ask)
+                ChatMode.AGENT -> stringResource(R.string.ai_desc_agent)
+                ChatMode.LIFE_PLANNER -> stringResource(R.string.ai_desc_planner)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -603,7 +604,7 @@ private fun PremiumEmptyState(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "THỬ HỎI",
+                text = stringResource(R.string.ai_try_ask),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 1.5.sp
@@ -611,16 +612,16 @@ private fun PremiumEmptyState(
             
             when (chatMode) {
                 ChatMode.ASK -> {
-                    PremiumSuggestionChip(text = "Làm sao để quản lý thời gian tốt hơn?")
-                    PremiumSuggestionChip(text = "Kỹ thuật Pomodoro là gì?")
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_1))
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_2))
                 }
                 ChatMode.AGENT -> {
-                    PremiumSuggestionChip(text = "Lên lịch học bài cho tôi")
-                    PremiumSuggestionChip(text = "Tạo lịch làm việc từ 8h-17h")
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_3))
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_4))
                 }
                 ChatMode.LIFE_PLANNER -> {
-                    PremiumSuggestionChip(text = "Tôi muốn học IELTS 7.0 trong 3 tháng")
-                    PremiumSuggestionChip(text = "Chuẩn bị thi cuối kỳ 5 môn trong 2 tuần")
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_5))
+                    PremiumSuggestionChip(text = stringResource(R.string.ai_suggestion_6))
                 }
             }
         }
@@ -672,7 +673,7 @@ private fun LifePlanAnalyzingIndicator(
         Text(text = "🎯", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Đang phân tích mục tiêu và tạo kế hoạch...",
+            text = stringResource(R.string.ai_analyzing_plan),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.tertiary
         )
@@ -695,7 +696,7 @@ private fun LifePlanCreatingIndicator(
         Text(text = "📅", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Đang tạo lịch từ kế hoạch...",
+            text = stringResource(R.string.ai_creating_schedule),
             style = MaterialTheme.typography.bodyMedium,
             color = TempusDesignSystem.Success
         )
