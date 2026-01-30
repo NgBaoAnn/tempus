@@ -1007,7 +1007,7 @@ fun TimelineItem(
                             text = "+${block.subtasks.size - 3} more",
                             fontSize = 11.sp,
                             color = TempusDesignSystem.TextMuted,
-                            modifier = Modifier.padding(start = 22.dp, top = 2.dp)
+                             modifier = Modifier.padding(start = 22.dp, top = 2.dp)
                         )
                     }
                 }

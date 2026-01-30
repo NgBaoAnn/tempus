@@ -114,19 +114,36 @@ class StatisticsViewModel(
     }
 
     private suspend fun getPomodoroStats(startDate: LocalDate, endDate: LocalDate): Pair<Int, Int> {
-        if (gamificationRepository == null) return Pair(0, 0)
+        if (gamificationRepository == null) {
+            Log.w("StatisticsVM", "gamificationRepository is null!")
+            return Pair(0, 0)
+        }
         
         try {
             val history = gamificationRepository.getPointHistory().first()
             
+            Log.d("StatisticsVM", "Total point history entries: ${history.size}")
+            Log.d("StatisticsVM", "All reasons: ${history.map { it.reason }.distinct()}")
+            
             val startMillis = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
             val endMillis = endDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
             
-            val pomodoroHistory = history.filter { it.reason == "POMODORO_COMPLETE" && it.timestamp >= startMillis && it.timestamp < endMillis }
+            // Filter Pomodoro entries - saved as "POMODORO_25m" format
+            val pomodoroHistory = history.filter { 
+                it.reason.startsWith("POMODORO_") && 
+                it.timestamp >= startMillis && 
+                it.timestamp < endMillis 
+            }
             
             val count = pomodoroHistory.size
-            // Giả định mỗi phiên Pomodoro là 25 phút (có thể điều chỉnh nếu có dữ liệu thực)
-            val minutes = count * 25
+            
+            // Extract actual minutes from each entry (e.g., "POMODORO_25m" -> 25)
+            val minutes = pomodoroHistory.sumOf { entry ->
+                val minutesStr = entry.reason.removePrefix("POMODORO_").removeSuffix("m")
+                minutesStr.toIntOrNull() ?: 25 // Default to 25 if parsing fails
+            }
+            
+            Log.d("StatisticsVM", "Pomodoro stats: count=$count, minutes=$minutes (range: $startDate to $endDate)")
             
             return Pair(count, minutes)
         } catch (e: Exception) {

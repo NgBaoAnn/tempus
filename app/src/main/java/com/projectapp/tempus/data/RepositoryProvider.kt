@@ -231,7 +231,8 @@ object RepositoryProvider {
     }
     
     private fun createLocalGamificationRepository(context: Context): LocalGamificationRepository {
-        val database = GamificationDatabase.getDatabase(context)
+        // Use TempusDatabase (unified) instead of separate GamificationDatabase
+        val database = TempusDatabase.getDatabase(context)
         return LocalGamificationRepository(database.gamificationDao())
     }
     
