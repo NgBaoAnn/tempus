@@ -160,12 +160,19 @@ class StatisticsViewModel(
     }
 
     private fun formatRangeLabel(startDate: LocalDate, endDate: LocalDate, isWeek: Boolean): String {
+        val language = com.projectapp.tempus.data.user.UserProfileCache.getLanguage()
+        val locale = if (language == "en") Locale.ENGLISH else Locale("vi")
+        
         return if (isWeek) {
-            val formatter = DateTimeFormatter.ofPattern("dd/MM")
+            val formatter = DateTimeFormatter.ofPattern("dd/MM", locale)
             "${startDate.format(formatter)} - ${endDate.format(formatter)}"
         } else {
-            val formatter = DateTimeFormatter.ofPattern("MM/yyyy")
-            "Tháng ${startDate.format(formatter)}"
+            val formatter = DateTimeFormatter.ofPattern("MM/yyyy", locale)
+            if (language == "en") {
+                "Month ${startDate.format(formatter)}"
+            } else {
+                "Tháng ${startDate.format(formatter)}"
+            }
         }
     }
 
