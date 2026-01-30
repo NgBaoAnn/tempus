@@ -66,6 +66,7 @@ class SettingsFragment : Fragment() {
                         onNotificationsClick = ::onNotificationsClick,
                         onPersonalizationClick = ::navigateToPersonalization,
                         onThemeClick = ::onThemeClick,
+                        onLanguageClick = ::navigateToLanguage,
                         onPrivacyClick = ::navigateToPrivacyPolicy,
                         onTermsClick = ::navigateToTermsOfService,
                         onExportJsonClick = ::performSync,
@@ -131,6 +132,11 @@ class SettingsFragment : Fragment() {
 
     private fun onThemeClick() {
         val intent = Intent(requireContext(), ThemeSettingsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToLanguage() {
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.LanguageSettingsActivity::class.java)
         startActivity(intent)
     }
     

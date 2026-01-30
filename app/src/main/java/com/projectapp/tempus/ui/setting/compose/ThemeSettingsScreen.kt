@@ -22,10 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.projectapp.tempus.ui.theme.ThemeMode
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 
 /**
  * Theme Settings Screen - Modern design for theme selection
  */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeSettingsScreen(
@@ -38,7 +41,7 @@ fun ThemeSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Giao diện",
+                        text = stringResource(R.string.theme_title),
                         fontWeight = FontWeight.SemiBold
                     )
                 },
@@ -46,7 +49,7 @@ fun ThemeSettingsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Quay lại"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -65,7 +68,7 @@ fun ThemeSettingsScreen(
         ) {
             // Section header
             Text(
-                text = "Chọn giao diện",
+                text = stringResource(R.string.theme_select_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -74,8 +77,8 @@ fun ThemeSettingsScreen(
             
             // Theme options
             ThemeOptionCard(
-                title = "Sáng",
-                subtitle = "Giao diện màu sáng",
+                title = stringResource(R.string.theme_light),
+                subtitle = stringResource(R.string.theme_light_desc),
                 emoji = "☀️",
                 isSelected = currentThemeMode == ThemeMode.LIGHT,
                 previewColors = listOf(Color.White, TempusDesignSystem.Slate100),
@@ -83,8 +86,8 @@ fun ThemeSettingsScreen(
             )
             
             ThemeOptionCard(
-                title = "Tối",
-                subtitle = "Giao diện màu tối",
+                title = stringResource(R.string.theme_dark),
+                subtitle = stringResource(R.string.theme_dark_desc),
                 emoji = "🌙",
                 isSelected = currentThemeMode == ThemeMode.DARK,
                 previewColors = listOf(TempusDesignSystem.Slate900, TempusDesignSystem.Slate800),
@@ -92,8 +95,8 @@ fun ThemeSettingsScreen(
             )
             
             ThemeOptionCard(
-                title = "Theo hệ thống",
-                subtitle = "Tự động theo cài đặt thiết bị",
+                title = stringResource(R.string.theme_system),
+                subtitle = stringResource(R.string.theme_system_desc),
                 emoji = "📱",
                 isSelected = currentThemeMode == ThemeMode.SYSTEM,
                 previewColors = listOf(Color.White, TempusDesignSystem.Slate900),
@@ -225,7 +228,7 @@ private fun ThemeOptionCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Đã chọn",
+                        contentDescription = stringResource(R.string.theme_selected_content_desc),
                         modifier = Modifier.size(18.dp),
                         tint = Color.White
                     )
