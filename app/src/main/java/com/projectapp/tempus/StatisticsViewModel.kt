@@ -125,14 +125,21 @@ class StatisticsViewModel(
             Log.d("StatisticsVM", "Total point history entries: ${history.size}")
             Log.d("StatisticsVM", "All reasons: ${history.map { it.reason }.distinct()}")
             
-            val startMillis = startDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
-            val endMillis = endDate.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            // Use system timezone instead of UTC for correct local time comparison
+            val zone = java.time.ZoneId.systemDefault()
+            val startMillis = startDate.atStartOfDay(zone).toInstant().toEpochMilli()
+            val endMillis = endDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            
+            Log.d("StatisticsVM", "Time range: startMillis=$startMillis, endMillis=$endMillis")
             
             // Filter Pomodoro entries - saved as "POMODORO_25m" format
-            val pomodoroHistory = history.filter { 
-                it.reason.startsWith("POMODORO_") && 
-                it.timestamp >= startMillis && 
-                it.timestamp < endMillis 
+            val pomodoroHistory = history.filter { entry ->
+                val isPomodoro = entry.reason.startsWith("POMODORO_")
+                val inRange = entry.timestamp >= startMillis && entry.timestamp < endMillis
+                if (isPomodoro) {
+                    Log.d("StatisticsVM", "Pomodoro entry: ${entry.reason}, timestamp=${entry.timestamp}, inRange=$inRange")
+                }
+                isPomodoro && inRange
             }
             
             val count = pomodoroHistory.size
@@ -140,14 +147,14 @@ class StatisticsViewModel(
             // Extract actual minutes from each entry (e.g., "POMODORO_25m" -> 25)
             val minutes = pomodoroHistory.sumOf { entry ->
                 val minutesStr = entry.reason.removePrefix("POMODORO_").removeSuffix("m")
-                minutesStr.toIntOrNull() ?: 25 // Default to 25 if parsing fails
+                minutesStr.toIntOrNull() ?: 0 // Default to 0 if parsing fails (not 25)
             }
             
             Log.d("StatisticsVM", "Pomodoro stats: count=$count, minutes=$minutes (range: $startDate to $endDate)")
             
             return Pair(count, minutes)
         } catch (e: Exception) {
-            Log.e("StatisticsVM", "Error getting pomodoro stats: ${e.message}")
+            Log.e("StatisticsVM", "Error getting pomodoro stats: ${e.message}", e)
             return Pair(0, 0)
         }
     }

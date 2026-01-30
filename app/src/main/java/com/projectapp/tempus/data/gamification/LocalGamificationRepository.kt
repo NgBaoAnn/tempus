@@ -33,6 +33,11 @@ class LocalGamificationRepository(
     
     fun getPointHistory(): Flow<List<PointHistoryEntity>> = dao.getPointHistory()
     
+    fun getPomodoroHistory(): Flow<List<PointHistoryEntity>> = dao.getPomodoroHistory()
+    
+    suspend fun getPomodoroHistoryInRange(startTime: Long, endTime: Long): List<PointHistoryEntity> = 
+        dao.getPomodoroHistoryInRange(startTime, endTime)
+    
     suspend fun getPointsEarnedSince(startTime: Long): Int = dao.getPointsEarnedSince(startTime) ?: 0
     
     // ==================== Trees ====================

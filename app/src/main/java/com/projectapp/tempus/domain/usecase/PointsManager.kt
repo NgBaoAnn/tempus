@@ -16,7 +16,7 @@ import java.time.LocalDate
  * Manager quản lý tất cả logic liên quan đến điểm và cây
  */
 class PointsManager(
-    private val repository: GamificationRepository
+    val repository: GamificationRepository  // Exposed for direct access when needed
 ) {
     companion object {
         const val STREAK_MULTIPLIER = 1.5f

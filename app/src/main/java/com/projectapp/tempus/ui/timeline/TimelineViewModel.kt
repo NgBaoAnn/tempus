@@ -74,17 +74,28 @@ class TimelineViewModel(
     }
     
     private fun loadStreak() {
-        if (pointsManager != null) {
-            viewModelScope.launch {
-                try {
-                    pointsManager.getUserPoints().collect { userPoints ->
-                        _ui.value = _ui.value.copy(
-                            currentStreak = userPoints?.currentStreak ?: 0
-                        )
+        val manager = pointsManager
+        if (manager == null) {
+            Log.w("Timeline", "pointsManager is null, cannot load streak")
+            return
+        }
+        
+        viewModelScope.launch {
+            try {
+                // Ensure UserPoints exists before observing
+                val initialPoints = manager.repository.getOrCreateUserPoints()
+                _ui.value = _ui.value.copy(currentStreak = initialPoints.currentStreak)
+                Log.d("Timeline", "Initial streak loaded: ${initialPoints.currentStreak}")
+                
+                // Then observe changes
+                manager.getUserPoints().collect { userPoints ->
+                    userPoints?.let {
+                        Log.d("Timeline", "Streak updated: ${it.currentStreak}")
+                        _ui.value = _ui.value.copy(currentStreak = it.currentStreak)
                     }
-                } catch (e: Exception) {
-                    Log.e("Timeline", "Failed to load streak: ${e.message}")
                 }
+            } catch (e: Exception) {
+                Log.e("Timeline", "Failed to load streak: ${e.message}", e)
             }
         }
     }

@@ -28,8 +28,14 @@ interface GamificationDao {
     @Insert
     suspend fun addPointHistory(history: PointHistoryEntity)
     
-    @Query("SELECT * FROM point_history ORDER BY timestamp DESC LIMIT 50")
+    @Query("SELECT * FROM point_history ORDER BY timestamp DESC LIMIT 500")
     fun getPointHistory(): Flow<List<PointHistoryEntity>>
+    
+    @Query("SELECT * FROM point_history WHERE reason LIKE 'POMODORO_%' ORDER BY timestamp DESC")
+    fun getPomodoroHistory(): Flow<List<PointHistoryEntity>>
+    
+    @Query("SELECT * FROM point_history WHERE reason LIKE 'POMODORO_%' AND timestamp >= :startTime AND timestamp < :endTime ORDER BY timestamp DESC")
+    suspend fun getPomodoroHistoryInRange(startTime: Long, endTime: Long): List<PointHistoryEntity>
     
     @Query("SELECT SUM(points) FROM point_history WHERE timestamp >= :startTime")
     suspend fun getPointsEarnedSince(startTime: Long): Int?
