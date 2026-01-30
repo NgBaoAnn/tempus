@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class GardenUiState(
@@ -42,12 +43,12 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun loadData() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
             
             // Observe points
             launch {
                 pointsManager.getUserPoints().collectLatest { points ->
-                    _uiState.value = _uiState.value.copy(userPoints = points)
+                    _uiState.update { it.copy(userPoints = points) }
                 }
             }
 
@@ -57,13 +58,15 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
                     val mature = trees.count { TreeState.fromString(it.state) == TreeState.TREE }
                     val invested = trees.sumOf { it.investedPoints }
                     
-                    _uiState.value = _uiState.value.copy(
-                        trees = trees,
-                        totalTrees = trees.size,
-                        matureTrees = mature,
-                        totalInvested = invested,
-                        isLoading = false
-                    )
+                    _uiState.update { 
+                        it.copy(
+                            trees = trees,
+                            totalTrees = trees.size,
+                            matureTrees = mature,
+                            totalInvested = invested,
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }
@@ -77,7 +80,7 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
     
     fun refresh() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
             checkDeadTrees()
             // isLoading will be set to false when trees flow emits
         }
@@ -85,13 +88,13 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
 
     fun plantTree(type: TreeType, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
             val treeId = pointsManager.plantTree(type)
             if (treeId != null) {
                 onSuccess()
                 // isLoading will be set to false when trees flow emits
             } else {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { it.copy(isLoading = false) }
                 onError("Không đủ điểm để trồng cây!")
             }
         }
@@ -110,13 +113,13 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
 
     fun deleteTree(tree: TreeEntity, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
             try {
                 repository.killTree(tree.id)
                 onSuccess()
                 // isLoading will be set to false when trees flow emits
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { it.copy(isLoading = false) }
                 onError(e.message ?: "Lỗi khi xóa cây")
             }
         }
