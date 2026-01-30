@@ -415,4 +415,156 @@
     <string name="profile_points">Total Points</string>
     <string name="profile_streak">Streak Days</string>
     <string name="profile_trees">Planted Trees</string>
+
+    <!-- Notification Settings -->
+    <string name="notif_settings_title">NOTIFICATION SETTINGS</string>
+    <string name="notif_timer_title">Timer</string>
+    <string name="notif_timer_desc">Show notification when timer is running</string>
+    <string name="notif_timeline_title">Timeline</string>
+    <string name="notif_timeline_desc">Schedule reminders for tasks</string>
+
+    <!-- Personalization Settings -->
+    <string name="pers_section_lifestyle">LIFESTYLE</string>
+    <string name="pers_section_days">ACTIVE DAYS</string>
+    <string name="pers_section_sleep">SLEEP &amp; WAKE UP</string>
+    <string name="pers_section_work">WORK HOURS</string>
+    <string name="pers_section_custom">CUSTOM PERIODS</string>
+    
+    <string name="pers_wake_up">Wake up time</string>
+    <string name="pers_sleep">Sleep time</string>
+    <string name="pers_work_start">Start time</string>
+    <string name="pers_work_end">End time</string>
+    
+    <string name="pers_add_activity">Add Activity</string>
+    <string name="pers_reset_plan">Reset Plan</string>
+    
+    <!-- Time Picker Dialog -->
+    <string name="picker_title_wake">Select wake up time</string>
+    <string name="picker_title_sleep">Select sleep time</string>
+    <string name="picker_title_work_start">Select work start time</string>
+    <string name="picker_title_work_end">Select work end time</string>
+    <string name="picker_title_default">Select time</string>
+    <string name="picker_title_start">Select start time</string>
+    <string name="picker_title_end">Select end time</string>
+
+    <!-- Add Custom Period -->
+    <string name="custom_period_title">Add Activity</string>
+    <string name="custom_period_name_hint">Activity Name</string>
+    <string name="custom_period_desc_hint">Add description...</string>
+    <string name="custom_period_label">Label</string>
+    <string name="custom_period_start">Start Time</string>
+    <string name="custom_period_end">End Time</string>
+    <string name="custom_period_duration">Duration</string>
+    <string name="custom_period_hour">hours</string>
+    <string name="custom_period_minute">minutes</string>
+    <string name="custom_period_sheet_label">Select Label</string>
+
+    <!-- Legal -->
+    <string name="legal_privacy_policy">Privacy Policy</string>
+    <string name="legal_terms_service">Terms of Service</string>
+    <string name="legal_last_updated">Last updated: %s</string>
+    
+    <!-- Privacy Policy Content -->
+    <string name="privacy_intro_title">1. Introduction</string>
+    <string name="privacy_intro_content">Welcome to Tempus - Smart Time Management App. We are committed to protecting your privacy and personal data. This policy describes how we collect, use, and protect your information.</string>
+    
+    <string name="privacy_info_title">2. Information We Collect</string>
+    <string name="privacy_info_sub1">2.1. Account Information</string>
+    <string name="privacy_info_content1">• Email and username upon registration\n• Encrypted password\n• Profile information (optional)</string>
+    <string name="privacy_info_sub2">2.2. Usage Data</string>
+    <string name="privacy_info_content2">• Schedules and tasks you create\n• Personalized wake/sleep times\n• App settings</string>
+    <string name="privacy_info_sub3">2.3. Device Information</string>
+    <string name="privacy_info_content3">• Device type and operating system\n• Local time zone\n• Notification token (if enabled)</string>
+    
+    <string name="privacy_usage_title">3. How We Use Information</string>
+    <string name="privacy_usage_content">• Provide and improve services\n• Sync data across devices\n• Send reminder notifications (if permitted)\n• Analyze to improve user experience\n• Technical support when needed</string>
+    
+    <string name="privacy_security_title">4. Data Security</string>
+    <string name="privacy_security_content">We implement advanced security measures:\n\n• Data encryption in transit (TLS/SSL)\n• Secure storage on Supabase with encryption\n• Biometric authentication for sensitive actions\n• No sharing data with third parties for advertising purposes</string>
+    
+    <string name="privacy_rights_title">5. Your Rights</string>
+    <string name="privacy_rights_content">You have the right to:\n\n• Access and view your data\n• Export data (JSON/CSV)\n• Edit or delete personal information\n• Permanently delete account\n• Opt-out of notifications</string>
+    
+    <string name="privacy_storage_title">6. Data Retention and Deletion</string>
+    <string name="privacy_storage_content">• Data is stored on Supabase servers\n• You can delete all data in Settings\n• After account deletion, data is removed within 30 days\n• System logs may be retained up to 90 days</string>
+    
+    <string name="privacy_changes_title">7. Policy Changes</string>
+    <string name="privacy_changes_content">We may update this policy from time to time. You will be notified of significant changes via the app or email.</string>
+    
+    <string name="privacy_contact_title">8. Contact Us</string>
+    <string name="privacy_contact_content">If you have questions about privacy policy, please contact:\n\n📧 Email: support@tempus-app.com\n🌐 Website: https://tempus-app.com</string>
+
+    <!-- Terms of Service Content -->
+    <string name="terms_accept_title">1. Acceptance of Terms</string>
+    <string name="terms_accept_content">By downloading, installing, or using the Tempus app, you agree to comply with the terms and conditions set forth in this document.</string>
+    
+    <string name="terms_desc_title">2. Service Description</string>
+    <string name="terms_desc_content">Tempus is a time management app providing features:\n\n• Create and manage personal schedules\n• Personalize daily habits\n• Cloud data synchronization\n• Smart reminders\n• Time analysis and statistics</string>
+    
+    <string name="terms_account_title">3. User Account</string>
+    <string name="terms_account_content">• You must provide accurate information when registering\n• You are responsible for account security\n• Each account is for single user only\n• We reserve the right to ban violating accounts</string>
+    
+    <string name="terms_rules_title">4. Usage Rules</string>
+    <string name="terms_rules_content">You commit NOT to:\n\n• Use app for illegal purposes\n• Attempt unauthorized system access\n• Copy, distribute or modify the app\n• Harm other users\n• Infringe intellectual property rights</string>
+    
+    <string name="terms_ip_title">5. Intellectual Property</string>
+    <string name="terms_ip_content">• Tempus and all content are our property\n• You are granted a limited license\n• Cannot copy source code or design\n• Logo, brand belong to Tempus</string>
+    
+    <string name="terms_liability_title">6. Limitation of Liability</string>
+    <string name="terms_liability_content">• App provided "as is"\n• We do not guarantee uninterrupted operation\n• Not responsible for data loss due to user error\n• Total liability not exceeding service fees (if any)</string>
+    
+    <string name="terms_termination_title">7. Termination</string>
+    <string name="terms_termination_content">• You can stop using at any time\n• We may terminate service with 30 days notice\n• Violating accounts may be banned immediately\n• After termination, you have 30 days to export data</string>
+    
+    <string name="terms_changes_title">8. Terms Changes</string>
+    <string name="terms_changes_content">We reserve the right to modify these terms. Significant changes will be notified 14 days in advance. Continued use implies acceptance of new terms.</string>
+    
+    <string name="terms_law_title">9. Governing Law</string>
+    <string name="terms_law_content">These terms are governed by the laws of Vietnam. Any disputes will be resolved at competent courts in Vietnam.</string>
+    
+    <string name="terms_contact_title">10. Contact</string>
+    <string name="terms_contact_content">Questions about terms of service:\n\n📧 Email: legal@tempus-app.com\n🌐 Website: https://tempus-app.com/terms</string>
+
+    <!-- Missing Personalization Strings -->
+    <string name="pers_title">Personalization</string>
+    <string name="pers_delete">Delete</string>
+    <string name="pers_add_period">Add Period</string>
+    <string name="pers_create_plan">Recreate Plan</string>
+    <string name="pers_cancel">Cancel</string>
+    <string name="pers_confirm">Confirm</string>
+    <string name="pers_select_lifestyle">Select Lifestyle</string>
+    <string name="pers_preset_desc">Wake: %1$s • Sleep: %2$s</string>
+    
+    <string name="pers_reset_warning_title">⚠️ Confirm Reset Plan</string>
+    <string name="pers_reset_warning_content">This action will DELETE ALL existing tasks on the timeline from today onwards and create new personalized tasks.</string>
+    <string name="pers_reset_new_tasks">New tasks will be created (%s):</string>
+    <string name="pers_reset_wake">• Wake up: %s</string>
+    <string name="pers_reset_sleep">• Sleep: %s</string>
+    <string name="pers_reset_work">• Work: %1$s - %2$s</string>
+    <string name="pers_reset_custom_period">• %1$s: %2$s - %3$s</string>
+    <string name="pers_reset_confirm_action">Delete and Recreate</string>
+    <string name="pers_lifestyle">Lifestyle</string>
+    <string name="more_options">More options</string>
+    
+    <!-- Days of Week -->
+    <string name="day_mon_short">Mon</string>
+    <string name="day_tue_short">Tue</string>
+    <string name="day_wed_short">Wed</string>
+    <string name="day_thu_short">Thu</string>
+    <string name="day_fri_short">Fri</string>
+    <string name="day_sat_short">Sat</string>
+    <string name="day_sun_short">Sun</string>
+    
+    <!-- Contact Screen -->
+    <string name="contact_title">Contact &amp; Support</string>
+    <string name="contact_channels_title">CONTACT CHANNELS</string>
+    <string name="contact_fb_title">Facebook Fanpage</string>
+    <string name="contact_fb_desc">Follow for latest updates</string>
+    <string name="contact_email_title">Send Support Email</string>
+    <string name="contact_info_title">CONTACT INFORMATION</string>
+    <string name="contact_address_title">Address</string>
+    <string name="contact_address_value">University of Science, Ward 6, Thu Duc, Ho Chi Minh City, Vietnam</string>
+    <string name="contact_hours_title">Working Hours</string>
+    <string name="contact_hours_value">Mon - Fri: 8:00 - 17:00</string>
+    <string name="contact_hotline_title">Hotline</string>
 </resources>

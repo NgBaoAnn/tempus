@@ -30,12 +30,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.projectapp.tempus.R
 import com.projectapp.tempus.data.personalization.CustomTimePeriod
 import com.projectapp.tempus.data.personalization.LifestylePreset
 import com.projectapp.tempus.data.schedule.dto.ScheduleLabel
@@ -122,7 +124,7 @@ fun PersonalizationScreen(
 
             // Section: LỐI SỐNG
             item {
-                SectionTitle(text = "LỐI SỐNG")
+                SectionTitle(text = stringResource(R.string.pers_section_lifestyle))
             }
 
             item {
@@ -134,7 +136,7 @@ fun PersonalizationScreen(
 
             // Section: NGÀY ÁP DỤNG
             item {
-                SectionTitle(text = "NGÀY ÁP DỤNG")
+                SectionTitle(text = stringResource(R.string.pers_section_days))
             }
 
             item {
@@ -147,14 +149,14 @@ fun PersonalizationScreen(
 
             // Section: NGỦ & THỨC DẬY
             item {
-                SectionTitle(text = "NGỦ & THỨC DẬY")
+                SectionTitle(text = stringResource(R.string.pers_section_sleep))
             }
 
             item {
                 TimeSettingsCard(
                     items = listOf(
-                        TimeSettingData("Giờ thức", uiState.wakeUpTime, PersonalizationColors.Orange, TimePickerTarget.WAKE_UP),
-                        TimeSettingData("Giờ ngủ", uiState.sleepTime, PersonalizationColors.Purple, TimePickerTarget.SLEEP)
+                        TimeSettingData(stringResource(R.string.pers_wake_up), uiState.wakeUpTime, PersonalizationColors.Orange, TimePickerTarget.WAKE_UP),
+                        TimeSettingData(stringResource(R.string.pers_sleep), uiState.sleepTime, PersonalizationColors.Purple, TimePickerTarget.SLEEP)
                     ),
                     onShowTimePicker = onShowTimePicker
                 )
@@ -162,14 +164,14 @@ fun PersonalizationScreen(
 
             // Section: GIỜ LÀM VIỆC
             item {
-                SectionTitle(text = "GIỜ LÀM VIỆC")
+                SectionTitle(text = stringResource(R.string.pers_section_work))
             }
 
             item {
                 TimeSettingsCard(
                     items = listOf(
-                        TimeSettingData("Giờ bắt đầu", uiState.workStartTime, PersonalizationColors.Green, TimePickerTarget.WORK_START),
-                        TimeSettingData("Giờ kết thúc", uiState.workEndTime, PersonalizationColors.Orange, TimePickerTarget.WORK_END)
+                        TimeSettingData(stringResource(R.string.pers_work_start), uiState.workStartTime, PersonalizationColors.Green, TimePickerTarget.WORK_START),
+                        TimeSettingData(stringResource(R.string.pers_work_end), uiState.workEndTime, PersonalizationColors.Orange, TimePickerTarget.WORK_END)
                     ),
                     onShowTimePicker = onShowTimePicker
                 )
@@ -177,7 +179,7 @@ fun PersonalizationScreen(
 
             // Section: THỜI GIAN TÙY CHỈNH
             item {
-                SectionTitle(text = "THỜI GIAN TÙY CHỈNH")
+                SectionTitle(text = stringResource(R.string.pers_section_custom))
             }
 
             // Custom time periods list
@@ -192,7 +194,10 @@ fun PersonalizationScreen(
 
             // Add custom period button
             item {
-                AddCustomPeriodCard(onClick = onShowAddCustomPeriod)
+                AddCustomPeriodCard(
+                    onClick = onShowAddCustomPeriod,
+                    text = stringResource(R.string.pers_add_period)
+                )
             }
 
             // Spacer
@@ -223,11 +228,11 @@ fun PersonalizationScreen(
                 else -> "08:00"
             },
             title = when (uiState.showTimePickerFor) {
-                TimePickerTarget.WAKE_UP -> "Chọn giờ thức"
-                TimePickerTarget.SLEEP -> "Chọn giờ ngủ"
-                TimePickerTarget.WORK_START -> "Chọn giờ bắt đầu làm việc"
-                TimePickerTarget.WORK_END -> "Chọn giờ kết thúc làm việc"
-                else -> "Chọn thời gian"
+                TimePickerTarget.WAKE_UP -> stringResource(R.string.picker_title_wake)
+                TimePickerTarget.SLEEP -> stringResource(R.string.picker_title_sleep)
+                TimePickerTarget.WORK_START -> stringResource(R.string.picker_title_work_start)
+                TimePickerTarget.WORK_END -> stringResource(R.string.picker_title_work_end)
+                else -> stringResource(R.string.picker_title_default)
             },
             onDismiss = onDismissTimePicker,
             onConfirm = onTimeSelected
@@ -312,11 +317,11 @@ private fun AddCustomPeriodScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onClose) {
-                    Text("Hủy", color = PersonalizationColors.Blue, fontSize = 17.sp)
+                    Text(stringResource(R.string.cancel), color = PersonalizationColors.Blue, fontSize = 17.sp)
                 }
                 
                 Text(
-                    text = "Thêm hoạt động",
+                    text = stringResource(R.string.custom_period_title),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = PersonalizationColors.TextPrimary
@@ -327,7 +332,7 @@ private fun AddCustomPeriodScreen(
                     enabled = name.isNotBlank()
                 ) {
                     Text(
-                        "Lưu",
+                        stringResource(R.string.save),
                         color = if (name.isNotBlank()) PersonalizationColors.Blue else PersonalizationColors.TextHint,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold
@@ -388,7 +393,7 @@ private fun AddCustomPeriodScreen(
                             decorationBox = { innerTextField ->
                                 if (name.isEmpty()) {
                                     Text(
-                                        "Tên hoạt động",
+                                        stringResource(R.string.custom_period_name_hint),
                                         color = PersonalizationColors.TextHint,
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.SemiBold
@@ -416,7 +421,7 @@ private fun AddCustomPeriodScreen(
                         decorationBox = { innerTextField ->
                             if (description.isEmpty()) {
                                 Text(
-                                    "Thêm mô tả...",
+                                    stringResource(R.string.custom_period_desc_hint),
                                     color = PersonalizationColors.TextHint,
                                     fontSize = 15.sp
                                 )
@@ -462,7 +467,7 @@ private fun AddCustomPeriodScreen(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Text(
-                        text = "Nhãn",
+                        text = stringResource(R.string.custom_period_label),
                         color = PersonalizationColors.TextPrimary,
                         fontSize = 16.sp,
                         modifier = Modifier.weight(1f)
@@ -505,7 +510,7 @@ private fun AddCustomPeriodScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Thời gian bắt đầu",
+                                text = stringResource(R.string.custom_period_start),
                                 fontSize = 16.sp,
                                 color = PersonalizationColors.TextPrimary
                             )
@@ -536,7 +541,7 @@ private fun AddCustomPeriodScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Thời gian kết thúc",
+                                text = stringResource(R.string.custom_period_end),
                                 fontSize = 16.sp,
                                 color = PersonalizationColors.TextPrimary
                             )
@@ -566,7 +571,7 @@ private fun AddCustomPeriodScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Thời lượng",
+                        text = stringResource(R.string.custom_period_duration),
                         fontSize = 16.sp,
                         color = PersonalizationColors.TextPrimary
                     )
@@ -589,7 +594,7 @@ private fun AddCustomPeriodScreen(
         TimePickerDialog(
             initialTime = if (showTimePickerFor == TimePickerTarget.NEW_PERIOD_START) startTime else endTime,
             title = if (showTimePickerFor == TimePickerTarget.NEW_PERIOD_START) 
-                "Chọn giờ bắt đầu" else "Chọn giờ kết thúc",
+                stringResource(R.string.picker_title_start) else stringResource(R.string.picker_title_end),
             onDismiss = onDismissTimePicker,
             onConfirm = onTimeSelected
         )
@@ -606,7 +611,10 @@ private fun AddCustomPeriodScreen(
     }
 }
 
+@Composable
 private fun calculateDurationDisplay(startTime: String, endTime: String): String {
+    val hourStr = stringResource(R.string.custom_period_hour)
+    val minuteStr = stringResource(R.string.custom_period_minute)
     return try {
         val startParts = startTime.split(":")
         val endParts = endTime.split(":")
@@ -623,12 +631,12 @@ private fun calculateDurationDisplay(startTime: String, endTime: String): String
         val minutes = durationMinutes % 60
         
         when {
-            hours == 0 -> "$minutes phút"
-            minutes == 0 -> "$hours giờ"
-            else -> "$hours giờ $minutes phút"
+            hours == 0 -> "$minutes $minuteStr"
+            minutes == 0 -> "$hours $hourStr"
+            else -> "$hours $hourStr $minutes $minuteStr"
         }
     } catch (e: Exception) {
-        "1 giờ"
+        "1 $hourStr"
     }
 }
 
@@ -662,7 +670,7 @@ private fun LabelPickerSheet(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Chọn nhãn",
+                stringResource(R.string.custom_period_sheet_label),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = PersonalizationColors.TextPrimary,
@@ -796,7 +804,7 @@ private fun PersonalizationHeader(onBackClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Quay lại",
+                    text = stringResource(R.string.back),
                     color = PersonalizationColors.AccentPrimary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
@@ -818,7 +826,7 @@ private fun PersonalizationHeader(onBackClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Cá nhân hóa",
+                text = stringResource(R.string.pers_title),
                 color = PersonalizationColors.TextPrimary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -906,7 +914,7 @@ private fun LifestyleCard(
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = "Lối sống",
+                text = stringResource(R.string.pers_lifestyle),
                 color = PersonalizationColors.TextPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
@@ -995,13 +1003,13 @@ private fun DayOfWeekSelector(
     onToggleDay: (Int) -> Unit
 ) {
     val days = listOf(
-        1 to "T2",
-        2 to "T3",
-        3 to "T4",
-        4 to "T5",
-        5 to "T6",
-        6 to "T7",
-        7 to "CN"
+        1 to stringResource(R.string.day_mon_short),
+        2 to stringResource(R.string.day_tue_short),
+        3 to stringResource(R.string.day_wed_short),
+        4 to stringResource(R.string.day_thu_short),
+        5 to stringResource(R.string.day_fri_short),
+        6 to stringResource(R.string.day_sat_short),
+        7 to stringResource(R.string.day_sun_short)
     )
 
     Row(
@@ -1224,22 +1232,35 @@ private fun CustomPeriodsCard(
                         )
                     }
 
-                    TextButton(
-                        onClick = { onRemove(period.id) },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
+                    var expanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { expanded = true }) {
                         Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = null,
-                            tint = PersonalizationColors.Red,
-                            modifier = Modifier.size(16.dp)
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.more_options)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Xóa",
-                            color = PersonalizationColors.Red,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    text = stringResource(R.string.pers_delete), 
+                                    color = Color.Red 
+                                ) 
+                            },
+                            onClick = {
+                                onRemove(period.id)
+                                expanded = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = null,
+                                    tint = Color.Red
+                                )
+                            }
                         )
                     }
                 }
@@ -1259,7 +1280,10 @@ private fun CustomPeriodsCard(
 // ======================== ADD CUSTOM PERIOD CARD ========================
 
 @Composable
-private fun AddCustomPeriodCard(onClick: () -> Unit) {
+private fun AddCustomPeriodCard(
+    onClick: () -> Unit,
+    text: String
+) {
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -1293,7 +1317,7 @@ private fun AddCustomPeriodCard(onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Thêm khoảng thời gian",
+                text = text,
                 color = PersonalizationColors.AccentTertiary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
@@ -1359,7 +1383,7 @@ private fun ResetPlanButton(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Tạo lại kế hoạch",
+                        text = stringResource(R.string.pers_reset_plan),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1395,7 +1419,7 @@ private fun TimePickerDialog(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -1415,7 +1439,7 @@ private fun TimePickerDialog(
                     colors = TimePickerDefaults.colors(
                         clockDialColor = PersonalizationColors.ChipBackground,
                         selectorColor = PersonalizationColors.Blue,
-                        containerColor = Color.White
+                        containerColor = PersonalizationColors.SurfaceCard
                     )
                 )
 
@@ -1428,7 +1452,7 @@ private fun TimePickerDialog(
                 ) {
                     TextButton(onClick = onDismiss) {
                         Text(
-                            text = "Hủy",
+                            text = stringResource(R.string.cancel),
                             color = PersonalizationColors.TextSecondary
                         )
                     }
@@ -1437,7 +1461,7 @@ private fun TimePickerDialog(
                         onClick = { onConfirm(timePickerState.hour, timePickerState.minute) }
                     ) {
                         Text(
-                            text = "Xác nhận",
+                            text = stringResource(R.string.pers_confirm),
                             color = PersonalizationColors.Blue,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -1464,7 +1488,7 @@ private fun LifestylePickerSheet(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Chọn lối sống",
+                text = stringResource(R.string.pers_select_lifestyle),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = PersonalizationColors.TextPrimary,
@@ -1499,7 +1523,7 @@ private fun LifestylePickerSheet(
                             )
                             if (preset != LifestylePreset.CUSTOM) {
                                 Text(
-                                    text = "Thức: ${preset.wakeUpTime} • Ngủ: ${preset.sleepTime}",
+                                    text = stringResource(R.string.pers_preset_desc, preset.wakeUpTime, preset.sleepTime),
                                     fontSize = 13.sp,
                                     color = PersonalizationColors.TextSecondary
                                 )
@@ -1542,13 +1566,13 @@ private fun ResetConfirmationDialog(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = PersonalizationColors.SurfaceCard)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = "⚠️ Xác nhận đặt lại kế hoạch",
+                    text = stringResource(R.string.pers_reset_warning_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = PersonalizationColors.Orange
@@ -1557,7 +1581,7 @@ private fun ResetConfirmationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Hành động này sẽ XÓA TẤT CẢ tác vụ hiện có trên timeline từ hôm nay trở đi và tạo mới các tác vụ cá nhân hóa.",
+                    text = stringResource(R.string.pers_reset_warning_content),
                     fontSize = 15.sp,
                     color = PersonalizationColors.TextPrimary
                 )
@@ -1573,7 +1597,7 @@ private fun ResetConfirmationDialog(
                 ) {
                     Column {
                         Text(
-                            text = "Tác vụ mới sẽ được tạo ($activeDaysLabel):",
+                            text = stringResource(R.string.pers_reset_new_tasks, activeDaysLabel),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = PersonalizationColors.TextPrimary
@@ -1582,24 +1606,24 @@ private fun ResetConfirmationDialog(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
-                            text = "• Thức dậy: $wakeUpTime",
+                            text = stringResource(R.string.pers_reset_wake, wakeUpTime),
                             fontSize = 13.sp,
                             color = PersonalizationColors.TextSecondary
                         )
                         Text(
-                            text = "• Đi ngủ: $sleepTime",
+                            text = stringResource(R.string.pers_reset_sleep, sleepTime),
                             fontSize = 13.sp,
                             color = PersonalizationColors.TextSecondary
                         )
                         Text(
-                            text = "• Làm việc: $workStartTime - $workEndTime",
+                            text = stringResource(R.string.pers_reset_work, workStartTime, workEndTime),
                             fontSize = 13.sp,
                             color = PersonalizationColors.TextSecondary
                         )
                         
                         customPeriods.forEach { period ->
                             Text(
-                                text = "• ${period.name}: ${period.startTime} - ${period.endTime}",
+                                text = stringResource(R.string.pers_reset_custom_period, period.name, period.startTime, period.endTime),
                                 fontSize = 13.sp,
                                 color = PersonalizationColors.TextSecondary
                             )
@@ -1615,7 +1639,7 @@ private fun ResetConfirmationDialog(
                 ) {
                     TextButton(onClick = onDismiss) {
                         Text(
-                            text = "Hủy",
+                            text = stringResource(R.string.pers_cancel),
                             color = PersonalizationColors.TextSecondary,
                             fontSize = 16.sp
                         )
@@ -1629,7 +1653,7 @@ private fun ResetConfirmationDialog(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "Xóa và tạo mới",
+                            text = stringResource(R.string.pers_reset_confirm_action),
                             fontSize = 16.sp
                         )
                     }
@@ -1695,7 +1719,8 @@ private object PersonalizationColors {
         @Composable get() = MaterialTheme.colorScheme.surfaceVariant
     val ChipBackgroundActive: Color
         @Composable get() = MaterialTheme.colorScheme.primaryContainer
-    val WarningBackground = Color(0xFFFEF3C7)
+    val WarningBackground: Color
+        @Composable get() = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
     
     // Glow Effects
     val GlowPrimary: Color

@@ -415,4 +415,156 @@
     <string name="profile_points">Điểm tích lũy</string>
     <string name="profile_streak">Ngày streak</string>
     <string name="profile_trees">Cây đã trồng</string>
+
+    <!-- Notification Settings -->
+    <string name="notif_settings_title">TÙY CHỈNH THÔNG BÁO</string>
+    <string name="notif_timer_title">Hẹn giờ</string>
+    <string name="notif_timer_desc">Hiển thị thông báo khi hẹn giờ đang chạy</string>
+    <string name="notif_timeline_title">Dòng thời gian</string>
+    <string name="notif_timeline_desc">Nhắc nhở công việc theo lịch trình</string>
+
+    <!-- Personalization Settings -->
+    <string name="pers_section_lifestyle">LỐI SỐNG</string>
+    <string name="pers_section_days">NGÀY ÁP DỤNG</string>
+    <string name="pers_section_sleep">NGỦ &amp; THỨC DẬY</string>
+    <string name="pers_section_work">GIỜ LÀM VIỆC</string>
+    <string name="pers_section_custom">THỜI GIAN TÙY CHỈNH</string>
+    
+    <string name="pers_wake_up">Giờ thức</string>
+    <string name="pers_sleep">Giờ ngủ</string>
+    <string name="pers_work_start">Giờ bắt đầu</string>
+    <string name="pers_work_end">Giờ kết thúc</string>
+    
+    <string name="pers_add_activity">Thêm hoạt động</string>
+    <string name="pers_reset_plan">Đặt lại kế hoạch</string>
+    
+    <!-- Time Picker Dialog -->
+    <string name="picker_title_wake">Chọn giờ thức</string>
+    <string name="picker_title_sleep">Chọn giờ ngủ</string>
+    <string name="picker_title_work_start">Chọn giờ bắt đầu làm việc</string>
+    <string name="picker_title_work_end">Chọn giờ kết thúc làm việc</string>
+    <string name="picker_title_default">Chọn thời gian</string>
+    <string name="picker_title_start">Chọn giờ bắt đầu</string>
+    <string name="picker_title_end">Chọn giờ kết thúc</string>
+
+    <!-- Add Custom Period -->
+    <string name="custom_period_title">Thêm hoạt động</string>
+    <string name="custom_period_name_hint">Tên hoạt động</string>
+    <string name="custom_period_desc_hint">Thêm mô tả...</string>
+    <string name="custom_period_label">Nhãn</string>
+    <string name="custom_period_start">Thời gian bắt đầu</string>
+    <string name="custom_period_end">Thời gian kết thúc</string>
+    <string name="custom_period_duration">Thời lượng</string>
+    <string name="custom_period_hour">giờ</string>
+    <string name="custom_period_minute">phút</string>
+    <string name="custom_period_sheet_label">Chọn nhãn</string>
+
+    <!-- Legal -->
+    <string name="legal_privacy_policy">Chính sách quyền riêng tư</string>
+    <string name="legal_terms_service">Điều khoản dịch vụ</string>
+    <string name="legal_last_updated">Cập nhật lần cuối: %s</string>
+    
+    <!-- Privacy Policy Content -->
+    <string name="privacy_intro_title">1. Giới thiệu</string>
+    <string name="privacy_intro_content">Chào mừng bạn đến với Tempus - Ứng dụng Quản lý Thời gian Thông minh. Chúng tôi cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của bạn. Chính sách này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.</string>
+    
+    <string name="privacy_info_title">2. Thông tin chúng tôi thu thập</string>
+    <string name="privacy_info_sub1">2.1. Thông tin tài khoản</string>
+    <string name="privacy_info_content1">• Email và tên người dùng khi đăng ký\n• Mật khẩu đã được mã hóa\n• Thông tin hồ sơ (tùy chọn)</string>
+    <string name="privacy_info_sub2">2.2. Dữ liệu sử dụng</string>
+    <string name="privacy_info_content2">• Lịch trình và công việc bạn tạo\n• Thời gian thức/ngủ cá nhân hóa\n• Cài đặt ứng dụng</string>
+    <string name="privacy_info_sub3">2.3. Thông tin thiết bị</string>
+    <string name="privacy_info_content3">• Loại thiết bị và hệ điều hành\n• Múi giờ địa phương\n• Token thông báo (nếu bật)</string>
+    
+    <string name="privacy_usage_title">3. Cách chúng tôi sử dụng thông tin</string>
+    <string name="privacy_usage_content">• Cung cấp và cải thiện dịch vụ\n• Đồng bộ dữ liệu giữa các thiết bị\n• Gửi thông báo nhắc nhở (nếu bạn cho phép)\n• Phân tích để cải thiện trải nghiệm người dùng\n• Hỗ trợ kỹ thuật khi cần thiết</string>
+    
+    <string name="privacy_security_title">4. Bảo mật dữ liệu</string>
+    <string name="privacy_security_content">Chúng tôi áp dụng các biện pháp bảo mật tiên tiến:\n\n• Mã hóa dữ liệu khi truyền tải (TLS/SSL)\n• Lưu trữ an toàn trên Supabase với mã hóa\n• Xác thực sinh trắc học cho các thao tác nhạy cảm\n• Không chia sẻ dữ liệu với bên thứ ba vì mục đích quảng cáo</string>
+    
+    <string name="privacy_rights_title">5. Quyền của bạn</string>
+    <string name="privacy_rights_content">Bạn có quyền:\n\n• Truy cập và xem dữ liệu của mình\n• Xuất dữ liệu (JSON/CSV)\n• Chỉnh sửa hoặc xóa thông tin cá nhân\n• Xóa tài khoản vĩnh viễn\n• Từ chối nhận thông báo</string>
+    
+    <string name="privacy_storage_title">6. Lưu trữ và xóa dữ liệu</string>
+    <string name="privacy_storage_content">• Dữ liệu được lưu trữ trên máy chủ Supabase\n• Bạn có thể xóa tất cả dữ liệu trong phần Cài đặt\n• Sau khi xóa tài khoản, dữ liệu sẽ bị xóa trong 30 ngày\n• Log hệ thống có thể được giữ lại tối đa 90 ngày</string>
+    
+    <string name="privacy_changes_title">7. Thay đổi chính sách</string>
+    <string name="privacy_changes_content">Chúng tôi có thể cập nhật chính sách này theo thời gian. Bạn sẽ được thông báo về các thay đổi quan trọng qua ứng dụng hoặc email.</string>
+    
+    <string name="privacy_contact_title">8. Liên hệ</string>
+    <string name="privacy_contact_content">Nếu có câu hỏi về chính sách quyền riêng tư, vui lòng liên hệ:\n\n📧 Email: support@tempus-app.com\n🌐 Website: https://tempus-app.com</string>
+
+    <!-- Terms of Service Content -->
+    <string name="terms_accept_title">1. Chấp nhận điều khoản</string>
+    <string name="terms_accept_content">Bằng việc tải xuống, cài đặt hoặc sử dụng ứng dụng Tempus, bạn đồng ý tuân thủ các điều khoản và điều kiện được quy định trong tài liệu này.</string>
+    
+    <string name="terms_desc_title">2. Mô tả dịch vụ</string>
+    <string name="terms_desc_content">Tempus là ứng dụng quản lý thời gian cung cấp các tính năng:\n\n• Tạo và quản lý lịch trình cá nhân\n• Cá nhân hóa thói quen hằng ngày\n• Đồng bộ dữ liệu đám mây\n• Nhắc nhở thông minh\n• Phân tích và thống kê thời gian</string>
+    
+    <string name="terms_account_title">3. Tài khoản người dùng</string>
+    <string name="terms_account_content">• Bạn phải cung cấp thông tin chính xác khi đăng ký\n• Bạn chịu trách nhiệm bảo mật tài khoản\n• Mỗi tài khoản chỉ dành cho một người sử dụng\n• Chúng tôi có quyền khóa tài khoản vi phạm</string>
+    
+    <string name="terms_rules_title">4. Quy tắc sử dụng</string>
+    <string name="terms_rules_content">Bạn cam kết KHÔNG:\n\n• Sử dụng ứng dụng cho mục đích bất hợp pháp\n• Cố gắng truy cập trái phép hệ thống\n• Sao chép, phân phối hoặc sửa đổi ứng dụng\n• Gây hại cho người dùng khác\n• Vi phạm quyền sở hữu trí tuệ</string>
+    
+    <string name="terms_ip_title">5. Quyền sở hữu trí tuệ</string>
+    <string name="terms_ip_content">• Tempus và tất cả nội dung là tài sản của chúng tôi\n• Bạn được cấp giấy phép sử dụng có giới hạn\n• Không được sao chép mã nguồn hoặc thiết kế\n• Logo, thương hiệu thuộc quyền sở hữu của Tempus</string>
+    
+    <string name="terms_liability_title">6. Giới hạn trách nhiệm</string>
+    <string name="terms_liability_content">• Ứng dụng được cung cấp "nguyên trạng"\n• Chúng tôi không đảm bảo hoạt động không gián đoạn\n• Không chịu trách nhiệm cho mất mát dữ liệu do lỗi người dùng\n• Tổng trách nhiệm bồi thường không vượt quá phí dịch vụ (nếu có)</string>
+    
+    <string name="terms_termination_title">7. Chấm dứt</string>
+    <string name="terms_termination_content">• Bạn có thể ngừng sử dụng bất cứ lúc nào\n• Chúng tôi có thể chấm dứt dịch vụ với thông báo 30 ngày\n• Tài khoản vi phạm có thể bị khóa ngay lập tức\n• Sau khi chấm dứt, bạn có 30 ngày để xuất dữ liệu</string>
+    
+    <string name="terms_changes_title">8. Thay đổi điều khoản</string>
+    <string name="terms_changes_content">Chúng tôi có quyền sửa đổi điều khoản này. Thay đổi quan trọng sẽ được thông báo trước 14 ngày. Tiếp tục sử dụng sau thay đổi đồng nghĩa với việc bạn chấp nhận điều khoản mới.</string>
+    
+    <string name="terms_law_title">9. Luật áp dụng</string>
+    <string name="terms_law_content">Các điều khoản này được điều chỉnh bởi pháp luật Việt Nam. Mọi tranh chấp sẽ được giải quyết tại tòa án có thẩm quyền tại Việt Nam.</string>
+    
+    <string name="terms_contact_title">10. Liên hệ</string>
+    <string name="terms_contact_content">Thắc mắc về điều khoản dịch vụ:\n\n📧 Email: legal@tempus-app.com\n🌐 Website: https://tempus-app.com/terms</string>
+
+    <!-- Missing Personalization Strings -->
+    <string name="pers_title">Cá nhân hóa</string>
+    <string name="pers_delete">Xóa</string>
+    <string name="pers_add_period">Thêm khoảng thời gian</string>
+    <string name="pers_create_plan">Tạo lại kế hoạch</string>
+    <string name="pers_cancel">Hủy</string>
+    <string name="pers_confirm">Xác nhận</string>
+    <string name="pers_select_lifestyle">Chọn lối sống</string>
+    <string name="pers_preset_desc">Thức: %1$s • Ngủ: %2$s</string>
+    
+    <string name="pers_reset_warning_title">⚠️ Xác nhận đặt lại kế hoạch</string>
+    <string name="pers_reset_warning_content">Hành động này sẽ XÓA TẤT CẢ tác vụ hiện có trên timeline từ hôm nay trở đi và tạo mới các tác vụ cá nhân hóa.</string>
+    <string name="pers_reset_new_tasks">Tác vụ mới sẽ được tạo (%s):</string>
+    <string name="pers_reset_wake">• Thức dậy: %s</string>
+    <string name="pers_reset_sleep">• Đi ngủ: %s</string>
+    <string name="pers_reset_work">• Làm việc: %1$s - %2$s</string>
+    <string name="pers_reset_custom_period">• %1$s: %2$s - %3$s</string>
+    <string name="pers_reset_confirm_action">Xóa và tạo mới</string>
+    <string name="pers_lifestyle">Lối sống</string>
+    <string name="more_options">Tùy chọn khác</string>
+    
+    <!-- Days of Week -->
+    <string name="day_mon_short">T2</string>
+    <string name="day_tue_short">T3</string>
+    <string name="day_wed_short">T4</string>
+    <string name="day_thu_short">T5</string>
+    <string name="day_fri_short">T6</string>
+    <string name="day_sat_short">T7</string>
+    <string name="day_sun_short">CN</string>
+    
+    <!-- Contact Screen -->
+    <string name="contact_title">Liên hệ &amp; Hỗ trợ</string>
+    <string name="contact_channels_title">KÊNH LIÊN HỆ</string>
+    <string name="contact_fb_title">Facebook Fanpage</string>
+    <string name="contact_fb_desc">Theo dõi cập nhật mới nhất</string>
+    <string name="contact_email_title">Gửi Email Hỗ Trợ</string>
+    <string name="contact_info_title">THÔNG TIN LIÊN HỆ</string>
+    <string name="contact_address_title">Địa chỉ</string>
+    <string name="contact_address_value">Trường Đại học Khoa học Tự nhiên, Khu Phố 6, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam</string>
+    <string name="contact_hours_title">Giờ làm việc</string>
+    <string name="contact_hours_value">Thứ 2 - Thứ 6: 8:00 - 17:00</string>
+    <string name="contact_hotline_title">Hotline</string>
 </resources>

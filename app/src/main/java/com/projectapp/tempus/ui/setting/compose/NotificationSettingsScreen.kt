@@ -61,7 +61,7 @@ fun NotificationSettingsScreen(
             
             // Section Header
             Text(
-                text = "TÙY CHỈNH THÔNG BÁO",
+                text = stringResource(R.string.notif_settings_title),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -80,8 +80,8 @@ fun NotificationSettingsScreen(
                         icon = Icons.Outlined.Timer,
                         iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Hẹn giờ", // Timer
-                        subtitle = "Hiển thị thông báo khi hẹn giờ đang chạy",
+                        title = stringResource(R.string.notif_timer_title),
+                        subtitle = stringResource(R.string.notif_timer_desc),
                         checked = timerEnabled,
                         onCheckedChange = onTimerToggle
                     )
@@ -97,8 +97,8 @@ fun NotificationSettingsScreen(
                         icon = Icons.Outlined.ViewDay, // Timeline icon
                         iconBgColor = MaterialTheme.colorScheme.secondaryContainer,
                         iconTint = MaterialTheme.colorScheme.secondary,
-                        title = "Dòng thời gian", // Timeline
-                        subtitle = "Nhắc nhở công việc theo lịch trình",
+                        title = stringResource(R.string.notif_timeline_title),
+                        subtitle = stringResource(R.string.notif_timeline_desc),
                         checked = timelineEnabled,
                         onCheckedChange = onTimelineToggle
                     )

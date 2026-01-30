@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.theme.TempusTheme
 
@@ -73,7 +75,7 @@ private fun PrivacyPolicyScreen(
     ) {
         // Header
         LegalHeader(
-            title = "Chính sách quyền riêng tư",
+            title = stringResource(R.string.legal_privacy_policy),
             onBackClick = onBackClick
         )
         
@@ -86,100 +88,53 @@ private fun PrivacyPolicyScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LegalCard {
-                LegalSectionTitle("1. Giới thiệu")
-                LegalParagraph(
-                    """Chào mừng bạn đến với Tempus - Ứng dụng Quản lý Thời gian Thông minh. Chúng tôi cam kết bảo vệ quyền riêng tư và dữ liệu cá nhân của bạn. Chính sách này mô tả cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn."""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_intro_title))
+                LegalParagraph(stringResource(R.string.privacy_intro_content))
             }
             
             LegalCard {
-                LegalSectionTitle("2. Thông tin chúng tôi thu thập")
-                LegalSubsection("2.1. Thông tin tài khoản")
-                LegalParagraph(
-                    """• Email và tên người dùng khi đăng ký
-• Mật khẩu đã được mã hóa
-• Thông tin hồ sơ (tùy chọn)"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_info_title))
+                LegalSubsection(stringResource(R.string.privacy_info_sub1))
+                LegalParagraph(stringResource(R.string.privacy_info_content1))
                 
-                LegalSubsection("2.2. Dữ liệu sử dụng")
-                LegalParagraph(
-                    """• Lịch trình và công việc bạn tạo
-• Thời gian thức/ngủ cá nhân hóa
-• Cài đặt ứng dụng"""
-                )
+                LegalSubsection(stringResource(R.string.privacy_info_sub2))
+                LegalParagraph(stringResource(R.string.privacy_info_content2))
                 
-                LegalSubsection("2.3. Thông tin thiết bị")
-                LegalParagraph(
-                    """• Loại thiết bị và hệ điều hành
-• Múi giờ địa phương
-• Token thông báo (nếu bật)"""
-                )
+                LegalSubsection(stringResource(R.string.privacy_info_sub3))
+                LegalParagraph(stringResource(R.string.privacy_info_content3))
             }
             
             LegalCard {
-                LegalSectionTitle("3. Cách chúng tôi sử dụng thông tin")
-                LegalParagraph(
-                    """• Cung cấp và cải thiện dịch vụ
-• Đồng bộ dữ liệu giữa các thiết bị
-• Gửi thông báo nhắc nhở (nếu bạn cho phép)
-• Phân tích để cải thiện trải nghiệm người dùng
-• Hỗ trợ kỹ thuật khi cần thiết"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_usage_title))
+                LegalParagraph(stringResource(R.string.privacy_usage_content))
             }
             
             LegalCard {
-                LegalSectionTitle("4. Bảo mật dữ liệu")
-                LegalParagraph(
-                    """Chúng tôi áp dụng các biện pháp bảo mật tiên tiến:
-
-• Mã hóa dữ liệu khi truyền tải (TLS/SSL)
-• Lưu trữ an toàn trên Supabase với mã hóa
-• Xác thực sinh trắc học cho các thao tác nhạy cảm
-• Không chia sẻ dữ liệu với bên thứ ba vì mục đích quảng cáo"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_security_title))
+                LegalParagraph(stringResource(R.string.privacy_security_content))
             }
             
             LegalCard {
-                LegalSectionTitle("5. Quyền của bạn")
-                LegalParagraph(
-                    """Bạn có quyền:
-
-• Truy cập và xem dữ liệu của mình
-• Xuất dữ liệu (JSON/CSV)
-• Chỉnh sửa hoặc xóa thông tin cá nhân
-• Xóa tài khoản vĩnh viễn
-• Từ chối nhận thông báo"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_rights_title))
+                LegalParagraph(stringResource(R.string.privacy_rights_content))
             }
             
             LegalCard {
-                LegalSectionTitle("6. Lưu trữ và xóa dữ liệu")
-                LegalParagraph(
-                    """• Dữ liệu được lưu trữ trên máy chủ Supabase
-• Bạn có thể xóa tất cả dữ liệu trong phần Cài đặt
-• Sau khi xóa tài khoản, dữ liệu sẽ bị xóa trong 30 ngày
-• Log hệ thống có thể được giữ lại tối đa 90 ngày"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_storage_title))
+                LegalParagraph(stringResource(R.string.privacy_storage_content))
             }
             
             LegalCard {
-                LegalSectionTitle("7. Thay đổi chính sách")
-                LegalParagraph(
-                    """Chúng tôi có thể cập nhật chính sách này theo thời gian. Bạn sẽ được thông báo về các thay đổi quan trọng qua ứng dụng hoặc email."""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_changes_title))
+                LegalParagraph(stringResource(R.string.privacy_changes_content))
             }
             
             LegalCard {
-                LegalSectionTitle("8. Liên hệ")
-                LegalParagraph(
-                    """Nếu có câu hỏi về chính sách quyền riêng tư, vui lòng liên hệ:
-
-📧 Email: support@tempus-app.com
-🌐 Website: https://tempus-app.com"""
-                )
+                LegalSectionTitle(stringResource(R.string.privacy_contact_title))
+                LegalParagraph(stringResource(R.string.privacy_contact_content))
             }
             
-            LegalFooter("Cập nhật lần cuối: 25/01/2026")
+            LegalFooter(stringResource(R.string.legal_last_updated, "25/01/2026"))
             
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -200,7 +155,7 @@ private fun TermsOfServiceScreen(
     ) {
         // Header
         LegalHeader(
-            title = "Điều khoản dịch vụ",
+            title = stringResource(R.string.legal_terms_service),
             onBackClick = onBackClick
         )
         
@@ -213,103 +168,56 @@ private fun TermsOfServiceScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LegalCard {
-                LegalSectionTitle("1. Chấp nhận điều khoản")
-                LegalParagraph(
-                    """Bằng việc tải xuống, cài đặt hoặc sử dụng ứng dụng Tempus, bạn đồng ý tuân thủ các điều khoản và điều kiện được quy định trong tài liệu này."""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_accept_title))
+                LegalParagraph(stringResource(R.string.terms_accept_content))
             }
             
             LegalCard {
-                LegalSectionTitle("2. Mô tả dịch vụ")
-                LegalParagraph(
-                    """Tempus là ứng dụng quản lý thời gian cung cấp các tính năng:
-
-• Tạo và quản lý lịch trình cá nhân
-• Cá nhân hóa thói quen hằng ngày
-• Đồng bộ dữ liệu đám mây
-• Nhắc nhở thông minh
-• Phân tích và thống kê thời gian"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_desc_title))
+                LegalParagraph(stringResource(R.string.terms_desc_content))
             }
             
             LegalCard {
-                LegalSectionTitle("3. Tài khoản người dùng")
-                LegalParagraph(
-                    """• Bạn phải cung cấp thông tin chính xác khi đăng ký
-• Bạn chịu trách nhiệm bảo mật tài khoản
-• Mỗi tài khoản chỉ dành cho một người sử dụng
-• Chúng tôi có quyền khóa tài khoản vi phạm"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_account_title))
+                LegalParagraph(stringResource(R.string.terms_account_content))
             }
             
             LegalCard {
-                LegalSectionTitle("4. Quy tắc sử dụng")
-                LegalParagraph(
-                    """Bạn cam kết KHÔNG:
-
-• Sử dụng ứng dụng cho mục đích bất hợp pháp
-• Cố gắng truy cập trái phép hệ thống
-• Sao chép, phân phối hoặc sửa đổi ứng dụng
-• Gây hại cho người dùng khác
-• Vi phạm quyền sở hữu trí tuệ"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_rules_title))
+                LegalParagraph(stringResource(R.string.terms_rules_content))
             }
             
             LegalCard {
-                LegalSectionTitle("5. Quyền sở hữu trí tuệ")
-                LegalParagraph(
-                    """• Tempus và tất cả nội dung là tài sản của chúng tôi
-• Bạn được cấp giấy phép sử dụng có giới hạn
-• Không được sao chép mã nguồn hoặc thiết kế
-• Logo, thương hiệu thuộc quyền sở hữu của Tempus"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_ip_title))
+                LegalParagraph(stringResource(R.string.terms_ip_content))
             }
             
             LegalCard {
-                LegalSectionTitle("6. Giới hạn trách nhiệm")
-                LegalParagraph(
-                    """• Ứng dụng được cung cấp "nguyên trạng"
-• Chúng tôi không đảm bảo hoạt động không gián đoạn
-• Không chịu trách nhiệm cho mất mát dữ liệu do lỗi người dùng
-• Tổng trách nhiệm bồi thường không vượt quá phí dịch vụ (nếu có)"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_liability_title))
+                LegalParagraph(stringResource(R.string.terms_liability_content))
             }
             
             LegalCard {
-                LegalSectionTitle("7. Chấm dứt")
-                LegalParagraph(
-                    """• Bạn có thể ngừng sử dụng bất cứ lúc nào
-• Chúng tôi có thể chấm dứt dịch vụ với thông báo 30 ngày
-• Tài khoản vi phạm có thể bị khóa ngay lập tức
-• Sau khi chấm dứt, bạn có 30 ngày để xuất dữ liệu"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_termination_title))
+                LegalParagraph(stringResource(R.string.terms_termination_content))
             }
             
             LegalCard {
-                LegalSectionTitle("8. Thay đổi điều khoản")
-                LegalParagraph(
-                    """Chúng tôi có quyền sửa đổi điều khoản này. Thay đổi quan trọng sẽ được thông báo trước 14 ngày. Tiếp tục sử dụng sau thay đổi đồng nghĩa với việc bạn chấp nhận điều khoản mới."""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_changes_title))
+                LegalParagraph(stringResource(R.string.terms_changes_content))
             }
             
             LegalCard {
-                LegalSectionTitle("9. Luật áp dụng")
-                LegalParagraph(
-                    """Các điều khoản này được điều chỉnh bởi pháp luật Việt Nam. Mọi tranh chấp sẽ được giải quyết tại tòa án có thẩm quyền tại Việt Nam."""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_law_title))
+                LegalParagraph(stringResource(R.string.terms_law_content))
             }
             
             LegalCard {
-                LegalSectionTitle("10. Liên hệ")
-                LegalParagraph(
-                    """Thắc mắc về điều khoản dịch vụ:
-
-📧 Email: legal@tempus-app.com
-🌐 Website: https://tempus-app.com/terms"""
-                )
+                LegalSectionTitle(stringResource(R.string.terms_contact_title))
+                LegalParagraph(stringResource(R.string.terms_contact_content))
             }
             
-            LegalFooter("Cập nhật lần cuối: 25/01/2026")
+            LegalFooter(stringResource(R.string.legal_last_updated, "25/01/2026"))
             
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -335,7 +243,7 @@ private fun LegalHeader(
             contentPadding = PaddingValues(0.dp)
         ) {
             Text(
-                text = "← Quay lại",
+                text = "← " + stringResource(R.string.back),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 17.sp
             )

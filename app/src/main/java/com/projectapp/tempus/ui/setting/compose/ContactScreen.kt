@@ -43,10 +43,10 @@ fun ContactScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Liên hệ & Hỗ trợ") },
+                title = { Text(stringResource(R.string.contact_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -67,7 +67,7 @@ fun ContactScreen(
             
             // ================== SOCIAL CHANNELS ==================
             Text(
-                text = "KÊNH LIÊN HỆ",
+                text = stringResource(R.string.contact_channels_title),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -88,8 +88,8 @@ fun ContactScreen(
                         fallbackIcon = Icons.Default.Public,
                         iconBgColor = Color(0xFF1877F2), // Facebook Blue
                         iconTint = Color.White,
-                        title = "Facebook Fanpage",
-                        subtitle = "Theo dõi cập nhật mới nhất",
+                        title = stringResource(R.string.contact_fb_title),
+                        subtitle = stringResource(R.string.contact_fb_desc),
                         onClick = onFacebookClick
                     )
 
@@ -106,7 +106,7 @@ fun ContactScreen(
                         fallbackIcon = Icons.Default.Email,
                         iconBgColor = Color(0xFFEA4335), // Gmail Red
                         iconTint = Color.White,
-                        title = "Gửi Email Hỗ Trợ",
+                        title = stringResource(R.string.contact_email_title),
                         subtitle = "hvo6471@gmail.com",
                         onClick = onEmailClick
                     )
@@ -117,7 +117,7 @@ fun ContactScreen(
 
             // ================== CONTACT INFO ==================
             Text(
-                text = "THÔNG TIN LIÊN HỆ",
+                text = stringResource(R.string.contact_info_title),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -134,8 +134,8 @@ fun ContactScreen(
                     // Address
                     ContactInfoItem(
                         icon = Icons.Default.Map,
-                        title = "Địa chỉ",
-                        value = "Trường Đại học Khoa học Tự nhiên, Khu Phố 6, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam",
+                        title = stringResource(R.string.contact_address_title),
+                        value = stringResource(R.string.contact_address_value),
                         onClick = onAddressClick
                     )
 
@@ -144,8 +144,8 @@ fun ContactScreen(
                     // Working Hours
                     ContactInfoItem(
                         icon = Icons.Default.Schedule,
-                        title = "Giờ làm việc",
-                        value = "Thứ 2 - Thứ 6: 8:00 - 17:00",
+                        title = stringResource(R.string.contact_hours_title),
+                        value = stringResource(R.string.contact_hours_value),
                         onClick = null // Not clickable
                     )
 
@@ -154,7 +154,7 @@ fun ContactScreen(
                     // Hotline
                     ContactInfoItem(
                         icon = Icons.Default.Call,
-                        title = "Hotline",
+                        title = stringResource(R.string.contact_hotline_title),
                         value = "1900 1234",
                         onClick = onHotlineClick
                     )
