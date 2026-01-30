@@ -22,3 +22,6 @@ local.properties
 app/build/
 build_output.txt
 .shared/
+
+# Environment variables (API keys)
+.env

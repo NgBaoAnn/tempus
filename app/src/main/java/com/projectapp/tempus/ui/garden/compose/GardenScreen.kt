@@ -1,5 +1,7 @@
 package com.projectapp.tempus.ui.garden.compose
 
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -170,7 +172,7 @@ fun GardenScreen(
                     type = treeType,
                     onSuccess = {
                         showPlantDialog = false
-                        Toast.makeText(context, "🌱 Đã trồng ${treeType.displayName}!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.garden_planted_success, treeType.displayName), Toast.LENGTH_SHORT).show()
                     },
                     onError = { error ->
                         Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
@@ -185,7 +187,7 @@ fun GardenScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "My Garden",
+                        text = stringResource(R.string.garden_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -193,7 +195,7 @@ fun GardenScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back to Timeline"
+                            contentDescription = stringResource(R.string.garden_back)
                         )
                     }
                 },
@@ -212,7 +214,7 @@ fun GardenScreen(
                     IconButton(
                         onClick = { viewModel.refresh() }
                     ) {
-                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                         Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.garden_refresh))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -227,7 +229,7 @@ fun GardenScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Trồng cây mới")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.garden_plant_new))
             }
         }
     ) { padding ->
@@ -400,7 +402,7 @@ private fun TreeCard(
             // Warning if dying
             if (tree.isAlive && daysUntilDeath <= 2 && state != TreeState.TREE) {
                 Text(
-                    text = "⚠️ Sắp héo!",
+                    text = stringResource(R.string.garden_dying),
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
@@ -449,14 +451,14 @@ private fun EmptyGardenState(onPlantClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Khu vườn trống trơn",
+            text = stringResource(R.string.garden_empty_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Hãy trồng cái cây đầu tiên của bạn!",
+            text = stringResource(R.string.garden_empty_desc),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
         )
@@ -465,7 +467,7 @@ private fun EmptyGardenState(onPlantClick: () -> Unit) {
             onClick = onPlantClick,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
-            Text("Trồng cây ngay")
+            Text(stringResource(R.string.garden_plant_now))
         }
     }
 }
@@ -491,12 +493,12 @@ private fun PlantTreeDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Trồng cây mới",
+                    text = stringResource(R.string.garden_plant_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Bạn có $currentPoints 💰",
+                    text = stringResource(R.string.garden_your_points, currentPoints),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -510,7 +512,7 @@ private fun PlantTreeDialog(
                     color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
                 ) {
                     Text(
-                        text = "❌ Cần ít nhất ${TreeType.OAK.costToPlant} điểm để trồng cây!",
+                        text = stringResource(R.string.garden_error_points, TreeType.OAK.costToPlant),
                         modifier = Modifier.padding(16.dp),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         color = MaterialTheme.colorScheme.error
@@ -570,7 +572,7 @@ private fun PlantTreeDialog(
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                     )
                                     Text(
-                                        text = "${treeType.costToPlant} điểm",
+                                        text = "${treeType.costToPlant} " + stringResource(R.string.garden_cost),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (canAfford)
                                             MaterialTheme.colorScheme.primary
@@ -583,7 +585,7 @@ private fun PlantTreeDialog(
                                 if (canAfford) {
                                     Icon(
                                         Icons.Default.Add,
-                                        contentDescription = "Trồng",
+                                        contentDescription = stringResource(R.string.garden_plant_now),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
@@ -596,7 +598,7 @@ private fun PlantTreeDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Đóng")
+                Text(stringResource(R.string.garden_close))
             }
         }
     )
