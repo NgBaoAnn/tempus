@@ -52,4 +52,14 @@ interface MessageRepository {
      * Hủy subscription realtime hiện tại
      */
     suspend fun unsubscribeFromMessages()
+    
+    // ============================================
+    // IMAGE MESSAGES
+    // ============================================
+    
+    /**
+     * Gửi tin nhắn hình ảnh
+     * Upload ảnh lên storage và tạo message với type = "image"
+     */
+    suspend fun sendImageMessage(conversationId: String, imageBytes: ByteArray): Result<MessageDto>
 }

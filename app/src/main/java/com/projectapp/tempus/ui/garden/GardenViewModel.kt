@@ -82,7 +82,9 @@ class GardenViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             checkDeadTrees()
-            // isLoading will be set to false when trees flow emits
+            // Force reset isLoading after a short delay to handle case where flow doesn't emit
+            kotlinx.coroutines.delay(500)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 

@@ -1,6 +1,12 @@
 package com.projectapp.tempus.ui.social.messages.compose
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.social.dto.MessageDto
 import io.github.jan.supabase.gotrue.auth
@@ -28,6 +38,7 @@ import io.github.jan.supabase.gotrue.auth
 import com.projectapp.tempus.ui.theme.TempusDesignSystem
 import com.projectapp.tempus.ui.components.TempusCard
 import com.projectapp.tempus.ui.social.messages.MessagesViewModel
+import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -49,6 +60,27 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val currentUserId = remember { 
         SupabaseClientProvider.client.auth.currentUserOrNull()?.id ?: "" 
+    }
+    val context = LocalContext.current
+    
+    // Full screen image viewer state
+    var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
+    
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { selectedUri ->
+            // Read and compress image
+            context.contentResolver.openInputStream(selectedUri)?.use { inputStream ->
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                val outputStream = ByteArrayOutputStream()
+                // Compress to JPEG with 80% quality
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                val imageBytes = outputStream.toByteArray()
+                viewModel.sendImageMessage(imageBytes)
+            }
+        }
     }
 
     // Open chat when screen loads
@@ -142,6 +174,24 @@ fun ChatScreen(
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
+                    // Image picker button
+                    IconButton(
+                        onClick = {
+                            imagePickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        enabled = !uiState.isSending
+                    ) {
+                        Icon(
+                            Icons.Filled.Image, 
+                            contentDescription = "Chọn ảnh",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(4.dp))
+                    
                     FilledIconButton(
                         onClick = {
                             if (messageText.isNotBlank()) {
@@ -200,19 +250,31 @@ fun ChatScreen(
                     items(uiState.currentMessages, key = { it.id }) { message ->
                         MessageBubble(
                             message = message,
-                            isMe = message.senderId == currentUserId
+                            isMe = message.senderId == currentUserId,
+                            onImageClick = { imageUrl ->
+                                fullScreenImageUrl = imageUrl
+                            }
                         )
                     }
                 }
             }
         }
     }
+    
+    // Full screen image viewer dialog
+    fullScreenImageUrl?.let { imageUrl ->
+        FullScreenImageViewer(
+            imageUrl = imageUrl,
+            onDismiss = { fullScreenImageUrl = null }
+        )
+    }
 }
 
 @Composable
 private fun MessageBubble(
     message: MessageDto,
-    isMe: Boolean
+    isMe: Boolean,
+    onImageClick: (String) -> Unit = {}
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -229,20 +291,37 @@ private fun MessageBubble(
             modifier = Modifier.widthIn(max = 280.dp)
         ) {
             Column(
-                modifier = Modifier.padding(12.dp)
+                modifier = Modifier.padding(if (message.messageType == "image") 4.dp else 12.dp)
             ) {
-                Text(
-                    text = message.content,
-                    color = if (isMe) Color.White else MaterialTheme.colorScheme.onBackground,
-                    fontSize = 15.sp
-                )
+                // Check message type
+                if (message.messageType == "image") {
+                    // Image message - clickable
+                    AsyncImage(
+                        model = message.content,
+                        contentDescription = "Hình ảnh",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp, max = 200.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onImageClick(message.content) },
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Text message
+                    Text(
+                        text = message.content,
+                        color = if (isMe) Color.White else MaterialTheme.colorScheme.onBackground,
+                        fontSize = 15.sp
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Text(
                     text = formatMessageTime(message.createdAt),
                     color = if (isMe) Color.White.copy(alpha = 0.7f) else TempusDesignSystem.TextMuted,
-                    fontSize = 11.sp
+                    fontSize = 11.sp,
+                    modifier = if (message.messageType == "image") Modifier.padding(horizontal = 8.dp) else Modifier
                 )
             }
         }

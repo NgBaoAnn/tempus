@@ -10,6 +10,7 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.realtime.*
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -239,6 +240,59 @@ class SupabaseMessageRepository : MessageRepository {
                 Log.e(TAG, "Error unsubscribing from realtime", e)
             }
         }
+    }
+    
+    // ============================================
+    // IMAGE MESSAGES
+    // ============================================
+    
+    override suspend fun sendImageMessage(
+        conversationId: String, 
+        imageBytes: ByteArray
+    ): Result<MessageDto> = runCatching {
+        val currentUserId = getCurrentUserId()
+        val now = Instant.now().toString()
+        
+        // Generate unique filename
+        val fileName = "$conversationId/${currentUserId}_${System.currentTimeMillis()}.jpg"
+        
+        // Upload to storage
+        val bucket = supabase.storage.from("chat-images")
+        bucket.upload(fileName, imageBytes)
+        
+        // Get public URL
+        val imageUrl = bucket.publicUrl(fileName)
+        
+        Log.d(TAG, "Image uploaded: $imageUrl")
+        
+        // Create message with type = image
+        val createMessage = CreateMessageDto(
+            conversationId = conversationId,
+            senderId = currentUserId,
+            content = imageUrl,
+            messageType = "image"
+        )
+        
+        val message = supabase.from("messages")
+            .insert(createMessage) {
+                select()
+            }
+            .decodeSingle<MessageDto>()
+        
+        // Update conversation preview
+        val updateConversation = UpdateConversationDto(
+            lastMessageAt = now,
+            lastMessagePreview = "📷 Hình ảnh"
+        )
+        
+        supabase.from("conversations")
+            .update(updateConversation) {
+                filter {
+                    eq("id", conversationId)
+                }
+            }
+        
+        message
     }
     
     // ============================================

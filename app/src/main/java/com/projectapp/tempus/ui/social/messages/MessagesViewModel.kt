@@ -220,6 +220,41 @@ class MessagesViewModel : ViewModel() {
     }
     
     /**
+     * Gửi tin nhắn hình ảnh
+     */
+    fun sendImageMessage(imageBytes: ByteArray) {
+        val conversationId = _uiState.value.currentConversationId ?: return
+        
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSending = true) }
+            
+            repository.sendImageMessage(conversationId, imageBytes)
+                .onSuccess { message ->
+                    // Message will be added via realtime subscription
+                    _uiState.update { state ->
+                        if (state.currentMessages.none { it.id == message.id }) {
+                            state.copy(
+                                isSending = false,
+                                currentMessages = state.currentMessages + message
+                            )
+                        } else {
+                            state.copy(isSending = false)
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Error sending image message", error)
+                    _uiState.update { 
+                        it.copy(
+                            isSending = false, 
+                            error = "Không thể gửi hình ảnh"
+                        ) 
+                    }
+                }
+        }
+    }
+    
+    /**
      * Đóng chat - cleanup realtime subscription
      */
     fun closeChat() {
