@@ -1101,6 +1101,84 @@ ${scheduleLines.joinToString("\n")}"""
         }
     }
     
+    // ============================================
+    // CHAT TITLE GENERATION
+    // ============================================
+    
+    /**
+     * Generate a short title for a chat conversation based on the first user message
+     * @param firstMessage The first message from the user
+     * @return A short title (max 30 characters)
+     */
+    suspend fun generateChatTitle(firstMessage: String): Result<String> = withContext(Dispatchers.IO) {
+        val lang = UserProfileCache.getLanguage() ?: "vi"
+        val fallbackTitle = if (lang == "en") "New Chat" else "Cuộc trò chuyện mới"
+        
+        try {
+            android.util.Log.d("AIRepository", "Generating chat title for: ${firstMessage.take(50)}...")
+            
+            val prompt = if (lang == "en") {
+                """Generate a very short title (max 5 words, under 30 characters) for a conversation that starts with:
+                |"$firstMessage"
+                |
+                |Rules:
+                |- Just return the title, no quotes, no explanation
+                |- Be concise and descriptive
+                |- Use the same language as the message
+                """.trimMargin()
+            } else {
+                """Tạo một tiêu đề rất ngắn gọn (tối đa 5 từ, dưới 30 ký tự) cho cuộc trò chuyện bắt đầu với:
+                |"$firstMessage"
+                |
+                |Quy tắc:
+                |- Chỉ trả về tiêu đề, không dấu ngoặc kép, không giải thích
+                |- Ngắn gọn và mô tả được nội dung
+                |- Dùng cùng ngôn ngữ với tin nhắn
+                """.trimMargin()
+            }
+            
+            val request = GeminiRequest(
+                contents = listOf(
+                    Content(
+                        role = "user",
+                        parts = listOf(Part(text = prompt))
+                    )
+                ),
+                generationConfig = GenerationConfig(
+                    temperature = 0.5f,
+                    maxOutputTokens = 50
+                )
+            )
+            
+            val response = geminiService.generateContent(
+                apiKey = apiKeyManager.getCurrentKey(),
+                request = request
+            )
+            
+            android.util.Log.d("AIRepository", "Title generation response: candidates=${response.candidates?.size}")
+            
+            val title = response.candidates
+                ?.firstOrNull()
+                ?.content
+                ?.parts
+                ?.firstOrNull()
+                ?.text
+                ?.trim()
+                ?.take(30)
+            
+            if (title.isNullOrBlank()) {
+                android.util.Log.w("AIRepository", "Title generation returned empty, using fallback")
+                Result.success(fallbackTitle)
+            } else {
+                android.util.Log.d("AIRepository", "Generated title: $title")
+                Result.success(title)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AIRepository", "Title generation failed: ${e.message}", e)
+            Result.success(fallbackTitle)
+        }
+    }
+    
     /**
      * Clear conversation history
      */
@@ -1467,9 +1545,11 @@ ${scheduleLines.joinToString("\n")}"""
 
 /**
  * Simple chat message model for UI layer
+ * @param id Optional ID for persisted messages (from ai_history table)
  */
 data class ChatMessage(
     val text: String,
     val isFromUser: Boolean,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val id: String? = null
 )

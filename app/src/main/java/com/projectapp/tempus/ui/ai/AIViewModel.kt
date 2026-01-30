@@ -1,9 +1,11 @@
 package com.projectapp.tempus.ui.ai
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.projectapp.tempus.data.ai.AIHistoryRepository
 import com.projectapp.tempus.data.ai.AIRepository
 import com.projectapp.tempus.data.ai.ChatMessage
 import com.projectapp.tempus.data.schedule.ScheduleRepository
@@ -27,6 +29,7 @@ import com.projectapp.tempus.R
 /**
  * ViewModel for AI Chat with Ask/Agent modes
  * Implements state machine for Agent Mode flow
+ * Now with persistent chat history via Supabase
  */
 class AIViewModel(
     application: Application,
@@ -35,7 +38,11 @@ class AIViewModel(
 ) : AndroidViewModel(application) {
     
     private val aiRepository = AIRepository(scheduleRepository, userId)
+    private val aiHistoryRepository = AIHistoryRepository()
     private val parseScheduleUseCase = ParseScheduleSuggestionUseCase()
+    
+    // Track if history has been loaded
+    private var historyLoaded = false
     
     // ============================================
     // CHAT MODE STATE
@@ -81,10 +88,308 @@ class AIViewModel(
     private val _showSuggestionSheet = MutableLiveData(false)
     val showSuggestionSheet: LiveData<Boolean> = _showSuggestionSheet
     
+    // ============================================
+    // HISTORY SHEET STATE
+    // ============================================
+    
+    private val _showHistorySheet = MutableLiveData(false)
+    val showHistorySheet: LiveData<Boolean> = _showHistorySheet
+    
+    private val _historySessions = MutableLiveData<List<com.projectapp.tempus.ui.ai.compose.ChatSession>>(emptyList())
+    val historySessions: LiveData<List<com.projectapp.tempus.ui.ai.compose.ChatSession>> = _historySessions
+    
+    private val _isLoadingHistory = MutableLiveData(false)
+    val isLoadingHistory: LiveData<Boolean> = _isLoadingHistory
+    
+    // ============================================
+    // SESSION MANAGEMENT
+    // ============================================
+    
+    private var currentSessionId: String = java.util.UUID.randomUUID().toString()
+    private var currentSessionTitle: String? = null
+    private var isFirstMessageInSession: Boolean = true
+    
     private var welcomeMessageShown = false
     
     init {
+        loadChatHistory()
+    }
+    
+    // ============================================
+    // CHAT HISTORY PERSISTENCE
+    // ============================================
+    
+    /**
+     * Load chat history from Supabase when ViewModel initializes
+     */
+    private fun loadChatHistory() {
+        if (historyLoaded) return
+        
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                val history = aiHistoryRepository.getHistoryForDisplay(limit = 100)
+                
+                if (history.isEmpty()) {
+                    // No history, show welcome message
+                    showWelcomeMessage()
+                } else {
+                    // Convert history to ChatMessages
+                    val messages = mutableListOf<ChatMessage>()
+                    
+                    for (record in history) {
+                        // Add user's prompt
+                        record.prompt?.let { prompt ->
+                            messages.add(ChatMessage(
+                                text = prompt,
+                                isFromUser = true,
+                                id = "${record.id}_prompt"
+                            ))
+                        }
+                        
+                        // Add AI's response
+                        record.response?.let { response ->
+                            messages.add(ChatMessage(
+                                text = response,
+                                isFromUser = false,
+                                id = "${record.id}_response"
+                            ))
+                        }
+                    }
+                    
+                    _messages.value = messages
+                    welcomeMessageShown = true
+                    Log.d("AIViewModel", "Loaded ${history.size} conversation records")
+                }
+                
+                historyLoaded = true
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to load chat history: ${e.message}", e)
+                // Fallback to welcome message on error
+                showWelcomeMessage()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    
+    /**
+     * Save a conversation exchange (prompt + response) to database
+     */
+    private fun saveToHistory(prompt: String, response: String) {
+        val mode = when (_chatMode.value) {
+            ChatMode.ASK -> "ask"
+            ChatMode.AGENT -> "agent"
+            ChatMode.LIFE_PLANNER -> "life_planner"
+            else -> "ask"
+        }
+        
+        viewModelScope.launch {
+            try {
+                // Generate title for first message in session (await completion before saving)
+                val shouldGenerateTitle = isFirstMessageInSession && currentSessionTitle == null
+                if (shouldGenerateTitle) {
+                    // Generate and wait for title
+                    val titleResult = aiRepository.generateChatTitle(prompt)
+                    titleResult.onSuccess { title ->
+                        currentSessionTitle = title
+                        Log.d("AIViewModel", "Generated session title: $title")
+                    }.onFailure { e ->
+                        Log.e("AIViewModel", "Title generation failed: ${e.message}")
+                        // Use fallback title
+                        currentSessionTitle = prompt.take(30)
+                    }
+                }
+                
+                // Now save with title (guaranteed to have a value now)
+                aiHistoryRepository.saveConversation(
+                    prompt = prompt,
+                    response = response,
+                    sessionId = currentSessionId,
+                    title = currentSessionTitle,
+                    mode = mode
+                )
+                
+                isFirstMessageInSession = false
+                Log.d("AIViewModel", "Saved conversation with sessionId=$currentSessionId, title=$currentSessionTitle")
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to save conversation: ${e.message}", e)
+            }
+        }
+    }
+    
+    // ============================================
+    // NEW CHAT FUNCTION
+    // ============================================
+    
+    /**
+     * Start a new chat session
+     * Clears current messages and creates a new session ID
+     */
+    fun startNewChat() {
+        // Generate new session ID
+        currentSessionId = java.util.UUID.randomUUID().toString()
+        currentSessionTitle = null
+        isFirstMessageInSession = true
+        
+        // Clear messages and show welcome
+        _messages.value = emptyList()
+        aiRepository.clearHistory()
+        welcomeMessageShown = false
         showWelcomeMessage()
+        
+        // Reset states
+        _agentState.value = AgentState.Idle
+        _lifePlanState.value = LifePlanState.Idle
+        
+        // Close history sheet if open
+        _showHistorySheet.value = false
+        
+        Log.d("AIViewModel", "Started new chat session: $currentSessionId")
+    }
+    
+    // ============================================
+    // HISTORY SHEET FUNCTIONS
+    // ============================================
+    
+    /**
+     * Open history sheet and load sessions
+     */
+    fun openHistorySheet() {
+        _showHistorySheet.value = true
+        loadHistorySessions()
+    }
+    
+    /**
+     * Close history sheet
+     */
+    fun closeHistorySheet() {
+        _showHistorySheet.value = false
+    }
+    
+    /**
+     * Load chat sessions grouped by session_id
+     */
+    private fun loadHistorySessions() {
+        viewModelScope.launch {
+            _isLoadingHistory.value = true
+            try {
+                val sessionList = aiHistoryRepository.getSessionList()
+                
+                val sessions = sessionList.map { record ->
+                    val sessionId = record.sessionId ?: return@map null
+                    
+                    // Use title from record, or fallback to date
+                    val displayTitle = record.title 
+                        ?: formatDisplayDate(record.createdAt?.take(10) ?: "")
+                    
+                    val previewText = record.prompt?.take(100) ?: ""
+                    
+                    com.projectapp.tempus.ui.ai.compose.ChatSession(
+                        sessionId = sessionId,
+                        title = displayTitle,
+                        date = record.createdAt?.take(10) ?: "",
+                        displayDate = formatDisplayDate(record.createdAt?.take(10) ?: ""),
+                        conversations = emptyList(), // Will be loaded when selected
+                        previewText = previewText,
+                        messageCount = 0
+                    )
+                }.filterNotNull()
+                
+                _historySessions.value = sessions
+                Log.d("AIViewModel", "Loaded ${sessions.size} chat sessions")
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to load history sessions: ${e.message}", e)
+                _historySessions.value = emptyList()
+            } finally {
+                _isLoadingHistory.value = false
+            }
+        }
+    }
+    
+    /**
+     * Load a specific session into chat
+     */
+    fun loadSession(session: com.projectapp.tempus.ui.ai.compose.ChatSession) {
+        viewModelScope.launch {
+            try {
+                // Load messages for this session from database
+                val sessionMessages = aiHistoryRepository.getSessionMessages(session.sessionId)
+                
+                // Convert to ChatMessages
+                val messages = mutableListOf<ChatMessage>()
+                
+                for (record in sessionMessages) {
+                    record.prompt?.let { prompt ->
+                        messages.add(ChatMessage(
+                            text = prompt,
+                            isFromUser = true,
+                            id = "${record.id}_prompt"
+                        ))
+                    }
+                    
+                    record.response?.let { response ->
+                        messages.add(ChatMessage(
+                            text = response,
+                            isFromUser = false,
+                            id = "${record.id}_response"
+                        ))
+                    }
+                }
+                
+                _messages.value = messages
+                welcomeMessageShown = true
+                _showHistorySheet.value = false
+                
+                // Set current session to this loaded session
+                currentSessionId = session.sessionId
+                currentSessionTitle = session.title
+                isFirstMessageInSession = false
+                
+                Log.d("AIViewModel", "Loaded session ${session.sessionId} with ${messages.size} messages")
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to load session: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
+     * Delete a specific session
+     */
+    fun deleteSession(session: com.projectapp.tempus.ui.ai.compose.ChatSession) {
+        viewModelScope.launch {
+            try {
+                // Delete entire session
+                aiHistoryRepository.deleteSession(session.sessionId)
+                
+                // Reload sessions
+                loadHistorySessions()
+                Log.d("AIViewModel", "Deleted session: ${session.sessionId}")
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to delete session: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
+     * Format date string for display
+     */
+    private fun formatDisplayDate(dateStr: String): String {
+        return try {
+            val date = java.time.LocalDate.parse(dateStr)
+            val today = java.time.LocalDate.now()
+            
+            when {
+                date == today -> getApplication<Application>().getString(R.string.ai_history_today)
+                date == today.minusDays(1) -> getApplication<Application>().getString(R.string.ai_history_yesterday)
+                else -> {
+                    val formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    date.format(formatter)
+                }
+            }
+        } catch (e: Exception) {
+            dateStr
+        }
     }
     
     // ============================================
@@ -151,6 +456,8 @@ class AIViewModel(
         
         result.onSuccess { responseText ->
             addAIMessage(responseText)
+            // Save to history after successful response
+            saveToHistory(text, responseText)
         }.onFailure { exception ->
             handleError(exception)
         }
@@ -171,12 +478,17 @@ class AIViewModel(
                 is AIRepository.AgentResponse.Proposal -> {
                     // Got a structured proposal - show proposal card
                     _agentState.value = AgentState.AwaitingAccept(response.proposal)
-                    addAIMessage(getApplication<Application>().getString(R.string.ai_proposal_ready))
+                    val responseText = getApplication<Application>().getString(R.string.ai_proposal_ready)
+                    addAIMessage(responseText)
+                    // Save proposal to history
+                    saveToHistory(text, responseText + "\n[Proposal: ${response.proposal.intent}]")
                 }
                 is AIRepository.AgentResponse.TextOnly -> {
                     // AI responded with text (not an action request)
                     _agentState.value = AgentState.Idle
                     addAIMessage(response.text)
+                    // Save to history
+                    saveToHistory(text, response.text)
                 }
             }
         }.onFailure { exception ->
@@ -265,6 +577,8 @@ class AIViewModel(
             """.trimMargin()
             
             addAIMessage(summaryMessage)
+            // Save to history
+            saveToHistory(text, summaryMessage)
         }.onFailure { exception ->
             _lifePlanState.value = LifePlanState.Error(exception.message ?: getApplication<Application>().getString(R.string.ai_planner_failed, ""))
             addAIMessage(getApplication<Application>().getString(R.string.ai_planner_failed, exception.message))
@@ -383,12 +697,29 @@ class AIViewModel(
         _suggestions.value = emptyList()
     }
     
+    /**
+     * Clear all chat messages and history
+     * Also deletes persisted history from database
+     */
     fun clearChat() {
+        viewModelScope.launch {
+            // Clear from Supabase
+            try {
+                aiHistoryRepository.clearHistory()
+                Log.d("AIViewModel", "Cleared history from database")
+            } catch (e: Exception) {
+                Log.e("AIViewModel", "Failed to clear history from database: ${e.message}", e)
+            }
+        }
+        
+        // Clear local state
         aiRepository.clearHistory()
         welcomeMessageShown = false
+        historyLoaded = false
         _messages.value = emptyList()
         _error.value = null
         _agentState.value = AgentState.Idle
+        _lifePlanState.value = LifePlanState.Idle
         _suggestions.value = emptyList()
         _showSuggestionSheet.value = false
         showWelcomeMessage()
