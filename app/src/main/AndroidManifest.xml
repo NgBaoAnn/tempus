@@ -61,6 +61,9 @@
             android:name=".ui.setting.NotificationSettingsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.setting.ContactActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.garden.TreeDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Tempus" />

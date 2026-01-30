@@ -72,7 +72,8 @@ class SettingsFragment : Fragment() {
                         onExportJsonClick = ::performSync,
                         onExportCsvClick = ::exportToCsv,
                         onDeleteDataClick = ::showDeleteConfirmationStep1,
-                        onLogoutClick = ::logout
+                        onLogoutClick = ::logout,
+                        onContactClick = ::navigateToContact
                     )
                 }
             }
@@ -138,6 +139,11 @@ class SettingsFragment : Fragment() {
 
     private fun navigateToLanguage() {
         val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.LanguageSettingsActivity::class.java)
+        startActivity(intent)
+    }
+    
+    private fun navigateToContact() {
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.ContactActivity::class.java)
         startActivity(intent)
     }
     
