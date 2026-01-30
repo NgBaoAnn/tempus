@@ -34,6 +34,11 @@ import com.projectapp.tempus.ui.focus.InstalledApp
 // ===== DESIGN TOKENS =====
 // SettingsDesignTokens removed in favor of MaterialTheme.colorScheme
 
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
+
+// ===== DESIGN TOKENS =====
+
 /**
  * Premium Focus Mode Settings Screen
  */
@@ -102,7 +107,7 @@ fun FocusSettingsScreen(
             
             // Settings Section
             item {
-                SectionTitle(text = "Cài đặt")
+                SectionTitle(text = stringResource(R.string.nav_settings))
             }
             
             item {
@@ -123,9 +128,9 @@ fun FocusSettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SectionTitle(text = "Ứng dụng bị chặn")
+                    SectionTitle(text = stringResource(R.string.focus_blocked_apps_title))
                     Text(
-                        text = "${uiState.blockedApps.size} ứng dụng",
+                        text = "${uiState.blockedApps.size} ${stringResource(R.string.focus_apps_count_suffix)}",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         letterSpacing = 0.5.sp,
@@ -175,7 +180,7 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Quay lại",
+                contentDescription = stringResource(R.string.content_desc_back),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -184,14 +189,14 @@ private fun PremiumHeader(onBackClick: () -> Unit) {
         
         Column {
             Text(
-                text = "Chế độ Tập trung",
+                text = stringResource(R.string.focus_settings_title_screen),
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.5).sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Chặn phân tâm, tăng hiệu suất",
+                text = stringResource(R.string.focus_settings_desc_screen),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -228,7 +233,7 @@ private fun StatsCard(
         ) {
             StatItem(
                 value = formatFocusTime(totalMinutes),
-                label = "Thời gian",
+                label = stringResource(R.string.focus_stats_total_time),
                 icon = Icons.Outlined.Timer,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -242,7 +247,7 @@ private fun StatsCard(
             
             StatItem(
                 value = blockedAttempts.toString(),
-                label = "Đã chặn",
+                label = stringResource(R.string.focus_stats_blocked_attempts),
                 icon = Icons.Outlined.Block,
                 color = MaterialTheme.colorScheme.error
             )
@@ -255,8 +260,8 @@ private fun StatsCard(
             )
             
             StatItem(
-                value = if (isEnabled) "BẬT" else "TẮT",
-                label = "Trạng thái",
+                value = if (isEnabled) stringResource(R.string.focus_status_on) else stringResource(R.string.focus_status_off),
+                label = stringResource(R.string.focus_stats_status),
                 icon = Icons.Outlined.PowerSettingsNew,
                 color = if (isEnabled) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant, // Green still makes sense as status
                 showPulse = isEnabled,
@@ -344,7 +349,7 @@ private fun PermissionsCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 
                 Text(
-                    text = "Cần cấp quyền",
+                    text = stringResource(R.string.focus_permissions_title),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.secondary
@@ -356,8 +361,8 @@ private fun PermissionsCard(
             if (!hasUsagePermission) {
                 PermissionRow(
                     icon = Icons.Outlined.Visibility,
-                    title = "Quyền truy cập dữ liệu",
-                    description = "Phát hiện ứng dụng đang chạy",
+                    title = stringResource(R.string.focus_permission_usage_title),
+                    description = stringResource(R.string.focus_permission_usage_desc),
                     onClick = onRequestUsagePermission
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -366,8 +371,8 @@ private fun PermissionsCard(
             if (!hasOverlayPermission) {
                 PermissionRow(
                     icon = Icons.Outlined.Layers,
-                    title = "Quyền hiển thị trên ứng dụng",
-                    description = "Hiện màn hình khoá",
+                    title = stringResource(R.string.focus_permission_overlay_title),
+                    description = stringResource(R.string.focus_permission_overlay_desc),
                     onClick = onRequestOverlayPermission
                 )
             }
@@ -418,7 +423,7 @@ private fun PermissionRow(
         
         Icon(
             Icons.Outlined.OpenInNew,
-            contentDescription = "Mở",
+            contentDescription = stringResource(R.string.content_desc_open),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(18.dp)
         )
@@ -438,8 +443,8 @@ private fun SettingsCard(
         Column(modifier = Modifier.padding(4.dp)) {
             SettingToggleRow(
                 icon = Icons.Outlined.CenterFocusStrong,
-                title = "Bật Chế độ Tập trung",
-                description = "Chặn ứng dụng gây phân tâm",
+                title = stringResource(R.string.focus_mode_enable),
+                description = stringResource(R.string.focus_mode_enable_desc),
                 checked = focusModeEnabled,
                 onCheckedChange = onToggleFocusMode,
                 accentColor = Color(0xFF10B981) // Keep Green for ON state
@@ -449,8 +454,8 @@ private fun SettingsCard(
             
             SettingToggleRow(
                 icon = Icons.Outlined.PlayCircle,
-                title = "Tự động bật cùng Timer",
-                description = "Kích hoạt khi bắt đầu đếm giờ",
+                title = stringResource(R.string.focus_auto_start),
+                description = stringResource(R.string.focus_auto_start_desc),
                 checked = autoStartWithTimer,
                 onCheckedChange = onToggleAutoStart,
                 enabled = focusModeEnabled,
@@ -461,8 +466,8 @@ private fun SettingsCard(
             
             SettingToggleRow(
                 icon = Icons.Outlined.Fullscreen,
-                title = "Hiện màn hình khoá",
-                description = "Màn hình tập trung toàn màn hình",
+                title = stringResource(R.string.focus_show_overlay),
+                description = stringResource(R.string.focus_show_overlay_desc),
                 checked = showOverlay,
                 onCheckedChange = onToggleShowOverlay,
                 enabled = focusModeEnabled,
@@ -581,9 +586,10 @@ private fun AddAppButton(onClick: () -> Unit) {
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary
         )
+        // ...
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Thêm ứng dụng cần chặn",
+            text = stringResource(R.string.focus_add_app_button),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.primary
@@ -618,14 +624,14 @@ private fun EmptyAppsCard() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Chưa có ứng dụng bị chặn",
+                text = stringResource(R.string.focus_no_apps_title),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Text(
-                text = "Thêm ứng dụng gây phân tâm để tập trung",
+                text = stringResource(R.string.focus_no_apps_desc),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 0.5.sp,
@@ -693,7 +699,7 @@ private fun BlockedAppCard(
             ) {
                 Icon(
                     Icons.Outlined.Close,
-                    contentDescription = "Xoá",
+                    contentDescription = "Delete",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )

@@ -33,7 +33,9 @@ import com.projectapp.tempus.domain.usecase.CategoryStats
 import com.projectapp.tempus.domain.usecase.DayStats
 import com.projectapp.tempus.domain.usecase.InsightsData
 import com.projectapp.tempus.domain.usecase.TrendType
-import com.projectapp.tempus.ui.theme.TempusDesignSystem
+
+import androidx.compose.ui.res.stringResource
+import com.projectapp.tempus.R
 
 // StatsDesign object removed. Using MaterialTheme.colorScheme directly.
 private val PomodoroGradient = Brush.linearGradient(
@@ -155,7 +157,7 @@ private fun HeaderSection() {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Thống kê",
+            text = stringResource(R.string.stats_title),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -182,14 +184,14 @@ private fun ModeToggle(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             ToggleChip(
-                text = "Tuần",
+                text = stringResource(R.string.stats_week),
                 icon = Icons.Outlined.DateRange,
                 selected = isWeekMode,
                 onClick = { onModeChange(true) },
                 modifier = Modifier.weight(1f)
             )
             ToggleChip(
-                text = "Tháng",
+                text = stringResource(R.string.stats_month),
                 icon = Icons.Outlined.CalendarMonth,
                 selected = !isWeekMode,
                 onClick = { onModeChange(false) },
@@ -248,9 +250,9 @@ private fun StatsOverviewRow(
     ) {
         // Pomodoro Card
         StatCard(
-            title = "Pomodoro",
+            title = stringResource(R.string.stats_pomodoro),
             value = "$pomodoroCount",
-            subtitle = "$pomodoroMinutes phút",
+            subtitle = "$pomodoroMinutes " + stringResource(R.string.stats_minutes),
             icon = Icons.Filled.Timer,
             iconTint = Color(0xFFFF6B6B),
             gradient = PomodoroGradient,
@@ -259,9 +261,9 @@ private fun StatsOverviewRow(
         
         // Tasks Card
         StatCard(
-            title = "Hoàn thành",
+            title = stringResource(R.string.stats_completed),
             value = "$completedTasks",
-            subtitle = "/ $totalTasks tác vụ",
+            subtitle = "/ $totalTasks " + stringResource(R.string.stats_tasks),
             icon = Icons.Filled.CheckCircle,
             iconTint = Color(0xFF4CAF50),
             gradient = SuccessGradient,
@@ -381,7 +383,7 @@ private fun ProgressCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Tiến độ",
+                        text = stringResource(R.string.stats_progress),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -428,7 +430,7 @@ private fun ProgressCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "Hoàn thành",
+                            text = stringResource(R.string.stats_completed),
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -440,21 +442,21 @@ private fun ProgressCard(
                 Column {
                     ProgressStatRow(
                         icon = Icons.Filled.Task,
-                        label = "Tổng cộng",
+                        label = stringResource(R.string.stats_total),
                         value = "$totalTasks",
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ProgressStatRow(
                         icon = Icons.Filled.CheckCircle,
-                        label = "Đã hoàn thành",
+                        label = stringResource(R.string.stats_completed),
                         value = "$completedTasks",
                         color = Color(0xFF4CAF50)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     ProgressStatRow(
                         icon = Icons.Outlined.RadioButtonUnchecked,
-                        label = "Còn lại",
+                        label = stringResource(R.string.stats_remaining),
                         value = "${totalTasks - completedTasks}",
                         color = Color(0xFFFFC107)
                     )
@@ -527,7 +529,7 @@ private fun ChartCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Biểu đồ",
+                    text = stringResource(R.string.stats_chart),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -556,7 +558,7 @@ private fun ChartCard(
                 IconButton(onClick = onPrevious) {
                     Icon(
                         imageVector = Icons.Filled.ChevronLeft,
-                        contentDescription = "Trước",
+                        contentDescription = stringResource(R.string.stats_prev),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -577,7 +579,7 @@ private fun ChartCard(
                 IconButton(onClick = onNext) {
                     Icon(
                         imageVector = Icons.Filled.ChevronRight,
-                        contentDescription = "Sau",
+                        contentDescription = stringResource(R.string.stats_next),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -606,7 +608,7 @@ private fun BarChart(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Chưa có dữ liệu",
+                    text = stringResource(R.string.stats_no_data),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.5f),
                     fontSize = 14.sp
                 )
@@ -697,13 +699,13 @@ private fun BarChart(
             ) {
                 dailyStats.forEach { stats ->
                     val label = when (stats.date.dayOfWeek.value) {
-                        1 -> "T2"
-                        2 -> "T3"
-                        3 -> "T4"
-                        4 -> "T5"
-                        5 -> "T6"
-                        6 -> "T7"
-                        7 -> "CN"
+                        1 -> stringResource(R.string.day_mon)
+                        2 -> stringResource(R.string.day_tue)
+                        3 -> stringResource(R.string.day_wed)
+                        4 -> stringResource(R.string.day_thu)
+                        5 -> stringResource(R.string.day_fri)
+                        6 -> stringResource(R.string.day_sat)
+                        7 -> stringResource(R.string.day_sun)
                         else -> ""
                     }
                     Text(
@@ -764,7 +766,7 @@ private fun InsightsCard(insights: InsightsData) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Phân tích",
+                    text = stringResource(R.string.stats_insight),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -776,7 +778,7 @@ private fun InsightsCard(insights: InsightsData) {
             // Average Rate
             InsightItem(
                 icon = Icons.Outlined.Speed,
-                label = "Tỷ lệ hoàn thành TB",
+                label = stringResource(R.string.stats_completion_rate),
                 value = String.format("%.1f%%", insights.avgCompletionRate),
                 iconTint = MaterialTheme.colorScheme.primary
             )
@@ -785,7 +787,7 @@ private fun InsightsCard(insights: InsightsData) {
             insights.bestDay?.let { (day, rate) ->
                 InsightItem(
                     icon = Icons.Filled.TrendingUp,
-                    label = "Ngày tốt nhất",
+                    label = stringResource(R.string.stats_best_day),
                     value = "$day (${rate.toInt()}%)",
                     iconTint = Color(0xFF4CAF50)
                 )
@@ -795,7 +797,7 @@ private fun InsightsCard(insights: InsightsData) {
             insights.worstDay?.let { (day, rate) ->
                 InsightItem(
                     icon = Icons.Filled.TrendingDown,
-                    label = "Cần cải thiện",
+                    label = stringResource(R.string.stats_improve),
                     value = "$day (${rate.toInt()}%)",
                     iconTint = MaterialTheme.colorScheme.error
                 )
@@ -803,13 +805,13 @@ private fun InsightsCard(insights: InsightsData) {
             
             // Trend
             val (trendIcon, trendText, trendColor) = when (insights.trend) {
-                TrendType.UP -> Triple(Icons.Filled.TrendingUp, "Đang tăng", Color(0xFF4CAF50))
-                TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, "Đang giảm", MaterialTheme.colorScheme.error)
-                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, "Ổn định", MaterialTheme.colorScheme.onSurfaceVariant)
+                TrendType.UP -> Triple(Icons.Filled.TrendingUp, stringResource(R.string.stats_trend_up), Color(0xFF4CAF50))
+                TrendType.DOWN -> Triple(Icons.Filled.TrendingDown, stringResource(R.string.stats_trend_down), MaterialTheme.colorScheme.error)
+                TrendType.STABLE -> Triple(Icons.Default.TrendingFlat, stringResource(R.string.stats_trend_stable), MaterialTheme.colorScheme.onSurfaceVariant)
             }
             InsightItem(
                 icon = trendIcon,
-                label = "Xu hướng",
+                label = stringResource(R.string.stats_trend_label),
                 value = trendText,
                 iconTint = trendColor
             )
@@ -899,18 +901,18 @@ private fun getCategoryIcon(label: String): ImageVector = when (label) {
     else -> Icons.Outlined.Label
 }
 
-private fun getCategoryName(label: String): String = when (label) {
-    "wakeup" -> "Thức dậy"
-    "eat" -> "Ăn uống"
-    "exercise" -> "Tập luyện"
-    "rest" -> "Nghỉ ngơi"
-    "water" -> "Uống nước"
-    "book" -> "Học tập"
-    "sleep" -> "Ngủ"
-    "clean" -> "Dọn dẹp"
-    "cook" -> "Nấu ăn"
-    "garden" -> "Làm vườn"
-    else -> label.replaceFirstChar { it.uppercase() }
+private fun getCategoryNameResId(label: String): Int? = when (label) {
+    "wakeup" -> R.string.cat_wakeup
+    "eat" -> R.string.cat_eat
+    "exercise" -> R.string.cat_exercise
+    "rest" -> R.string.cat_rest
+    "water" -> R.string.cat_water
+    "book" -> R.string.cat_study
+    "sleep" -> R.string.cat_sleep
+    "clean" -> R.string.cat_clean
+    "cook" -> R.string.cat_cook
+    "garden" -> R.string.cat_garden
+    else -> null
 }
 
 @Composable
@@ -938,7 +940,7 @@ private fun CategoriesCard(categories: List<CategoryStats>) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Theo danh mục",
+                    text = stringResource(R.string.stats_by_category),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -978,8 +980,10 @@ private fun CategoryItem(category: CategoryStats) {
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
+                
+                val nameResId = getCategoryNameResId(category.label)
                 Text(
-                    text = getCategoryName(category.label),
+                    text = if (nameResId != null) stringResource(nameResId) else category.label.replaceFirstChar { it.uppercase() },
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -1067,13 +1071,13 @@ private fun HeatmapPreviewCard(
                 
                 Column {
                     Text(
-                        text = "Heatmap Năng suất",
+                        text = stringResource(R.string.heatmap_title),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Xem bức tranh tổng quan theo tháng",
+                        text = stringResource(R.string.heatmap_desc),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1082,7 +1086,7 @@ private fun HeatmapPreviewCard(
             
             Icon(
                 imageVector = Icons.Filled.ChevronRight,
-                contentDescription = "Mở Heatmap",
+                contentDescription = stringResource(R.string.heatmap_open_desc),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
