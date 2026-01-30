@@ -184,13 +184,19 @@ class SupabaseMessageRepository : MessageRepository {
             // Create new channel for this conversation
             val channel = supabase.realtime.channel("messages:$conversationId")
             
-            // Subscribe to INSERT events on messages table
+            // IMPORTANT: Setup postgresChangeFlow BEFORE subscribing
             val changeFlow = channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
                 table = "messages"
                 filter = "conversation_id=eq.$conversationId"
             }
             
-            // Collect changes and emit to flow
+            // Subscribe to channel first and wait until subscribed
+            channel.subscribe(blockUntilSubscribed = true)
+            currentChannel = channel
+            
+            Log.d(TAG, "Subscribed to realtime for conversation: $conversationId")
+            
+            // Now collect changes after subscription is confirmed
             val job = launch {
                 changeFlow.collect { change ->
                     try {
@@ -212,12 +218,6 @@ class SupabaseMessageRepository : MessageRepository {
                     }
                 }
             }
-            
-            // Subscribe to channel
-            channel.subscribe()
-            currentChannel = channel
-            
-            Log.d(TAG, "Subscribed to realtime for conversation: $conversationId")
             
             awaitClose {
                 job.cancel()

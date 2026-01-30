@@ -108,7 +108,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.3")
     implementation("io.github.jan-tennert.supabase:storage-kt:2.1.3")
     implementation("io.github.jan-tennert.supabase:realtime-kt:2.1.3")
-    implementation("io.ktor:ktor-client-android:2.3.12")
+    implementation("io.ktor:ktor-client-okhttp:2.3.12")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 

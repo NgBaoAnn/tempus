@@ -132,9 +132,9 @@
     <string name="ai_clear_chat">Clear Chat</string>
     <string name="ai_new_chat">New Chat</string>
     <string name="ai_history">Chat History</string>
-    <string name="ai_mode_ask">Ask Mode</string>
-    <string name="ai_mode_agent">Agent Mode</string>
-    <string name="ai_mode_planner">Life Planner</string>
+    <string name="ai_mode_ask">Ask</string>
+    <string name="ai_mode_agent">Agent</string>
+    <string name="ai_mode_planner">Planner</string>
     <string name="ai_desc_ask">Ask questions, get time management advice.\nDoes not perform actions.</string>
     <string name="ai_desc_agent">Request to create, edit, delete schedules.\nPreview and confirm before execution.</string>
     <string name="ai_desc_planner">Long-term planning for your goals.\nAI will create milestones and study/work schedules.</string>
