@@ -63,6 +63,10 @@ class PersonalizationActivity : ComponentActivity() {
                         onGenerateScheduleWithAI = { viewModel.generateScheduleWithAI() },
                         onConfirmSchedule = { viewModel.confirmScheduleGeneration() },
                         onDismissSchedulePreview = { viewModel.dismissSchedulePreview() },
+                        onDeletePreviewItem = { itemId -> viewModel.deletePreviewItem(itemId) },
+                        onUpdatePreviewItem = { itemId, name, startTime, endTime -> 
+                            viewModel.updatePreviewItem(itemId, name, startTime, endTime) 
+                        },
                         modifier = Modifier.padding(paddingValues)
                     )
                 }

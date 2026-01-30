@@ -68,6 +68,7 @@ data class PersonalizationUiState(
  * Preview item for generated schedule before confirmation
  */
 data class SchedulePreviewItem(
+    val id: String = java.util.UUID.randomUUID().toString(),
     val name: String,
     val startTime: String,
     val endTime: String,
@@ -499,6 +500,32 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
             showSchedulePreview = false,
             generatedSchedulePreview = emptyList()
         )
+    }
+    
+    /**
+     * Delete a preview item before confirming
+     */
+    fun deletePreviewItem(itemId: String) {
+        val updatedList = _uiState.value.generatedSchedulePreview.filter { it.id != itemId }
+        _uiState.value = _uiState.value.copy(generatedSchedulePreview = updatedList)
+        Log.d("PersonalizationVM", "Deleted preview item: $itemId, remaining: ${updatedList.size}")
+    }
+    
+    /**
+     * Update a preview item (for editing time/name)
+     */
+    fun updatePreviewItem(itemId: String, newName: String? = null, newStartTime: String? = null, newEndTime: String? = null) {
+        val updatedList = _uiState.value.generatedSchedulePreview.map { item ->
+            if (item.id == itemId) {
+                item.copy(
+                    name = newName ?: item.name,
+                    startTime = newStartTime ?: item.startTime,
+                    endTime = newEndTime ?: item.endTime
+                )
+            } else item
+        }
+        _uiState.value = _uiState.value.copy(generatedSchedulePreview = updatedList)
+        Log.d("PersonalizationVM", "Updated preview item: $itemId")
     }
     
     /**

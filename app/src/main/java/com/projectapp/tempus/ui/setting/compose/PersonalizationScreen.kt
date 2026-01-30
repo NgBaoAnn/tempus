@@ -90,6 +90,8 @@ fun PersonalizationScreen(
     onGenerateScheduleWithAI: () -> Unit,
     onConfirmSchedule: () -> Unit,
     onDismissSchedulePreview: () -> Unit,
+    onDeletePreviewItem: (String) -> Unit,
+    onUpdatePreviewItem: (String, String?, String?, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Show Add Custom Period Screen if active
@@ -283,7 +285,9 @@ fun PersonalizationScreen(
             previewItems = uiState.generatedSchedulePreview,
             isLoading = uiState.isGeneratingSchedule,
             onConfirm = onConfirmSchedule,
-            onDismiss = onDismissSchedulePreview
+            onDismiss = onDismissSchedulePreview,
+            onDeleteItem = onDeletePreviewItem,
+            onUpdateItem = onUpdatePreviewItem
         )
     }
 }
@@ -929,8 +933,16 @@ private fun SchedulePreviewDialog(
     previewItems: List<SchedulePreviewItem>,
     isLoading: Boolean,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onDeleteItem: (String) -> Unit,
+    onUpdateItem: (String, String?, String?, String?) -> Unit
 ) {
+    // State for editing item
+    var editingItem by remember { mutableStateOf<SchedulePreviewItem?>(null) }
+    var editName by remember { mutableStateOf("") }
+    var editStartTime by remember { mutableStateOf("") }
+    var editEndTime by remember { mutableStateOf("") }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier
@@ -958,7 +970,7 @@ private fun SchedulePreviewDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "AI đã phân tích và tạo lịch trình tối ưu cho bạn. Xác nhận để thêm vào timeline.",
+                    text = "Nhấn vào lịch để sửa, hoặc vuốt để xóa.",
                     fontSize = 14.sp,
                     color = PersonalizationColors.TextSecondary
                 )
@@ -973,7 +985,16 @@ private fun SchedulePreviewDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(previewItems.sortedBy { it.startTime }) { item ->
-                        SchedulePreviewItemCard(item = item)
+                        SchedulePreviewItemCard(
+                            item = item,
+                            onDelete = { onDeleteItem(item.id) },
+                            onEdit = {
+                                editingItem = item
+                                editName = item.name
+                                editStartTime = item.startTime
+                                editEndTime = item.endTime
+                            }
+                        )
                     }
                 }
                 
@@ -1018,10 +1039,68 @@ private fun SchedulePreviewDialog(
             }
         }
     }
+    
+    // Edit dialog
+    if (editingItem != null) {
+        AlertDialog(
+            onDismissRequest = { editingItem = null },
+            title = { Text("Chỉnh sửa lịch", color = PersonalizationColors.TextPrimary) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = editName,
+                        onValueChange = { editName = it },
+                        label = { Text("Tên") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = editStartTime,
+                            onValueChange = { editStartTime = it },
+                            label = { Text("Bắt đầu (HH:mm)") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = editEndTime,
+                            onValueChange = { editEndTime = it },
+                            label = { Text("Kết thúc (HH:mm)") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        editingItem?.let { item ->
+                            onUpdateItem(item.id, editName, editStartTime, editEndTime)
+                        }
+                        editingItem = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PersonalizationColors.Green)
+                ) {
+                    Text("Lưu")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingItem = null }) {
+                    Text("Hủy")
+                }
+            },
+            containerColor = PersonalizationColors.SurfaceCard
+        )
+    }
 }
 
 @Composable
-private fun SchedulePreviewItemCard(item: SchedulePreviewItem) {
+private fun SchedulePreviewItemCard(
+    item: SchedulePreviewItem,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
     val itemColor = try {
         Color(android.graphics.Color.parseColor(item.color))
     } catch (e: Exception) {
@@ -1036,7 +1115,8 @@ private fun SchedulePreviewItemCard(item: SchedulePreviewItem) {
     
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = PersonalizationColors.ChipBackground
+        color = PersonalizationColors.ChipBackground,
+        onClick = onEdit  // Tap to edit
     ) {
         Row(
             modifier = Modifier
@@ -1088,6 +1168,21 @@ private fun SchedulePreviewItemCard(item: SchedulePreviewItem) {
                     fontWeight = FontWeight.Medium,
                     color = priorityColor,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Delete button
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Xóa",
+                    tint = Color(0xFFE53935),
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
