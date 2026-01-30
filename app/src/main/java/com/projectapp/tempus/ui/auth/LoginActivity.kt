@@ -62,12 +62,12 @@ class LoginActivity : ComponentActivity() {
     
     private fun handleLogin(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập email và mật khẩu", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.error_empty_input), Toast.LENGTH_SHORT).show()
             return
         }
         
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -79,7 +79,7 @@ class LoginActivity : ComponentActivity() {
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     try {
-                        Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
                         
                         // 1. Pull Schedule data
                         val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
@@ -111,15 +111,16 @@ class LoginActivity : ComponentActivity() {
                     com.projectapp.tempus.ui.theme.ThemeManager.updateThemeLocally(mode)
                 }
                 
-                Toast.makeText(this@LoginActivity, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+                
+                Toast.makeText(this@LoginActivity, getString(R.string.msg_login_success), Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
             } catch (e: HttpException) {
                 Log.e("LoginActivity", "HTTP Error: ${e.code()}", e)
-                Toast.makeText(this@LoginActivity, "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.error_login_failed_credentials), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Login Error", e)
-                Toast.makeText(this@LoginActivity, "Lỗi không xác định", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -168,7 +169,7 @@ class LoginActivity : ComponentActivity() {
                     val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
                         try {
-                            Toast.makeText(this@LoginActivity, "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
                             
                             // 1. Pull Schedule data
                             val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
@@ -203,12 +204,13 @@ class LoginActivity : ComponentActivity() {
                         // Continue anyway, just theme might be wrong initially
                     }
                     
-                    Toast.makeText(this@LoginActivity, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show()
+                    
+                    Toast.makeText(this@LoginActivity, getString(R.string.msg_login_success), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
                     Log.e("LoginActivity", "Unexpected credential type: ${credential.type}")
-                    Toast.makeText(this@LoginActivity, "Lỗi: Loại credential không hợp lệ", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
                 }
                 
             } catch (e: GetCredentialCancellationException) {
@@ -216,27 +218,27 @@ class LoginActivity : ComponentActivity() {
                 // Người dùng hủy, không cần hiển thị lỗi
             } catch (e: NoCredentialException) {
                 Log.e("LoginActivity", "No Google account found", e)
-                Toast.makeText(this@LoginActivity, "Không tìm thấy tài khoản Google", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.error_no_google_account), Toast.LENGTH_SHORT).show()
             } catch (e: HttpException) {
                 Log.e("LoginActivity", "Supabase authentication failed: ${e.code()}", e)
-                Toast.makeText(this@LoginActivity, "Lỗi xác thực với server", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.error_server_auth), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Google Sign-In failed", e)
-                Toast.makeText(this@LoginActivity, "Lỗi đăng nhập Google: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
             }
         }
     }
     
     private fun handleForgotPassword(email: String) {
         if (email.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.error_empty_email), Toast.LENGTH_SHORT).show()
             return
         }
         
         lifecycleScope.launch {
             try {
                 authService.resetPassword(email)
-                Toast.makeText(this@LoginActivity, "Mã xác nhận đã được gửi tới email", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.msg_reset_email_sent), Toast.LENGTH_LONG).show()
                 
                 // Navigate to VerifyOtpActivity
                 val intent = Intent(this@LoginActivity, VerifyOtpActivity::class.java)
@@ -245,7 +247,7 @@ class LoginActivity : ComponentActivity() {
                 
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Reset Password Error", e)
-                Toast.makeText(this@LoginActivity, "Lỗi: Không thể gửi email khôi phục", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@LoginActivity, getString(R.string.error_reset_email_failed), Toast.LENGTH_LONG).show()
             }
         }
     }
