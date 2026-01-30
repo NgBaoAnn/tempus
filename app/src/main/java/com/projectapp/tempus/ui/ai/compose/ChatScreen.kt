@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,6 +77,11 @@ fun ChatScreen(
     val agentState by viewModel.agentState.observeAsState(AgentState.Idle)
     val lifePlanState by viewModel.lifePlanState.observeAsState(LifePlanState.Idle)
     
+    // History sheet state
+    val showHistorySheet by viewModel.showHistorySheet.observeAsState(false)
+    val historySessions by viewModel.historySessions.observeAsState(emptyList())
+    val isLoadingHistory by viewModel.isLoadingHistory.observeAsState(false)
+    
     // Legacy support
     val suggestions by viewModel.suggestions.observeAsState(emptyList())
     val showSuggestionSheet by viewModel.showSuggestionSheet.observeAsState(false)
@@ -91,12 +96,32 @@ fun ChatScreen(
         }
     }
     
+    // History Bottom Sheet
+    if (showHistorySheet) {
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { viewModel.closeHistorySheet() },
+            sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surface
+        ) {
+            HistorySheet(
+                sessions = historySessions,
+                isLoading = isLoadingHistory,
+                onSessionClick = { session -> viewModel.loadSession(session) },
+                onDeleteSession = { session -> viewModel.deleteSession(session) },
+                onClearAllHistory = { viewModel.clearChat() },
+                onDismiss = { viewModel.closeHistorySheet() }
+            )
+        }
+    }
+    
     Scaffold(
         topBar = {
             PremiumChatHeader(
                 isLoading = isLoading,
                 chatMode = chatMode,
-                onClearChat = { viewModel.clearChat() }
+                onClearChat = { viewModel.clearChat() },
+                onHistoryClick = { viewModel.openHistorySheet() },
+                onNewChat = { viewModel.startNewChat() }
             )
         },
         bottomBar = {
@@ -169,10 +194,10 @@ fun ChatScreen(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        items(
+                        itemsIndexed(
                             items = messages,
-                            key = { it.timestamp }
-                        ) { message ->
+                            key = { index, msg -> msg.id ?: "${msg.timestamp}_$index" }
+                        ) { _, message ->
                             MessageBubble(message = message)
                         }
                         
@@ -315,9 +340,13 @@ private fun PremiumChatHeader(
     isLoading: Boolean,
     chatMode: ChatMode,
     onClearChat: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onNewChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val historyInteractionSource = remember { MutableInteractionSource() }
+    val newChatInteractionSource = remember { MutableInteractionSource() }
     
     // Animated status glow
     val infiniteTransition = rememberInfiniteTransition(label = "statusGlow")
@@ -403,20 +432,13 @@ private fun PremiumChatHeader(
             Spacer(modifier = Modifier.width(14.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.ai_name),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    
-                    Spacer(modifier = Modifier.width(10.dp))
-                    
-                    // Premium Mode badge
-                    PremiumModeIndicator(mode = chatMode)
-                }
+                Text(
+                    text = stringResource(R.string.ai_name),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
                 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Animated status dot
@@ -439,6 +461,67 @@ private fun PremiumChatHeader(
                     )
                 }
             }
+            
+            // Premium Mode badge
+            PremiumModeIndicator(mode = chatMode)
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // New Chat button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha=0.1f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha=0.3f),
+                        shape = CircleShape
+                    )
+                    .clickable(
+                        interactionSource = newChatInteractionSource,
+                        indication = null,
+                        onClick = onNewChat
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_chat_add),
+                    contentDescription = stringResource(R.string.ai_new_chat),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // History button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha=0.2f),
+                        shape = CircleShape
+                    )
+                    .clickable(
+                        interactionSource = historyInteractionSource,
+                        indication = null,
+                        onClick = onHistoryClick
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_history),
+                    contentDescription = stringResource(R.string.ai_history),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
             
             // Clear button with glass effect
             Box(
