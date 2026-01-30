@@ -62,6 +62,7 @@ fun SettingsScreen(
     onExportCsvClick: () -> Unit,
     onDeleteDataClick: () -> Unit,
     onLogoutClick: () -> Unit,
+    onContactClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -96,7 +97,7 @@ fun SettingsScreen(
                 onClick = onProfileClick
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Section: CHUNG
             SectionHeader(text = stringResource(R.string.settings_section_general))
@@ -133,17 +134,9 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_item_personalization),
                     onClick = onPersonalizationClick
                 )
-                SettingsDivider()
-                SettingsItem(
-                    icon = Icons.Outlined.Settings,
-                    iconBgColor = MaterialTheme.colorScheme.surfaceVariant,
-                    iconTint = TempusDesignSystem.TextMuted,
-                    title = stringResource(R.string.settings_item_advanced),
-                    onClick = {}
-                )
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Section: DỮ LIỆU & QUYỀN RIÊNG TƯ
             SectionHeader(text = stringResource(R.string.settings_section_data))
@@ -166,7 +159,7 @@ fun SettingsScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Section: HỖ TRỢ
             SectionHeader(text = stringResource(R.string.settings_section_support))
@@ -177,27 +170,11 @@ fun SettingsScreen(
                     iconBgColor = MaterialTheme.colorScheme.primaryContainer,
                     iconTint = MaterialTheme.colorScheme.primary,
                     title = stringResource(R.string.settings_item_contact),
-                    onClick = {}
-                )
-                SettingsDivider()
-                SettingsItem(
-                    icon = Icons.Default.Send,
-                    iconBgColor = TempusDesignSystem.WarningLight,
-                    iconTint = TempusDesignSystem.Warning,
-                    title = stringResource(R.string.settings_item_feedback),
-                    onClick = {}
-                )
-                SettingsDivider()
-                SettingsItem(
-                    icon = Icons.Outlined.Star,
-                    iconBgColor = TempusDesignSystem.WarningLight,
-                    iconTint = TempusDesignSystem.Warning,
-                    title = stringResource(R.string.settings_item_rate),
-                    onClick = {}
+                    onClick = onContactClick
                 )
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Section: PHÁP LÝ
             SectionHeader(text = stringResource(R.string.settings_section_legal))
@@ -220,7 +197,7 @@ fun SettingsScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Section: THÔNG TIN
             SectionHeader(text = stringResource(R.string.settings_section_info))

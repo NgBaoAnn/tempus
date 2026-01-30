@@ -72,7 +72,8 @@ class SettingsFragment : Fragment() {
                         onExportJsonClick = ::performSync,
                         onExportCsvClick = ::exportToCsv,
                         onDeleteDataClick = ::showDeleteConfirmationStep1,
-                        onLogoutClick = ::logout
+                        onLogoutClick = ::logout,
+                        onContactClick = ::navigateToContact
                     )
                 }
             }
@@ -127,7 +128,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun onNotificationsClick() {
-        Toast.makeText(requireContext(), getString(R.string.msg_notification_settings), Toast.LENGTH_SHORT).show()
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.NotificationSettingsActivity::class.java)
+        startActivity(intent)
     }
 
     private fun onThemeClick() {
@@ -139,7 +141,12 @@ class SettingsFragment : Fragment() {
         val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.LanguageSettingsActivity::class.java)
         startActivity(intent)
     }
-    
+
+    private fun navigateToContact() {
+        val intent = Intent(requireContext(), com.projectapp.tempus.ui.setting.ContactActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun navigateToPrivacyPolicy() {
         val intent = Intent(requireContext(), LegalDocumentActivity::class.java)
         intent.putExtra(LegalDocumentActivity.EXTRA_DOCUMENT_TYPE, LegalDocumentActivity.TYPE_PRIVACY_POLICY)
@@ -162,7 +169,7 @@ class SettingsFragment : Fragment() {
         }
 
         lifecycleScope.launch {
-            Toast.makeText(requireContext(), getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Đang đồng bộ dữ liệu...", Toast.LENGTH_SHORT).show()
             
             try {
                 // ... (sync logic) ...
