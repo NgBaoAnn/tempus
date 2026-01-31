@@ -33,17 +33,30 @@ import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import io.github.jan.supabase.gotrue.auth
 
 import com.projectapp.tempus.data.user.UserProfileCache
+import com.projectapp.tempus.data.ai.context.AIContextManager
+import android.content.Context
 
 
 class AIRepository(
     private val scheduleRepository: ScheduleRepository? = null,
-    private val userId: String? = null
+    private val userId: String? = null,
+    private val appContext: Context? = null
 ) {
     
     private val geminiService = GeminiClientProvider.service
     private val apiKeyManager = GeminiApiKeyManager
     
+    // Advanced context management with sliding window, summarization, and persistence
+    private val contextManager: AIContextManager? = appContext?.let { 
+        AIContextManager(
+            appContext = it,
+            maxRecentMessages = 10,
+            maxTokens = 8000,
+            summarizeThreshold = 8
+        )
+    }
     
+    // Fallback for cases where appContext is not provided
     private val conversationHistory = mutableListOf<Content>()
     
     
@@ -647,11 +660,20 @@ class AIRepository(
             role = "user",
             parts = listOf(Part(text = message))
         )
-        conversationHistory.add(userContent)
+        
+        // Use context manager if available, otherwise fallback to simple list
+        if (contextManager != null) {
+            contextManager.addMessage(userContent)
+        } else {
+            conversationHistory.add(userContent)
+        }
         
         val result = executeWithRetry { apiKey ->
+            // Get context from manager (includes summary + profile) or fallback to simple history
+            val contents = contextManager?.getContextForRequest() ?: conversationHistory.toList()
+            
             val request = GeminiRequest(
-                contents = conversationHistory.toList(),
+                contents = contents,
                 systemInstruction = getAskModeInstruction(),
                 generationConfig = GenerationConfig(
                     temperature = 0.7f,
@@ -671,10 +693,14 @@ class AIRepository(
                 role = "model",
                 parts = listOf(Part(text = responseText))
             )
-            conversationHistory.add(aiContent)
+            if (contextManager != null) {
+                contextManager.addMessage(aiContent)
+            } else {
+                conversationHistory.add(aiContent)
+            }
         }.onFailure {
-            
-            if (conversationHistory.isNotEmpty()) {
+            // Rollback on failure - context manager handles this internally
+            if (contextManager == null && conversationHistory.isNotEmpty()) {
                 conversationHistory.removeAt(conversationHistory.size - 1)
             }
         }
@@ -1123,17 +1149,36 @@ ${scheduleLines.joinToString("\n")}"""
     
     
     fun clearHistory() {
+        contextManager?.clearHistory()
         conversationHistory.clear()
     }
     
-    
     fun getHistory(): List<ChatMessage> {
-        return conversationHistory.map { content ->
+        val messages = contextManager?.getRecentMessages() ?: conversationHistory
+        return messages.map { content ->
             ChatMessage(
                 text = content.parts.firstOrNull()?.text ?: "",
                 isFromUser = content.role == "user"
             )
         }
+    }
+    
+    // New session management methods
+    suspend fun saveSession() {
+        contextManager?.saveSession()
+    }
+    
+    suspend fun restoreSession(): Boolean {
+        return contextManager?.restoreSession() ?: false
+    }
+    
+    fun startNewSession() {
+        contextManager?.startNewSession()
+        conversationHistory.clear()
+    }
+    
+    fun getContextStats(): com.projectapp.tempus.data.ai.context.ContextStats? {
+        return contextManager?.getStats()
     }
     
     
