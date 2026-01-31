@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.data.ai.AIHistoryRepository
 import com.projectapp.tempus.data.ai.AIRepository
-import com.projectapp.tempus.data.ai.ChatMessage
+import com.projectapp.tempus.data.ai.repo.ChatMessage
 import com.projectapp.tempus.data.schedule.ScheduleRepository
 import com.projectapp.tempus.domain.model.AgentProposal
 import com.projectapp.tempus.domain.model.AgentState

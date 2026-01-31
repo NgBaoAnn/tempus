@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.projectapp.tempus.R
-import com.projectapp.tempus.data.ai.ChatMessage
+import com.projectapp.tempus.data.ai.repo.ChatMessage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

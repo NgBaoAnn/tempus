@@ -6,7 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.projectapp.tempus.core.supabase.SupabaseClientProvider
 import com.projectapp.tempus.data.ai.AIRepository
-import com.projectapp.tempus.data.ai.ScheduleSlot
+import com.projectapp.tempus.data.ai.repo.PersonalizationTaskInput
+import com.projectapp.tempus.data.ai.repo.ScheduleSlot
 import com.projectapp.tempus.data.personalization.CustomTimePeriod
 import com.projectapp.tempus.data.personalization.LifestylePreset
 import com.projectapp.tempus.data.personalization.PersonalizationSettings
@@ -374,7 +375,7 @@ class PersonalizationViewModel(application: Application) : AndroidViewModel(appl
                 val aiRepo = AIRepository(scheduleRepo)
                 
                 val tasks = state.pendingTasks.map { task ->
-                    AIRepository.PersonalizationTaskInput(
+                    PersonalizationTaskInput(
                         name = task.name,
                         description = task.description,
                         estimatedMinutes = task.estimatedMinutes,
