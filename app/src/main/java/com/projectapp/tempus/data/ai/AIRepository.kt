@@ -34,13 +34,15 @@ import io.github.jan.supabase.gotrue.auth
 
 import com.projectapp.tempus.data.user.UserProfileCache
 import com.projectapp.tempus.data.ai.context.AIContextManager
+import com.projectapp.tempus.data.ai.vector.VectorMemoryRepository
 import android.content.Context
 
 
 class AIRepository(
     private val scheduleRepository: ScheduleRepository? = null,
     private val userId: String? = null,
-    private val appContext: Context? = null
+    private val appContext: Context? = null,
+    private val useVectorMemory: Boolean = false  // Feature flag for vector memory
 ) {
     
     private val geminiService = GeminiClientProvider.service
@@ -54,6 +56,13 @@ class AIRepository(
             maxTokens = 8000,
             summarizeThreshold = 8
         )
+    }
+    
+    // Vector memory repository for long-term semantic context
+    private val vectorMemoryRepo: VectorMemoryRepository? by lazy {
+        if (useVectorMemory && userId != null) {
+            VectorMemoryRepository(userId, scheduleRepository)
+        } else null
     }
     
     // Fallback for cases where appContext is not provided
@@ -1179,6 +1188,69 @@ ${scheduleLines.joinToString("\n")}"""
     
     fun getContextStats(): com.projectapp.tempus.data.ai.context.ContextStats? {
         return contextManager?.getStats()
+    }
+    
+    // ============ VECTOR MEMORY METHODS ============
+    
+    /**
+     * Send message with vector context retrieval (if enabled)
+     * Falls back to local context management if vector memory fails
+     */
+    suspend fun sendMessageWithVectorContext(
+        message: String,
+        mode: String = "ask"
+    ): Result<String> {
+        // Try vector memory first if enabled
+        if (vectorMemoryRepo != null) {
+            val result = vectorMemoryRepo!!.sendMessage(message, mode)
+            if (result.isSuccess) {
+                android.util.Log.d("AIRepository", "Vector memory response received")
+                return Result.success(result.getOrThrow().response)
+            }
+            // Fallback to local on error
+            android.util.Log.w("AIRepository", "Vector memory failed, falling back to local")
+        }
+        
+        // Fallback to local context management
+        return sendAskModeMessage(message)
+    }
+    
+    /**
+     * Sync tasks to vector memory for semantic search
+     */
+    suspend fun syncToVectorMemory(): Result<Int> {
+        return vectorMemoryRepo?.syncTasks() 
+            ?: Result.failure(Exception("Vector memory not enabled"))
+    }
+    
+    /**
+     * Add a user preference to vector memory
+     */
+    suspend fun addToVectorMemory(text: String, category: String = "general"): Result<Unit> {
+        return vectorMemoryRepo?.addMemory(text, category)
+            ?: Result.failure(Exception("Vector memory not enabled"))
+    }
+    
+    /**
+     * Clear all vector memory for the user
+     */
+    suspend fun clearVectorMemory(): Result<Unit> {
+        return vectorMemoryRepo?.clearMemory()
+            ?: Result.failure(Exception("Vector memory not enabled"))
+    }
+    
+    /**
+     * Check if vector memory backend is available
+     */
+    suspend fun isVectorMemoryAvailable(): Boolean {
+        return vectorMemoryRepo?.isAvailable() ?: false
+    }
+    
+    /**
+     * Get vector memory statistics
+     */
+    suspend fun getVectorMemoryStats(): Result<com.projectapp.tempus.data.ai.vector.MemoryStats>? {
+        return vectorMemoryRepo?.getStats()
     }
     
     
