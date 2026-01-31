@@ -13,8 +13,8 @@
 | **Bảo An** | AI Developer | AI Chat, Social | UC28-32, UC39-47, UC63 | 15 |
 | **Thế Vinh** | Backend/Data | Timeline, Notes, Sync | UC13-21, UC33-38, UC66-69 | 19 |
 | **Quang Vinh** | Game Developer | Gamification, Garden, System | UC22-27, UC58-62 | 11 |
-| **Nhật Đạt** | Core Features | Timer, Statistics, Heatmap, Voice, Notification | UC06-12, UC49, UC56-57, UC64-65, UC70-71 | 16 |
-| **Huy** | Auth/Settings | Authentication, Settings, Onboarding | UC01-05, UC48, UC50-55, UC72-73 | 12 |
+| **Nhật Đạt** | Core Features | Timer, Statistics, Heatmap, Voice, Personalization| UC06-12, UC49, UC56-57, UC64-65, UC70-71 | 16 |
+| **Huy** | Auth/Settings | Authentication, Settings, Onboarding,  Notification  | UC01-05, UC48, UC50-55, UC72-73 | 12 |
 
 ---
 
