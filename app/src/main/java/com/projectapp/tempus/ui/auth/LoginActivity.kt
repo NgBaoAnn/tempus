@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.credentials.CredentialManager
@@ -34,6 +35,8 @@ import io.github.jan.supabase.gotrue.auth
 class LoginActivity : ComponentActivity() {
     
     private lateinit var authService: AuthService
+    private val _isLoading = mutableStateOf(false)
+    private val _loadingMessage = mutableStateOf("")
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +54,9 @@ class LoginActivity : ComponentActivity() {
                         onLoginClick = { email, password -> handleLogin(email, password) },
                         onGoogleClick = { handleGoogleLogin() },
                         onForgotPasswordClick = { email -> handleForgotPassword(email) },
-                        onRegisterClick = { navigateToRegister() }
+                        onRegisterClick = { navigateToRegister() },
+                        isLoading = _isLoading.value,
+                        loadingMessage = _loadingMessage.value
                     )
                 }
             }
@@ -71,13 +76,16 @@ class LoginActivity : ComponentActivity() {
         
         lifecycleScope.launch {
             try {
+                _isLoading.value = true
+                _loadingMessage.value = "Đang đăng nhập..."
+                
                 authService.login(email, password)
                 
                 
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     try {
-                        Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
+                        _loadingMessage.value = "Đang đồng bộ dữ liệu..."
                         
                         
                         val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
@@ -110,13 +118,16 @@ class LoginActivity : ComponentActivity() {
                 }
                 
                 
+                _isLoading.value = false
                 Toast.makeText(this@LoginActivity, getString(R.string.msg_login_success), Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                 finish()
             } catch (e: HttpException) {
+                _isLoading.value = false
                 Log.e("LoginActivity", "HTTP Error: ${e.code()}", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.error_login_failed_credentials), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                _isLoading.value = false
                 Log.e("LoginActivity", "Login Error", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
             }
@@ -127,6 +138,8 @@ class LoginActivity : ComponentActivity() {
     private fun handleGoogleLogin() {
         lifecycleScope.launch {
             try {
+                _isLoading.value = true
+                _loadingMessage.value = "Đang đăng nhập với Google..."
                 
                 val credentialManager = CredentialManager.create(this@LoginActivity)
                 
@@ -165,7 +178,7 @@ class LoginActivity : ComponentActivity() {
                     val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                     if (userId != null) {
                         try {
-                            Toast.makeText(this@LoginActivity, getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
+                            _loadingMessage.value = "Đang đồng bộ dữ liệu..."
                             
                             
                             val syncManager = com.projectapp.tempus.data.RepositoryProvider.getSyncManager(this@LoginActivity)
@@ -201,24 +214,30 @@ class LoginActivity : ComponentActivity() {
                     }
                     
                     
+                    _isLoading.value = false
                     Toast.makeText(this@LoginActivity, getString(R.string.msg_login_success), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
+                    _isLoading.value = false
                     Log.e("LoginActivity", "Unexpected credential type: ${credential.type}")
                     Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
                 }
                 
             } catch (e: GetCredentialCancellationException) {
+                _isLoading.value = false
                 Log.d("LoginActivity", "User cancelled Google Sign-In")
                 
             } catch (e: NoCredentialException) {
+                _isLoading.value = false
                 Log.e("LoginActivity", "No Google account found", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.error_no_google_account), Toast.LENGTH_SHORT).show()
             } catch (e: HttpException) {
+                _isLoading.value = false
                 Log.e("LoginActivity", "Supabase authentication failed: ${e.code()}", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.error_server_auth), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                _isLoading.value = false
                 Log.e("LoginActivity", "Google Sign-In failed", e)
                 Toast.makeText(this@LoginActivity, getString(R.string.msg_error), Toast.LENGTH_SHORT).show()
             }

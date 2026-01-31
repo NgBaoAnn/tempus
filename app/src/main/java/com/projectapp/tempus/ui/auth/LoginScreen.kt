@@ -36,7 +36,9 @@ fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
     onGoogleClick: () -> Unit,
     onForgotPasswordClick: (email: String) -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    isLoading: Boolean = false,
+    loadingMessage: String = ""
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -160,6 +162,38 @@ fun LoginScreen(
             onDismiss = { showForgotPasswordDialog = false },
             onSend = { showForgotPasswordDialog = false; onForgotPasswordClick(it) }
         )
+    }
+    
+    // Loading overlay
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = AuthColors.PrimaryBlue,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = loadingMessage,
+                        fontSize = 16.sp,
+                        color = AuthColors.TextPrimary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -4,6 +4,7 @@
     
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="tempus_blue">#0082BB</color>
 
     
     <color name="label_red">#FFEF4444</color>

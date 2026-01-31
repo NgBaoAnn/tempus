@@ -44,6 +44,7 @@ class SettingsFragment : Fragment() {
 
     
     private val userInfoState = mutableStateOf(UserInfo())
+    private var loadingDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -374,7 +375,9 @@ class SettingsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 if (syncBeforeLogout) {
-                    Toast.makeText(requireContext(), getString(R.string.msg_syncing_data), Toast.LENGTH_SHORT).show()
+                    showLoadingDialog("Đang đồng bộ dữ liệu...")
+                } else {
+                    showLoadingDialog("Đang đăng xuất...")
                 }
                 
                 
@@ -387,8 +390,10 @@ class SettingsFragment : Fragment() {
                 
                 com.projectapp.tempus.data.user.UserProfileCache.clearCache()
                 
+                dismissLoadingDialog()
                 Toast.makeText(requireContext(), getString(R.string.msg_logout_success), Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
+                dismissLoadingDialog()
                 android.util.Log.e("Settings", "Logout error", e)
                 
             }
@@ -398,5 +403,25 @@ class SettingsFragment : Fragment() {
             startActivity(intent)
             requireActivity().finish()
         }
+    }
+    
+    private fun showLoadingDialog(message: String) {
+        dismissLoadingDialog()
+        loadingDialog = AlertDialog.Builder(requireContext())
+            .setView(R.layout.dialog_loading)
+            .setMessage(message)
+            .setCancelable(false)
+            .create()
+        loadingDialog?.show()
+    }
+    
+    private fun dismissLoadingDialog() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        dismissLoadingDialog()
     }
 }
